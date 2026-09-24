@@ -27,10 +27,13 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      # Add the wasm32-unknown-unknown target for building contracts
       - run: rustup target add wasm32-unknown-unknown
       - run: sudo apt-get update && sudo apt-get install -y libudev-dev libdbus-1-dev pkg-config
+      # Install binstall to quickly install stellar-scaffold-cli
       - name: Install cargo-binstall
         uses: cargo-bins/cargo-binstall@main
+      # Check for stellar-scaffold-cli binary and install if not present
       - name: Check for stellar-scaffold binary
         run: |
           if ! command -v stellar-scaffold &> /dev/null; then
@@ -66,6 +69,7 @@ jobs:
               echo "Friendbot is up!"
               break
             fi
+            # Also check if it just returns a 400 (which means it's running but needs params)
             if curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/friendbot | grep -q "400"; then
               echo "Friendbot is reachable!"
               break
@@ -75,6 +79,7 @@ jobs:
           done
       - name: Check client generation summary
         run: |
+          # Extract the number after "Failed: "
           FAILED=$(grep -Eo "Failed: [0-9]+" build_clients.log | awk '{print $2}' | tail -n 1)
           if [ -z "$FAILED" ]; then
             echo "Could not find 'Failed: N' in build_clients.log; assuming 0 failures."
@@ -82,12 +87,13 @@ jobs:
           fi
           if [ "$FAILED" -gt 0 ]; then
             echo "Client generation summary check failed: Failed: $FAILED"
-            echo "Check the Build with Scaffold step logs."
+            echo "Check the \"Build with Scaffold\" step logs."
             exit 1
           fi
       - name: Move packages to frontend
         run: |
           mkdir -p frontend/packages
+          # Copy generated packages if they exist in root packages/
           if [ -d "packages" ]; then
             cp -r packages/* frontend/packages/
           fi
