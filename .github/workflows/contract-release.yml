@@ -6,6 +6,7 @@ on:
       - "v*"
 
 # Retention policy: Keep successful runs for 90 days, failed/cancelled for 14 days
+# (repo Actions retention setting; not a valid workflow-level key)
 permissions: # required permissions for the workflow
   id-token: write
   contents: write # in order to create releases
