@@ -5,9 +5,9 @@ on:
     tags:
       - "v*"
 
-permissions: # required permissions for the workflow
+permissions:
   id-token: write
-  contents: write # in order to create releases
+  contents: write
   attestations: write
 
 concurrency:
