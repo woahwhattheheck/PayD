@@ -5,9 +5,10 @@ on:
     tags:
       - "v*"
 
-permissions:
+# Retention policy: Keep successful runs for 90 days, failed/cancelled for 14 days
+permissions: # required permissions for the workflow
   id-token: write
-  contents: write
+  contents: write # in order to create releases
   attestations: write
 
 concurrency:
