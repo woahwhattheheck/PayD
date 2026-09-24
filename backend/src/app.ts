@@ -9,6 +9,7 @@ import logger from './utils/logger.js';
 import passport from './config/passport.js';
 import { apiVersionMiddleware } from './middlewares/apiVersionMiddleware.js';
 import { requestIdMiddleware } from './middleware/requestId.js';
+import { requestTimeoutMiddleware } from './middleware/requestTimeout.js';
 import { auditLoggerMiddleware } from './middleware/auditLogger.js';
 import { tieredOrganizationRateLimit } from './middleware/advancedRateLimiting.js';
 import { rateLimitHeaders } from './middleware/rateLimitHeaders.js';
@@ -58,6 +59,7 @@ const app = express();
 
 // Middleware — request ID first for correlation across all layers
 app.use(requestIdMiddleware);
+app.use(requestTimeoutMiddleware);
 
 // Standard X-RateLimit-* response headers on every response, normalized from
 // whichever rate limiter (tiered/advanced, organization, or smart) ran for
