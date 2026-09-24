@@ -1,17 +1,17 @@
 {
-  "name": "scaffold-stellar-frontend",
+  "name": "payd",
   "type": "module",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "npm start",
-    "start": "concurrently --kill-others-on-fail --names stellar,vite -c gray,green --pad-prefix \"stellar scaffold watch --build-clients\" \"vite\"",
-    "build": "tsc -b && vite build",
-    "install:contracts": "npm install --workspace=packages && npm run build --workspace=packages",
-    "preview": "vite preview",
-    "lint": "eslint .",
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "preview": "npm run preview --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
     "format": "prettier . --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "backend:dev": "npm run dev --prefix backend",
+    "backend:test": "npm test --prefix backend"
   },
   "workspaces": [
     "packages/*"
