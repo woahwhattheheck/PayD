@@ -27,4 +27,3 @@ jobs:
       package: "..."
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
-
