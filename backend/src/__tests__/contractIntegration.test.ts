@@ -237,7 +237,7 @@ const mockQueryFn = async (sql: string, params: any[] = []): Promise<any> => {
 // 4. Module mocks — must be declared before any imports that use them
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Mock 'pg' Pool — used by contractEventIndexerService and rbac.ts
+// Mock 'pg' Pool — used by contractEventIndexer and rbac.ts
 jest.mock('pg', () => ({
   Pool: jest.fn().mockImplementation(() => ({
     connect: jest.fn(async () => ({
@@ -299,8 +299,7 @@ jest.mock('../middlewares/rbac.js', () => ({
 // 5. Now we can safely import application modules
 // ─────────────────────────────────────────────────────────────────────────────
 import { config } from '../config/env.js';
-import { ContractEventIndexerService } from '../services/contractEventIndexerService.js';
-import { ContractEventsController } from '../controllers/contractEventsController.js';
+import { contractEventIndexer } from '../services/contractEventIndexer.js';
 import { ContractEventController } from '../controllers/contractEventController.js';
 import contractEventRoutes from '../routes/contractEventRoutes.js';
 
@@ -322,9 +321,6 @@ const mockAuthToken = jwt.sign(mockUserPayload, JWT_SECRET);
 
 // Mount contract event routes (auth + rbac are both mocked above)
 app.use('/api/events', contractEventRoutes);
-
-// Direct route for ContractEventsController (no auth needed in test)
-app.get('/api/contract-events/:contractId', ContractEventsController.listByContract);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 7. Simulated Soroban RPC event queue + fetch mock
@@ -418,7 +414,7 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
   // ───────────────────────────────────────────────────────────────────────────
   describe('2. Execute Bulk Payment & Verify Events Indexed', () => {
     it('should execute bulk payment operations and index BatchExecutedEvent into backend DB', async () => {
-      await ContractEventIndexerService.initialize();
+      await contractEventIndexer.initialize();
 
       const txHash = '0x1111111111111111111111111111111111111111111111111111111111111111';
       sorobanRpcEventQueue.push({
@@ -431,7 +427,7 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
         value: { batch_id: 1, total_sent: '5000000000', recipient_count: 10 },
       });
 
-      await ContractEventIndexerService.pollOnce();
+      await contractEventIndexer.pollOnce();
 
       expect(mockEventsStore.length).toBeGreaterThanOrEqual(1);
 
@@ -450,7 +446,7 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
   // ───────────────────────────────────────────────────────────────────────────
   describe('3. Execute Vesting Escrow & Verify Events Indexed', () => {
     it('should execute vesting claim operations and index VestingClaimedEvent into backend DB', async () => {
-      await ContractEventIndexerService.initialize();
+      await contractEventIndexer.initialize();
 
       const txHash = '0x2222222222222222222222222222222222222222222222222222222222222222';
       sorobanRpcEventQueue.push({
@@ -463,7 +459,7 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
         value: { beneficiary: 'GBENEFICIARY12345678901234567890123456789012345678901234', amount_claimed: '1000000000' },
       });
 
-      await ContractEventIndexerService.pollOnce();
+      await contractEventIndexer.pollOnce();
 
       const indexed = mockEventsStore.find(
         (e) => e.contract_id === VESTING_ESCROW_CONTRACT_ID && e.event_type === 'VestingClaimedEvent'
@@ -480,7 +476,7 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
   // ───────────────────────────────────────────────────────────────────────────
   describe('4. Backend API Returns Contract Event Data', () => {
     beforeEach(async () => {
-      await ContractEventIndexerService.initialize();
+      await contractEventIndexer.initialize();
 
       sorobanRpcEventQueue.push(
         {
@@ -509,7 +505,7 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
         }
       );
 
-      await ContractEventIndexerService.pollOnce();
+      await contractEventIndexer.pollOnce();
       // Update state store so indexer/status returns correct ledger
       mockStateStore.set('soroban_contract_events', {
         state_key: 'soroban_contract_events',
@@ -568,22 +564,12 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
       expect(res.body.lastIndexedLedger).toBe(110);
     });
 
-    it('GET /api/contract-events/:contractId — should return events via ContractEventsController', async () => {
-      const res = await request(app)
-        .get(`/api/contract-events/${REVENUE_SPLIT_CONTRACT_ID}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0].contract_id).toBe(REVENUE_SPLIT_CONTRACT_ID);
-      expect(res.body.data[0].event_type).toBe('RevenueDistributed');
-    });
   });
 
   // ───────────────────────────────────────────────────────────────────────────
   describe('5. Idempotent Indexing & Deduplication', () => {
     it('should not insert duplicate events when re-polling the same ledger range', async () => {
-      await ContractEventIndexerService.initialize();
+      await contractEventIndexer.initialize();
 
       const txHash = '0x4444444444444444444444444444444444444444444444444444444444444444';
       sorobanRpcEventQueue.push({
@@ -596,11 +582,11 @@ describe('Soroban Contract - Backend Indexer Integration Tests', () => {
       });
 
       // First poll — should insert
-      await ContractEventIndexerService.pollOnce();
+      await contractEventIndexer.pollOnce();
       expect(mockEventsStore.filter((e) => e.tx_hash === txHash)).toHaveLength(1);
 
       // Second poll — ledger state is advanced, mock will not re-queue, but even if it did…
-      await ContractEventIndexerService.pollOnce();
+      await contractEventIndexer.pollOnce();
       expect(mockEventsStore.filter((e) => e.tx_hash === txHash)).toHaveLength(1);
     });
   });

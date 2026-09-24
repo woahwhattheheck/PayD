@@ -61,6 +61,13 @@ export class ContractEventIndexer {
   /**
    * Main polling loop - fetches and indexes new events
    */
+  /**
+   * Run a single poll cycle. Used by tests and on-demand refresh.
+   */
+  async pollOnce(): Promise<void> {
+    return this.pollAndIndexEvents();
+  }
+
   private async pollAndIndexEvents(): Promise<void> {
     if (!this.isRunning) return;
 
