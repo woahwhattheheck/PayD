@@ -5,7 +5,8 @@ resources:
   - backend-deployment.yaml
   - backend-service.yaml
   - backend-configmap.yaml
-  - backend-secret.yaml
+  - secret-store.yaml
+  - external-secret.yaml
   - backend-hpa.yaml
   - frontend-deployment.yaml
   - frontend-service.yaml

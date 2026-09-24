@@ -42,9 +42,9 @@ This guide covers deploying PayD to a Kubernetes cluster using either raw manife
 
 ### 1. Create Secrets
 
-**Do not edit `k8s/base/backend-secret.yaml` with real values.** That file is
-tracked by git and must only contain placeholders. Instead, create the secret
-imperatively:
+**Do not commit real secret values.** `k8s/base/` applies secrets via External
+Secrets Operator (`external-secret.yaml`). For local clusters without ESO, create
+the secret imperatively:
 
 ```bash
 kubectl create secret generic payd-backend-secrets \

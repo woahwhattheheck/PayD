@@ -10,19 +10,28 @@ k8s/base/
 ├── backend-deployment.yaml     # Backend API deployment (2 replicas)
 ├── backend-service.yaml        # Backend ClusterIP service
 ├── backend-configmap.yaml      # Non-sensitive backend config
-├── backend-secret.yaml         # Secret placeholders (never commit real values)
+├── secret-store.yaml           # External Secrets Operator SecretStore (AWS SM)
+├── external-secret.yaml        # ExternalSecret → payd-backend-secrets
 ├── backend-hpa.yaml            # Horizontal Pod Autoscaler
 ├── frontend-deployment.yaml    # Frontend deployment (2 replicas)
 ├── frontend-service.yaml       # Frontend ClusterIP service
 ├── frontend-configmap.yaml     # Frontend runtime config
 └── ingress.yaml                # nginx ingress with TLS
+
+k8s/examples/
+└── backend-secret.example.yaml # Local/dev reference only — never apply with real values
 ```
 
 ## Secrets Management
 
-**`backend-secret.yaml` must never contain real secret values.** The committed file
-contains `CHANGE_ME` placeholders only. Real values are injected at deploy time
-using one of the methods below.
+**No plaintext Kubernetes Secret is applied from `k8s/base/`.** Production uses
+the External Secrets Operator (`secret-store.yaml` + `external-secret.yaml`) so
+the `payd-backend-secrets` Secret is created only when AWS Secrets Manager is
+reachable. If the store or remote keys are missing, the ExternalSecret stays
+unready and pods that require `payd-backend-secrets` fail to start (fail closed).
+
+For local/dev, use Method 1 below or the example under `k8s/examples/` (do not
+commit real values).
 
 ### Why this matters
 
@@ -200,8 +209,8 @@ spec:
         key: payd/prod/sds-api-key
 ```
 
-4. Remove `backend-secret.yaml` from `kustomization.yaml` (the ExternalSecret
-   creates the K8s Secret automatically).
+4. `kustomization.yaml` already lists `secret-store.yaml` and `external-secret.yaml`
+   (no plaintext Secret manifest). The ExternalSecret creates `payd-backend-secrets`.
 
 5. Configure IRSA or static credentials for the ESO service account to read from
    AWS Secrets Manager.
@@ -209,7 +218,7 @@ spec:
 ## Pre-commit Safety Check
 
 A pre-commit hook (`scripts/check-k8s-secrets.sh`) verifies that
-`backend-secret.yaml` contains only the expected `CHANGE_ME` placeholders. This
+`k8s/base/` does not ship a plaintext Secret, and `k8s/examples/backend-secret.example.yaml` has no live credentials. This
 runs automatically via Husky and is also enforced in CI.
 
 To run it manually:
