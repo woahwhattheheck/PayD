@@ -5,10 +5,9 @@ on:
     tags:
       - "v*"
 
-# Retention policy: Keep successful runs for 90 days, failed/cancelled for 14 days
-permissions: # required permissions for the workflow
+permissions:
   id-token: write
-  contents: write # in order to create releases
+  contents: write
   attestations: write
 
 concurrency:
@@ -40,6 +39,3 @@ jobs:
       package: ${{ matrix.package }}
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
-
-# Workflow run retention settings
-retention-days: 90
