@@ -9,6 +9,7 @@ import logger from './utils/logger.js';
 import passport from './config/passport.js';
 import { apiVersionMiddleware } from './middlewares/apiVersionMiddleware.js';
 import { requestIdMiddleware } from './middleware/requestId.js';
+import { config as envConfig } from './config/env.js';
 import { auditLoggerMiddleware } from './middleware/auditLogger.js';
 import { tieredOrganizationRateLimit } from './middleware/advancedRateLimiting.js';
 import { rateLimitHeaders } from './middleware/rateLimitHeaders.js';
@@ -88,7 +89,42 @@ app.use(
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   })
 );
-app.use(cors());
+const corsOrigins = envConfig.CORS_ORIGIN.split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const localhostDevOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+];
+
+const allowedOrigins = new Set(
+  envConfig.NODE_ENV === 'development'
+    ? [...corsOrigins, ...localhostDevOrigins]
+    : corsOrigins
+);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Non-browser / same-origin requests omit Origin
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    optionsSuccessStatus: 204,
+  })
+);
 
 // Attach request ID to morgan logs for end-to-end traceability
 morgan.token('request-id', (req) => (req as any).requestId || '-');
