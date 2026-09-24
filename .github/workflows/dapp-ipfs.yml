@@ -9,7 +9,6 @@ on:
 
   workflow_dispatch:
 
-# Retention policy: Keep successful runs for 30 days, failed/cancelled for 7 days
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -28,7 +27,7 @@ jobs:
         working-directory: ./
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install App dependencies
         run: npm install
