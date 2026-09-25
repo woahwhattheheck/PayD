@@ -14,8 +14,9 @@ FROM node:20-alpine AS production
 
 WORKDIR /usr/src/app
 
-# Non-root runtime user (Alpine)
-RUN addgroup -S payd && adduser -S -G payd payd
+# wget is not on the slim Alpine image; HEALTHCHECK needs it
+RUN apk add --no-cache wget \
+  && addgroup -S payd && adduser -S -G payd payd
 
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
