@@ -9,7 +9,6 @@ on:
 
   workflow_dispatch:
 
-# Retention is a repo Actions setting, not a workflow key.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
