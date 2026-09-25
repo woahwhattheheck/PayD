@@ -1,0 +1,93 @@
+# Staging values override for PayD Helm chart
+# Usage: helm upgrade --install payd charts/payd -f charts/payd/values-staging.yaml
+
+backend:
+  replicaCount: 1
+
+  image:
+    tag: "staging"
+    pullPolicy: Always
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: 80
+
+  config:
+    NODE_ENV: "staging"
+    LOG_LEVEL: "debug"
+    ENABLE_CACHING: "true"
+    CACHE_TTL: "600"
+
+  secrets:
+    DATABASE_URL: ""
+    DB_USER: ""
+    DB_PASSWORD: ""
+    JWT_SECRET: ""
+    STELLAR_SECRET_KEY: ""
+    ANCHOR_API_KEY: ""
+    SDS_API_KEY: ""
+
+frontend:
+  replicaCount: 1
+
+  image:
+    tag: "staging"
+    pullPolicy: Always
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+  hosts:
+    - host: staging.payd.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+          port: 80
+    - host: api.staging.payd.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: backend
+          port: 3001
+  tls:
+    - secretName: payd-staging-tls
+      hosts:
+        - staging.payd.yourdomain.com
+        - api.staging.payd.yourdomain.com
+
+stellar:
+  network: "TESTNET"
+  passphrase: "Test SDF Network ; September 2015"
+  horizonUrl: "https://horizon-testnet.stellar.org"
+  sorobanRpcUrl: "https://soroban-testnet.stellar.org"
+
+# Feature flags (staging defaults — verbose diagnostics on)
+features:
+  enableDebugEndpoints: true
+  enableCaching: true
+  enableRateLimiting: true
+  strictCors: false
