@@ -1,0 +1,81 @@
+# Staging stack — production-like settings (auth + RLS on), isolated volumes/ports.
+# Usage:
+#   cp backend/.env.staging.example backend/.env.staging
+#   docker compose -f docker-compose.staging.yml --env-file backend/.env.staging up --build
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '3101:3001'
+    env_file:
+      - ./backend/.env.staging
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - APP_ENV=staging
+      - DATABASE_URL=postgresql://${STAGING_DB_USER:-payd_staging}:${STAGING_DB_PASSWORD:-payd_staging_password}@postgres:5432/${STAGING_DB_NAME:-payd_staging}
+      - REDIS_URL=redis://redis:6379
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${STAGING_DB_USER:-payd_staging}
+      - DB_PASSWORD=${STAGING_DB_PASSWORD:-payd_staging_password}
+      - DB_NAME=${STAGING_DB_NAME:-payd_staging}
+      - ENABLE_RLS=true
+      - REQUIRE_AUTH=true
+      - LOG_LEVEL=info
+      - ENABLE_CACHING=true
+      - CACHE_TTL=3600
+      - STELLAR_NETWORK_PASSPHRASE=${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network \; September 2015}
+      - STELLAR_HORIZON_URL=${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - payd_staging_network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${STAGING_DB_USER:-payd_staging}
+      - POSTGRES_PASSWORD=${STAGING_DB_PASSWORD:-payd_staging_password}
+      - POSTGRES_DB=${STAGING_DB_NAME:-payd_staging}
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+      - ./backend/src/db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${STAGING_DB_USER:-payd_staging} -d ${STAGING_DB_NAME:-payd_staging}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payd_staging_network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_staging_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payd_staging_network
+
+volumes:
+  postgres_staging_data:
+  redis_staging_data:
+
+networks:
+  payd_staging_network:
+    driver: bridge
