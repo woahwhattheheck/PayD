@@ -339,3 +339,35 @@ fn test_distribute_emits_one_event_per_asset() {
     let n = count_named_events(&env, &client.address, "distribution_executed_event");
     assert_eq!(n, 2, "expected one DistributionExecutedEvent per asset");
 }
+
+#[test]
+fn test_distribution_emits_truthful_total_when_last_share_rounds_to_zero() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let token_admin = Address::generate(&env);
+    let (token_id, stellar_asset_client, token_client) = create_token_contract(&env, &token_admin);
+    let contract_id = env.register(RevenueSplitContract, ());
+    let client = RevenueSplitContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let first = Address::generate(&env);
+    let last = Address::generate(&env);
+    let shares = Vec::from_array(
+        &env,
+        [
+            RecipientShare { destination: first.clone(), basis_points: 5000 },
+            RecipientShare { destination: last.clone(), basis_points: 5000 },
+        ],
+    );
+    client.init(&admin, &shares);
+
+    let sender = Address::generate(&env);
+    stellar_asset_client.mint(&sender, &1);
+    client.distribute(&sender, &Vec::from_array(&env, [(token_id, 1i128)]));
+
+    assert_eq!(count_named_events(&env, &client.address, "distribution_executed_event"), 1);
+    assert_eq!(token_client.balance(&sender), 0);
+    assert_eq!(token_client.balance(&first), 0);
+    assert_eq!(token_client.balance(&last), 1);
+}
