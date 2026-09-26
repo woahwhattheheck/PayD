@@ -16,7 +16,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate-domain:
+    runs-on: ubuntu-latest
+    env:
+      PAYD_HOME_DOMAIN: ${{ vars.PAYD_HOME_DOMAIN }}
+    steps:
+      - name: Require a real contract home domain
+        run: |
+          case "$PAYD_HOME_DOMAIN" in
+            ""|*example.*|*yourdomain.*|*://*|*/*|*' '*)
+              echo "::error::Set PAYD_HOME_DOMAIN to the verified production domain before releasing contracts"
+              exit 1
+              ;;
+          esac
+
   release-contract:
+    needs: validate-domain
     name: Compile ${{ matrix.package }} and create release
     strategy:
       fail-fast: false
@@ -34,8 +49,7 @@ jobs:
     with:
       release_name: ${{ github.ref_name }}-${{ matrix.package }}
       release_description: "PayD ${{ matrix.package }} contract release"
-      # Matches ORG_URL host in backend/.well-known/stellar.toml
-      home_domain: "payd.example.com"
+      home_domain: ${{ vars.PAYD_HOME_DOMAIN }}
       relative_path: ${{ matrix.relative_path }}
       package: ${{ matrix.package }}
     secrets:
