@@ -27,3 +27,6 @@ jobs:
       package: "..."
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
+
+# Workflow run retention settings
+retention-days: 90
