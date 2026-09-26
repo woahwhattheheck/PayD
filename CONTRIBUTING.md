@@ -78,10 +78,11 @@ git clone https://github.com/Protocol-Guild/PayD.git
 cd PayD
 ```
 
-Install root/frontend dependencies:
+Install root and frontend dependencies separately (the root workspace does not include `frontend/`):
 
 ```bash
 npm install
+cd frontend && npm install && cd ..
 ```
 
 Install backend dependencies:
@@ -165,8 +166,7 @@ Health check: `GET http://localhost:3001/health`
 - **Linting**: ESLint (`npm run lint` in root/frontend; `npm run lint` in backend).
 - **Modules**: Backend uses ESM (`"type": "module"`). Prefer explicit `.js`
   extensions in relative TypeScript imports to match existing files.
-- **Errors**: Prefer typed errors (`AppError` / subclasses in `backend/src/errors`)
-  and let the global error middleware format responses. Do not return raw
+- **Errors**: Match the existing backend error response shape. Do not return raw
   database or stack messages to clients outside development.
 - **Security**: Never commit secrets. Sanitize logs (passwords, tokens, keys).
   Preserve tenant isolation middleware on multi-tenant routes.
@@ -215,9 +215,9 @@ cargo test
 
 ### CI expectations
 
-GitHub Actions (see `.github/workflows/`) run build, e2e, contract release, and
-secrets checks. A PR should pass the same checks you can run locally before
-requesting review.
+GitHub Actions (see `.github/workflows/`) run checks according to event and
+changed paths. Contract releases run on version tags, not every PR. Run the
+focused checks relevant to your change before requesting review.
 
 ## Pull request process
 
