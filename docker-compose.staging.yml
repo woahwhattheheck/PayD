@@ -1,7 +1,9 @@
 # Staging stack — production-like settings (auth + RLS on), isolated volumes/ports.
 # Usage:
 #   cp backend/.env.staging.example backend/.env.staging
-#   docker compose -f docker-compose.staging.yml --env-file backend/.env.staging up --build
+#   docker compose --env-file backend/.env.staging -f docker-compose.staging.yml up --build
+# A new staging volume initializes the seed schema before loading fixtures.
+# PostgreSQL's image only runs init scripts on an empty volume.
 version: '3.8'
 
 services:
@@ -17,12 +19,12 @@ services:
       - PORT=3001
       - NODE_ENV=production
       - APP_ENV=staging
-      - DATABASE_URL=postgresql://${STAGING_DB_USER:-payd_staging}:${STAGING_DB_PASSWORD:-payd_staging_password}@postgres:5432/${STAGING_DB_NAME:-payd_staging}
+      - DATABASE_URL=postgresql://${STAGING_DB_USER:-payd_staging}:${STAGING_DB_PASSWORD:?Set STAGING_DB_PASSWORD in backend/.env.staging}@postgres:5432/${STAGING_DB_NAME:-payd_staging}
       - REDIS_URL=redis://redis:6379
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=${STAGING_DB_USER:-payd_staging}
-      - DB_PASSWORD=${STAGING_DB_PASSWORD:-payd_staging_password}
+      - DB_PASSWORD=${STAGING_DB_PASSWORD:?Set STAGING_DB_PASSWORD in backend/.env.staging}
       - DB_NAME=${STAGING_DB_NAME:-payd_staging}
       - ENABLE_RLS=true
       - REQUIRE_AUTH=true
@@ -43,15 +45,20 @@ services:
     image: postgres:15-alpine
     environment:
       - POSTGRES_USER=${STAGING_DB_USER:-payd_staging}
-      - POSTGRES_PASSWORD=${STAGING_DB_PASSWORD:-payd_staging_password}
+      - POSTGRES_PASSWORD=${STAGING_DB_PASSWORD:?Set STAGING_DB_PASSWORD in backend/.env.staging}
       - POSTGRES_DB=${STAGING_DB_NAME:-payd_staging}
     ports:
       - '5433:5432'
     volumes:
       - postgres_staging_data:/var/lib/postgresql/data
-      - ./backend/src/db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+      # The seed references these tables; the RLS migration must precede seed data.
+      - ./backend/src/db/migrations/001_create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
+      - ./backend/src/db/migrations/003_multi_tenant_rls.sql:/docker-entrypoint-initdb.d/02_multi_tenant_rls.sql:ro
+      - ./backend/src/db/migrations/009_create_tax_tables.sql:/docker-entrypoint-initdb.d/03_create_tax_tables.sql:ro
+      - ./backend/src/db/seed.sql:/docker-entrypoint-initdb.d/04_seed.sql:ro
+      - ./backend/staging/mark-seed-ready.sh:/docker-entrypoint-initdb.d/05_mark_seed_ready.sh:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${STAGING_DB_USER:-payd_staging} -d ${STAGING_DB_NAME:-payd_staging}']
+      test: ['CMD-SHELL', 'test -f /var/lib/postgresql/data/.staging-seed-ready && pg_isready -U ${STAGING_DB_USER:-payd_staging} -d ${STAGING_DB_NAME:-payd_staging}']
       interval: 10s
       timeout: 5s
       retries: 5
