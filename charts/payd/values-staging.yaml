@@ -26,7 +26,7 @@ backend:
   config:
     # env.ts accepts development, production, and test; staging uses production behavior.
     NODE_ENV: "production"
-    APP_ENV: "staging"
+    CORS_ORIGIN: "https://staging.payd.yourdomain.com"
     LOG_LEVEL: "debug"
     ENABLE_CACHING: "true"
     CACHE_TTL: "600"
