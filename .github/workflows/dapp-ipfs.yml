@@ -9,6 +9,7 @@ on:
 
   workflow_dispatch:
 
+# Retention policy: Keep successful runs for 30 days, failed/cancelled for 7 days
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -64,3 +65,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- CID: ${{ steps.storacha.outputs.cid }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- URL: ${{ steps.storacha.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+
+# Workflow run retention settings
+retention-days: 30

@@ -42,9 +42,9 @@ This guide covers deploying PayD to a Kubernetes cluster using either raw manife
 
 ### 1. Create Secrets
 
-**Do not commit real secret values.** `k8s/base/` applies secrets via External
-Secrets Operator (`external-secret.yaml`). For local clusters without ESO, create
-the secret imperatively:
+**Do not commit real secret values.** Production `k8s/base/` requires External
+Secrets Operator and the AWS values described in [k8s/README.md](../k8s/README.md).
+For a local cluster without ESO, create the secret imperatively:
 
 ```bash
 kubectl create secret generic payd-backend-secrets \
@@ -59,8 +59,10 @@ kubectl create secret generic payd-backend-secrets \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-For production, use the External Secrets Operator to sync from AWS Secrets
-Manager. See [k8s/README.md](../k8s/README.md) for details.
+The manual Secret alone does not make `kubectl apply -k k8s/base/` work on a
+cluster without ESO CRDs. Use the separate non-ESO local apply commands in
+[k8s/README.md](../k8s/README.md). In production, install ESO and configure the
+SecretStore and remote keys first.
 
 ### 2. Update ConfigMap
 
@@ -121,8 +123,14 @@ containers:
 ### 6. Deploy
 
 ```bash
-kubectl apply -k k8s/base/
+kubectl -n payd apply -k k8s/base/
+kubectl -n payd get externalsecret payd-backend-secrets
 ```
+
+Only use this base command after ESO is installed and its AWS access is
+configured; wait for the ExternalSecret to report Ready=True before serving
+traffic. For a local cluster without ESO, use the manifest list in
+[k8s/README.md](../k8s/README.md).
 
 ### 7. Verify Deployment
 

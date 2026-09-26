@@ -30,8 +30,10 @@ the `payd-backend-secrets` Secret is created only when AWS Secrets Manager is
 reachable. If the store or remote keys are missing, the ExternalSecret stays
 unready and pods that require `payd-backend-secrets` fail to start (fail closed).
 
-For local/dev, use Method 1 below or the example under `k8s/examples/` (do not
-commit real values).
+`kubectl apply -k k8s/base/` requires the ESO CRDs and a configured AWS
+SecretStore. For local clusters without ESO, create a Secret with Method 1 and
+apply the non-ESO manifests separately; do not apply the example with live values
+or commit generated credentials.
 
 ### Why this matters
 
@@ -60,14 +62,16 @@ kubectl create secret generic payd-backend-secrets \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-Then deploy the remaining manifests without the secret file:
+For a local cluster without ESO, apply the non-ESO manifests (the base also
+contains `SecretStore` and `ExternalSecret` resources that need ESO installed):
 
 ```bash
-kubectl apply -k k8s/base/ --prune -l app=payd
+kubectl -n payd apply -f k8s/base/backend-configmap.yaml \
+  -f k8s/base/backend-deployment.yaml -f k8s/base/backend-service.yaml \
+  -f k8s/base/backend-hpa.yaml -f k8s/base/frontend-configmap.yaml \
+  -f k8s/base/frontend-deployment.yaml -f k8s/base/frontend-service.yaml \
+  -f k8s/base/ingress.yaml
 ```
-
-Or exclude the secret from kustomize by removing it from `kustomization.yaml`
-locally (do not commit that change).
 
 ### Method 2: Helm `--set` (if using the Helm chart)
 
@@ -145,7 +149,26 @@ helm install external-secrets external-secrets/external-secrets \
   --namespace external-secrets --create-namespace
 ```
 
-2. Create a `SecretStore` pointing at AWS Secrets Manager:
+2. Create `payd` namespace and the `external-secrets-sa` service account there.
+   Grant that account IAM read access to the remote keys and configure its IRSA
+   role annotation for your cluster. The namespaced `SecretStore` references
+   that service account; installing the ESO controller in its own namespace does
+   not create this account for PayD.
+
+3. Provision the remote values. Terraform's secrets module creates
+   `payd-production/db-credentials` as JSON with `username` and `password`,
+   plus raw-string `payd-production/jwt-secret` and (when configured)
+   `payd-production/stellar-credentials`. Provision these additional raw-string
+   values in AWS Secrets Manager before deploying the backend:
+
+   - `payd-production/database-url`: complete Postgres connection URL
+   - `payd-production/anchor-api-key`: anchor API key
+   - `payd-production/sds-api-key`: SDS API key
+
+   Their names and formats must match `k8s/base/external-secret.yaml`. Missing
+   values leave the ExternalSecret unready and the backend without a Secret.
+
+4. Apply the namespaced `SecretStore` and `ExternalSecret` from `k8s/base/`:
 
 ```yaml
 # k8s/base/secret-store.yaml
@@ -166,60 +189,14 @@ spec:
             name: external-secrets-sa
 ```
 
-3. Create an `ExternalSecret` that maps provider keys to K8s secret keys:
-
-```yaml
-# k8s/base/external-secret.yaml
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: payd-backend-secrets
-  labels:
-    app: payd
-    component: backend
-spec:
-  refreshInterval: 1h
-  secretStoreRef:
-    name: aws-secrets-manager
-    kind: SecretStore
-  target:
-    name: payd-backend-secrets
-    creationPolicy: Owner
-  data:
-    - secretKey: DATABASE_URL
-      remoteRef:
-        key: payd/prod/database-url
-    - secretKey: DB_USER
-      remoteRef:
-        key: payd/prod/db-user
-    - secretKey: DB_PASSWORD
-      remoteRef:
-        key: payd/prod/db-password
-    - secretKey: JWT_SECRET
-      remoteRef:
-        key: payd/prod/jwt-secret
-    - secretKey: STELLAR_SECRET_KEY
-      remoteRef:
-        key: payd/prod/stellar-secret-key
-    - secretKey: ANCHOR_API_KEY
-      remoteRef:
-        key: payd/prod/anchor-api-key
-    - secretKey: SDS_API_KEY
-      remoteRef:
-        key: payd/prod/sds-api-key
-```
-
-4. `kustomization.yaml` already lists `secret-store.yaml` and `external-secret.yaml`
-   (no plaintext Secret manifest). The ExternalSecret creates `payd-backend-secrets`.
-
-5. Configure IRSA or static credentials for the ESO service account to read from
-   AWS Secrets Manager.
+   `kubectl -n payd apply -k k8s/base/` includes both resources. Before routing traffic,
+   inspect `kubectl -n payd get externalsecret payd-backend-secrets` and confirm
+   Ready=True. Do not put remote values in a tracked YAML file.
 
 ## Pre-commit Safety Check
 
-A pre-commit hook (`scripts/check-k8s-secrets.sh`) verifies that
-`k8s/base/` does not ship a plaintext Secret, and `k8s/examples/backend-secret.example.yaml` has no live credentials. This
-runs automatically via Husky and is also enforced in CI.
+A pre-commit hook (`scripts/check-k8s-secrets.sh`) rejects plaintext Secret
+manifests under `k8s/base/`. It runs through Husky and in CI.
 
 To run it manually:
 
