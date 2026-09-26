@@ -24,10 +24,14 @@ backend:
     targetMemoryUtilizationPercentage: 80
 
   config:
-    NODE_ENV: "staging"
+    # env.ts accepts development, production, and test; staging uses production behavior.
+    NODE_ENV: "production"
+    APP_ENV: "staging"
     LOG_LEVEL: "debug"
     ENABLE_CACHING: "true"
     CACHE_TTL: "600"
+    SDS_ENABLE: "false"
+    RATE_LIMIT_API_MAX: "100"
 
   secrets:
     DATABASE_URL: ""
@@ -85,9 +89,3 @@ stellar:
   horizonUrl: "https://horizon-testnet.stellar.org"
   sorobanRpcUrl: "https://soroban-testnet.stellar.org"
 
-# Feature flags (staging defaults — verbose diagnostics on)
-features:
-  enableDebugEndpoints: true
-  enableCaching: true
-  enableRateLimiting: true
-  strictCors: false
