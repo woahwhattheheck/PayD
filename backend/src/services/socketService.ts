@@ -1,13 +1,13 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HttpServer } from 'node:http';
-import { config } from '../config/env.js';
+import { allowedCorsOrigins } from '../config/corsOrigins.js';
 
 let io: SocketIOServer | null = null;
 
 export const initializeSocket = (httpServer: HttpServer) => {
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: config.CORS_ORIGIN,
+      origin: allowedCorsOrigins,
       methods: ['GET', 'POST'],
       credentials: true,
     },

@@ -9,7 +9,7 @@ import logger from './utils/logger.js';
 import passport from './config/passport.js';
 import { apiVersionMiddleware } from './middlewares/apiVersionMiddleware.js';
 import { requestIdMiddleware } from './middleware/requestId.js';
-import { config as envConfig } from './config/env.js';
+import { allowedCorsOrigins } from './config/corsOrigins.js';
 import { auditLoggerMiddleware } from './middleware/auditLogger.js';
 import { tieredOrganizationRateLimit } from './middleware/advancedRateLimiting.js';
 import { rateLimitHeaders } from './middleware/rateLimitHeaders.js';
@@ -89,23 +89,6 @@ app.use(
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   })
 );
-const corsOrigins = envConfig.CORS_ORIGIN.split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-const localhostDevOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000',
-];
-
-const allowedOrigins = new Set(
-  envConfig.NODE_ENV === 'development'
-    ? [...corsOrigins, ...localhostDevOrigins]
-    : corsOrigins
-);
-
 app.use(
   cors({
     origin(origin, callback) {
@@ -114,7 +97,7 @@ app.use(
         callback(null, true);
         return;
       }
-      if (allowedOrigins.has(origin)) {
+      if (allowedCorsOrigins.includes(origin)) {
         callback(null, true);
         return;
       }

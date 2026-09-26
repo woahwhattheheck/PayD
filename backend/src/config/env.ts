@@ -8,7 +8,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().default('postgres://localhost:5432/payd_test'),
   REDIS_URL: z.string().optional(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  CORS_ORIGIN: z.string().optional(),
   THROTTLING_TPM: z.string().default('100'),
   THROTTLING_MAX_QUEUE_SIZE: z.string().default('1000'),
   THROTTLING_REFILL_INTERVAL_MS: z.string().default('1000'),
