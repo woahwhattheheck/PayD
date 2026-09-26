@@ -32,8 +32,13 @@ export function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ): void {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+
   const requestId = requestIdOf(req);
   const isDev = config.nodeEnv === 'development';
 
