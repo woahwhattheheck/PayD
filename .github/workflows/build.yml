@@ -8,7 +8,6 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 # Retention policy: Keep successful runs for 30 days, failed/cancelled for 7 days
-# (repo Actions retention setting; not a valid workflow-level key)
 env:
   CARGO_TERM_COLOR: always
   PKG_CONFIG_PATH: /usr/lib/pkgconfig
@@ -114,3 +113,6 @@ jobs:
       - name: Run Tests
         working-directory: ./frontend
         run: npm test --if-present
+
+# Workflow run retention settings
+retention-days: 30
