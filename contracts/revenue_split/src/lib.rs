@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contracterror, contractimpl, contracttype, Address, Env, Vec, token, Symbol};
+use soroban_sdk::{contract, contracterror, contractevent, contractimpl, contracttype, Address, Env, Vec, token};
 use common::CommonError;
 
 #[cfg(test)]
@@ -43,6 +43,19 @@ pub struct RecipientShare {
 }
 
 pub const TOTAL_BASIS_POINTS: u32 = 10000; // 100%
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+/// Emitted once per asset distribution so off-chain indexers can track totals,
+/// recipient counts, and the active split weights (basis points, 10000 = 100%).
+#[contractevent]
+pub struct DistributionExecutedEvent {
+    pub asset: Address,
+    pub total_amount: i128,
+    pub recipient_count: u32,
+    /// Share weights in basis points (10000 = 100%).
+    pub split_percentages: Vec<u32>,
+}
 
 #[contract]
 pub struct RevenueSplitContract;
@@ -127,7 +140,18 @@ impl RevenueSplitContract {
                 }
             }
 
-            env.events().publish((Symbol::new(&env, "distribute"), token.clone()), amount);
+            let mut split_percentages: Vec<u32> = Vec::new(&env);
+            for share in shares.iter() {
+                split_percentages.push_back(share.basis_points);
+            }
+
+            DistributionExecutedEvent {
+                asset: token.clone(),
+                total_amount: amount,
+                recipient_count: shares.len(),
+                split_percentages,
+            }
+            .publish(&env);
         }
 
         Ok(())
