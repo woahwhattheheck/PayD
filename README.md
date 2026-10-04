@@ -146,70 +146,69 @@ Every payment includes:
 
 ### Prerequisites
 
-Ensure you have the following installed:
+- **Node.js** v22+ and **npm** for the frontend and backend.
+- **Rust** and **Stellar CLI** when working on the Soroban contracts.
+- A configured PostgreSQL instance and any services needed by the backend features
+  you use; see the [backend setup](backend/README.md).
 
-- **Node.js** v22+
-- **npm** or **yarn**
-- **Rust** (for Soroban contracts)
-- **Stellar CLI**
-- **Docker** (optional, for local development)
+### Install the frontend
 
-### Installation
+Clone the repository, then install and run from its root:
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/your-org/payD.git](https://github.com/your-org/payD.git)
-   cd payD
-   Install dependencies:
-   bash
-   npm install
-   Environment Setup:
-   bash
-   cp .env.example .env
-   ```
-
-# Edit .env with your configuration
-
-Database Setup:
-bash
-
-# Using Docker
-
-docker run --name payd-postgres -e POSTGRES_PASSWORD=mypassword -d postgres:15
-
-# Or set up PostgreSQL manually
-
-Configuration
-Edit
-.env
-with the following key variables:
-
-env
-
-# Stellar Network
-
-STELLAR_NETWORK=testnet # or mainnet
-STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
-
-# Database
-
-DATABASE_URL=postgresql://user:password@localhost:5432/payd
-
-# API Keys
-
-STELLAR_SECRET_KEY=your_issuer_secret_key
-ANCHOR_API_KEY=your_anchor_service_key
-
-# JWT
-
-JWT_SECRET=your_jwt_secret
-Development
-Start the development server:
-bash
+```bash
+git clone https://github.com/Protocol-Guild/PayD.git
+cd PayD
+npm install
+npm install --prefix frontend
 npm run dev
-Build for production:
-bash
-npm run build
-Run tests:
-bash
-npm run test.
+```
+
+The application source is in [`frontend/src/`](frontend/src/). The root
+[`package.json`](package.json) forwards `dev`, `build`, `preview`, and `lint` to
+[`frontend/package.json`](frontend/package.json). Its `packages/*` workspace
+pattern does not include `frontend/` or `backend/`, so installing only the root
+package does not install either application's declared dependencies.
+
+`npm run dev` starts Vite only. Open the URL printed by Vite; it does not start
+the backend, a database, or a local Stellar network.
+
+### Configure and start the backend
+
+From the repository root, install and configure the backend separately:
+
+```bash
+npm install --prefix backend
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env` using the
+[backend configuration and database instructions](backend/README.md) before
+starting it in a separate terminal:
+
+```bash
+npm run backend:dev
+```
+
+The current [`frontend/vite.config.ts`](frontend/vite.config.ts) proxies `/api`
+to `http://localhost:3000`. Set `PORT=3000` in `backend/.env` for that development
+proxy, or update its target to the backend port you choose. The backend's default
+port is 3001. Copying the root `.env.example` alone does not configure the backend.
+
+### Commands from the repository root
+
+| Command                              | Package and purpose                            |
+| ------------------------------------ | ---------------------------------------------- |
+| `npm run dev`                        | Frontend Vite development server               |
+| `npm run build`                      | Frontend TypeScript compilation and Vite build |
+| `npm run preview`                    | Frontend preview of a completed build          |
+| `npm run lint`                       | Frontend ESLint                                |
+| `npm run format`                     | Repository-wide Prettier                       |
+| `npm run backend:dev`                | Backend development server                     |
+| `npm run backend:test`               | Backend Jest tests                             |
+| `npm run build --prefix backend`     | Backend TypeScript build                       |
+| `npm run test:e2e --prefix frontend` | Frontend Playwright tests                      |
+
+There is no root `test` script. The backend and frontend test commands above
+are separate; frontend Playwright setup is documented in
+[`frontend/e2e/README.md`](frontend/e2e/README.md). A frontend build does not build
+the backend or Soroban contracts.
