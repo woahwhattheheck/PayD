@@ -3,7 +3,7 @@ import config from '../config/index.js';
 import logger from '../utils/logger.js';
 
 /**
- * Shared 500-response helper.
+ * Shared 500-response helper with the common error envelope.
  *
  * Why this exists: several controllers were doing
  * `res.status(500).json({ error: error.message })`. When the failing call is a
@@ -38,10 +38,18 @@ export function sendInternalError(
     stack: error instanceof Error ? error.stack : undefined,
   });
 
+  // Keep legacy error text while supplying the shared machine-readable fields.
+  const body = {
+    error: userMessage,
+    message: userMessage,
+    code: 'INTERNAL_ERROR',
+    requestId,
+  };
+
   if (config.nodeEnv === 'development') {
-    res.status(500).json({ error: userMessage, detail: message });
+    res.status(500).json({ ...body, detail: message });
     return;
   }
 
-  res.status(500).json({ error: userMessage });
+  res.status(500).json(body);
 }
