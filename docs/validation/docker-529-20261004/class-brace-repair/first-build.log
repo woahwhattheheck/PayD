@@ -1,0 +1,452 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 738B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 ...
+
+#3 [auth] library/node:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 96B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 2.01MB 0.0s done
+#5 DONE 0.0s
+
+#6 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#6 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 done
+#6 sha256:afdf98210b07b586eb71fa22ba2e432e058e4cd1304d31ed60888755b8c865fb 1.72kB / 1.72kB done
+#6 sha256:11cedc39e663e7c5d5cb9cc77a461a0d2adc25537b94e6831a6108f09cb2001b 6.52kB / 6.52kB done
+#6 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0B / 3.86MB 0.1s
+#6 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 0B / 43.23MB 0.1s
+#6 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0B / 1.26MB 0.1s
+#6 sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 7.67kB / 7.67kB done
+#6 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 3.86MB / 3.86MB 0.2s done
+#6 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 1.26MB / 1.26MB 0.1s done
+#6 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.1s
+#6 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 0B / 445B 0.2s
+#6 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 43.23MB / 43.23MB 0.4s done
+#6 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.1s done
+#6 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 445B / 445B 0.2s done
+#6 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287
+#6 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 1.1s done
+#6 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122
+#6 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0.0s done
+#6 extracting sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 done
+#6 DONE 4.2s
+
+#7 [builder 2/7] WORKDIR /usr/src/app
+#7 DONE 0.0s
+
+#8 [builder 3/7] COPY package*.json ./
+#8 DONE 0.0s
+
+#9 [builder 4/7] RUN npm ci
+#9 ...
+
+#10 [production 3/7] RUN apk add --no-cache wget   && addgroup -S payd && adduser -S -G payd payd
+#10 0.638 (1/4) Installing libunistring (1.4.1-r0)
+#10 0.667 (2/4) Installing libidn2 (2.3.8-r0)
+#10 0.675 (3/4) Installing pcre2 (10.49-r0)
+#10 0.689 (4/4) Installing wget (1.25.0-r2)
+#10 0.701 Executing busybox-1.37.0-r30.trigger
+#10 0.710 OK: 14.1 MiB in 22 packages
+#10 DONE 0.8s
+
+#11 [production 4/7] COPY package*.json ./
+#11 DONE 0.0s
+
+#12 [production 5/7] RUN npm ci --omit=dev && npm cache clean --force
+#12 3.516 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+#12 3.913 npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+#12 4.257 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#12 4.422 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#12 5.133 npm warn deprecated @otplib/plugin-crypto@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+#12 5.170 npm warn deprecated @otplib/preset-default@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+#12 5.252 npm warn deprecated @otplib/plugin-thirty-two@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+#12 5.268 npm warn deprecated fstream@1.0.12: This package is no longer supported.
+#12 5.670 npm warn deprecated jpeg-exif@1.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+#12 7.788 
+#12 7.788 added 376 packages, and audited 377 packages in 8s
+#12 7.788 
+#12 7.789 52 packages are looking for funding
+#12 7.789   run `npm fund` for details
+#12 7.826 
+#12 7.826 19 vulnerabilities (1 low, 7 moderate, 11 high)
+#12 7.826 
+#12 7.826 To address issues that do not require attention, run:
+#12 7.826   npm audit fix
+#12 7.826 
+#12 7.826 To address all issues (including breaking changes), run:
+#12 7.826   npm audit fix --force
+#12 7.826 
+#12 7.826 Run `npm audit` for details.
+#12 7.828 npm notice
+#12 7.828 npm notice New major version of npm available! 10.8.2 -> 12.2.0
+#12 7.828 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#12 7.828 npm notice To update run: npm install -g npm@12.2.0
+#12 7.828 npm notice
+#12 8.061 npm warn using --force Recommended protections disabled.
+#12 ...
+
+#9 [builder 4/7] RUN npm ci
+#9 4.804 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+#9 5.779 npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+#9 6.669 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#9 6.751 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 7.703 npm warn deprecated fstream@1.0.12: This package is no longer supported.
+#9 8.375 npm warn deprecated @otplib/preset-default@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+#9 8.416 npm warn deprecated @otplib/plugin-crypto@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+#9 8.442 npm warn deprecated @otplib/plugin-thirty-two@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+#9 8.641 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+#9 8.805 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+#9 9.301 npm warn deprecated jpeg-exif@1.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+#9 9.412 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#9 ...
+
+#12 [production 5/7] RUN npm ci --omit=dev && npm cache clean --force
+#12 DONE 9.2s
+
+#9 [builder 4/7] RUN npm ci
+#9 10.60 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 10.60 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 10.63 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#9 11.55 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+#9 83.61 
+#9 83.61 added 826 packages, and audited 827 packages in 1m
+#9 83.61 
+#9 83.61 135 packages are looking for funding
+#9 83.61   run `npm fund` for details
+#9 83.92 
+#9 83.92 63 vulnerabilities (3 low, 8 moderate, 52 high)
+#9 83.92 
+#9 83.92 To address issues that do not require attention, run:
+#9 83.92   npm audit fix
+#9 83.92 
+#9 83.92 To address all issues possible (including breaking changes), run:
+#9 83.92   npm audit fix --force
+#9 83.92 
+#9 83.92 Some issues need review, and may require choosing
+#9 83.92 a different dependency.
+#9 83.92 
+#9 83.92 Run `npm audit` for details.
+#9 83.92 npm notice
+#9 83.92 npm notice New major version of npm available! 10.8.2 -> 12.2.0
+#9 83.92 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#9 83.92 npm notice To update run: npm install -g npm@12.2.0
+#9 83.92 npm notice
+#9 DONE 84.0s
+
+#13 [builder 5/7] COPY tsconfig.json ./
+#13 DONE 0.0s
+
+#14 [builder 6/7] COPY src/ ./src/
+#14 DONE 0.0s
+
+#15 [builder 7/7] RUN npm run build
+#15 0.270 
+#15 0.270 > payd-backend@1.0.0 build
+#15 0.270 > tsc
+#15 0.270 
+#15 8.560 src/__tests__/backendScalingPart49.test.ts(129,18): error TS2352: Conversion of type 'Mock<NextFunction>' to type 'MockedFunction<NextFunction>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.560   Type 'Mock<NextFunction>' is not comparable to type 'NextFunction'.
+#15 8.560     Types of parameters 'deferToNext' and 'deferToNext' are incompatible.
+#15 8.560       Type '"router"' is not comparable to type '"route"'.
+#15 8.561 src/__tests__/backendScalingPart49.test.ts(140,18): error TS2352: Conversion of type 'Mock<NextFunction>' to type 'MockedFunction<NextFunction>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.561   Type 'Mock<NextFunction>' is not comparable to type 'NextFunction'.
+#15 8.561     Types of parameters 'deferToNext' and 'deferToNext' are incompatible.
+#15 8.561       Type '"router"' is not comparable to type '"route"'.
+#15 8.561 src/__tests__/backendScalingPart49.test.ts(150,18): error TS2352: Conversion of type 'Mock<NextFunction>' to type 'MockedFunction<NextFunction>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.561   Type 'Mock<NextFunction>' is not comparable to type 'NextFunction'.
+#15 8.561     Types of parameters 'deferToNext' and 'deferToNext' are incompatible.
+#15 8.561       Type '"router"' is not comparable to type '"route"'.
+#15 8.561 src/__tests__/backendScalingPart49.test.ts(161,18): error TS2352: Conversion of type 'Mock<NextFunction>' to type 'MockedFunction<NextFunction>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.561   Type 'Mock<NextFunction>' is not comparable to type 'NextFunction'.
+#15 8.561     Types of parameters 'deferToNext' and 'deferToNext' are incompatible.
+#15 8.561       Type '"router"' is not comparable to type '"route"'.
+#15 8.561 src/app.ts(94,8): error TS2339: Property 'token' does not exist on type '(format?: Format | undefined, options?: any) => RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+#15 8.561 src/app.ts(94,29): error TS7006: Parameter 'req' implicitly has an 'any' type.
+#15 8.561 src/controllers/__tests__/authController.test.ts(537,32): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | URL'.
+#15 8.561   Type 'undefined' is not assignable to type 'string | URL'.
+#15 8.561 src/controllers/__tests__/authController.test.ts(550,32): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | URL'.
+#15 8.561   Type 'undefined' is not assignable to type 'string | URL'.
+#15 8.561 src/controllers/__tests__/contractEventController.test.ts(2,41): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../contractEventController.js'?
+#15 8.561 src/controllers/__tests__/contractEventController.test.ts(3,33): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../../config/database.js'?
+#15 8.561 src/controllers/assetController.ts(90,30): error TS2532: Object is possibly 'undefined'.
+#15 8.561 src/controllers/authController.ts(304,39): error TS2694: Namespace 'e' has no exported member 'User'.
+#15 8.561 src/controllers/cashFlowForecastController.ts(45,37): error TS2339: Property 'errors' does not exist on type 'ZodError<{ forecastDays: number; distributionAccount: string; assetIssuer: string; }>'.
+#15 8.562 src/db/__tests__/migration-verification.test.ts(13,26): error TS2724: '"node:test"' has no exported member named 'beforeAll'. Did you mean 'before'?
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(58,33): error TS2345: Argument of type '{ query: Mock<() => Promise<any>>; release: jest.Mock<UnknownFunction>; }' is not assignable to parameter of type 'never'.
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(135,28): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(153,28): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(164,33): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(167,28): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(180,32): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/jobs/__tests__/part49Jobs.test.ts(181,33): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/jobs/part49Jobs.ts(86,10): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/middleware/__tests__/auditLogger.test.ts(27,9): error TS2322: Type 'string' is not assignable to type 'number'.
+#15 8.562 src/middleware/__tests__/auditLogger.test.ts(151,19): error TS2540: Cannot assign to 'ip' because it is a read-only property.
+#15 8.562 src/middleware/__tests__/auditLogger.test.ts(259,14): error TS18048: 'callArgs' is possibly 'undefined'.
+#15 8.562 src/middleware/__tests__/auditLogger.test.ts(260,14): error TS18048: 'callArgs' is possibly 'undefined'.
+#15 8.562 src/middleware/__tests__/auditLogger.test.ts(281,37): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/middleware/__tests__/auditLogger.test.ts(300,37): error TS2532: Object is possibly 'undefined'.
+#15 8.562 src/middleware/__tests__/enhancedAuditAnalytics.test.ts(31,9): error TS2322: Type 'string' is not assignable to type 'number'.
+#15 8.562 src/middleware/__tests__/enhancedAuditAnalytics.test.ts(97,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.562 src/middleware/__tests__/enhancedTenantIsolation.test.ts(27,9): error TS2322: Type 'string' is not assignable to type 'number'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(10,18): error TS2307: Cannot find module '../../db/index.js' or its corresponding type declarations.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(63,14): error TS18048: 'RATE_LIMIT_TIERS.free' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(64,9): error TS18048: 'RATE_LIMIT_TIERS.standard' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(66,14): error TS18048: 'RATE_LIMIT_TIERS.standard' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(67,9): error TS18048: 'RATE_LIMIT_TIERS.premium' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(69,14): error TS18048: 'RATE_LIMIT_TIERS.premium' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(70,9): error TS18048: 'RATE_LIMIT_TIERS.enterprise' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(152,9): error TS18048: 'RATE_LIMIT_TIERS.standard' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(245,11): error TS18048: 'RATE_LIMIT_TIERS.premium' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(246,11): error TS18048: 'RATE_LIMIT_TIERS.premium' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(247,11): error TS18048: 'RATE_LIMIT_TIERS.premium' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/organizationRateLimiter.test.ts(248,11): error TS18048: 'RATE_LIMIT_TIERS.premium' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/rateLimitHeaders.test.ts(78,17): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/requestAuditLogger.test.ts(8,18): error TS2307: Cannot find module '../../db/index.js' or its corresponding type declarations.
+#15 8.563 src/middleware/__tests__/requestAuditLogger.test.ts(79,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/requestAuditLogger.test.ts(90,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/requireAdminJustification.test.ts(12,46): error TS2345: Argument of type '{ rows: never[]; }' is not assignable to parameter of type 'never'.
+#15 8.563 src/middleware/__tests__/requireAdminJustification.test.ts(41,12): error TS2352: Conversion of type 'Mock<NextFunction>' to type 'MockedFunction<NextFunction>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.563   Type 'Mock<NextFunction>' is not comparable to type 'NextFunction'.
+#15 8.563     Types of parameters 'deferToNext' and 'deferToNext' are incompatible.
+#15 8.563       Type '"router"' is not comparable to type '"route"'.
+#15 8.563 src/middleware/__tests__/requireAdminJustification.test.ts(70,18): error TS2532: Object is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/smartRateLimiter.test.ts(24,9): error TS2322: Type 'string' is not assignable to type 'number'.
+#15 8.563 src/middleware/__tests__/smartRateLimiter.test.ts(148,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/smartRateLimiter.test.ts(166,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/smartRateLimiter.test.ts(185,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/smartRateLimiter.test.ts(202,14): error TS18048: 'mockResponse.locals' is possibly 'undefined'.
+#15 8.563 src/middleware/__tests__/tenantSecurityGuard.test.ts(27,9): error TS2322: Type 'string' is not assignable to type 'number'.
+#15 8.563 src/middleware/__tests__/tenantSecurityGuard.test.ts(192,9): error TS2349: This expression is not callable.
+#15 8.563   Type 'never' has no call signatures.
+#15 8.563 src/middleware/__tests__/tenantSecurityGuard.test.ts(219,9): error TS2349: This expression is not callable.
+#15 8.563   Type 'never' has no call signatures.
+#15 8.563 src/middleware/__tests__/tenantSecurityMonitor.test.ts(14,18): error TS2307: Cannot find module '../../db/index.js' or its corresponding type declarations.
+#15 8.563 src/middleware/__tests__/tenantSecurityMonitor.test.ts(275,19): error TS2540: Cannot assign to 'path' because it is a read-only property.
+#15 8.563 src/middleware/__tests__/tenantSecurityMonitor.test.ts(599,7): error TS2322: Type 'Mock<Partial<Response<any, Record<string, any>>>, [], any>' is not assignable to type '(code: number) => Response<any, Record<string, any>>'.
+#15 8.563   Call signature return types 'Partial<Response<any, Record<string, any>>>' and 'Response<any, Record<string, any>>' are incompatible.
+#15 8.563     The types of 'status' are incompatible between these types.
+#15 8.563       Type '((code: number) => Response<any, Record<string, any>>) | undefined' is not assignable to type '(code: number) => Response<any, Record<string, any>>'.
+#15 8.563         Type 'undefined' is not assignable to type '(code: number) => Response<any, Record<string, any>>'.
+#15 8.563 src/middleware/advancedRateLimiting.ts(55,11): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string | undefined'.
+#15 8.563   Type 'number' is not assignable to type 'string'.
+#15 8.563 src/middleware/advancedRateLimiting.ts(82,67): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string | undefined'.
+#15 8.563   Type 'number' is not assignable to type 'string'.
+#15 8.563 src/middleware/advancedRateLimiting.ts(105,11): error TS2322: Type 'number | undefined' is not assignable to type 'string | undefined'.
+#15 8.563   Type 'number' is not assignable to type 'string'.
+#15 8.563 src/middleware/advancedRateLimiting.ts(210,9): error TS2322: Type 'Promise<void>' is not assignable to type 'void'.
+#15 8.563 src/middleware/advancedRateLimiting.ts(215,5): error TS2322: Type 'Promise<void>' is not assignable to type 'void'.
+#15 8.563 src/middleware/advancedRateLimiting.ts(391,21): error TS18048: 'loadAvg' is possibly 'undefined'.
+#15 8.563 src/middleware/auditLogger.ts(74,11): error TS2322: Type 'number | undefined' is not assignable to type 'string | undefined'.
+#15 8.563   Type 'number' is not assignable to type 'string'.
+#15 8.563 src/middleware/auditLogger.ts(75,11): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+#15 8.563   Type 'null' is not assignable to type 'string | undefined'.
+#15 8.563 src/middleware/auditLogger.ts(76,11): error TS2322: Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+#15 8.563   Type 'null' is not assignable to type 'number | undefined'.
+#15 8.563 src/middleware/auditLogger.ts(204,3): error TS2322: Type 'string | string[] | undefined' is not assignable to type 'string | undefined'.
+#15 8.563   Type 'string[]' is not assignable to type 'string'.
+#15 8.563 src/middleware/organizationRateLimiter.ts(3,18): error TS2307: Cannot find module '../db/index.js' or its corresponding type declarations.
+#15 8.563 src/middleware/organizationRateLimiter.ts(86,21): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+#15 8.563   Type 'string[]' is not assignable to type 'string'.
+#15 8.563 src/middleware/organizationRateLimiter.ts(177,5): error TS2322: Type 'RateLimitTier | undefined' is not assignable to type 'RateLimitTier'.
+#15 8.563   Type 'undefined' is not assignable to type 'RateLimitTier'.
+#15 8.563 src/middleware/organizationRateLimiter.ts(180,5): error TS2322: Type 'RateLimitTier | undefined' is not assignable to type 'RateLimitTier'.
+#15 8.563   Type 'undefined' is not assignable to type 'RateLimitTier'.
+#15 8.563 src/middleware/organizationRateLimiter.ts(339,7): error TS2322: Type 'RateLimitTier | undefined' is not assignable to type 'RateLimitTier'.
+#15 8.563   Type 'undefined' is not assignable to type 'RateLimitTier'.
+#15 8.563 src/middleware/requestAuditLogger.ts(2,30): error TS7016: Could not find a declaration file for module 'uuid'. '/usr/src/app/node_modules/uuid/wrapper.mjs' implicitly has an 'any' type.
+#15 8.563   Try `npm i --save-dev @types/uuid` if it exists or add a new declaration (.d.ts) file containing `declare module 'uuid';`
+#15 8.563 src/middleware/requestAuditLogger.ts(3,18): error TS2307: Cannot find module '../db/index.js' or its corresponding type declarations.
+#15 8.563 src/middleware/requestAuditLogger.ts(124,21): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+#15 8.563   Type 'string[]' is not assignable to type 'string'.
+#15 8.563 src/middleware/requestAuditLogger.ts(323,52): error TS2538: Type 'undefined' cannot be used as an index type.
+#15 8.563 src/middleware/requestId.ts(2,30): error TS7016: Could not find a declaration file for module 'uuid'. '/usr/src/app/node_modules/uuid/wrapper.mjs' implicitly has an 'any' type.
+#15 8.563   Try `npm i --save-dev @types/uuid` if it exists or add a new declaration (.d.ts) file containing `declare module 'uuid';`
+#15 8.563 src/middleware/smartRateLimiter.ts(39,67): error TS2345: Argument of type 'number | null | undefined' is not assignable to parameter of type 'number'.
+#15 8.563   Type 'undefined' is not assignable to type 'number'.
+#15 8.563 src/middleware/smartRateLimiter.ts(58,55): error TS2345: Argument of type 'number | null | undefined' is not assignable to parameter of type 'number'.
+#15 8.563   Type 'undefined' is not assignable to type 'number'.
+#15 8.564 src/middleware/smartRateLimiter.ts(78,49): error TS2345: Argument of type 'number | null | undefined' is not assignable to parameter of type 'number'.
+#15 8.564   Type 'undefined' is not assignable to type 'number'.
+#15 8.564 src/middleware/tenantSecurityGuard.ts(60,51): error TS2352: Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.564 src/middleware/tenantSecurityGuard.ts(87,49): error TS2352: Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.564 src/middleware/tenantSecurityGuard.ts(125,47): error TS2352: Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.564 src/middleware/tenantSecurityGuard.ts(181,51): error TS2352: Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.564 src/middleware/tenantSecurityMonitor.ts(2,18): error TS2307: Cannot find module '../db/index.js' or its corresponding type declarations.
+#15 8.564 src/middleware/tenantSecurityMonitor.ts(47,21): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'string[]' is not assignable to type 'string'.
+#15 8.564 src/middleware/tenantSecurityMonitor.ts(216,9): error TS2345: Argument of type 'string | string[] | null' is not assignable to parameter of type 'string | null'.
+#15 8.564   Type 'string[]' is not assignable to type 'string'.
+#15 8.564 src/middleware/tenantSecurityMonitor.ts(340,52): error TS2538: Type 'undefined' cannot be used as an index type.
+#15 8.564 src/middleware/tenantSecurityMonitor.ts(485,9): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+#15 8.564 src/middlewares/__tests__/require2fa.test.ts(211,12): error TS2532: Object is possibly 'undefined'.
+#15 8.564 src/middlewares/auth.ts(29,7): error TS2322: Type 'JWTPayload & { typ?: string | undefined; }' is not assignable to type 'User | undefined'.
+#15 8.564   Type 'JWTPayload & { typ?: string | undefined; }' is not assignable to type 'User'.
+#15 8.564     Types of property 'role' are incompatible.
+#15 8.564       Type 'UserRole' is not assignable to type '"EMPLOYER" | "EMPLOYEE"'.
+#15 8.564         Type '"ADMIN"' is not assignable to type '"EMPLOYER" | "EMPLOYEE"'.
+#15 8.564 src/routes/adminRoutes.ts(51,26): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/adminRoutes.ts(74,26): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/adminRoutes.ts(158,26): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/adminRoutes.ts(180,26): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/auditAnalyticsRoutes.ts(15,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/auditAnalyticsRoutes.ts(47,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/auditAnalyticsRoutes.ts(81,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/auditAnalyticsRoutes.ts(125,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/auditAnalyticsRoutes.ts(214,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/example-enhanced-route.ts(37,10): error TS7006: Parameter 'req' implicitly has an 'any' type.
+#15 8.564 src/routes/example-enhanced-route.ts(37,15): error TS7006: Parameter 'res' implicitly has an 'any' type.
+#15 8.564 src/routes/example-enhanced-route.ts(147,10): error TS7006: Parameter 'req' implicitly has an 'any' type.
+#15 8.564 src/routes/example-enhanced-route.ts(147,15): error TS7006: Parameter 'res' implicitly has an 'any' type.
+#15 8.564 src/routes/example-enhanced-route.ts(178,10): error TS7006: Parameter 'req' implicitly has an 'any' type.
+#15 8.564 src/routes/example-enhanced-route.ts(178,15): error TS7006: Parameter 'res' implicitly has an 'any' type.
+#15 8.564 src/routes/smartRateLimitRoutes.ts(15,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/smartRateLimitRoutes.ts(49,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/smartRateLimitRoutes.ts(73,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/smartRateLimitRoutes.ts(117,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/smartRateLimitRoutes.ts(153,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/smartRateLimitRoutes.ts(208,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(15,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(38,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(80,30): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(82,48): error TS2352: Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(119,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(143,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/routes/tenantSecurityRoutes.ts(213,37): error TS2345: Argument of type 'string | string[] | undefined' is not assignable to parameter of type 'string'.
+#15 8.564   Type 'undefined' is not assignable to type 'string'.
+#15 8.564 src/services/__tests__/contractConfigService.test.ts(80,14): error TS2532: Object is possibly 'undefined'.
+#15 8.564 src/services/__tests__/contractConfigService.test.ts(81,14): error TS2532: Object is possibly 'undefined'.
+#15 8.565 src/services/__tests__/contractEventIndexer.test.ts(1,38): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../contractEventIndexer.js'?
+#15 8.565 src/services/__tests__/contractEventIndexer.test.ts(2,33): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../../config/database.js'?
+#15 8.565 src/services/__tests__/createSchedule.manual.test.ts(22,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+#15 8.565   Type 'undefined' is not assignable to type 'string'.
+#15 8.565 src/services/__tests__/csvPayrollImportService.test.ts(58,12): error TS2532: Object is possibly 'undefined'.
+#15 8.565 src/services/__tests__/csvPayrollImportService.test.ts(59,12): error TS2532: Object is possibly 'undefined'.
+#15 8.565 src/services/__tests__/csvPayrollImportService.test.ts(62,12): error TS2532: Object is possibly 'undefined'.
+#15 8.565 src/services/__tests__/employeeService.test.ts(40,51): error TS2345: Argument of type '{ organization_id: number; first_name: string; last_name: string; email: string; wallet_address: string; position: string; department: string; status: "active"; }' is not assignable to parameter of type '{ organization_id: number; first_name: string; last_name: string; email: string; status: "active" | "inactive" | "pending"; base_salary: number; base_currency: string; wallet_address?: string | undefined; position?: string | undefined; department?: string | undefined; }'.
+#15 8.565   Type '{ organization_id: number; first_name: string; last_name: string; email: string; wallet_address: string; position: string; department: string; status: "active"; }' is missing the following properties from type '{ organization_id: number; first_name: string; last_name: string; email: string; status: "active" | "inactive" | "pending"; base_salary: number; base_currency: string; wallet_address?: string | undefined; position?: string | undefined; department?: string | undefined; }': base_salary, base_currency
+#15 8.565 src/services/__tests__/employeeService.test.ts(62,44): error TS2554: Expected 2 arguments, but got 1.
+#15 8.565 src/services/__tests__/employeeService.test.ts(77,29): error TS2554: Expected 2 arguments, but got 1.
+#15 8.565 src/services/__tests__/employeeService.test.ts(95,44): error TS2554: Expected 3 arguments, but got 2.
+#15 8.565 src/services/__tests__/employeeService.test.ts(109,44): error TS2554: Expected 3 arguments, but got 2.
+#15 8.565 src/services/__tests__/employeeService.test.ts(122,44): error TS2554: Expected 2 arguments, but got 1.
+#15 8.565 src/services/__tests__/scheduleExecutor.manual.test.ts(38,9): error TS2741: Property 'timezone' is missing in type '{ id: number; organizationId: number; userId: number; frequency: "weekly"; timeOfDay: string; startDate: Date; endDate: undefined; paymentConfig: { recipients: { walletAddress: string; amount: string; assetCode: string; }[]; memo: string; }; ... 4 more ...; updatedAt: Date; }' but required in type 'Schedule'.
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(1,34): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../scheduleExecutor.js'?
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(2,32): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../stellarService.js'?
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(3,33): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../scheduleService.js'?
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(4,48): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../../types/schedule.js'?
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(142,47): error TS2554: Expected 1 arguments, but got 0.
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(242,47): error TS2554: Expected 1 arguments, but got 0.
+#15 8.565 src/services/__tests__/scheduleExecutor.test.ts(313,47): error TS2554: Expected 1 arguments, but got 0.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(20,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(45,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(71,75): error TS2345: Argument of type 'Date' is not assignable to parameter of type 'string'.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(96,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(121,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(146,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(171,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(190,28): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.manual.test.ts(209,13): error TS2554: Expected 4-5 arguments, but got 3.
+#15 8.565 src/services/__tests__/scheduleService.test.ts(1,33): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../scheduleService.js'?
+#15 8.565 src/services/__tests__/scheduleService.test.ts(2,63): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../../types/schedule.js'?
+#15 8.565 src/services/__tests__/searchService.test.ts(334,14): error TS2532: Object is possibly 'undefined'.
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(20,20): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type 'void | TestReturnValuePromise | TestReturnValueGenerator'.
+#15 8.565   Type 'Mock<UnknownFunction>' is missing the following properties from type 'Generator<void, unknown, void>': next, return, throw, [Symbol.iterator]
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(23,37): error TS2345: Argument of type '{ rows: { max_employees: number; max_monthly_transactions: number; max_storage_mb: number; quota_alert_threshold: string; }[]; }' is not assignable to parameter of type 'never'.
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(41,37): error TS2345: Argument of type '{ rows: never[]; }' is not assignable to parameter of type 'never'.
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(54,20): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type 'void | TestReturnValuePromise | TestReturnValueGenerator'.
+#15 8.565   Type 'Mock<UnknownFunction>' is missing the following properties from type 'Generator<void, unknown, void>': next, return, throw, [Symbol.iterator]
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(58,37): error TS2345: Argument of type '{ rows: { max_employees: number; max_monthly_transactions: number; max_storage_mb: number; quota_alert_threshold: string; }[]; }' is not assignable to parameter of type 'never'.
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(62,37): error TS2345: Argument of type '{ rows: { count: string; }[]; }' is not assignable to parameter of type 'never'.
+#15 8.565 src/services/__tests__/tenantQuotaService.test.ts(64,37): error TS2345: Argument of type '{ rows: { count: string; }[]; }' is not assignable to parameter of type 'never'.
+#15 8.565 src/services/__tests__/throttlingService.test.ts(1,35): error TS2307: Cannot find module '../services/throttlingService.js' or its corresponding type declarations.
+#15 8.565 src/services/__tests__/twoFactorService.stateful.test.ts(259,70): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+#15 8.565   Type 'undefined' is not assignable to type 'string'.
+#15 8.565 src/services/__tests__/twoFactorService.stateful.test.ts(285,48): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+#15 8.565   Type 'undefined' is not assignable to type 'string'.
+#15 8.565 src/services/__tests__/twoFactorService.stateful.test.ts(288,48): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+#15 8.565   Type 'undefined' is not assignable to type 'string'.
+#15 8.565 src/services/__tests__/twoFactorService.stateful.test.ts(293,48): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+#15 8.565   Type 'undefined' is not assignable to type 'string'.
+#15 8.565 src/services/auditIntegrityService.ts(74,32): error TS2532: Object is possibly 'undefined'.
+#15 8.565 src/services/rateLimitService.ts(114,55): error TS2322: Type 'number' is not assignable to type '10 | 100 | 200 | 20'.
+#15 8.565 src/services/rateLimitService.ts(127,11): error TS2322: Type 'number' is not assignable to type '10 | 100 | 200 | 20'.
+#15 8.565 src/services/smartRateLimitService.ts(194,18): error TS2339: Property 'consecutive_violations' does not exist on type 'SmartRateLimitConfig'.
+#15 8.566 src/services/twoFactorService.ts(120,17): error TS2769: No overload matches this call.
+#15 8.566   Overload 1 of 4, '(arrayBuffer: WithImplicitCoercion<ArrayBufferLike>, byteOffset?: number | undefined, length?: number | undefined): Buffer<ArrayBufferLike>', gave the following error.
+#15 8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<ArrayBufferLike>'.
+#15 8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<ArrayBufferLike>'.
+#15 8.566   Overload 2 of 4, '(string: WithImplicitCoercion<string>, encoding?: BufferEncoding | undefined): Buffer<ArrayBuffer>', gave the following error.
+#15 8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<string>'.
+#15 8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<string>'.
+#15 8.566 src/services/twoFactorService.ts(122,35): error TS2769: No overload matches this call.
+#15 8.566   Overload 1 of 4, '(arrayBuffer: WithImplicitCoercion<ArrayBufferLike>, byteOffset?: number | undefined, length?: number | undefined): Buffer<ArrayBufferLike>', gave the following error.
+#15 8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<ArrayBufferLike>'.
+#15 8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<ArrayBufferLike>'.
+#15 8.566   Overload 2 of 4, '(string: WithImplicitCoercion<string>, encoding?: BufferEncoding | undefined): Buffer<ArrayBuffer>', gave the following error.
+#15 8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<string>'.
+#15 8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<string>'.
+#15 8.566 src/services/twoFactorService.ts(124,33): error TS2769: No overload matches this call.
+#15 8.566   Overload 1 of 4, '(arrayBuffer: WithImplicitCoercion<ArrayBufferLike>, byteOffset?: number | undefined, length?: number | undefined): Buffer<ArrayBufferLike>', gave the following error.
+#15 8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<ArrayBufferLike>'.
+#15 8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<ArrayBufferLike>'.
+#15 8.566   Overload 2 of 4, '(string: WithImplicitCoercion<string>, encoding?: BufferEncoding | undefined): Buffer<ArrayBuffer>', gave the following error.
+#15 8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<string>'.
+#15 8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<string>'.
+#15 8.566 src/services/twoFactorService.ts(149,20): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+#15 8.566   Type 'undefined' is not assignable to type 'string'.
+#15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 2
+------
+ > [builder 7/7] RUN npm run build:
+8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<string>'.
+8.566 src/services/twoFactorService.ts(124,33): error TS2769: No overload matches this call.
+8.566   Overload 1 of 4, '(arrayBuffer: WithImplicitCoercion<ArrayBufferLike>, byteOffset?: number | undefined, length?: number | undefined): Buffer<ArrayBufferLike>', gave the following error.
+8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<ArrayBufferLike>'.
+8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<ArrayBufferLike>'.
+8.566   Overload 2 of 4, '(string: WithImplicitCoercion<string>, encoding?: BufferEncoding | undefined): Buffer<ArrayBuffer>', gave the following error.
+8.566     Argument of type 'string | undefined' is not assignable to parameter of type 'WithImplicitCoercion<string>'.
+8.566       Type 'undefined' is not assignable to type 'WithImplicitCoercion<string>'.
+8.566 src/services/twoFactorService.ts(149,20): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+8.566   Type 'undefined' is not assignable to type 'string'.
+------
+Dockerfile:11
+--------------------
+   9 |     COPY src/ ./src/
+  10 |     
+  11 | >>> RUN npm run build
+  12 |     
+  13 |     FROM node:20-alpine AS production
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 2

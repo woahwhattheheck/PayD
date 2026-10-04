@@ -1,0 +1,35 @@
+9507c7c7e3634cc6e3f85da8fb8a04ca400d5c88
+fd62af8183747bc2b74f3ee6980f051a0d3dab05
+100644 blob 7f57190fac0786f7f4935ac2857b2ba17850a0a3	backend/.dockerignore
+100644 blob da34233df80f6fa808ef01bb2c9a12cee1d13750	backend/Dockerfile
+100644 blob 2803b2048d296fadbd21baae3ad89b660226cd47	backend/package-lock.json
+100644 blob 746a535b08bf0c6ce9c4a96f7d75c76e0bbacb95	backend/package.json
+100644 blob 9bcf755fb55656c2454fa6bc097e562da91cc383	backend/tsconfig.json
+Client: Docker Engine - Community
+ Version:           28.0.4
+ API version:       1.48
+ Go version:        go1.23.7
+ Git commit:        b8034c0
+ Built:             Tue Mar 25 15:07:16 2025
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          28.0.4
+  API version:      1.48 (minimum version 1.24)
+  Go version:       go1.23.7
+  Git commit:       6430e49
+  Built:            Tue Mar 25 15:07:16 2025
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.3.6
+  GitCommit:        ee2735368117d2eb259779949d5e75cdafec9761
+ runc:
+  Version:          1.5.1
+  GitCommit:        v1.5.1-0-g8f2685a4
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a

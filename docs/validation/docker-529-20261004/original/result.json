@@ -1,0 +1,34 @@
+{
+  "source_commit": "b6aeb6f162c01145188cf77ce3ac80945f8935e8",
+  "dockerfile_blob": "da34233df80f6fa808ef01bb2c9a12cee1d13750",
+  "run_id": 37192310507,
+  "job_id": 111406907149,
+  "status": "blocked_before_image_export",
+  "failed_command": "RUN npm run build",
+  "compiler_exit_code": 2,
+  "dependency_installs_completed": true,
+  "first_build_seconds_raw": "Command exited with non-zero status 1\n71.95",
+  "base_digests_from_build": [
+    "sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+  ],
+  "image_size_uncompressed_bytes": null,
+  "runtime_uid": null,
+  "cached_build_executed": false,
+  "initial_error_lines": [
+    "#15 6.101 src/services/tenantConfigService.ts(207,3): error TS1434: Unexpected keyword or identifier.",
+    "#15 6.101 src/services/tenantConfigService.ts(207,45): error TS1005: ',' expected.",
+    "#15 6.101 src/services/tenantConfigService.ts(207,54): error TS1005: ';' expected.",
+    "#15 6.101 src/services/tenantConfigService.ts(207,97): error TS1005: ',' expected.",
+    "#15 6.101 src/services/tenantConfigService.ts(208,11): error TS1005: ':' expected.",
+    "#15 6.101 src/services/tenantConfigService.ts(208,77): error TS1005: ',' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(209,12): error TS1005: ':' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(209,21): error TS1005: ',' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(215,3): error TS1434: Unexpected keyword or identifier.",
+    "#15 6.102 src/services/tenantConfigService.ts(216,19): error TS1005: ',' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(217,14): error TS1005: ',' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(218,4): error TS1005: ';' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(219,12): error TS1005: ':' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(219,77): error TS1005: ',' expected.",
+    "#15 6.102 src/services/tenantConfigService.ts(221,1): error TS1128: Declaration or statement expected."
+  ]
+}
