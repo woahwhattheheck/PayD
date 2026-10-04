@@ -47,7 +47,7 @@ const RATE_LIMIT_TIERS = {
 
 export type RateLimitTierName = keyof typeof RATE_LIMIT_TIERS;
 
-class RedisClient {
+export class RedisClient {
   private static instance: Redis | null = null;
 
   static getInstance(): Redis | null {
