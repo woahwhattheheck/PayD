@@ -16,7 +16,7 @@ jobs:
       - name: Checkout exact product source
         uses: actions/checkout@v4
         with:
-          ref: 7470e965d1eb610598a4598a3abb1bfe99fd22f1
+          ref: 0d09b36c2e732d372ebdf484d9b7c31f4f139933
           fetch-depth: 0
           persist-credentials: false
       - name: Record source and runtime
@@ -51,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object contracts/revenue_split/src/lib.rs)" = 9a9540dee5ffc07b251e2f335d1dcbd44ab82159
-          test "$(git hash-object contracts/revenue_split/src/arithmetic_test.rs)" = f03e46404c0256fa09479a286a696afcae099d8b
+          test "$(git hash-object contracts/revenue_split/src/arithmetic_test.rs)" = cd82526f8a19ff019886003617f9dc83e3bd9cf8
           cargo test --locked -p revenue_split --lib 2>&1 | tee replay-logs/fixed.log
           grep -q '15 passed; 0 failed' replay-logs/fixed.log
           git diff --exit-code -- Cargo.toml Cargo.lock contracts/revenue_split/src/lib.rs contracts/revenue_split/src/arithmetic_test.rs contracts/revenue_split/src/test.rs
@@ -59,7 +59,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: revenue-split-arithmetic-7470e965
+          name: revenue-split-arithmetic-0d09b36c
           path: replay-logs
           retention-days: 1
           if-no-files-found: error

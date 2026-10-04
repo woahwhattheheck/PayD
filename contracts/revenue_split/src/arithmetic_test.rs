@@ -2,7 +2,7 @@ use crate::{ContractError, RecipientShare, RevenueSplitContract, RevenueSplitCon
 use soroban_sdk::{
     testutils::{Address as _, Events},
     token::{Client as TokenClient, StellarAssetClient},
-    Address, Env, FromVal, IntoVal, Map, Symbol, Val, Vec,
+    Address, Env, FromVal, Map, Symbol, Val, Vec,
 };
 
 #[test]
@@ -76,10 +76,10 @@ fn large_distribution_preserves_balances_and_event_payload() {
     assert_eq!(client.try_distribute(&sender, &Vec::from_array(&env, [(token_id.clone(), amount)])), Ok(Ok(())));
 
     // Read the event before later token calls replace the invocation's log.
-    let topic: Val = Symbol::new(&env, "distribution_executed_event").into_val(&env);
+    let topic = Symbol::new(&env, "distribution_executed_event");
     let mut count = 0;
     for (contract, topics, data) in env.events().all().iter() {
-        if contract != id || topics.first() != Some(topic) {
+        if contract != id || topics.first().map(|value| Symbol::from_val(&env, &value)) != Some(topic.clone()) {
             continue;
         }
         count += 1;
