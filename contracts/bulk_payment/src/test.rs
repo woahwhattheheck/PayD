@@ -17,6 +17,7 @@ use soroban_sdk::{
 //   InvalidAmount      = 6  → Error(Contract, #6)
 //   SequenceMismatch   = 8  → Error(Contract, #8)
 //   BatchNotFound      = 9  → Error(Contract, #9)
+//   Paused             = 10 → Error(Contract, #10)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -67,6 +68,58 @@ fn one_payment(env: &Env) -> Vec<PaymentOp> {
 fn test_initialize_twice_panics() {
     let (env, _, _, client) = setup();
     client.initialize(&Address::generate(&env));
+}
+
+// ── emergency pause ───────────────────────────────────────────────────────────
+
+#[test]
+fn test_pause_unpause_flow_emits_events() {
+    let (env, _, _, client) = setup();
+
+    assert!(!client.is_paused());
+    client.pause();
+    assert!(client.is_paused());
+    assert!(
+        has_event(&env, &client.address, "paused_event"),
+        "PausedEvent was not emitted"
+    );
+
+    client.unpause();
+    assert!(!client.is_paused());
+    assert!(
+        has_event(&env, &client.address, "unpaused_event"),
+        "UnpausedEvent was not emitted"
+    );
+}
+
+#[test]
+fn test_paused_execute_batch_does_not_advance_sequence() {
+    let (env, sender, token, client) = setup();
+    let payments = one_payment(&env);
+    let sequence = client.get_sequence();
+
+    client.pause();
+    assert_eq!(
+        client.try_execute_batch(&sender, &token, &payments, &sequence),
+        Err(Ok(ContractError::Paused))
+    );
+    assert_eq!(client.get_sequence(), sequence);
+    assert_eq!(client.get_batch_count(), 0);
+}
+
+#[test]
+fn test_paused_partial_batch_does_not_advance_sequence() {
+    let (env, sender, token, client) = setup();
+    let payments = one_payment(&env);
+    let sequence = client.get_sequence();
+
+    client.pause();
+    assert_eq!(
+        client.try_execute_batch_partial(&sender, &token, &payments, &sequence),
+        Err(Ok(ContractError::Paused))
+    );
+    assert_eq!(client.get_sequence(), sequence);
+    assert_eq!(client.get_batch_count(), 0);
 }
 
 // ── execute_batch ─────────────────────────────────────────────────────────────
