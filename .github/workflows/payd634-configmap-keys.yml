@@ -1,0 +1,77 @@
+name: PayD ConfigMap key check
+on:
+  push:
+    branches: [verify/payd634-configmap-keys-20261004-sandpiper4769]
+    paths: [.github/workflows/payd634-configmap-keys.yml]
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+          persist-credentials: false
+      - name: Render the exact before and after chart
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v helm
+          python3 - <<'PY'
+          import hashlib, json, pathlib, re, subprocess, tempfile
+          base = "19012e70822c75350ba0bbcb1ac688aa98819f5e"
+          path = "charts/payd/templates/backend-configmap.yaml"
+          old = subprocess.check_output(["git", "show", f"{base}:{path}"])
+          new = pathlib.Path(path).read_bytes()
+          def blob(data):
+              return hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
+          assert blob(old) == "015d31eb4886d3577cde6ab4c23cf95705653445"
+          assert blob(new) == "b66bb87babcb8a677e64635b72100c101335704d"
+          report = {"base": base, "candidate_blob": blob(new), "helm": subprocess.check_output(["helm", "version", "--short"], text=True).strip(), "cases": []}
+          reserved = {"STELLAR_NETWORK_PASSPHRASE": "stellar.passphrase", "STELLAR_HORIZON_URL": "stellar.horizonUrl", "SOROBAN_RPC_URL": "stellar.sorobanRpcUrl"}
+          def render(source, preset=None, extra=None):
+              pathlib.Path(path).write_bytes(source)
+              with tempfile.TemporaryDirectory() as td:
+                  f = pathlib.Path(td) / "input.json"
+                  data = {"backend": {"secrets": {"JWT_REFRESH_SECRET": "RENDER_ONLY_NOT_A_SIGNING_KEY"}}}
+                  if extra:
+                      data["backend"].update(extra)
+                  f.write_text(json.dumps(data))
+                  cmd = ["helm", "template", "payd", "charts/payd"]
+                  if preset:
+                      cmd += ["-f", f"charts/payd/values-{preset}.yaml"]
+                  cmd += ["-f", str(f)]
+                  return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+          try:
+              controls = [("defaults", None, None), ("staging", "staging", None), ("production", "production", None), ("ordinary-values", None, {"config": {"CUSTOM_EMPTY": "", "CUSTOM_FALSE": False, "CUSTOM_ZERO": 0}}), ("backend-disabled", None, {"enabled": False, "config": {key: "unused" for key in reserved}})]
+              for name, preset, extra in controls:
+                  before, after = render(old, preset, extra), render(new, preset, extra)
+                  assert before.returncode == after.returncode == 0, (name, before.stderr, after.stderr)
+                  assert before.stdout == after.stdout, name
+                  report["cases"].append({"name": name, "status": "pass", "manifests_byte_identical": True})
+              for key, canonical in reserved.items():
+                  for value in ["SYNTHETIC_DUPLICATE_VALUE_DO_NOT_USE", ""]:
+                      before, after = render(old, extra={"config": {key: value}}), render(new, extra={"config": {key: value}})
+                      name = key + (":empty" if value == "" else ":nonempty")
+                      assert before.returncode == 0, (name, before.stderr)
+                      count = len(re.findall(r"^  " + re.escape(key) + r":", before.stdout, re.M))
+                      assert count == 2, (name, count)
+                      assert after.returncode != 0 and not after.stdout, (name, after.stdout)
+                      expected = f"backend.config.{key} duplicates a chart-managed key; set {canonical} instead"
+                      assert expected in after.stderr, (name, after.stderr)
+                      assert "SYNTHETIC_DUPLICATE_VALUE_DO_NOT_USE" not in after.stderr
+                      report["cases"].append({"name": name, "status": "pass", "original_duplicate_keys": count, "candidate_exit": after.returncode, "diagnostic": expected})
+          finally:
+              pathlib.Path(path).write_bytes(new)
+              pathlib.Path("configmap-result.json").write_text(json.dumps(report, indent=2) + "\n")
+          print(json.dumps(report, indent=2))
+          assert len(report["cases"]) == 11
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payd634-configmap-key-result
+          path: configmap-result.json
+          retention-days: 7
