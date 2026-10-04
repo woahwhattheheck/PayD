@@ -21,6 +21,7 @@ pub enum ContractError {
     AmountOverflow     = 7,
     SequenceMismatch   = 8,
     BatchNotFound      = 9,
+    Paused             = 10,
 }
 
 impl From<CommonError> for ContractError {
@@ -60,6 +61,16 @@ pub struct PaymentSkippedEvent {
     pub amount: i128,
 }
 
+#[contractevent]
+pub struct PausedEvent {
+    pub admin: Address,
+}
+
+#[contractevent]
+pub struct UnpausedEvent {
+    pub admin: Address,
+}
+
 // ── Storage types ─────────────────────────────────────────────────────────────
 
 #[contracttype]
@@ -83,6 +94,7 @@ pub struct BatchRecord {
 #[contracttype]
 pub enum DataKey {
     Admin,
+    Paused,
     BatchCount,
     Batch(u64),
     Sequence,
@@ -102,6 +114,7 @@ impl BulkPaymentContract {
             return Err(ContractError::AlreadyInitialized);
         }
         env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::Paused, &false);
         env.storage().instance().set(&DataKey::BatchCount, &0u64);
         env.storage().instance().set(&DataKey::Sequence, &0u64);
         Ok(())
@@ -111,6 +124,24 @@ impl BulkPaymentContract {
         common::require_admin(&env, &DataKey::Admin).map_err(ContractError::from)?;
         env.storage().instance().set(&DataKey::Admin, &new_admin);
         Ok(())
+    }
+
+    pub fn pause(env: Env) -> Result<(), ContractError> {
+        let admin = common::require_admin(&env, &DataKey::Admin).map_err(ContractError::from)?;
+        env.storage().instance().set(&DataKey::Paused, &true);
+        PausedEvent { admin }.publish(&env);
+        Ok(())
+    }
+
+    pub fn unpause(env: Env) -> Result<(), ContractError> {
+        let admin = common::require_admin(&env, &DataKey::Admin).map_err(ContractError::from)?;
+        env.storage().instance().set(&DataKey::Paused, &false);
+        UnpausedEvent { admin }.publish(&env);
+        Ok(())
+    }
+
+    pub fn is_paused(env: Env) -> bool {
+        env.storage().instance().get(&DataKey::Paused).unwrap_or(false)
     }
 
     /// All-or-nothing batch. Any failed transfer reverts the entire call.
@@ -123,6 +154,7 @@ impl BulkPaymentContract {
         expected_sequence: u64,
     ) -> Result<u64, ContractError> {
         sender.require_auth();
+        Self::ensure_not_paused(&env)?;
         Self::check_and_advance_sequence(&env, expected_sequence)?;
 
         let len = payments.len();
@@ -171,6 +203,7 @@ impl BulkPaymentContract {
         expected_sequence: u64,
     ) -> Result<u64, ContractError> {
         sender.require_auth();
+        Self::ensure_not_paused(&env)?;
         Self::check_and_advance_sequence(&env, expected_sequence)?;
 
         let len = payments.len();
@@ -270,6 +303,13 @@ impl BulkPaymentContract {
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
+
+    fn ensure_not_paused(env: &Env) -> Result<(), ContractError> {
+        if env.storage().instance().get(&DataKey::Paused).unwrap_or(false) {
+            return Err(ContractError::Paused);
+        }
+        Ok(())
+    }
 
     fn check_and_advance_sequence(env: &Env, expected: u64) -> Result<(), ContractError> {
         let current: u64 = env.storage().instance().get(&DataKey::Sequence).unwrap_or(0);
