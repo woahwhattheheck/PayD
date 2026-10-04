@@ -46,10 +46,13 @@ jobs:
           docker run --rm -i --network none "$IMAGE" node --input-type=module > evidence/runtime-smoke.json <<'JS'
           import assert from 'node:assert/strict';
           import { createRequire } from 'node:module';
+          import { existsSync, readFileSync, readdirSync } from 'node:fs';
+          import { dirname, join } from 'node:path';
           const require = createRequire(process.cwd() + '/package.json');
           assert.match(process.version, /^v20\./);
           const { Keypair } = require('@stellar/stellar-sdk');
-          const { Keypair: BaseKeypair } = require('@stellar/stellar-base');
+          const stellarBase = require('@stellar/stellar-base');
+          const { Keypair: BaseKeypair } = stellarBase;
           const message = Buffer.from('PayD Docker 529 runtime smoke');
           const keypair = Keypair.fromRawEd25519Seed(Buffer.alloc(32, 7));
           const signature = keypair.sign(message);
@@ -62,17 +65,48 @@ jobs:
           const restored = new ExcelJS.Workbook();
           await restored.xlsx.load(xlsx);
           assert.equal(restored.getWorksheet('smoke').getCell('A1').value, 'PayD #529');
-          const sodium = require('sodium-native');
-          const random = Buffer.alloc(32);
-          sodium.randombytes_buf(random);
-          assert.equal(random.some(value => value !== 0), true);
+          const sodiumPackageDir = dirname(require.resolve('sodium-native'));
+          const sodiumPackage = JSON.parse(readFileSync(join(sodiumPackageDir, 'package.json'), 'utf8'));
+          assert.equal(sodiumPackage.version, '4.3.3');
+          const prebuildDir = join(sodiumPackageDir, 'prebuilds');
+          const prebuildDirectories = readdirSync(prebuildDir).sort();
+          const muslCandidates = [
+            join(prebuildDir, 'linux-x64-musl', 'sodium-native@4.3.3.node'),
+            join(prebuildDir, 'linux-x64-musl', 'sodium-native.node')
+          ].map(path => ({ path, exists: existsSync(path) }));
+          let sodiumNative;
+          try {
+            const sodium = require('sodium-native');
+            const random = Buffer.alloc(32);
+            sodium.randombytes_buf(random);
+            assert.equal(random.some(value => value !== 0), true);
+            sodiumNative = { available: true, randombytes_passed: true };
+          } catch (error) {
+            if (error?.code !== 'ADDON_NOT_FOUND') throw error;
+            assert.equal(stellarBase.FastSigning, false);
+            for (const candidate of muslCandidates) {
+              assert.equal(candidate.exists, false, `Unexpected musl addon exists: ${candidate.path}`);
+            }
+            sodiumNative = {
+              available: false,
+              error_code: error.code,
+              randombytes_passed: null,
+              supported_fallback: 'TweetNaCl'
+            };
+          }
           console.log(JSON.stringify({
             passed: true,
             node_version: process.version,
             stellar_sign_verify: true,
             stellar_base_verify: true,
             exceljs_xlsx_roundtrip: true,
-            sodium_native_randombytes: true
+            fast_signing: stellarBase.FastSigning,
+            sodium_native: {
+              package_version: sodiumPackage.version,
+              prebuild_directories: prebuildDirectories,
+              musl_candidates: muslCandidates,
+              ...sodiumNative
+            }
           }, null, 2));
           JS
           cat evidence/runtime-smoke.json
@@ -123,7 +157,7 @@ jobs:
               'source_change_build_seconds': float((evidence / 'cached-build-seconds.txt').read_text()),
               'cache_probe': 'one temporary comment in backend/src/index.ts; first image and product source unchanged',
               'runtime_smoke': runtime_smoke,
-              'runtime_scope': 'id, Alpine release, Node version, Stellar sign/verify, ExcelJS XLSX buffer roundtrip, sodium-native randombytes; application/database health was not executed',
+              'runtime_scope': 'id, Alpine release, Node version, Stellar sign/verify, ExcelJS XLSX buffer roundtrip, optional sodium-native availability and supported TweetNaCl fallback; application/database health was not executed',
           }
           report['criteria'] = {
               'under_200MB': report['size_uncompressed_bytes'] < report['size_limit_bytes'],
