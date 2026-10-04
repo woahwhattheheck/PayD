@@ -1,6 +1,6 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response, NextFunction, Router } from 'express';
 import { payrollQueryService } from '../services/payroll-query.service.js';
-import logger from '../utils/logger.js';
+import { NotFoundError, ValidationError } from '../errors/index.js';
 import { authenticateJWT } from '../middlewares/auth.js';
 import { authorizeRoles, isolateOrganization } from '../middlewares/rbac.js';
 import {
@@ -44,7 +44,7 @@ router.use(isolateOrganization);
  * - sortBy: Sort field (timestamp, amount, employeeId)
  * - sortOrder: Sort order (asc, desc)
  */
-router.get('/transactions', async (req: Request, res: Response) => {
+router.get('/transactions', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {
       orgPublicKey,
@@ -62,9 +62,7 @@ router.get('/transactions', async (req: Request, res: Response) => {
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
-      return res.status(400).json({
-        error: 'Missing required parameter: orgPublicKey',
-      });
+      return next(new ValidationError('Missing required parameter: orgPublicKey'));
     }
 
     const query = {
@@ -88,11 +86,7 @@ router.get('/transactions', async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    logger.error('GET /api/payroll/transactions failed', error);
-    res.status(500).json({
-      error: 'Failed to query payroll transactions',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -100,16 +94,14 @@ router.get('/transactions', async (req: Request, res: Response) => {
  * Get payroll for a specific employee
  * GET /api/payroll/employees/:employeeId
  */
-router.get('/employees/:employeeId', async (req: Request, res: Response) => {
+router.get('/employees/:employeeId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { employeeId } = req.params;
     const { orgPublicKey, startDate, endDate, page, limit } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: orgPublicKey',
-      });
+      return next(new ValidationError('Missing required query parameter: orgPublicKey'));
     }
 
     const result = await payrollQueryService.getEmployeePayroll(
@@ -126,11 +118,7 @@ router.get('/employees/:employeeId', async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    logger.error(`GET /api/payroll/employees/${req.params.employeeId} failed`, error);
-    res.status(500).json({
-      error: 'Failed to retrieve employee payroll',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -138,16 +126,14 @@ router.get('/employees/:employeeId', async (req: Request, res: Response) => {
  * Get employee payroll summary
  * GET /api/payroll/employees/:employeeId/summary
  */
-router.get('/employees/:employeeId/summary', async (req: Request, res: Response) => {
+router.get('/employees/:employeeId/summary', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { employeeId } = req.params;
     const { orgPublicKey, startDate, endDate } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: orgPublicKey',
-      });
+      return next(new ValidationError('Missing required query parameter: orgPublicKey'));
     }
 
     const summary = await payrollQueryService.getEmployeeSummary(
@@ -162,11 +148,7 @@ router.get('/employees/:employeeId/summary', async (req: Request, res: Response)
       data: summary,
     });
   } catch (error) {
-    logger.error(`GET /api/payroll/employees/${req.params.employeeId}/summary failed`, error);
-    res.status(500).json({
-      error: 'Failed to retrieve employee summary',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -174,16 +156,14 @@ router.get('/employees/:employeeId/summary', async (req: Request, res: Response)
  * Get payroll batch details
  * GET /api/payroll/batches/:batchId
  */
-router.get('/batches/:batchId', async (req: Request, res: Response) => {
+router.get('/batches/:batchId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { batchId } = req.params;
     const { orgPublicKey, page, limit } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: orgPublicKey',
-      });
+      return next(new ValidationError('Missing required query parameter: orgPublicKey'));
     }
 
     const result = await payrollQueryService.getPayrollBatch(
@@ -198,11 +178,7 @@ router.get('/batches/:batchId', async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    logger.error(`GET /api/payroll/batches/${req.params.batchId} failed`, error);
-    res.status(500).json({
-      error: 'Failed to retrieve payroll batch',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -210,15 +186,13 @@ router.get('/batches/:batchId', async (req: Request, res: Response) => {
  * Get payroll aggregation statistics
  * GET /api/payroll/aggregation
  */
-router.get('/aggregation', async (req: Request, res: Response) => {
+router.get('/aggregation', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { orgPublicKey, startDate, endDate, assetCode, assetIssuer } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: orgPublicKey',
-      });
+      return next(new ValidationError('Missing required query parameter: orgPublicKey'));
     }
 
     const aggregation = await payrollQueryService.getPayrollAggregation(
@@ -234,11 +208,7 @@ router.get('/aggregation', async (req: Request, res: Response) => {
       data: aggregation,
     });
   } catch (error) {
-    logger.error('GET /api/payroll/aggregation failed', error);
-    res.status(500).json({
-      error: 'Failed to retrieve aggregation',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -246,15 +216,13 @@ router.get('/aggregation', async (req: Request, res: Response) => {
  * Get organization-wide audit report
  * GET /api/payroll/audit
  */
-router.get('/audit', async (req: Request, res: Response) => {
+router.get('/audit', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { orgPublicKey, startDate, endDate } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: orgPublicKey',
-      });
+      return next(new ValidationError('Missing required query parameter: orgPublicKey'));
     }
 
     const report = await payrollQueryService.getOrganizationAuditReport(
@@ -268,11 +236,7 @@ router.get('/audit', async (req: Request, res: Response) => {
       data: report,
     });
   } catch (error) {
-    logger.error('GET /api/payroll/audit failed', error);
-    res.status(500).json({
-      error: 'Failed to generate audit report',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -280,16 +244,14 @@ router.get('/audit', async (req: Request, res: Response) => {
  * Search transactions by memo pattern
  * GET /api/payroll/search/memo
  */
-router.get('/search/memo', async (req: Request, res: Response) => {
+router.get('/search/memo', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { orgPublicKey, pattern, page, limit } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     const patternStr = asString(pattern);
     if (!orgPublicKeyStr || !patternStr) {
-      return res.status(400).json({
-        error: 'Missing required query parameters: orgPublicKey, pattern',
-      });
+      return next(new ValidationError('Missing required query parameters: orgPublicKey, pattern'));
     }
 
     const result = await payrollQueryService.searchByMemoPattern(
@@ -304,11 +266,7 @@ router.get('/search/memo', async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    logger.error('GET /api/payroll/search/memo failed', error);
-    res.status(500).json({
-      error: 'Failed to search by memo',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -316,16 +274,14 @@ router.get('/search/memo', async (req: Request, res: Response) => {
  * Get transaction details by hash
  * GET /api/payroll/transactions/:txHash
  */
-router.get('/transactions/:txHash', async (req: Request, res: Response) => {
+router.get('/transactions/:txHash', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { txHash } = req.params;
 
     const transaction = await payrollQueryService.getTransactionDetails(txHash as string);
 
     if (!transaction) {
-      return res.status(404).json({
-        error: 'Transaction not found',
-      });
+      return next(new NotFoundError('Transaction not found'));
     }
 
     res.json({
@@ -333,11 +289,7 @@ router.get('/transactions/:txHash', async (req: Request, res: Response) => {
       data: transaction,
     });
   } catch (error) {
-    logger.error(`GET /api/payroll/transactions/${req.params.txHash} failed`, error);
-    res.status(500).json({
-      error: 'Failed to retrieve transaction',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -345,7 +297,7 @@ router.get('/transactions/:txHash', async (req: Request, res: Response) => {
  * Get SDS rate limit information
  * GET /api/payroll/status/rate-limit
  */
-router.get('/status/rate-limit', (req: Request, res: Response) => {
+router.get('/status/rate-limit', (req: Request, res: Response, next: NextFunction) => {
   try {
     const rateLimitInfo = payrollQueryService.getSDSRateLimitInfo();
 
@@ -354,11 +306,7 @@ router.get('/status/rate-limit', (req: Request, res: Response) => {
       data: rateLimitInfo || { message: 'No rate limit info available' },
     });
   } catch (error) {
-    logger.error('GET /api/payroll/status/rate-limit failed', error);
-    res.status(500).json({
-      error: 'Failed to retrieve rate limit info',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -366,7 +314,7 @@ router.get('/status/rate-limit', (req: Request, res: Response) => {
  * Check SDS health status
  * GET /api/payroll/status/health
  */
-router.get('/status/health', async (req: Request, res: Response) => {
+router.get('/status/health', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const healthy = await payrollQueryService.checkSDSHealth();
 
@@ -378,11 +326,7 @@ router.get('/status/health', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    logger.error('GET /api/payroll/status/health failed', error);
-    res.status(500).json({
-      error: 'Failed to check health',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -390,7 +334,7 @@ router.get('/status/health', async (req: Request, res: Response) => {
  * Clear cache (admin endpoint)
  * POST /api/payroll/cache/clear
  */
-router.post('/cache/clear', (req: Request, res: Response) => {
+router.post('/cache/clear', (req: Request, res: Response, next: NextFunction) => {
   try {
     payrollQueryService.clearCache();
 
@@ -399,11 +343,7 @@ router.post('/cache/clear', (req: Request, res: Response) => {
       message: 'Cache cleared successfully',
     });
   } catch (error) {
-    logger.error('POST /api/payroll/cache/clear failed', error);
-    res.status(500).json({
-      error: 'Failed to clear cache',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
@@ -411,7 +351,7 @@ router.post('/cache/clear', (req: Request, res: Response) => {
  * Get cache statistics
  * GET /api/payroll/cache/stats
  */
-router.get('/cache/stats', (req: Request, res: Response) => {
+router.get('/cache/stats', (req: Request, res: Response, next: NextFunction) => {
   try {
     const stats = payrollQueryService.getCacheStats();
 
@@ -420,11 +360,7 @@ router.get('/cache/stats', (req: Request, res: Response) => {
       data: stats,
     });
   } catch (error) {
-    logger.error('GET /api/payroll/cache/stats failed', error);
-    res.status(500).json({
-      error: 'Failed to retrieve cache stats',
-      message: (error as Error).message,
-    });
+    next(error);
   }
 });
 
