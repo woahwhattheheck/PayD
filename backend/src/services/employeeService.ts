@@ -1,4 +1,6 @@
 import { pool } from '../config/database.js';
+import { RedisClient } from './rateLimitService.js';
+import logger from '../utils/logger.js';
 import {
   CreateEmployeeInput,
   UpdateEmployeeInput,
@@ -6,6 +8,39 @@ import {
 } from '../schemas/employeeSchema.js';
 
 export class EmployeeService {
+  private readonly redis = RedisClient.getInstance();
+
+  private listCacheKey(organizationId: number, params: EmployeeQueryInput): string {
+    const { page = 1, limit = 10, search, status, department } = params;
+    const fingerprint = JSON.stringify([
+      page,
+      limit,
+      search ?? '',
+      status ?? '',
+      department ?? '',
+    ]);
+    return `cache:employees:${organizationId}:${Buffer.from(fingerprint).toString('base64url')}`;
+  }
+
+  async invalidateListCache(organizationId: number): Promise<void> {
+    if (!this.redis) return;
+
+    const pattern = `cache:employees:${organizationId}:*`;
+    try {
+      let cursor = '0';
+      do {
+        const [nextCursor, keys] = await this.redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+        cursor = nextCursor;
+        const firstKey = keys[0];
+        if (firstKey) {
+          await this.redis.del(firstKey, ...keys.slice(1));
+        }
+      } while (cursor !== '0');
+    } catch (error) {
+      logger.warn('Employee cache invalidation failed', { organizationId, error });
+    }
+  }
+
   async create(data: CreateEmployeeInput, dbClient?: any) {
     const executor = dbClient || pool;
     const {
@@ -43,11 +78,34 @@ export class EmployeeService {
     ];
 
     const result = await executor.query(query, values);
+    if (!dbClient) {
+      await this.invalidateListCache(organization_id);
+    }
     return result.rows[0];
   }
 
   async findAll(organization_id: number, params: EmployeeQueryInput) {
     const { page = 1, limit = 10, search, status, department } = params;
+    const cacheKey = this.listCacheKey(organization_id, params);
+
+    if (this.redis) {
+      try {
+        const cached = await this.redis.get(cacheKey);
+        if (cached !== null) {
+          logger.info('Cache hit', { cache: 'employee-list', organizationId: organization_id });
+          return JSON.parse(cached);
+        }
+        logger.info('Cache miss', { cache: 'employee-list', organizationId: organization_id });
+      } catch (error) {
+        logger.warn('Employee cache read failed', { organizationId: organization_id, error });
+      }
+    } else {
+      logger.info('Cache miss', {
+        cache: 'employee-list',
+        organizationId: organization_id,
+        reason: 'redis_not_configured',
+      });
+    }
     const offset = (page - 1) * limit;
 
     let query = `
@@ -97,7 +155,7 @@ export class EmployeeService {
       return employee;
     });
 
-    return {
+    const response = {
       data: employees,
       pagination: {
         total,
@@ -106,6 +164,16 @@ export class EmployeeService {
         totalPages: Math.ceil(total / limit),
       },
     };
+
+    if (this.redis) {
+      try {
+        await this.redis.setex(cacheKey, 5 * 60, JSON.stringify(response));
+      } catch (error) {
+        logger.warn('Employee cache write failed', { organizationId: organization_id, error });
+      }
+    }
+
+    return response;
   }
 
   async findById(id: number, organization_id: number) {
@@ -114,7 +182,11 @@ export class EmployeeService {
       WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
     `;
     const result = await pool.query(query, [id, organization_id]);
-    return result.rows[0] || null;
+    const deleted = result.rows[0] || null;
+    if (deleted) {
+      await this.invalidateListCache(organization_id);
+    }
+    return deleted;
   }
 
   async update(id: number, organization_id: number, data: UpdateEmployeeInput) {
@@ -140,7 +212,11 @@ export class EmployeeService {
     `;
 
     const result = await pool.query(query, values);
-    return result.rows[0] || null;
+    const updated = result.rows[0] || null;
+    if (updated) {
+      await this.invalidateListCache(organization_id);
+    }
+    return updated;
   }
 
   async delete(id: number, organization_id: number) {
