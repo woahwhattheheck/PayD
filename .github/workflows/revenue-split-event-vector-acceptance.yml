@@ -1,0 +1,141 @@
+name: Revenue split event vector acceptance
+on:
+  push:
+    branches: [validation/payd636-event-vector-dot1-20261004]
+permissions:
+  contents: read
+jobs:
+  native-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: '2'
+      CARGO_TERM_COLOR: never
+      RUST_BACKTRACE: '0'
+    steps:
+      - name: Checkout exact released candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 85f40a591c26767c1e868bbb5ec66574f06825a9
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Package tests and one multi-asset host-budget comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p replay-logs contracts/revenue_split/tests
+          test "$(git rev-parse HEAD)" = 85f40a591c26767c1e868bbb5ec66574f06825a9
+          test "$(git rev-parse HEAD^)" = b4801f35bd217a226c5cf9a09ccc4110d695fdda
+          test "$(git hash-object contracts/revenue_split/src/lib.rs)" = ea3c3a3cd19d51bff7ca31c61732a72bf3a391a4
+          { git rev-parse HEAD; git rev-parse HEAD^{tree}; rustc -Vv; cargo --version; uname -a; sha256sum Cargo.lock contracts/revenue_split/src/{lib,arithmetic_test,test}.rs; } | tee replay-logs/environment.log
+          python3 - <<'PY'
+          import tomllib
+          with open('Cargo.lock', 'rb') as f:
+              packages = tomllib.load(f)['package']
+          versions = {p['name']: p['version'] for p in packages if p['name'] in ('soroban-sdk', 'soroban-env-host')}
+          print(versions)
+          assert versions == {'soroban-sdk': '23.5.2', 'soroban-env-host': '23.0.1'}
+          PY
+          cargo test --locked -p revenue_split --lib 2>&1 | tee replay-logs/candidate-package.log
+          grep -q '15 passed; 0 failed' replay-logs/candidate-package.log
+          cat > contracts/revenue_split/tests/event_vector_budget.rs <<'RUST'
+          use revenue_split::{RecipientShare, RevenueSplitContract, RevenueSplitContractClient};
+          use soroban_sdk::{
+              testutils::{Address as _, Events},
+              token::{Client as TokenClient, StellarAssetClient},
+              Address, Env, FromVal, Map, Symbol, Val, Vec,
+          };
+          
+          // One bounded native Soroban host-budget fixture, not a gas/fee or WASM benchmark.
+          #[test]
+          fn multi_asset_host_budget() {
+              let env = Env::default();
+              env.mock_all_auths();
+              let id = env.register(RevenueSplitContract, ());
+              let client = RevenueSplitContractClient::new(&env, &id);
+              let admin = Address::generate(&env);
+              let sender = Address::generate(&env);
+              let weights = [1u32, 99, 500, 900, 1500, 2000, 2500, 2500];
+              let mut recipients = Vec::new(&env);
+              let mut shares = Vec::new(&env);
+              for basis_points in weights {
+                  let destination = Address::generate(&env);
+                  recipients.push_back(destination.clone());
+                  shares.push_back(RecipientShare { destination, basis_points });
+              }
+              client.init(&admin, &shares);
+              let amounts = [1i128, 9999, 10000, 1_000_003];
+              let mut assets = Vec::new(&env);
+              for amount in amounts {
+                  let token = env.register_stellar_asset_contract_v2(admin.clone()).address();
+                  StellarAssetClient::new(&env, &token).mint(&sender, &amount);
+                  assets.push_back((token, amount));
+              }
+          
+              // Exclude all fixture construction, minting, initialization and assertions.
+              env.cost_estimate().budget().reset_default();
+              client.distribute(&sender, &assets);
+              let cpu = env.cost_estimate().budget().cpu_instruction_cost();
+              let memory = env.cost_estimate().budget().memory_bytes_cost();
+          
+              // Capture events before balance calls can replace the invocation event log.
+              let mut event_index = 0u32;
+              let expected_topic = Symbol::new(&env, "distribution_executed_event");
+              for (contract, topics, data) in env.events().all().iter() {
+                  if contract != id {
+                      continue;
+                  }
+                  assert_eq!(topics.len(), 1);
+                  assert_eq!(Symbol::from_val(&env, &topics.get(0).unwrap()), expected_topic);
+                  let fields = Map::<Symbol, Val>::from_val(&env, &data);
+                  assert_eq!(fields.len(), 4);
+                  let (token, amount) = assets.get(event_index).unwrap();
+                  assert_eq!(Address::from_val(&env, &fields.get(Symbol::new(&env, "asset")).unwrap()), token);
+                  assert_eq!(i128::from_val(&env, &fields.get(Symbol::new(&env, "total_amount")).unwrap()), amount);
+                  assert_eq!(u32::from_val(&env, &fields.get(Symbol::new(&env, "recipient_count")).unwrap()), 8);
+                  assert_eq!(Vec::<u32>::from_val(&env, &fields.get(Symbol::new(&env, "split_percentages")).unwrap()), Vec::from_array(&env, weights));
+                  event_index += 1;
+              }
+              assert_eq!(event_index, 4);
+              for (token, amount) in assets.iter() {
+                  let token_client = TokenClient::new(&env, &token);
+                  assert_eq!(token_client.balance(&sender), 0);
+                  let mut distributed = 0i128;
+                  for (i, recipient) in recipients.iter().enumerate() {
+                      let expected = if i == 7 { amount - distributed } else { amount * weights[i] as i128 / 10000 };
+                      assert_eq!(token_client.balance(&recipient), expected);
+                      distributed += expected;
+                  }
+                  assert_eq!(distributed, amount);
+              }
+              println!("PAYD_EVENT_VECTOR_BUDGET assets=4 recipients=8 cpu={} memory={} events=4 balances=32", cpu, memory);
+          }
+          RUST
+          sha256sum contracts/revenue_split/tests/event_vector_budget.rs
+          cp contracts/revenue_split/src/lib.rs "$RUNNER_TEMP/revenue-split-candidate.rs"
+          trap 'cp "$RUNNER_TEMP/revenue-split-candidate.rs" contracts/revenue_split/src/lib.rs' EXIT
+          git show b4801f35bd217a226c5cf9a09ccc4110d695fdda:contracts/revenue_split/src/lib.rs > contracts/revenue_split/src/lib.rs
+          cargo test --locked -p revenue_split --features testutils --test event_vector_budget multi_asset_host_budget -- --exact --nocapture 2>&1 | tee replay-logs/baseline-budget.log
+          cp "$RUNNER_TEMP/revenue-split-candidate.rs" contracts/revenue_split/src/lib.rs
+          cargo test --locked -p revenue_split --features testutils --test event_vector_budget multi_asset_host_budget -- --exact --nocapture 2>&1 | tee replay-logs/candidate-budget.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re
+          results = {}
+          for variant in ('baseline', 'candidate'):
+              log = Path(f'replay-logs/{variant}-budget.log').read_text()
+              assert '1 passed; 0 failed' in log, log
+              values = re.findall(r'PAYD_EVENT_VECTOR_BUDGET assets=4 recipients=8 cpu=(\d+) memory=(\d+) events=4 balances=32', log)
+              assert len(values) == 1, values
+              results[variant] = dict(zip(('cpu', 'memory'), map(int, values[0])))
+          for resource in ('cpu', 'memory'):
+              baseline = results['baseline'][resource]
+              candidate = results['candidate'][resource]
+              results[resource + '_saving'] = baseline - candidate
+              results[resource + '_saving_percent'] = (baseline - candidate) / baseline * 100
+              assert candidate < baseline, results
+          print('PAYD_EVENT_VECTOR_COMPARISON ' + json.dumps(results, sort_keys=True))
+          Path('replay-logs/comparison.json').write_text(json.dumps(results, indent=2) + '\n')
+          PY
+          test "$(git hash-object contracts/revenue_split/src/lib.rs)" = ea3c3a3cd19d51bff7ca31c61732a72bf3a391a4
+          git diff --exit-code -- Cargo.toml Cargo.lock contracts/revenue_split/src/lib.rs contracts/revenue_split/src/test.rs contracts/revenue_split/src/arithmetic_test.rs
