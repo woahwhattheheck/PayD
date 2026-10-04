@@ -1,107 +1,64 @@
-name: Native staging acceptance
+name: Retain native staging evidence
 on:
   push:
     branches: [validation/payd635-native-staging-relay5692]
 permissions:
-  contents: read
-concurrency:
-  group: payd635-native-staging-relay5692
-  cancel-in-progress: false
+  contents: write
+  actions: read
 jobs:
-  staging:
+  retain:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    defaults:
-      run:
-        shell: bash
-    env:
-      COMPOSE_PROJECT_NAME: payd635relay5692
-      PRODUCT_SHA: dbff07d69223bc699c3af03b2d0ba57dee82dc05
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: dbff07d69223bc699c3af03b2d0ba57dee82dc05
-          persist-credentials: false
-      - name: Record source and tools; generate disposable configuration
+          ref: ${{ github.sha }}
+      - name: Preserve the completed run without rerunning tests
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p evidence
-          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
-          { git rev-parse HEAD HEAD^{tree}; docker version; docker compose version; } > evidence/source-tools.txt
-          admin_password=$(openssl rand -hex 24)
-          app_password=$(openssl rand -hex 24)
-          jwt_secret=$(openssl rand -hex 32)
-          refresh_secret=$(openssl rand -hex 32)
-          for value in "$admin_password" "$app_password" "$jwt_secret" "$refresh_secret"; do echo "::add-mask::$value"; done
-          umask 077
-          cat > backend/.env.staging <<EOF
-          STAGING_DB_ADMIN_USER=payd_staging_owner
-          STAGING_DB_ADMIN_PASSWORD=$admin_password
-          STAGING_DB_NAME=payd_staging
-          STAGING_DB_USER=payd_staging
-          STAGING_DB_PASSWORD=$app_password
-          JWT_SECRET=$jwt_secret
-          JWT_REFRESH_SECRET=$refresh_secret
-          SDS_ENABLE=false
-          STELLAR_HORIZON_URL=http://127.0.0.1:1
-          SOROBAN_RPC_URL=http://127.0.0.1:1
-          EOF
-          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml config --quiet
-      - name: Build and start the actual staging stack
-        run: |
-          set -euo pipefail
-          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml up -d --build 2>&1 | tee evidence/compose-up.log
-          for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:3101/health/live > evidence/health-live.json; then
-              echo 'Staging API liveness passed' | tee evidence/health-result.txt
-              exit 0
-            fi
-            sleep 1
-          done
-          echo 'Staging API liveness failed' | tee evidence/health-result.txt
-          exit 1
-      - name: Check repeated bootstrap and production auth admission
-        run: |
-          set -euo pipefail
-          dc() { docker compose --env-file backend/.env.staging -f docker-compose.staging.yml "$@"; }
-          counts() { dc exec -T postgres psql -U payd_staging_owner -d payd_staging -Atc 'SELECT (SELECT count(*) FROM organizations),(SELECT count(*) FROM employees),(SELECT count(*) FROM transactions),(SELECT count(*) FROM schema_migrations),(SELECT count(*) FROM staging_bootstrap);'; }
-          counts > evidence/seed-counts-before.txt
-          dc run --rm migrate 2>&1 | tee evidence/bootstrap-repeat.log
-          counts > evidence/seed-counts-after.txt
-          diff -u evidence/seed-counts-before.txt evidence/seed-counts-after.txt
-          dc exec -T postgres psql -U payd_staging_owner -d payd_staging -Atc 'SELECT version();' > evidence/postgres-version.txt
-          dc exec -T api node --version > evidence/node-version.txt
-          for path in /api/employees /api/admin; do
-            status=$(curl --silent -o /dev/null -w '%{http_code}' "http://127.0.0.1:3101$path")
-            echo "Anonymous $path: $status" | tee -a evidence/auth-status.txt
-            test "$status" = 401
-          done
-      - name: Execute existing native PostgreSQL and HTTP acceptance
-        run: |
-          set -euo pipefail
-          set -a
-          source backend/.env.staging
-          set +a
-          RLS_TEST_DATABASE_URL="postgresql://$STAGING_DB_ADMIN_USER:$STAGING_DB_ADMIN_PASSWORD@postgres:5432/$STAGING_DB_NAME"
-          echo "::add-mask::$RLS_TEST_DATABASE_URL"
-          export RLS_TEST_DATABASE_URL
-          timeout 180 docker compose --env-file backend/.env.staging -f docker-compose.staging.yml run --rm --no-deps \
-            --entrypoint node \
-            -v "$PWD/backend/tests:/usr/src/app/tests:ro" \
-            -v "$PWD/backend/staging:/usr/src/app/staging:ro" \
-            -v "$PWD/backend/src/db:/usr/src/app/src/db:ro" \
-            -e RLS_TEST_DATABASE_URL -e STAGING_DB_USER -e STAGING_DB_PASSWORD \
-            -e NODE_ENV=test api tests/tenant-rls-postgres.mjs 2>&1 | tee evidence/native-rls-http.log
-      - name: Collect logs and remove this run's disposable resources
-        if: always()
-        run: |
-          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml ps --all > evidence/compose-ps.txt 2>&1 || true
-          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml logs --no-color > evidence/compose.log 2>&1 || true
-          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml down --volumes --remove-orphans || true
-      - name: Retain execution evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: payd635-native-staging-relay5692
-          path: evidence/
-          retention-days: 2
+          archive=evidence/payd635-native-staging-20261004.zip
+          if [ ! -f "$archive" ]; then
+            gh api repos/woahwhattheheck/PayD/actions/artifacts/11298695472/zip > "$archive"
+          fi
+          echo '1a56f81b00dad1e1d1562c644669915b1704f8230fdac7f406a7e5c3d7bed4e4  evidence/payd635-native-staging-20261004.zip' | sha256sum --check
+          python3 - <<'PY'
+          import hashlib, json, pathlib, zipfile
+          p = pathlib.Path('evidence/payd635-native-staging-20261004.zip')
+          assert p.stat().st_size == 12395
+          with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None
+              members = {name: z.read(name) for name in z.namelist()}
+          text = lambda name: members[name].decode().strip()
+          source = text('source-tools.txt').splitlines()
+          assert source[:2] == ['dbff07d69223bc699c3af03b2d0ba57dee82dc05', 'c83c0cca26c10c8a9ca85a992dd7127ab3870492']
+          assert text('seed-counts-before.txt') == text('seed-counts-after.txt') == '1|5|5|39|1'
+          assert text('auth-status.txt').splitlines() == ['Anonymous /api/employees: 401', 'Anonymous /api/admin: 401']
+          assert 'Engine: native PostgreSQL using restricted application login' in text('native-rls-http.log')
+          receipt = {
+              'source_sha': source[0], 'source_tree': source[1],
+              'run_id': 37189968962, 'job_id': 111399914243,
+              'controller_sha': '11f97e3f8dbf914df4d4610d48138a6a727924cd',
+              'run_url': 'https://github.com/woahwhattheheck/PayD/actions/runs/37189968962',
+              'artifact_id': 11298695472,
+              'archive_sha256': hashlib.sha256(p.read_bytes()).hexdigest(),
+              'archive_bytes': p.stat().st_size,
+              'node_version': text('node-version.txt'),
+              'postgres_version': text('postgres-version.txt'),
+              'seed_counts_before_and_after': dict(zip(['organizations', 'employees', 'transactions', 'migrations', 'seed_markers'], map(int, text('seed-counts-before.txt').split('|')))),
+              'archive_members_sha256': {name: hashlib.sha256(data).hexdigest() for name, data in sorted(members.items())},
+              'limits': ['Local disposable staging only', 'SDS disabled and Stellar endpoints loopback', 'No live chain, external Horizon readiness, full suite, load benchmark or multi-client concurrency claim'],
+          }
+          pathlib.Path('evidence/native-acceptance.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- evidence/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Retain completed native staging execution evidence [skip ci]'
+            git push origin HEAD:refs/heads/validation/payd635-native-staging-relay5692
+          fi
+          git rev-parse HEAD
