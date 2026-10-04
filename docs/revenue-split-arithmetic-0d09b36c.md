@@ -50,4 +50,12 @@ The first attempt, run 37189908720, stopped at compilation because the new test 
 
 ## Limits
 
-This does not claim a full-workspace build, WASM deployment, live-chain transaction, indexer integration, maintainer acceptance or reward payment. Existing unrelated workflow failures are not declared green by this focused replay. In particular, the inherited `contract-release.yml` still contains unsupported workflow-root `retention-days`; its tag-release behavior was not exercised or changed here.
+This does not claim a full-workspace build, WASM deployment, live-chain transaction, indexer integration, maintainer acceptance or reward payment. Existing unrelated workflow failures are not declared green by this focused replay. At the validated product source above, `contract-release.yml` still contained unsupported workflow-root `retention-days`; its tag-release behavior was not exercised or changed by that replay.
+
+### Subsequent workflow follow-through — 2026-10-04
+
+The original PR now includes the released workflow corrections through [`ba8161f9d1723c34f2fb1531457e6f5897c4a18a`](https://github.com/woahwhattheheck/PayD/commit/ba8161f9d1723c34f2fb1531457e6f5897c4a18a). The unsupported root retention settings have been removed from `contract-release.yml` and `ipfs-deploy.yml`. These are source/schema repairs; neither a production release nor an IPFS deployment was dispatched or demonstrated. Their existing triggers do not match this feature-branch push, so the absence of a run is not a successful deployment.
+
+The earlier [`e04c31bd6e594b24b4bcb7c56c5a2132e1e43921`](https://github.com/woahwhattheheck/PayD/commit/e04c31bd6e594b24b4bcb7c56c5a2132e1e43921) repaired the build and secrets-check workflows, restored their executable checker, and preserved failed Scaffold producer status through `tee`. The corresponding sponsor runs [37187697785](https://github.com/Protocol-Guild/PayD/actions/runs/37187697785) and [37187697799](https://github.com/Protocol-Guild/PayD/actions/runs/37187697799) were observed as `action_required`, not completed builds.
+
+These subsequent workflow and documentation changes leave the contract source, all 15 tests and dependency lockfile from the completed arithmetic result unchanged. That result remains pinned to `0d09b36c2e732d372ebdf484d9b7c31f4f139933`; no new execution, sponsor acceptance or reward payment is asserted.
