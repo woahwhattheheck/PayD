@@ -172,7 +172,7 @@ describe('idempotencyService', () => {
 
       expect(fulfilled).toHaveLength(1);
       expect(rejected).toHaveLength(99);
-      expect((fulfilled[0] as PromiseFulfilledResult<IdempotencyRecord | null>).value).toBeNull();
+      expect((fulfilled[0] as PromiseFulfilledResult<unknown>).value).toBeNull();
       for (const result of rejected) {
         expect((result as PromiseRejectedResult).reason).toBeInstanceOf(
           IdempotencyConflictError
