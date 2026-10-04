@@ -1,4 +1,4 @@
-name: PayD Helm probe acceptance
+name: PayD configuration rollout acceptance
 on:
   push:
     branches: [validation/payd634-probes-relay47-20261004]
@@ -8,44 +8,129 @@ concurrency:
   group: payd634-probes-relay47
   cancel-in-progress: false
 jobs:
-  chart-probes:
+  configuration-rollout:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
-          path: carrier
-          persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
           path: subject
-          ref: a3099111c392b504565cd27a6c0c6f4d952a33fe
+          ref: 458b8c8a616000a014ba3f7a4066649b37f1b207
       - uses: azure/setup-helm@v4
         with:
           version: v3.19.0
-      - name: Render exact chart before and after probe repair
+      - name: Render configuration and secret changes against the actual chart
         working-directory: subject
         shell: bash
         env:
-          EVIDENCE: ${{ runner.temp }}/payd634-probe-evidence
+          EVIDENCE: ${{ runner.temp }}/payd634-rollout-evidence
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = a3099111c392b504565cd27a6c0c6f4d952a33fe
-          test "$(git hash-object charts/payd/values.yaml)" = 269c215f63510329e8882289f347d1b6f8e4d330
-          test "$(git hash-object charts/payd/templates/backend-deployment.yaml)" = c0828146c68e1b3a9322781552a67d1dd14fb3f8
-          test "$(git hash-object charts/payd/VALUES.md)" = 9725ee3040a2d4c2bc5011f672b4939e4d0b428c
-          test ! -e charts/payd/PROBE_VALIDATION.md
-          /usr/bin/python3 ../carrier/accept.py
+          test "$(git rev-parse HEAD)" = 458b8c8a616000a014ba3f7a4066649b37f1b207
+          test "$(git hash-object charts/payd/templates/backend-deployment.yaml)" = 0fd2a64369a492f7bb5ad7493557689842c7fafa
+          test "$(git hash-object charts/payd/VALUES.md)" = 51ddcdd8cbea7600b999b37000abb13dff6b9084
+          /usr/bin/python3 - <<'PY'
+          import copy, json, os, re, subprocess
+          from pathlib import Path
+          import yaml
+          out = Path(os.environ['EVIDENCE'])
+          out.mkdir(parents=True, exist_ok=True)
+          chart = Path('charts/payd')
+          version = subprocess.check_output(['helm','version','--short'], text=True).strip()
+          def render(level='debug', secret='RENDER_ONLY_NOT_A_SIGNING_KEY_A'):
+              args = ['helm','template','payd',str(chart),'-f',str(chart/'values-staging.yaml'), '--set-string',f'backend.config.LOG_LEVEL={level}', '--set-string',f'backend.secrets.JWT_REFRESH_SECRET={secret}']
+              result = subprocess.run(args, capture_output=True, text=True, check=True)
+              docs = list(yaml.safe_load_all(result.stdout))
+              deployment = next(d for d in docs if d and d.get('kind')=='Deployment' and d['metadata']['name'].endswith('-backend'))
+              return deployment['spec']['template']
+          before = render()
+          assert before == render(level='warn'), 'Baseline already rolls for config changes'
+          assert before == render(secret='RENDER_ONLY_NOT_A_SIGNING_KEY_B'), 'Baseline already rolls for secret changes'
+          path = chart/'templates/backend-deployment.yaml'
+          text = path.read_text()
+          anchor = '    metadata:\n      labels:\n'
+          assert text.count(anchor) == 1
+          replacement = '''    metadata:
+                annotations:
+                  checksum/config: {{ include (print $.Template.BasePath "/backend-configmap.yaml") . | sha256sum | quote }}
+                  checksum/secret: {{ include (print $.Template.BasePath "/backend-secret.yaml") . | sha256sum | quote }}
+                labels:
+          '''
+          path.write_text(text.replace(anchor,replacement,1))
+          guide = chart/'VALUES.md'
+          text = guide.read_text()
+          anchor = 'Every entry under `backend.config` is quoted into the backend ConfigMap, which\n'
+          assert text.count(anchor) == 1
+          note = '''The backend pod template includes deterministic checksums of its rendered
+          ConfigMap and Secret. A chart-managed configuration or key change therefore
+          changes the pod template on `helm upgrade`, allowing the Deployment's normal
+          rolling-update mechanism to replace pods and load the new environment.
+          Identical rendered inputs keep both checksums stable; no random restart token
+          is used. Direct out-of-band edits to a live ConfigMap or Secret are not watched
+          by Helm: reconcile them through the release or arrange an explicit restart.
+          Checksums do not replace secret access control or secure credential generation.
+          
+          '''
+          guide.write_text(text.replace(anchor,note+anchor,1))
+          after = render()
+          config_changed = render(level='warn')
+          secret_changed = render(secret='RENDER_ONLY_NOT_A_SIGNING_KEY_B')
+          assert after == render(), 'No-op render is not deterministic'
+          def checksums(template):
+              annotations = template['metadata']['annotations']
+              assert all(re.fullmatch('[0-9a-f]{64}',annotations[k]) for k in ['checksum/config','checksum/secret'])
+              return annotations
+          a,c,s = checksums(after),checksums(config_changed),checksums(secret_changed)
+          assert a['checksum/config'] != c['checksum/config']
+          assert a['checksum/secret'] == c['checksum/secret']
+          assert a['checksum/config'] == s['checksum/config']
+          assert a['checksum/secret'] != s['checksum/secret']
+          for template in [after,config_changed,secret_changed]:
+              plain = copy.deepcopy(template)
+              plain['metadata'].pop('annotations')
+              assert plain == before, 'Unrelated pod template change'
+          blobs = {str(p):subprocess.check_output(['git','hash-object',str(p)],text=True).strip() for p in [path,guide]}
+          result = {'source':'458b8c8a616000a014ba3f7a4066649b37f1b207','helm':version,'baseline_config_change_rollout':False,'baseline_secret_change_rollout':False,'after_config_change_rollout':True,'after_secret_change_rollout':True,'no_op_stable':True,'unrelated_pod_template_unchanged':True,'blobs':blobs,'checksums':{'unchanged':a,'config_change':c,'secret_change':s}}
+          (out/'result.json').write_text(json.dumps(result,indent=2)+'\n')
+          print(json.dumps(result,indent=2))
+          report = chart/'PROBE_VALIDATION.md'
+          original = report.read_text()
+          assert '## Configuration rollout follow-through' not in original
+          run = f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+          addition = f'''\n## Configuration rollout follow-through
+          
+          Parent `458b8c8a616000a014ba3f7a4066649b37f1b207`; native Helm `{version}`.
+          [Focused render execution]({run}) used the staging preset with only
+          disposable render-only key strings. No live configuration or key was changed.
+          
+          Before the two checksum annotations, changing `LOG_LEVEL` or the refresh
+          key left the backend pod template byte-equivalent as parsed YAML. After the
+          change, only the corresponding configuration/secret checksum changes. An
+          identical rerender stays identical. Removing the two new annotations leaves
+          the entire pod template identical to the original in all three cases, including
+          the previously delivered probe definitions. These are actual Helm renders,
+          not an executed Kubernetes rollout or a secret-rotation deployment.
+          
+          - Deployment source: `{blobs[str(path)]}`.
+          - Values guide: `{blobs[str(guide)]}`.
+          
+          The execution retains the source patch and a machine-readable result with
+          checksum values, never real credentials. Existing config/secret templates,
+          backend application code, probe values and earlier report content are preserved.
+          '''
+          report.write_text(original+addition)
+          PY
           git diff --check
+          git diff --exit-code -- backend charts/payd/templates/backend-configmap.yaml charts/payd/templates/backend-secret.yaml charts/payd/values.yaml
           git diff > "$EVIDENCE/source.patch"
-          git add charts/payd/values.yaml charts/payd/templates/backend-deployment.yaml charts/payd/VALUES.md charts/payd/PROBE_VALIDATION.md
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(helm): separate process probes from dependency readiness [skip ci]'
+          git add charts/payd/templates/backend-deployment.yaml charts/payd/VALUES.md charts/payd/PROBE_VALIDATION.md
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(helm): roll backend pods when chart configuration changes [skip ci]'
           { git rev-parse HEAD HEAD^{tree} HEAD^; git show --stat --oneline HEAD; } | tee "$EVIDENCE/candidate.txt"
-          git push origin HEAD:refs/heads/relay47/payd634-probes-candidate-20261004
+          git push origin HEAD:refs/heads/relay47/payd634-rollout-candidate-20261004
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: payd634-probes-relay47
-          path: ${{ runner.temp }}/payd634-probe-evidence
+          name: payd634-rollout-relay47
+          path: ${{ runner.temp }}/payd634-rollout-evidence
           retention-days: 14
           if-no-files-found: error
