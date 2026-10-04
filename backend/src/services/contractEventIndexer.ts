@@ -6,6 +6,7 @@ import * as StellarSdk from '@stellar/stellar-sdk';
 export class ContractEventIndexer {
   private isRunning = false;
   private isPolling = false;
+  private lifecycleGeneration = 0;
   private intervalId: NodeJS.Timeout | null = null;
   private readonly POLL_INTERVAL_MS = 10000; // Poll every 10 seconds
   private readonly BATCH_SIZE = 100;
@@ -35,9 +36,13 @@ export class ContractEventIndexer {
     console.log(`[ContractEventIndexer] Monitoring contracts: ${this.CONTRACTS_TO_INDEX.join(', ')}`);
     
     this.isRunning = true;
+    const generation = ++this.lifecycleGeneration;
     
     // Run immediately on startup
     await this.pollAndIndexEvents();
+
+    // A stop or restart during the first poll retires this initialization.
+    if (!this.isRunning || generation !== this.lifecycleGeneration) return;
     
     // Then poll at regular intervals
     this.intervalId = setInterval(async () => {
@@ -56,6 +61,7 @@ export class ContractEventIndexer {
       this.intervalId = null;
     }
     this.isRunning = false;
+    this.lifecycleGeneration++;
     console.log('[ContractEventIndexer] Stopped');
   }
 
