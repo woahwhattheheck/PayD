@@ -1,4 +1,10 @@
 {{- if .Values.backend.enabled }}
+{{- $config := .Values.backend.config | default dict }}
+{{- range $key, $path := dict "STELLAR_NETWORK_PASSPHRASE" "stellar.passphrase" "STELLAR_HORIZON_URL" "stellar.horizonUrl" "SOROBAN_RPC_URL" "stellar.sorobanRpcUrl" }}
+{{- if hasKey $config $key }}
+{{- fail (printf "backend.config.%s duplicates a chart-managed key; set %s instead" $key $path) }}
+{{- end }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
