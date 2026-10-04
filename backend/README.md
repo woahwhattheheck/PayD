@@ -331,12 +331,14 @@ client-visible in every environment, so give those errors client-safe text.
 Parser errors use fixed messages; their original stack is included only in
 development.
 
-These rules apply when the error reaches the shared middleware. Existing
-[payroll routes](src/routes/payroll.routes.ts) also send some error JSON
-directly, including missing-parameter and caught-service responses. Those
-route-local bodies are not rewritten by the global handler. They can contain
-only `error`, or `error` and `message`, without `code` or `requestId`; clients
-must tolerate those existing shapes.
+The [payroll routes](src/routes/payroll.routes.ts) forward service failures to
+this shared handler. Missing required query parameters use `ValidationError`;
+a missing transaction uses `NotFoundError`. Their error responses therefore
+include the same `error`, `message`, `code` and available `requestId` fields.
+Successful payroll response bodies and service arguments are unchanged.
+Authentication and other middleware retain their own response policies; this
+does not claim that every direct response elsewhere in the application is
+rewritten.
 
 ## Development
 
