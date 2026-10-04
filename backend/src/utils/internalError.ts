@@ -2,6 +2,18 @@ import { Request, Response } from 'express';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
 
+function formatInternalError(error: unknown): string {
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`;
+  }
+
+  try {
+    return String(error);
+  } catch {
+    return 'An error occurred';
+  }
+}
+
 /**
  * Shared 500-response helper with the common error envelope.
  *
@@ -19,6 +31,8 @@ import logger from '../utils/logger.js';
  *   with the log entry that holds the real cause.
  * - In development the real message is included in the response so debugging
  *   stays fast where the leak cannot be exploited.
+ * - Non-Error thrown values which cannot be stringified use a safe fallback
+ *   instead of throwing again while handling the original failure.
  */
 export function sendInternalError(
   res: Response,
@@ -26,8 +40,7 @@ export function sendInternalError(
   error: unknown,
   userMessage = 'Internal server error'
 ): void {
-  const message =
-    error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  const message = formatInternalError(error);
 
   const requestId = typeof (req as any).requestId === 'string' ? (req as any).requestId : undefined;
   logger.error('Request failed', {
