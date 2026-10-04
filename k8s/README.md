@@ -18,6 +18,49 @@ k8s/base/
 └── ingress.yaml                # nginx ingress with TLS
 ```
 
+## Backend probes
+
+The [base backend Deployment](./base/backend-deployment.yaml) configures these
+HTTP GET probes on port `3001`:
+
+| Probe | Path | `periodSeconds` | `timeoutSeconds` | `failureThreshold` |
+| --- | --- | --- | --- | --- |
+| Startup | `/health` | 10 | 30 | 10 |
+| Liveness | `/health/live` | 10 | 5 | 3 |
+| Readiness | `/health` | 5 | 3 | 3 |
+
+`failureThreshold` counts consecutive failed probes. Kubernetes waits for startup
+success before running liveness and readiness. Failed startup or liveness checks
+trigger container restart handling; a failed readiness check marks the Pod not
+ready for matching Service traffic while the container continues running. See
+the [Kubernetes probe reference](https://kubernetes.io/docs/concepts/workloads/pods/probes/)
+for those lifecycle rules.
+
+### What the two endpoints measure
+
+[`/health/live`](../backend/src/controllers/healthController.ts) returns process
+liveness metadata with HTTP 200 and performs no per-request database, Redis or
+Horizon query. In [`app.ts`](../backend/src/app.ts), that route is registered
+after request IDs, response/security headers, CORS and request logging, but
+before body parsing, authentication setup and dependency middleware. It can
+therefore respond while the Redis-backed API limiter is waiting. A successful
+liveness response does not establish dependency readiness.
+
+`/health` is the dependency readiness endpoint. Its controller checks PostgreSQL
+with `SELECT 1`, configured Redis with `PING`, and Horizon with `feeStats`.
+An unset `REDIS_URL` produces `not_configured` and does not by itself make that
+controller's report unhealthy. A failed dependency check produces HTTP 503 and
+`status: degraded`; otherwise the controller returns HTTP 200 and `status: ok`.
+
+Those dependency checks run concurrently with individual five-second timeouts.
+The `/health` route still follows the global rate limiter and tenant-context
+middleware, so the controller timeout is not an end-to-end request deadline.
+The readiness probe's three-second timeout can expire before the controller
+finishes its dependency report. Inspect both the probe failure and application
+logs when readiness fails; a missing report is not proof of which dependency
+failed. Startup uses the same dependency endpoint, so unavailable dependencies
+can also prevent startup success even while `/health/live` responds.
+
 ## Secrets Management
 
 **`backend-secret.yaml` must never contain real secret values.** The committed file
