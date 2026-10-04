@@ -1,0 +1,115 @@
+name: PayD 631 maintained controller acceptance E267
+
+on:
+  push:
+    branches: [validation/payd631-controller-e267-20261004]
+
+permissions:
+  contents: read
+
+jobs:
+  controller-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out the original contribution
+        uses: actions/checkout@v4
+        with:
+          ref: 98bad9c9ff9cbf2bce4c050975419188c7dd0ba9
+          path: source
+          persist-credentials: false
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retain exact source and controller acceptance inputs
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/acceptance"
+          test "$(git rev-parse HEAD)" = 98bad9c9ff9cbf2bce4c050975419188c7dd0ba9
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/acceptance/source-sha.txt"
+          git archive --format=tar HEAD | gzip -n > "$GITHUB_WORKSPACE/acceptance/source-98bad9c9.tar.gz"
+          {
+            node --version
+            npm --version
+            uname -a
+            sha256sum backend/package.json backend/package-lock.json backend/jest.config.cjs backend/tsconfig.json backend/src/controllers/contractEventController.ts backend/src/controllers/__tests__/contractEventController.test.ts backend/src/routes/contractEventRoutes.ts
+          } > "$GITHUB_WORKSPACE/acceptance/environment.txt"
+          test ! -e backend/src/controllers/contractEventsController.ts
+          if git grep -n -F 'contractEventsController' -- backend/src > "$GITHUB_WORKSPACE/acceptance/dead-controller-references.txt"; then
+            echo 'A source reference to the deleted controller remains.'
+            exit 1
+          fi
+          git grep -n -F 'controllers/contractEventController' -- backend/src > "$GITHUB_WORKSPACE/acceptance/canonical-controller-references.txt"
+          printf '%s\n' 'Source: 98bad9c9ff9cbf2bce4c050975419188c7dd0ba9' 'Working directory: backend' 'Install: npm ci --legacy-peer-deps --no-audit --no-fund' 'Acceptance: npm test -- --runInBand --runTestsByPath src/controllers/__tests__/contractEventController.test.ts' 'Scope: eight maintained controller tests; conditional one-line database mock interop fix only.' > "$GITHUB_WORKSPACE/acceptance/commands.txt"
+      - name: Install exact backend lock dependencies
+        working-directory: source/backend
+        shell: bash
+        env:
+          HUSKY: '0'
+        run: |
+          set +e
+          set -uo pipefail
+          started=$(date +%s)
+          npm ci --legacy-peer-deps --no-audit --no-fund 2>&1 | tee "$GITHUB_WORKSPACE/acceptance/install.log"
+          result=${PIPESTATUS[0]}
+          printf '%s\n' "$result" > "$GITHUB_WORKSPACE/acceptance/install.exit"
+          printf '%s\n' "$(( $(date +%s) - started ))" > "$GITHUB_WORKSPACE/acceptance/install.seconds"
+          exit "$result"
+      - name: Run maintained controller cases and repair only a confirmed fixture mismatch
+        working-directory: source/backend
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          started=$(date +%s)
+          npm test -- --runInBand --runTestsByPath src/controllers/__tests__/contractEventController.test.ts --json --outputFile="$GITHUB_WORKSPACE/acceptance/baseline.json" 2>&1 | tee "$GITHUB_WORKSPACE/acceptance/baseline.log"
+          baseline=${PIPESTATUS[0]}
+          printf '%s\n' "$baseline" > "$GITHUB_WORKSPACE/acceptance/baseline.exit"
+          printf '%s\n' "$(( $(date +%s) - started ))" > "$GITHUB_WORKSPACE/acceptance/baseline.seconds"
+          set -e
+          if [ "$baseline" -eq 0 ]; then
+            printf '%s\n' 'Existing eight-case controller suite passed; no fixture change.' > "$GITHUB_WORKSPACE/acceptance/outcome.txt"
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['GITHUB_WORKSPACE']) / 'acceptance/baseline.json').read_text())
+          failures = [a for r in report['testResults'] for a in r.get('assertionResults', []) if a['status'] == 'failed']
+          assert report['numTotalTests'] == 8, 'Unexpected test collection; do not patch automatically.'
+          assert failures, 'No controller assertion failures; do not patch automatically.'
+          for case in failures:
+              messages = '\n'.join(case.get('failureMessages', []))
+              assert "Cannot read properties of undefined (reading 'mock" in messages, messages
+          target = Path('src/controllers/__tests__/contractEventController.test.ts')
+          source = target.read_text()
+          marker = "jest.mock('../../config/database', () => ({\n"
+          assert source.count(marker) == 1 and '__esModule' not in source
+          target.write_text(source.replace(marker, marker + '  __esModule: true,\n', 1))
+          print('Confirmed default-export mock mismatch; added only __esModule: true.')
+          PY
+          git diff -- src/controllers/__tests__/contractEventController.test.ts > "$GITHUB_WORKSPACE/acceptance/fixture.patch"
+          cp src/controllers/__tests__/contractEventController.test.ts "$GITHUB_WORKSPACE/acceptance/contractEventController.test.ts"
+          set +e
+          started=$(date +%s)
+          npm test -- --runInBand --runTestsByPath src/controllers/__tests__/contractEventController.test.ts --json --outputFile="$GITHUB_WORKSPACE/acceptance/fixed.json" 2>&1 | tee "$GITHUB_WORKSPACE/acceptance/fixed.log"
+          result=${PIPESTATUS[0]}
+          printf '%s\n' "$result" > "$GITHUB_WORKSPACE/acceptance/fixed.exit"
+          printf '%s\n' "$(( $(date +%s) - started ))" > "$GITHUB_WORKSPACE/acceptance/fixed.seconds"
+          set -e
+          git status --porcelain > "$GITHUB_WORKSPACE/acceptance/worktree-status.txt"
+          git diff --stat > "$GITHUB_WORKSPACE/acceptance/change-stat.txt"
+          git hash-object src/controllers/__tests__/contractEventController.test.ts > "$GITHUB_WORKSPACE/acceptance/fixed-test-blob.txt"
+          printf 'Baseline exit: %s\nFixed exit: %s\nOnly the database mock ES module marker changed.\n' "$baseline" "$result" > "$GITHUB_WORKSPACE/acceptance/outcome.txt"
+          exit "$result"
+      - name: Retain the exact outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payd631-controller-e267-${{ github.run_id }}
+          path: acceptance/
+          retention-days: 7
+          if-no-files-found: error
