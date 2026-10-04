@@ -1,0 +1,1038 @@
+﻿2026-10-04T09:57:14.1726694Z Current runner version: '2.337.0'
+2026-10-04T09:57:14.1752089Z ##[group]Runner Image Provisioner
+2026-10-04T09:57:14.1752958Z Hosted Compute Agent
+2026-10-04T09:57:14.1753659Z Version: 20260901.588
+2026-10-04T09:57:14.1754350Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-04T09:57:14.1755125Z Build Date: 2026-09-01T19:56:44Z
+2026-10-04T09:57:14.1755947Z Worker ID: {51c4ac1b-22fd-4a13-ace1-04d9c7a7bfb4}
+2026-10-04T09:57:14.1756780Z Azure Region: northcentralus
+2026-10-04T09:57:14.1757841Z ##[endgroup]
+2026-10-04T09:57:14.1759214Z ##[group]Operating System
+2026-10-04T09:57:14.1760230Z Ubuntu
+2026-10-04T09:57:14.1760880Z 24.04.5
+2026-10-04T09:57:14.1761434Z LTS
+2026-10-04T09:57:14.1761963Z ##[endgroup]
+2026-10-04T09:57:14.1762628Z ##[group]Runner Image
+2026-10-04T09:57:14.1763268Z Image: ubuntu-24.04
+2026-10-04T09:57:14.1764007Z Version: 20260927.320.1
+2026-10-04T09:57:14.1765305Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-04T09:57:14.1766908Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-04T09:57:14.1767945Z ##[endgroup]
+2026-10-04T09:57:14.1769193Z ##[group]GITHUB_TOKEN Permissions
+2026-10-04T09:57:14.1771444Z Contents: read
+2026-10-04T09:57:14.1772176Z Metadata: read
+2026-10-04T09:57:14.1772774Z ##[endgroup]
+2026-10-04T09:57:14.1775284Z Secret source: Actions
+2026-10-04T09:57:14.1776366Z Cache mode: write
+2026-10-04T09:57:14.1777110Z Prepare workflow directory
+2026-10-04T09:57:14.2192843Z Prepare all required actions
+2026-10-04T09:57:14.2241436Z Getting action download info
+2026-10-04T09:57:14.4591824Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+2026-10-04T09:57:14.5633464Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-04T09:57:14.7036367Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-04T09:57:14.9563021Z Complete job name: canonical-indexer
+2026-10-04T09:57:15.0306107Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+2026-10-04T09:57:15.0307135Z with:
+2026-10-04T09:57:15.0307744Z   repository: woahwhattheheck/PayD
+2026-10-04T09:57:15.0308505Z   ref: 4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d
+2026-10-04T09:57:15.0309166Z   path: source
+2026-10-04T09:57:15.0309860Z   persist-credentials: false
+2026-10-04T09:57:15.0313766Z   token: ***
+2026-10-04T09:57:15.0314211Z   ssh-strict: true
+2026-10-04T09:57:15.0314654Z   ssh-user: git
+2026-10-04T09:57:15.0315090Z   clean: true
+2026-10-04T09:57:15.0315564Z   sparse-checkout-cone-mode: true
+2026-10-04T09:57:15.0316125Z   fetch-depth: 1
+2026-10-04T09:57:15.0316560Z   fetch-tags: false
+2026-10-04T09:57:15.0317014Z   show-progress: true
+2026-10-04T09:57:15.0317463Z   lfs: false
+2026-10-04T09:57:15.0317883Z   submodules: false
+2026-10-04T09:57:15.0318366Z   set-safe-directory: true
+2026-10-04T09:57:15.0319142Z env:
+2026-10-04T09:57:15.0319667Z   CI: true
+2026-10-04T09:57:15.0320105Z   NODE_ENV: test
+2026-10-04T09:57:15.0320565Z   SOROBAN_RPC_URL: http://127.0.0.1:1
+2026-10-04T09:57:15.0321098Z ##[endgroup]
+2026-10-04T09:57:15.1370078Z Syncing repository: woahwhattheheck/PayD
+2026-10-04T09:57:15.1372633Z ##[group]Getting Git version info
+2026-10-04T09:57:15.1373705Z Working directory is '/home/runner/work/PayD/PayD/source'
+2026-10-04T09:57:15.1375306Z [command]/usr/bin/git version
+2026-10-04T09:57:15.1450773Z git version 2.55.0
+2026-10-04T09:57:15.1466257Z ##[endgroup]
+2026-10-04T09:57:15.1483476Z Temporarily overriding HOME='/home/runner/work/_temp/2448a67b-e86f-499e-bf74-5564796e0797' before making global git config changes
+2026-10-04T09:57:15.1486040Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T09:57:15.1490661Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/PayD/PayD/source
+2026-10-04T09:57:15.1545761Z ##[group]Initializing the repository
+2026-10-04T09:57:15.1551443Z [command]/usr/bin/git init /home/runner/work/PayD/PayD/source
+2026-10-04T09:57:15.1644833Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-04T09:57:15.1646456Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-04T09:57:15.1647895Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-04T09:57:15.1649110Z hint: call:
+2026-10-04T09:57:15.1650696Z hint:
+2026-10-04T09:57:15.1651575Z hint: 	git config --global init.defaultBranch <name>
+2026-10-04T09:57:15.1652573Z hint:
+2026-10-04T09:57:15.1653521Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-04T09:57:15.1654979Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-04T09:57:15.1656180Z hint:
+2026-10-04T09:57:15.1656872Z hint: 	git branch -m <name>
+2026-10-04T09:57:15.1657650Z hint:
+2026-10-04T09:57:15.1658638Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-04T09:57:15.1660469Z Initialized empty Git repository in /home/runner/work/PayD/PayD/source/.git/
+2026-10-04T09:57:15.1663323Z [command]/usr/bin/git remote add origin https://github.com/woahwhattheheck/PayD
+2026-10-04T09:57:15.1712453Z ##[endgroup]
+2026-10-04T09:57:15.1713660Z ##[group]Disabling automatic garbage collection
+2026-10-04T09:57:15.1716724Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-04T09:57:15.1750735Z ##[endgroup]
+2026-10-04T09:57:15.1751861Z ##[group]Setting up auth
+2026-10-04T09:57:15.1758223Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T09:57:15.1801712Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T09:57:15.2198202Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T09:57:15.2240477Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T09:57:15.2554754Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-04T09:57:15.2600206Z ##[endgroup]
+2026-10-04T09:57:15.2601298Z ##[group]Fetching the repository
+2026-10-04T09:57:15.2610206Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d
+2026-10-04T09:57:15.9572340Z From https://github.com/woahwhattheheck/PayD
+2026-10-04T09:57:15.9574233Z  * branch            4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d -> FETCH_HEAD
+2026-10-04T09:57:15.9601628Z ##[endgroup]
+2026-10-04T09:57:15.9602814Z ##[group]Determining the checkout info
+2026-10-04T09:57:15.9604258Z ##[endgroup]
+2026-10-04T09:57:15.9605267Z [command]/usr/bin/git sparse-checkout disable
+2026-10-04T09:57:15.9649823Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-04T09:57:15.9687623Z ##[group]Checking out the ref
+2026-10-04T09:57:15.9693832Z [command]/usr/bin/git checkout --progress --force 4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d
+2026-10-04T09:57:16.0165548Z Note: switching to '4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d'.
+2026-10-04T09:57:16.0166458Z 
+2026-10-04T09:57:16.0167013Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-04T09:57:16.0168225Z changes and commit them, and you can discard any commits you make in this
+2026-10-04T09:57:16.0169638Z state without impacting any branches by switching back to a branch.
+2026-10-04T09:57:16.0170748Z 
+2026-10-04T09:57:16.0171585Z If you want to create a new branch to retain commits you create, you may
+2026-10-04T09:57:16.0173403Z do so (now or later) by using -c with the switch command. Example:
+2026-10-04T09:57:16.0174851Z 
+2026-10-04T09:57:16.0175360Z   git switch -c <new-branch-name>
+2026-10-04T09:57:16.0176168Z 
+2026-10-04T09:57:16.0176769Z Or undo this operation with:
+2026-10-04T09:57:16.0177529Z 
+2026-10-04T09:57:16.0178005Z   git switch -
+2026-10-04T09:57:16.0178649Z 
+2026-10-04T09:57:16.0179796Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-04T09:57:16.0181227Z 
+2026-10-04T09:57:16.0182393Z HEAD is now at 4669cdc Drain contract event pages before advancing the shared checkpoint
+2026-10-04T09:57:16.0187249Z ##[endgroup]
+2026-10-04T09:57:16.0232344Z [command]/usr/bin/git log -1 --format=%H
+2026-10-04T09:57:16.0271077Z 4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d
+2026-10-04T09:57:16.0280674Z ##[group]Removing auth
+2026-10-04T09:57:16.0285235Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T09:57:16.0321020Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T09:57:16.0560496Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T09:57:16.0592747Z http.https://github.com/.extraheader
+2026-10-04T09:57:16.0602601Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-04T09:57:16.0642307Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T09:57:16.0877025Z ##[endgroup]
+2026-10-04T09:57:16.1305183Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-10-04T09:57:16.1306761Z with:
+2026-10-04T09:57:16.1307658Z   node-version: 22
+2026-10-04T09:57:16.1308608Z   always-auth: false
+2026-10-04T09:57:16.1309757Z   check-latest: false
+2026-10-04T09:57:16.1317856Z   token: ***
+2026-10-04T09:57:16.1318772Z env:
+2026-10-04T09:57:16.1319730Z   CI: true
+2026-10-04T09:57:16.1320620Z   NODE_ENV: test
+2026-10-04T09:57:16.1321626Z   SOROBAN_RPC_URL: http://127.0.0.1:1
+2026-10-04T09:57:16.1322762Z ##[endgroup]
+2026-10-04T09:57:16.2938829Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-04T09:57:16.2944261Z (node:2321) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-04T09:57:16.2948063Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-04T09:57:16.2951669Z ##[group]Environment details
+2026-10-04T09:57:19.0821145Z node: v22.23.3
+2026-10-04T09:57:19.0822667Z npm: 10.9.9
+2026-10-04T09:57:19.0823040Z yarn: 1.22.22
+2026-10-04T09:57:19.0824387Z ##[endgroup]
+2026-10-04T09:57:19.0980042Z ##[group]Run mkdir -p "$RUNNER_TEMP/payd632-evidence"
+2026-10-04T09:57:19.0980611Z [36;1mmkdir -p "$RUNNER_TEMP/payd632-evidence"[0m
+2026-10-04T09:57:19.0981180Z [36;1mnpm ci --no-audit --no-fund 2>&1 | tee "$RUNNER_TEMP/payd632-evidence/npm-ci.log"[0m
+2026-10-04T09:57:19.1276799Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-04T09:57:19.1277245Z env:
+2026-10-04T09:57:19.1277513Z   CI: true
+2026-10-04T09:57:19.1277761Z   NODE_ENV: test
+2026-10-04T09:57:19.1278102Z   SOROBAN_RPC_URL: http://127.0.0.1:1
+2026-10-04T09:57:19.1278442Z ##[endgroup]
+2026-10-04T09:57:22.5968612Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T09:57:23.0717508Z npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+2026-10-04T09:57:23.3110908Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-04T09:57:23.4463043Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T09:57:24.3022519Z npm warn deprecated @otplib/preset-default@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T09:57:24.3133596Z npm warn deprecated fstream@1.0.12: This package is no longer supported.
+2026-10-04T09:57:24.3634701Z npm warn deprecated @otplib/plugin-thirty-two@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T09:57:24.3647949Z npm warn deprecated @otplib/plugin-crypto@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T09:57:24.5158022Z npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+2026-10-04T09:57:24.5824583Z npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+2026-10-04T09:57:24.7095861Z npm warn deprecated jpeg-exif@1.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T09:57:24.9653447Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-04T09:57:26.0912687Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T09:57:26.0925277Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T09:57:26.1084859Z npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T09:57:26.9733892Z npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-10-04T09:57:27.7171756Z 
+2026-10-04T09:57:27.7172602Z added 826 packages in 9s
+2026-10-04T09:57:27.7774966Z ##[group]Run set +e
+2026-10-04T09:57:27.7775259Z [36;1mset +e[0m
+2026-10-04T09:57:27.7776193Z [36;1mnpm test -- --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile="$RUNNER_TEMP/payd632-evidence/jest-results.json" 2>&1 | tee "$RUNNER_TEMP/payd632-evidence/jest.log"[0m
+2026-10-04T09:57:27.7777148Z [36;1mtest_exit=${PIPESTATUS[0]}[0m
+2026-10-04T09:57:27.7777424Z [36;1mset -e[0m
+2026-10-04T09:57:27.7777768Z [36;1mprintf '%s\n' "$test_exit" > "$RUNNER_TEMP/payd632-evidence/exit-code.txt"[0m
+2026-10-04T09:57:27.7778193Z [36;1mexit "$test_exit"[0m
+2026-10-04T09:57:27.7851956Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-04T09:57:27.7852320Z env:
+2026-10-04T09:57:27.7852515Z   CI: true
+2026-10-04T09:57:27.7852709Z   NODE_ENV: test
+2026-10-04T09:57:27.7852960Z   SOROBAN_RPC_URL: http://127.0.0.1:1
+2026-10-04T09:57:27.7853230Z ##[endgroup]
+2026-10-04T09:57:27.9132835Z 
+2026-10-04T09:57:27.9133469Z > payd-backend@1.0.0 test
+2026-10-04T09:57:27.9135179Z > jest --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile=/home/runner/work/_temp/payd632-evidence/jest-results.json
+2026-10-04T09:57:27.9136349Z 
+2026-10-04T09:57:31.2637407Z ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+2026-10-04T09:57:31.4744691Z ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+2026-10-04T09:57:31.6794460Z   console.log
+2026-10-04T09:57:31.6794936Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6795259Z 
+2026-10-04T09:57:31.6795672Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6796149Z 
+2026-10-04T09:57:31.6825531Z   console.log
+2026-10-04T09:57:31.6826053Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6826385Z 
+2026-10-04T09:57:31.6827102Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6827734Z 
+2026-10-04T09:57:31.6855147Z   console.log
+2026-10-04T09:57:31.6855765Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6856260Z 
+2026-10-04T09:57:31.6856981Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6857630Z 
+2026-10-04T09:57:31.6875012Z   console.log
+2026-10-04T09:57:31.6875858Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6876220Z 
+2026-10-04T09:57:31.6876730Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6877423Z 
+2026-10-04T09:57:31.6895219Z   console.log
+2026-10-04T09:57:31.6895801Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6896236Z 
+2026-10-04T09:57:31.6896968Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6897531Z 
+2026-10-04T09:57:31.6914120Z   console.log
+2026-10-04T09:57:31.6914689Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6915128Z 
+2026-10-04T09:57:31.6916097Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6916794Z 
+2026-10-04T09:57:31.6943074Z   console.log
+2026-10-04T09:57:31.6943774Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6944327Z 
+2026-10-04T09:57:31.6945103Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6946306Z 
+2026-10-04T09:57:31.6965542Z   console.log
+2026-10-04T09:57:31.6966447Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.6967046Z 
+2026-10-04T09:57:31.6967784Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.6968607Z 
+2026-10-04T09:57:31.7003698Z   console.log
+2026-10-04T09:57:31.7004678Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7005308Z 
+2026-10-04T09:57:31.7006026Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7006839Z 
+2026-10-04T09:57:31.7244696Z   console.error
+2026-10-04T09:57:31.7246624Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC error: RPC error
+2026-10-04T09:57:31.7248197Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:184:17)
+2026-10-04T09:57:31.7250268Z         at Object.<anonymous> (/home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:197:7)
+2026-10-04T09:57:31.7251250Z 
+2026-10-04T09:57:31.7251783Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.7252414Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.7254020Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.7255262Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.7255949Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.7256515Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.7257310Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.7257553Z 
+2026-10-04T09:57:31.7258236Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.7259334Z       at Object.<anonymous> (src/services/__tests__/contractEventIndexer.test.ts:197:7)
+2026-10-04T09:57:31.7260063Z 
+2026-10-04T09:57:31.7260390Z   console.log
+2026-10-04T09:57:31.7262677Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7269151Z 
+2026-10-04T09:57:31.7269902Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7270665Z 
+2026-10-04T09:57:31.7380486Z   console.error
+2026-10-04T09:57:31.7381678Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC request failed: 500 Internal Server Error
+2026-10-04T09:57:31.7383522Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:178:17)
+2026-10-04T09:57:31.7385671Z         at Object.<anonymous> (/home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:209:7)
+2026-10-04T09:57:31.7387022Z 
+2026-10-04T09:57:31.7387666Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.7388465Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.7390333Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.7391768Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.7392642Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.7393384Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.7393985Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.7394392Z 
+2026-10-04T09:57:31.7395161Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.7396469Z       at Object.<anonymous> (src/services/__tests__/contractEventIndexer.test.ts:209:7)
+2026-10-04T09:57:31.7397296Z 
+2026-10-04T09:57:31.7397867Z   console.log
+2026-10-04T09:57:31.7398490Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7420236Z 
+2026-10-04T09:57:31.7421413Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7422012Z 
+2026-10-04T09:57:31.7444939Z   console.log
+2026-10-04T09:57:31.7445720Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.7446090Z 
+2026-10-04T09:57:31.7446641Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.7447234Z 
+2026-10-04T09:57:31.7452621Z   console.log
+2026-10-04T09:57:31.7453284Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.7453804Z 
+2026-10-04T09:57:31.7454317Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.7454908Z 
+2026-10-04T09:57:31.7458519Z   console.log
+2026-10-04T09:57:31.7459110Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.7459777Z 
+2026-10-04T09:57:31.7460763Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.7461541Z 
+2026-10-04T09:57:31.7468210Z   console.log
+2026-10-04T09:57:31.7469220Z     [ContractEventIndexer] Found 101 new events across configured contracts
+2026-10-04T09:57:31.7470058Z 
+2026-10-04T09:57:31.7470676Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.7471357Z 
+2026-10-04T09:57:31.7530363Z   console.log
+2026-10-04T09:57:31.7547200Z     [ContractEventIndexer] Indexed 101 events, skipped 0 duplicates
+2026-10-04T09:57:31.7547973Z 
+2026-10-04T09:57:31.7548792Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.7549581Z 
+2026-10-04T09:57:31.7549736Z   console.log
+2026-10-04T09:57:31.7550185Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.7550711Z 
+2026-10-04T09:57:31.7551035Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.7551413Z 
+2026-10-04T09:57:31.7561943Z   console.log
+2026-10-04T09:57:31.7562402Z     [ContractEventIndexer] Last indexed ledger: 100
+2026-10-04T09:57:31.7562770Z 
+2026-10-04T09:57:31.7563241Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.7563624Z 
+2026-10-04T09:57:31.7566295Z   console.log
+2026-10-04T09:57:31.7566887Z     [ContractEventIndexer] Found 99 new events across configured contracts
+2026-10-04T09:57:31.7567376Z 
+2026-10-04T09:57:31.7567822Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.7568213Z 
+2026-10-04T09:57:31.7594722Z   console.log
+2026-10-04T09:57:31.7595299Z     [ContractEventIndexer] Indexed 99 events, skipped 0 duplicates
+2026-10-04T09:57:31.7595733Z 
+2026-10-04T09:57:31.7596113Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.7596539Z 
+2026-10-04T09:57:31.7605086Z   console.log
+2026-10-04T09:57:31.7605485Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7605787Z 
+2026-10-04T09:57:31.7606235Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7606655Z 
+2026-10-04T09:57:31.7612867Z   console.log
+2026-10-04T09:57:31.7613251Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7613533Z 
+2026-10-04T09:57:31.7613976Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7614411Z 
+2026-10-04T09:57:31.7638343Z   console.log
+2026-10-04T09:57:31.7638889Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.7639223Z 
+2026-10-04T09:57:31.7639966Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.7640317Z 
+2026-10-04T09:57:31.7645021Z   console.log
+2026-10-04T09:57:31.7645648Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.7646152Z 
+2026-10-04T09:57:31.7646503Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.7646847Z 
+2026-10-04T09:57:31.7648456Z   console.log
+2026-10-04T09:57:31.7648892Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.7649677Z 
+2026-10-04T09:57:31.7650204Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.7650718Z 
+2026-10-04T09:57:31.7682414Z   console.error
+2026-10-04T09:57:31.7710731Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC error: continuation unavailable
+2026-10-04T09:57:31.7712484Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:184:17)
+2026-10-04T09:57:31.7714417Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.7716321Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.7718128Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7719927Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7720721Z 
+2026-10-04T09:57:31.7721817Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.7722471Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.7723925Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.7725167Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.7725860Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.7726675Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.7727108Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.7727369Z 
+2026-10-04T09:57:31.7727954Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.7729216Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.7730663Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.7731795Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7732719Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7733170Z 
+2026-10-04T09:57:31.7733319Z   console.error
+2026-10-04T09:57:31.7734077Z     [ContractEventIndexer] Error indexing contracts: Error: RPC error: continuation unavailable
+2026-10-04T09:57:31.7735904Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:184:17)
+2026-10-04T09:57:31.7737756Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.7739691Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.7741439Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7742941Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7743652Z 
+2026-10-04T09:57:31.7744910Z     [0m [90m 82 |[39m         [36mawait[39m [36mthis[39m[33m.[39mindexContractEvents([36mthis[39m[33m.[39m[33mCONTRACTS_TO_INDEX[39m[33m,[39m lastIndexedLedger)[33m;[39m
+2026-10-04T09:57:31.7745844Z      [90m 83 |[39m       } [36mcatch[39m (error) {
+2026-10-04T09:57:31.7746662Z     [31m[1m>[22m[39m[90m 84 |[39m         console[33m.[39merror([32m'[ContractEventIndexer] Error indexing contracts:'[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.7747371Z      [90m    |[39m                 [31m[1m^[22m[39m
+2026-10-04T09:57:31.7748497Z      [90m 85 |[39m         [36mawait[39m [36mthis[39m[33m.[39mupdateIndexerState(lastIndexedLedger[33m,[39m [32m'error'[39m[33m,[39m [33mString[39m(error))[33m;[39m
+2026-10-04T09:57:31.7749202Z      [90m 86 |[39m       }
+2026-10-04T09:57:31.7749818Z      [90m 87 |[39m     } [36mcatch[39m (error) {[0m
+2026-10-04T09:57:31.7750033Z 
+2026-10-04T09:57:31.7750389Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:84:17)
+2026-10-04T09:57:31.7751045Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7751589Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7752043Z 
+2026-10-04T09:57:31.7752143Z   console.log
+2026-10-04T09:57:31.7752642Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.7753018Z 
+2026-10-04T09:57:31.7753515Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.7753955Z 
+2026-10-04T09:57:31.7754049Z   console.log
+2026-10-04T09:57:31.7754364Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.7754580Z 
+2026-10-04T09:57:31.7754910Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.7755273Z 
+2026-10-04T09:57:31.7755361Z   console.log
+2026-10-04T09:57:31.7755717Z     [ContractEventIndexer] Found 101 new events across configured contracts
+2026-10-04T09:57:31.7756017Z 
+2026-10-04T09:57:31.7756356Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.7756734Z 
+2026-10-04T09:57:31.7757083Z   console.log
+2026-10-04T09:57:31.7757433Z     [ContractEventIndexer] Indexed 101 events, skipped 0 duplicates
+2026-10-04T09:57:31.7757710Z 
+2026-10-04T09:57:31.7758040Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.7758409Z 
+2026-10-04T09:57:31.7763666Z   console.log
+2026-10-04T09:57:31.7764064Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7764350Z 
+2026-10-04T09:57:31.7764810Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7765332Z 
+2026-10-04T09:57:31.7770832Z   console.log
+2026-10-04T09:57:31.7771224Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7771506Z 
+2026-10-04T09:57:31.7771931Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7772445Z 
+2026-10-04T09:57:31.7795251Z   console.log
+2026-10-04T09:57:31.7795662Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.7795967Z 
+2026-10-04T09:57:31.7796412Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.7796757Z 
+2026-10-04T09:57:31.7801929Z   console.log
+2026-10-04T09:57:31.7802502Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.7802999Z 
+2026-10-04T09:57:31.7803299Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.7803624Z 
+2026-10-04T09:57:31.7805475Z   console.log
+2026-10-04T09:57:31.7805893Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.7806258Z 
+2026-10-04T09:57:31.7806783Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.7807163Z 
+2026-10-04T09:57:31.7859113Z   console.error
+2026-10-04T09:57:31.7860183Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC pagination cursor is missing or did not advance
+2026-10-04T09:57:31.7861777Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:208:17)
+2026-10-04T09:57:31.7863347Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.7864578Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.7865566Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7866474Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7866896Z 
+2026-10-04T09:57:31.7867142Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.7867507Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.7868343Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.7869076Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.7869708Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.7870076Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.7870345Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.7870504Z 
+2026-10-04T09:57:31.7870868Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.7871581Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.7872265Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.7872911Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7873442Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7873700Z 
+2026-10-04T09:57:31.7878866Z   console.error
+2026-10-04T09:57:31.7879840Z     [ContractEventIndexer] Error indexing contracts: Error: RPC pagination cursor is missing or did not advance
+2026-10-04T09:57:31.7881432Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:208:17)
+2026-10-04T09:57:31.7883167Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.7884824Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.7886451Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7887839Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7888243Z 
+2026-10-04T09:57:31.7889001Z     [0m [90m 82 |[39m         [36mawait[39m [36mthis[39m[33m.[39mindexContractEvents([36mthis[39m[33m.[39m[33mCONTRACTS_TO_INDEX[39m[33m,[39m lastIndexedLedger)[33m;[39m
+2026-10-04T09:57:31.7890105Z      [90m 83 |[39m       } [36mcatch[39m (error) {
+2026-10-04T09:57:31.7891493Z     [31m[1m>[22m[39m[90m 84 |[39m         console[33m.[39merror([32m'[ContractEventIndexer] Error indexing contracts:'[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.7892662Z      [90m    |[39m                 [31m[1m^[22m[39m
+2026-10-04T09:57:31.7894173Z      [90m 85 |[39m         [36mawait[39m [36mthis[39m[33m.[39mupdateIndexerState(lastIndexedLedger[33m,[39m [32m'error'[39m[33m,[39m [33mString[39m(error))[33m;[39m
+2026-10-04T09:57:31.7895190Z      [90m 86 |[39m       }
+2026-10-04T09:57:31.7895558Z      [90m 87 |[39m     } [36mcatch[39m (error) {[0m
+2026-10-04T09:57:31.7895762Z 
+2026-10-04T09:57:31.7896101Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:84:17)
+2026-10-04T09:57:31.7896765Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.7897292Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.7897657Z 
+2026-10-04T09:57:31.7897821Z   console.log
+2026-10-04T09:57:31.7898482Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.7898850Z 
+2026-10-04T09:57:31.7899324Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.7900073Z 
+2026-10-04T09:57:31.7900200Z   console.log
+2026-10-04T09:57:31.7900626Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.7900979Z 
+2026-10-04T09:57:31.7901530Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.7902128Z 
+2026-10-04T09:57:31.7902249Z   console.log
+2026-10-04T09:57:31.7902617Z     [ContractEventIndexer] Found 101 new events across configured contracts
+2026-10-04T09:57:31.7902927Z 
+2026-10-04T09:57:31.7903259Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.7903638Z 
+2026-10-04T09:57:31.7941021Z   console.log
+2026-10-04T09:57:31.7946021Z     [ContractEventIndexer] Indexed 101 events, skipped 0 duplicates
+2026-10-04T09:57:31.7946792Z 
+2026-10-04T09:57:31.7947495Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.7948184Z 
+2026-10-04T09:57:31.7949958Z   console.log
+2026-10-04T09:57:31.7950593Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7950908Z 
+2026-10-04T09:57:31.7951377Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7951893Z 
+2026-10-04T09:57:31.7965375Z   console.log
+2026-10-04T09:57:31.7974455Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.7975936Z 
+2026-10-04T09:57:31.7976624Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.7977590Z 
+2026-10-04T09:57:31.8013904Z   console.log
+2026-10-04T09:57:31.8014401Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.8014801Z 
+2026-10-04T09:57:31.8015340Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.8015935Z 
+2026-10-04T09:57:31.8021548Z   console.log
+2026-10-04T09:57:31.8022115Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.8022601Z 
+2026-10-04T09:57:31.8023109Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.8023664Z 
+2026-10-04T09:57:31.8113559Z   console.log
+2026-10-04T09:57:31.8130802Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8131309Z 
+2026-10-04T09:57:31.8132068Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8132690Z 
+2026-10-04T09:57:31.8132921Z   console.error
+2026-10-04T09:57:31.8133822Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC pagination cursor is missing or did not advance
+2026-10-04T09:57:31.8135461Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:208:17)
+2026-10-04T09:57:31.8137365Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8139125Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8141000Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8143750Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8144654Z 
+2026-10-04T09:57:31.8145333Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.8146317Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.8147831Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.8149085Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.8214941Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.8215751Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.8216207Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.8216477Z 
+2026-10-04T09:57:31.8217071Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.8218323Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8230569Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8231825Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8232794Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8233247Z 
+2026-10-04T09:57:31.8233448Z   console.error
+2026-10-04T09:57:31.8234334Z     [ContractEventIndexer] Error indexing contracts: Error: RPC pagination cursor is missing or did not advance
+2026-10-04T09:57:31.8235966Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:208:17)
+2026-10-04T09:57:31.8237757Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8239738Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8241427Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8243300Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8244020Z 
+2026-10-04T09:57:31.8245313Z     [0m [90m 82 |[39m         [36mawait[39m [36mthis[39m[33m.[39mindexContractEvents([36mthis[39m[33m.[39m[33mCONTRACTS_TO_INDEX[39m[33m,[39m lastIndexedLedger)[33m;[39m
+2026-10-04T09:57:31.8246655Z      [90m 83 |[39m       } [36mcatch[39m (error) {
+2026-10-04T09:57:31.8248016Z     [31m[1m>[22m[39m[90m 84 |[39m         console[33m.[39merror([32m'[ContractEventIndexer] Error indexing contracts:'[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.8249168Z      [90m    |[39m                 [31m[1m^[22m[39m
+2026-10-04T09:57:31.8250934Z      [90m 85 |[39m         [36mawait[39m [36mthis[39m[33m.[39mupdateIndexerState(lastIndexedLedger[33m,[39m [32m'error'[39m[33m,[39m [33mString[39m(error))[33m;[39m
+2026-10-04T09:57:31.8252130Z      [90m 86 |[39m       }
+2026-10-04T09:57:31.8252720Z      [90m 87 |[39m     } [36mcatch[39m (error) {[0m
+2026-10-04T09:57:31.8253071Z 
+2026-10-04T09:57:31.8253643Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:84:17)
+2026-10-04T09:57:31.8254766Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8255699Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8256137Z 
+2026-10-04T09:57:31.8256286Z   console.log
+2026-10-04T09:57:31.8256772Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.8257166Z 
+2026-10-04T09:57:31.8257648Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.8258198Z 
+2026-10-04T09:57:31.8258338Z   console.log
+2026-10-04T09:57:31.8258780Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8259132Z 
+2026-10-04T09:57:31.8259933Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8260594Z 
+2026-10-04T09:57:31.8260725Z   console.log
+2026-10-04T09:57:31.8261322Z     [ContractEventIndexer] Found 101 new events across configured contracts
+2026-10-04T09:57:31.8261832Z 
+2026-10-04T09:57:31.8262672Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.8263327Z 
+2026-10-04T09:57:31.8263473Z   console.log
+2026-10-04T09:57:31.8264018Z     [ContractEventIndexer] Indexed 101 events, skipped 0 duplicates
+2026-10-04T09:57:31.8264477Z 
+2026-10-04T09:57:31.8265050Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.8265690Z 
+2026-10-04T09:57:31.8265834Z   console.log
+2026-10-04T09:57:31.8266212Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8266494Z 
+2026-10-04T09:57:31.8266958Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8267500Z 
+2026-10-04T09:57:31.8267629Z   console.log
+2026-10-04T09:57:31.8267996Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8268270Z 
+2026-10-04T09:57:31.8268618Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8269043Z 
+2026-10-04T09:57:31.8269189Z   console.log
+2026-10-04T09:57:31.8269812Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.8270071Z 
+2026-10-04T09:57:31.8270456Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.8270905Z 
+2026-10-04T09:57:31.8271014Z   console.log
+2026-10-04T09:57:31.8271461Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.8271849Z 
+2026-10-04T09:57:31.8272237Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.8272677Z 
+2026-10-04T09:57:31.8272772Z   console.log
+2026-10-04T09:57:31.8273113Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8273572Z 
+2026-10-04T09:57:31.8274020Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8274510Z 
+2026-10-04T09:57:31.8274628Z   console.error
+2026-10-04T09:57:31.8275275Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC response is missing a valid events page
+2026-10-04T09:57:31.8276512Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:188:17)
+2026-10-04T09:57:31.8278315Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8280192Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8281751Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8283097Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8283750Z 
+2026-10-04T09:57:31.8284042Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.8284567Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.8285861Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.8286928Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.8287533Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.8288032Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.8288409Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.8288633Z 
+2026-10-04T09:57:31.8289160Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.8290411Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8291490Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8292483Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8293323Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8293954Z 
+2026-10-04T09:57:31.8294115Z   console.error
+2026-10-04T09:57:31.8294881Z     [ContractEventIndexer] Error indexing contracts: Error: RPC response is missing a valid events page
+2026-10-04T09:57:31.8296392Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:188:17)
+2026-10-04T09:57:31.8298068Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8299209Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8301146Z         at ContractEventIndexer.initialize (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8302511Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8303106Z 
+2026-10-04T09:57:31.8304242Z     [0m [90m 82 |[39m         [36mawait[39m [36mthis[39m[33m.[39mindexContractEvents([36mthis[39m[33m.[39m[33mCONTRACTS_TO_INDEX[39m[33m,[39m lastIndexedLedger)[33m;[39m
+2026-10-04T09:57:31.8305561Z      [90m 83 |[39m       } [36mcatch[39m (error) {
+2026-10-04T09:57:31.8306947Z     [31m[1m>[22m[39m[90m 84 |[39m         console[33m.[39merror([32m'[ContractEventIndexer] Error indexing contracts:'[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.8308119Z      [90m    |[39m                 [31m[1m^[22m[39m
+2026-10-04T09:57:31.8309817Z      [90m 85 |[39m         [36mawait[39m [36mthis[39m[33m.[39mupdateIndexerState(lastIndexedLedger[33m,[39m [32m'error'[39m[33m,[39m [33mString[39m(error))[33m;[39m
+2026-10-04T09:57:31.8311239Z      [90m 86 |[39m       }
+2026-10-04T09:57:31.8311897Z      [90m 87 |[39m     } [36mcatch[39m (error) {[0m
+2026-10-04T09:57:31.8312246Z 
+2026-10-04T09:57:31.8312851Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:84:17)
+2026-10-04T09:57:31.8313972Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:40:5)
+2026-10-04T09:57:31.8314914Z       at src/services/__tests__/contractEventIndexer.test.ts:328:7
+2026-10-04T09:57:31.8315357Z 
+2026-10-04T09:57:31.8315508Z   console.log
+2026-10-04T09:57:31.8315994Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.8316374Z 
+2026-10-04T09:57:31.8316869Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.8317444Z 
+2026-10-04T09:57:31.8317585Z   console.log
+2026-10-04T09:57:31.8318030Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8318395Z 
+2026-10-04T09:57:31.8318947Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8319754Z 
+2026-10-04T09:57:31.8319903Z   console.log
+2026-10-04T09:57:31.8320511Z     [ContractEventIndexer] Found 101 new events across configured contracts
+2026-10-04T09:57:31.8321021Z 
+2026-10-04T09:57:31.8321579Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.8322238Z 
+2026-10-04T09:57:31.8348994Z   console.log
+2026-10-04T09:57:31.8349781Z     [ContractEventIndexer] Indexed 101 events, skipped 0 duplicates
+2026-10-04T09:57:31.8352877Z 
+2026-10-04T09:57:31.8353348Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.8353856Z 
+2026-10-04T09:57:31.8372171Z   console.log
+2026-10-04T09:57:31.8372674Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8372996Z 
+2026-10-04T09:57:31.8374971Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8375315Z 
+2026-10-04T09:57:31.8375576Z   console.log
+2026-10-04T09:57:31.8405126Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8405418Z 
+2026-10-04T09:57:31.8405959Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8406629Z 
+2026-10-04T09:57:31.8407059Z   console.log
+2026-10-04T09:57:31.8407638Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.8408204Z 
+2026-10-04T09:57:31.8408800Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.8409670Z 
+2026-10-04T09:57:31.8409836Z   console.log
+2026-10-04T09:57:31.8411206Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.8411713Z 
+2026-10-04T09:57:31.8412293Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.8412902Z 
+2026-10-04T09:57:31.8413049Z   console.log
+2026-10-04T09:57:31.8413504Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8413876Z 
+2026-10-04T09:57:31.8414463Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8415302Z 
+2026-10-04T09:57:31.8415471Z   console.log
+2026-10-04T09:57:31.8416027Z     [ContractEventIndexer] No new events for configured contracts
+2026-10-04T09:57:31.8416482Z 
+2026-10-04T09:57:31.8417062Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:101:15)
+2026-10-04T09:57:31.8417719Z 
+2026-10-04T09:57:31.8418599Z   console.log
+2026-10-04T09:57:31.8419130Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.8419694Z 
+2026-10-04T09:57:31.8420219Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.8420814Z 
+2026-10-04T09:57:31.8421215Z   console.log
+2026-10-04T09:57:31.8421690Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8422075Z 
+2026-10-04T09:57:31.8422651Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8423315Z 
+2026-10-04T09:57:31.8423486Z   console.log
+2026-10-04T09:57:31.8424088Z     [ContractEventIndexer] Found 2 new events across configured contracts
+2026-10-04T09:57:31.8424600Z 
+2026-10-04T09:57:31.8425194Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.8425867Z 
+2026-10-04T09:57:31.8428326Z   console.log
+2026-10-04T09:57:31.8432735Z     [ContractEventIndexer] Indexed 2 events, skipped 0 duplicates
+2026-10-04T09:57:31.8433058Z 
+2026-10-04T09:57:31.8433478Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.8434128Z 
+2026-10-04T09:57:31.8446121Z   console.log
+2026-10-04T09:57:31.8449354Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8450091Z 
+2026-10-04T09:57:31.8450728Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8451376Z 
+2026-10-04T09:57:31.8451756Z   console.log
+2026-10-04T09:57:31.8452252Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8452653Z 
+2026-10-04T09:57:31.8453144Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8453666Z 
+2026-10-04T09:57:31.8467164Z   console.log
+2026-10-04T09:57:31.8469124Z     [ContractEventIndexer] Initializing...
+2026-10-04T09:57:31.8470050Z 
+2026-10-04T09:57:31.8470692Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:34:13)
+2026-10-04T09:57:31.8471460Z 
+2026-10-04T09:57:31.8474940Z   console.log
+2026-10-04T09:57:31.8475836Z     [ContractEventIndexer] Monitoring contracts: CBULK, CVESTING, CREVENUE
+2026-10-04T09:57:31.8476504Z 
+2026-10-04T09:57:31.8478556Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:35:13)
+2026-10-04T09:57:31.8479299Z 
+2026-10-04T09:57:31.8481133Z   console.log
+2026-10-04T09:57:31.8481560Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8481906Z 
+2026-10-04T09:57:31.8482386Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8482965Z 
+2026-10-04T09:57:31.8484403Z   console.log
+2026-10-04T09:57:31.8485080Z     [ContractEventIndexer] Found 1 new events across configured contracts
+2026-10-04T09:57:31.8485609Z 
+2026-10-04T09:57:31.8486233Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.8486897Z 
+2026-10-04T09:57:31.8492382Z   console.log
+2026-10-04T09:57:31.8492990Z     [ContractEventIndexer] Indexed 1 events, skipped 0 duplicates
+2026-10-04T09:57:31.8504649Z 
+2026-10-04T09:57:31.8505280Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.8505979Z 
+2026-10-04T09:57:31.8506163Z   console.log
+2026-10-04T09:57:31.8506674Z     [ContractEventIndexer] Started polling every 10000ms
+2026-10-04T09:57:31.8507072Z 
+2026-10-04T09:57:31.8507588Z       at ContractEventIndexer.initialize (src/services/contractEventIndexer.ts:47:13)
+2026-10-04T09:57:31.8508177Z 
+2026-10-04T09:57:31.8508322Z   console.log
+2026-10-04T09:57:31.8508727Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8509024Z 
+2026-10-04T09:57:31.8512162Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8512764Z 
+2026-10-04T09:57:31.8515415Z   console.log
+2026-10-04T09:57:31.8515889Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8516606Z 
+2026-10-04T09:57:31.8523996Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8524583Z 
+2026-10-04T09:57:31.8556629Z   console.log
+2026-10-04T09:57:31.8557270Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8560201Z 
+2026-10-04T09:57:31.8570215Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8571074Z 
+2026-10-04T09:57:31.8585313Z   console.error
+2026-10-04T09:57:31.8586517Z     [ContractEventIndexer] Error fetching events from RPC: Error: RPC request failed: 500 late failure
+2026-10-04T09:57:31.8588419Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:178:17)
+2026-10-04T09:57:31.8590720Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8604384Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8606362Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:441:7
+2026-10-04T09:57:31.8607237Z 
+2026-10-04T09:57:31.8607743Z     [0m [90m 212 |[39m       }
+2026-10-04T09:57:31.8608341Z      [90m 213 |[39m     } [36mcatch[39m (error) {
+2026-10-04T09:57:31.8609860Z     [31m[1m>[22m[39m[90m 214 |[39m       console[33m.[39merror([32m`[ContractEventIndexer] Error fetching events from RPC:`[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.8611044Z      [90m     |[39m               [31m[1m^[22m[39m
+2026-10-04T09:57:31.8611704Z      [90m 215 |[39m       [36mthrow[39m error[33m;[39m
+2026-10-04T09:57:31.8612238Z      [90m 216 |[39m     }
+2026-10-04T09:57:31.8612663Z      [90m 217 |[39m   }[0m
+2026-10-04T09:57:31.8612906Z 
+2026-10-04T09:57:31.8613472Z       at ContractEventIndexer.fetchEventsFromRPC (src/services/contractEventIndexer.ts:214:15)
+2026-10-04T09:57:31.8614195Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8614879Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8615457Z       at src/services/__tests__/contractEventIndexer.test.ts:441:7
+2026-10-04T09:57:31.8615736Z 
+2026-10-04T09:57:31.8615979Z   console.error
+2026-10-04T09:57:31.8616476Z     [ContractEventIndexer] Error indexing contracts: Error: RPC request failed: 500 late failure
+2026-10-04T09:57:31.8617671Z         at ContractEventIndexer.fetchEventsFromRPC (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:178:17)
+2026-10-04T09:57:31.8618797Z         at ContractEventIndexer.indexContractEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:98:20)
+2026-10-04T09:57:31.8620867Z         at ContractEventIndexer.pollAndIndexEvents (/home/runner/work/PayD/PayD/source/backend/src/services/contractEventIndexer.ts:82:9)
+2026-10-04T09:57:31.8622633Z         at /home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts:441:7
+2026-10-04T09:57:31.8623337Z 
+2026-10-04T09:57:31.8624594Z     [0m [90m 82 |[39m         [36mawait[39m [36mthis[39m[33m.[39mindexContractEvents([36mthis[39m[33m.[39m[33mCONTRACTS_TO_INDEX[39m[33m,[39m lastIndexedLedger)[33m;[39m
+2026-10-04T09:57:31.8625747Z      [90m 83 |[39m       } [36mcatch[39m (error) {
+2026-10-04T09:57:31.8626568Z     [31m[1m>[22m[39m[90m 84 |[39m         console[33m.[39merror([32m'[ContractEventIndexer] Error indexing contracts:'[39m[33m,[39m error)[33m;[39m
+2026-10-04T09:57:31.8627252Z      [90m    |[39m                 [31m[1m^[22m[39m
+2026-10-04T09:57:31.8628134Z      [90m 85 |[39m         [36mawait[39m [36mthis[39m[33m.[39mupdateIndexerState(lastIndexedLedger[33m,[39m [32m'error'[39m[33m,[39m [33mString[39m(error))[33m;[39m
+2026-10-04T09:57:31.8628804Z      [90m 86 |[39m       }
+2026-10-04T09:57:31.8629163Z      [90m 87 |[39m     } [36mcatch[39m (error) {[0m
+2026-10-04T09:57:31.8632068Z 
+2026-10-04T09:57:31.8632660Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:84:17)
+2026-10-04T09:57:31.8634148Z       at src/services/__tests__/contractEventIndexer.test.ts:441:7
+2026-10-04T09:57:31.8634950Z 
+2026-10-04T09:57:31.8635335Z   console.log
+2026-10-04T09:57:31.8635796Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8636098Z 
+2026-10-04T09:57:31.8636543Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8637068Z 
+2026-10-04T09:57:31.8645234Z   console.log
+2026-10-04T09:57:31.8645709Z     [ContractEventIndexer] Last indexed ledger: 99
+2026-10-04T09:57:31.8646141Z 
+2026-10-04T09:57:31.8646555Z       at ContractEventIndexer.pollAndIndexEvents (src/services/contractEventIndexer.ts:78:15)
+2026-10-04T09:57:31.8647224Z 
+2026-10-04T09:57:31.8650535Z   console.log
+2026-10-04T09:57:31.8651125Z     [ContractEventIndexer] Found 1 new events across configured contracts
+2026-10-04T09:57:31.8651636Z 
+2026-10-04T09:57:31.8652142Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:105:13)
+2026-10-04T09:57:31.8652535Z 
+2026-10-04T09:57:31.8670340Z   console.log
+2026-10-04T09:57:31.8674588Z     [ContractEventIndexer] Indexed 1 events, skipped 0 duplicates
+2026-10-04T09:57:31.8675203Z 
+2026-10-04T09:57:31.8696695Z       at ContractEventIndexer.indexContractEvents (src/services/contractEventIndexer.ts:131:15)
+2026-10-04T09:57:31.8698666Z 
+2026-10-04T09:57:31.8699324Z   console.log
+2026-10-04T09:57:31.8705031Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8705433Z 
+2026-10-04T09:57:31.8706127Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8708237Z 
+2026-10-04T09:57:31.8708569Z   console.log
+2026-10-04T09:57:31.8709175Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8709849Z 
+2026-10-04T09:57:31.8711761Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8713726Z 
+2026-10-04T09:57:31.8736794Z   console.log
+2026-10-04T09:57:31.8740841Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8741389Z 
+2026-10-04T09:57:31.8742191Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8742983Z 
+2026-10-04T09:57:31.8760614Z   console.log
+2026-10-04T09:57:31.8761162Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8761557Z 
+2026-10-04T09:57:31.8764508Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8765080Z 
+2026-10-04T09:57:31.8775640Z   console.log
+2026-10-04T09:57:31.8776063Z     [ContractEventIndexer] Stopped
+2026-10-04T09:57:31.8776580Z 
+2026-10-04T09:57:31.8777039Z       at ContractEventIndexer.stop (src/services/contractEventIndexer.ts:59:13)
+2026-10-04T09:57:31.8777579Z 
+2026-10-04T09:57:31.9065129Z FAIL src/services/__tests__/contractEventIndexer.test.ts
+2026-10-04T09:57:31.9065808Z   ContractEventIndexer
+2026-10-04T09:57:31.9066205Z     getLastIndexedLedger
+2026-10-04T09:57:31.9077823Z       ✓ should return last indexed ledger from database (34 ms)
+2026-10-04T09:57:31.9078850Z       ✓ should return 0 if no state exists (2 ms)
+2026-10-04T09:57:31.9079726Z     extractEventType
+2026-10-04T09:57:31.9080367Z       ✓ should extract event type from topics (2 ms)
+2026-10-04T09:57:31.9093663Z       ✓ should return unknown if no topics (2 ms)
+2026-10-04T09:57:31.9094298Z     extractEventIndex
+2026-10-04T09:57:31.9094937Z       ✓ should extract event index from event ID (2 ms)
+2026-10-04T09:57:31.9102352Z       ✓ should return 0 for invalid format (2 ms)
+2026-10-04T09:57:31.9102970Z     insertEvent
+2026-10-04T09:57:31.9103583Z       ✓ should insert event and return true on success (3 ms)
+2026-10-04T09:57:31.9108848Z       ✓ should return false on duplicate (conflict) (2 ms)
+2026-10-04T09:57:31.9110869Z     fetchEventsFromRPC
+2026-10-04T09:57:31.9121227Z       ✓ should fetch events from Soroban RPC (3 ms)
+2026-10-04T09:57:31.9121915Z       ✓ should handle RPC errors (25 ms)
+2026-10-04T09:57:31.9122487Z       ✓ should handle network errors (12 ms)
+2026-10-04T09:57:31.9122947Z     lossless RPC pagination
+2026-10-04T09:57:31.9124141Z       ✓ indexes every event in a full ledger and defers arrivals beyond the initial RPC head (23 ms)
+2026-10-04T09:57:31.9125124Z       ✓ keeps the checkpoint and retries after a RPC error (16 ms)
+2026-10-04T09:57:31.9125958Z       ✓ keeps the checkpoint and retries after a missing cursor (18 ms)
+2026-10-04T09:57:31.9126845Z       ✓ keeps the checkpoint and retries after a repeated cursor (19 ms)
+2026-10-04T09:57:31.9127782Z       ✓ keeps the checkpoint and retries after a invalid page (22 ms)
+2026-10-04T09:57:31.9128844Z       ✓ keeps all contracts visible when a new ledger arrives after an empty response (8 ms)
+2026-10-04T09:57:31.9130625Z       ✓ prevents an overlapping poll from overwriting a completed checkpoint (6 ms)
+2026-10-04T09:57:31.9131378Z     distribution event RPC payloads
+2026-10-04T09:57:31.9132153Z       ✕ indexes raw XDR through a poll without losing event fields (11 ms)
+2026-10-04T09:57:31.9133187Z       ✓ indexes legacy wrapper XDR through a poll without losing event fields (5 ms)
+2026-10-04T09:57:31.9134134Z       ✓ preserves malformed raw XDR without throwing (2 ms)
+2026-10-04T09:57:31.9135007Z       ✓ preserves malformed legacy wrapper XDR without throwing (3 ms)
+2026-10-04T09:57:31.9135627Z     updateIndexerState
+2026-10-04T09:57:31.9136152Z       ✓ should update indexer state (2 ms)
+2026-10-04T09:57:31.9136776Z       ✓ should update with error message (1 ms)
+2026-10-04T09:57:31.9137128Z 
+2026-10-04T09:57:31.9138002Z   ● ContractEventIndexer › distribution event RPC payloads › indexes raw XDR through a poll without losing event fields
+2026-10-04T09:57:31.9138778Z 
+2026-10-04T09:57:31.9138979Z     expect(received).toBeDefined()
+2026-10-04T09:57:31.9139267Z 
+2026-10-04T09:57:31.9139608Z     Received: undefined
+2026-10-04T09:57:31.9139833Z 
+2026-10-04T09:57:31.9140069Z     [0m [90m 442 |[39m
+2026-10-04T09:57:31.9141847Z      [90m 443 |[39m       [36mconst[39m insert [33m=[39m mockClient[33m.[39mquery[33m.[39mmock[33m.[39mcalls[33m.[39mfind(([sql][33m:[39m [string]) [33m=>[39m sql[33m.[39mincludes([32m'INSERT INTO contract_events'[39m))[33m;[39m
+2026-10-04T09:57:31.9143783Z     [31m[1m>[22m[39m[90m 444 |[39m       expect(insert)[33m.[39mtoBeDefined()[33m;[39m
+2026-10-04T09:57:31.9144596Z      [90m     |[39m                      [31m[1m^[22m[39m
+2026-10-04T09:57:31.9145670Z      [90m 445 |[39m       [36mconst[39m values [33m=[39m insert[[35m1[39m][33m;[39m
+2026-10-04T09:57:31.9146848Z      [90m 446 |[39m       expect(values[[35m2[39m])[33m.[39mtoBe([32m'distribution_executed_event'[39m)[33m;[39m
+2026-10-04T09:57:31.9148204Z      [90m 447 |[39m       [36mconst[39m payload [33m=[39m [33mJSON[39m[33m.[39mparse(values[[35m3[39m])[33m;[39m[0m
+2026-10-04T09:57:31.9148827Z 
+2026-10-04T09:57:31.9149184Z       at src/services/__tests__/contractEventIndexer.test.ts:444:22
+2026-10-04T09:57:31.9155158Z 
+2026-10-04T09:57:31.9155415Z Test Suites: 1 failed, 1 total
+2026-10-04T09:57:31.9155915Z Tests:       1 failed, 23 passed, 24 total
+2026-10-04T09:57:31.9156235Z Snapshots:   0 total
+2026-10-04T09:57:31.9156486Z Time:        3.65 s
+2026-10-04T09:57:31.9162413Z Ran all test suites within paths "src/services/__tests__/contractEventIndexer.test.ts".
+2026-10-04T09:57:31.9173129Z Test results written to: ../../../../_temp/payd632-evidence/jest-results.json
+2026-10-04T09:57:32.0081078Z ##[error]Process completed with exit code 1.
+2026-10-04T09:57:32.0501615Z ##[group]Run python - <<'BEACON_RECEIPT_PY'
+2026-10-04T09:57:32.0502210Z [36;1mpython - <<'BEACON_RECEIPT_PY'[0m
+2026-10-04T09:57:32.0502695Z [36;1mimport json, os, pathlib, subprocess, platform[0m
+2026-10-04T09:57:32.0503182Z [36;1mroot = pathlib.Path('source')[0m
+2026-10-04T09:57:32.0503740Z [36;1mout = pathlib.Path(os.environ['RUNNER_TEMP']) / 'payd632-evidence'[0m
+2026-10-04T09:57:32.0504312Z [36;1mout.mkdir(exist_ok=True)[0m
+2026-10-04T09:57:32.0504721Z [36;1mdef git(*args):[0m
+2026-10-04T09:57:32.0505363Z [36;1m    return subprocess.check_output(['git', '-C', str(root), *args], text=True).strip()[0m
+2026-10-04T09:57:32.0507654Z [36;1mfiles = ['backend/src/services/contractEventIndexer.ts', 'backend/src/services/__tests__/contractEventIndexer.test.ts', 'backend/src/types/contractEvent.ts', 'backend/jest.config.cjs', 'backend/tsconfig.json', 'backend/package.json', 'backend/package-lock.json'][0m
+2026-10-04T09:57:32.0513390Z [36;1mdata = {'source_commit': git('rev-parse', 'HEAD'), 'workflow_commit': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'], 'platform': platform.platform(), 'node': subprocess.check_output(['node','--version'], text=True).strip(), 'npm': subprocess.check_output(['npm','--version'], text=True).strip(), 'files': {p: git('rev-parse', 'HEAD:' + p) for p in files}, 'command': 'npm test -- --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile=$RUNNER_TEMP/payd632-evidence/jest-results.json', 'working_directory': 'backend', 'limits': 'One maintained Jest file; repository config unchanged. Existing RPC/database/timer mocks. No full suite, typecheck, live RPC or PostgreSQL.'}[0m
+2026-10-04T09:57:32.0517653Z [36;1mdata['tracked_diff'] = git('diff', '--stat')[0m
+2026-10-04T09:57:32.0518152Z [36;1mversions = {}[0m
+2026-10-04T09:57:32.0518680Z [36;1mfor name in ['jest', 'ts-jest', 'typescript', '@stellar/stellar-sdk']:[0m
+2026-10-04T09:57:32.0519412Z [36;1m    p = root / 'backend/node_modules' / name / 'package.json'[0m
+2026-10-04T09:57:32.0520131Z [36;1m    if p.exists(): versions[name] = json.loads(p.read_text())['version'][0m
+2026-10-04T09:57:32.0520533Z [36;1mdata['packages'] = versions[0m
+2026-10-04T09:57:32.0520830Z [36;1mresult = out / 'jest-results.json'[0m
+2026-10-04T09:57:32.0521121Z [36;1mif result.exists():[0m
+2026-10-04T09:57:32.0521397Z [36;1m    j = json.loads(result.read_text())[0m
+2026-10-04T09:57:32.0522262Z [36;1m    data['jest'] = {k: j.get(k) for k in ['success','numTotalTestSuites','numPassedTestSuites','numFailedTestSuites','numTotalTests','numPassedTests','numFailedTests','numPendingTests','numTodoTests','startTime']}[0m
+2026-10-04T09:57:32.0523220Z [36;1m    data['selected_files'] = [r['name'] for r in j.get('testResults', [])][0m
+2026-10-04T09:57:32.0523637Z [36;1mexit_file = out / 'exit-code.txt'[0m
+2026-10-04T09:57:32.0524042Z [36;1mif exit_file.exists(): data['exit_code'] = int(exit_file.read_text().strip())[0m
+2026-10-04T09:57:32.0524538Z [36;1m(out / 'result.json').write_text(json.dumps(data, indent=2) + '\n')[0m
+2026-10-04T09:57:32.0524921Z [36;1mprint(json.dumps(data, indent=2))[0m
+2026-10-04T09:57:32.0525197Z [36;1mBEACON_RECEIPT_PY[0m
+2026-10-04T09:57:32.0593539Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-04T09:57:32.0593882Z env:
+2026-10-04T09:57:32.0594084Z   CI: true
+2026-10-04T09:57:32.0594282Z   NODE_ENV: test
+2026-10-04T09:57:32.0594532Z   SOROBAN_RPC_URL: http://127.0.0.1:1
+2026-10-04T09:57:32.0594823Z ##[endgroup]
+2026-10-04T09:57:32.2426411Z {
+2026-10-04T09:57:32.2427044Z   "source_commit": "4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d",
+2026-10-04T09:57:32.2427843Z   "workflow_commit": "72ed4c7d565e2800700284c15cdc6d3a53687f82",
+2026-10-04T09:57:32.2428392Z   "run_id": "37193783252",
+2026-10-04T09:57:32.2428933Z   "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+2026-10-04T09:57:32.2429596Z   "node": "v22.23.3",
+2026-10-04T09:57:32.2429927Z   "npm": "10.9.9",
+2026-10-04T09:57:32.2430584Z   "files": {
+2026-10-04T09:57:32.2431060Z     "backend/src/services/contractEventIndexer.ts": "0e6260626b2869e1f1f128dd98a9662eb94456af",
+2026-10-04T09:57:32.2431819Z     "backend/src/services/__tests__/contractEventIndexer.test.ts": "005a1d11e6af3894076071bc102f31af710edced",
+2026-10-04T09:57:32.2432495Z     "backend/src/types/contractEvent.ts": "f561a78d6a73d20a6aae554f6a89737f69436d13",
+2026-10-04T09:57:32.2433038Z     "backend/jest.config.cjs": "7b6e52a7558480442e1b9e160ea523b9f165e72c",
+2026-10-04T09:57:32.2433539Z     "backend/tsconfig.json": "9bcf755fb55656c2454fa6bc097e562da91cc383",
+2026-10-04T09:57:32.2434191Z     "backend/package.json": "746a535b08bf0c6ce9c4a96f7d75c76e0bbacb95",
+2026-10-04T09:57:32.2434691Z     "backend/package-lock.json": "2803b2048d296fadbd21baae3ad89b660226cd47"
+2026-10-04T09:57:32.2435071Z   },
+2026-10-04T09:57:32.2435931Z   "command": "npm test -- --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile=$RUNNER_TEMP/payd632-evidence/jest-results.json",
+2026-10-04T09:57:32.2436762Z   "working_directory": "backend",
+2026-10-04T09:57:32.2437489Z   "limits": "One maintained Jest file; repository config unchanged. Existing RPC/database/timer mocks. No full suite, typecheck, live RPC or PostgreSQL.",
+2026-10-04T09:57:32.2438147Z   "tracked_diff": "",
+2026-10-04T09:57:32.2438385Z   "packages": {
+2026-10-04T09:57:32.2438596Z     "jest": "30.2.0",
+2026-10-04T09:57:32.2438825Z     "ts-jest": "29.4.12",
+2026-10-04T09:57:32.2439097Z     "typescript": "5.9.3",
+2026-10-04T09:57:32.2439375Z     "@stellar/stellar-sdk": "12.3.0"
+2026-10-04T09:57:32.2439842Z   },
+2026-10-04T09:57:32.2440031Z   "jest": {
+2026-10-04T09:57:32.2440233Z     "success": false,
+2026-10-04T09:57:32.2440482Z     "numTotalTestSuites": 1,
+2026-10-04T09:57:32.2440751Z     "numPassedTestSuites": 0,
+2026-10-04T09:57:32.2441006Z     "numFailedTestSuites": 1,
+2026-10-04T09:57:32.2441253Z     "numTotalTests": 24,
+2026-10-04T09:57:32.2441503Z     "numPassedTests": 23,
+2026-10-04T09:57:32.2441750Z     "numFailedTests": 1,
+2026-10-04T09:57:32.2441988Z     "numPendingTests": 0,
+2026-10-04T09:57:32.2442228Z     "numTodoTests": 0,
+2026-10-04T09:57:32.2442482Z     "startTime": 1791107848259
+2026-10-04T09:57:32.2442718Z   },
+2026-10-04T09:57:32.2442914Z   "selected_files": [
+2026-10-04T09:57:32.2443411Z     "/home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts"
+2026-10-04T09:57:32.2443884Z   ],
+2026-10-04T09:57:32.2444079Z   "exit_code": 1
+2026-10-04T09:57:32.2444289Z }
+2026-10-04T09:57:32.2601861Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-04T09:57:32.2602527Z with:
+2026-10-04T09:57:32.2602797Z   name: payd632-current-jest-beacon-8447
+2026-10-04T09:57:32.2603130Z   path: /home/runner/work/_temp/payd632-evidence
+2026-10-04T09:57:32.2603438Z   retention-days: 7
+2026-10-04T09:57:32.2603667Z   if-no-files-found: error
+2026-10-04T09:57:32.2603910Z   compression-level: 6
+2026-10-04T09:57:32.2604208Z   overwrite: false
+2026-10-04T09:57:32.2604582Z   include-hidden-files: false
+2026-10-04T09:57:32.2604836Z env:
+2026-10-04T09:57:32.2605022Z   CI: true
+2026-10-04T09:57:32.2605221Z   NODE_ENV: test
+2026-10-04T09:57:32.2605460Z   SOROBAN_RPC_URL: http://127.0.0.1:1
+2026-10-04T09:57:32.2605747Z ##[endgroup]
+2026-10-04T09:57:32.4346194Z (node:2453) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-04T09:57:32.4347310Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-04T09:57:32.4423494Z With the provided path, there will be 5 files uploaded
+2026-10-04T09:57:32.4425289Z Artifact name is valid!
+2026-10-04T09:57:32.4426410Z Root directory input is valid!
+2026-10-04T09:57:32.6837441Z Beginning upload of artifact content to blob storage
+2026-10-04T09:57:32.7130645Z (node:2453) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-04T09:57:32.7984151Z Uploaded bytes 6711
+2026-10-04T09:57:32.8313503Z Finished uploading artifact content to blob storage!
+2026-10-04T09:57:32.8314732Z SHA256 digest of uploaded artifact zip is 35294d86f007a13aa4a1162078c2045fde942f64c9b264c911d9618c37db0385
+2026-10-04T09:57:32.8316516Z Finalizing artifact upload
+2026-10-04T09:57:33.0326087Z Artifact payd632-current-jest-beacon-8447.zip successfully finalized. Artifact ID 11299742188
+2026-10-04T09:57:33.0327426Z Artifact payd632-current-jest-beacon-8447 has been successfully uploaded! Final size is 6711 bytes. Artifact ID is 11299742188
+2026-10-04T09:57:33.0334777Z Artifact download URL: https://github.com/woahwhattheheck/PayD/actions/runs/37193783252/artifacts/11299742188
+2026-10-04T09:57:33.0999972Z Post job cleanup.
+2026-10-04T09:57:33.1854420Z [command]/usr/bin/git version
+2026-10-04T09:57:33.1897163Z git version 2.55.0
+2026-10-04T09:57:33.1936675Z Temporarily overriding HOME='/home/runner/work/_temp/5c89e93e-5fda-44be-bc26-fafbe40b7598' before making global git config changes
+2026-10-04T09:57:33.1938811Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T09:57:33.1942738Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/PayD/PayD/source
+2026-10-04T09:57:33.2072342Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T09:57:33.2118678Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T09:57:33.2384126Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T09:57:33.2443313Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T09:57:33.2953964Z Cleaning up orphan processes
+2026-10-04T09:57:33.3273612Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

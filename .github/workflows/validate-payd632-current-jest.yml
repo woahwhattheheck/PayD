@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: woahwhattheheck/PayD
-          ref: 4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d
+          ref: 2ad0076b92971dd087a7ca58a11bdc584eb1ad71
           path: source
           persist-credentials: false
       - name: Set up standard Node 22
