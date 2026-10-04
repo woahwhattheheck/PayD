@@ -1,0 +1,40 @@
+{
+  "source_sha": "dbff07d69223bc699c3af03b2d0ba57dee82dc05",
+  "source_tree": "c83c0cca26c10c8a9ca85a992dd7127ab3870492",
+  "run_id": 37189968962,
+  "job_id": 111399914243,
+  "controller_sha": "11f97e3f8dbf914df4d4610d48138a6a727924cd",
+  "run_url": "https://github.com/woahwhattheheck/PayD/actions/runs/37189968962",
+  "artifact_id": 11298695472,
+  "archive_sha256": "1a56f81b00dad1e1d1562c644669915b1704f8230fdac7f406a7e5c3d7bed4e4",
+  "archive_bytes": 12395,
+  "node_version": "v20.20.2",
+  "postgres_version": "PostgreSQL 15.19 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+  "seed_counts_before_and_after": {
+    "organizations": 1,
+    "employees": 5,
+    "transactions": 5,
+    "migrations": 39,
+    "seed_markers": 1
+  },
+  "archive_members_sha256": {
+    "auth-status.txt": "844df18c6ab777567a8fc4e8ca56feae9ef3a2fd2cbce1bfb260c29a11b90df7",
+    "bootstrap-repeat.log": "c906b59b1e9cd98dd64a3e6d295368727147128d8206cf8fc23162e560968818",
+    "compose-ps.txt": "a32835e503d29a091c7b58c5148be1860996862e296c949862c5f20b5e163fb5",
+    "compose-up.log": "cf4f416257b23029e81e698922953f6e8ef158c5cc9e7ec2517a8e0a438db1df",
+    "compose.log": "948a5402105940f9bb5c06a41dd04a58d1cdffbd9550faad01b191a4859ba633",
+    "health-live.json": "d01e2d9ae888e77908bac4c4911664ed073827c083bd0fb22e454d03b0d78994",
+    "health-result.txt": "1ba0ac337731adac0588ac88b5a19cd2a95ea74e239019f2510dd47a41d60f81",
+    "native-rls-http.log": "b40d9dde8e4fc9667f210df799be87b076472d77113f36d22b6a8a798c344f93",
+    "node-version.txt": "fa2f297fd185bb1c8acba036117f05240eaa1f42eeb8902e870982523ae06edf",
+    "postgres-version.txt": "9e92f464fa83ddb9c75d0c57ad8a21929a60536930a63517a8d74dd6f3c670a1",
+    "seed-counts-after.txt": "94de4c35965bcd9c7e81102469b5f5bdff84385f6f973cede1b0b97ac4454f61",
+    "seed-counts-before.txt": "94de4c35965bcd9c7e81102469b5f5bdff84385f6f973cede1b0b97ac4454f61",
+    "source-tools.txt": "72c2f0c9343b01be1a39d5fc5851544b38e6906cdc1d577cb7dfa842af353c7b"
+  },
+  "limits": [
+    "Local disposable staging only",
+    "SDS disabled and Stellar endpoints loopback",
+    "No live chain, external Horizon readiness, full suite, load benchmark or multi-client concurrency claim"
+  ]
+}
