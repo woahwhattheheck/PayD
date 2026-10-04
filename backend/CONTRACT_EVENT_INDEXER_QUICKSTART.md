@@ -115,6 +115,18 @@ You should see logs like:
 [ContractEventIndexer] Indexed 5 events, skipped 0 duplicates
 ```
 
+## RPC Event Data
+
+The indexer reads the default XDR response from Stellar
+[`getEvents`](https://developers.stellar.org/docs/data/apis/rpc/api-reference/methods/getEvents).
+Its `value` field is a base64 ScVal string. The indexer decodes this raw string
+and also accepts the existing `{ "xdr": "..." }` wrapper used by older fixtures.
+Both forms retain their original value in `payload.value`; the decoded data is
+stored under `payload.decoded.value`. Integer values decoded as bigint remain
+decimal strings, including distribution amounts.
+
+This applies to newly indexed events. Existing stored rows are not rewritten.
+
 ## Query Events
 
 ### Get Events for a Specific Contract

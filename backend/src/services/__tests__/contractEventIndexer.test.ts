@@ -1,5 +1,7 @@
 import { ContractEventIndexer } from '../contractEventIndexer';
 import { default as pool } from '../../config/database';
+import { Address, nativeToScVal, xdr } from '@stellar/stellar-sdk';
+import type { SorobanEvent } from '../../types/contractEvent';
 
 // Mock the database pool
 jest.mock('../../config/database', () => ({
@@ -207,6 +209,74 @@ describe('ContractEventIndexer', () => {
       await expect(
         (indexer as any).fetchEventsFromRPC('CTEST123', 0)
       ).rejects.toThrow('RPC request failed: 500 Internal Server Error');
+    });
+  });
+
+  describe('distribution event RPC payloads', () => {
+    const asset = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';
+    const totalAmount = 9007199254740993n;
+
+    function distributionEvent(): SorobanEvent {
+      const fields = [
+        ['asset', new Address(asset).toScVal()],
+        ['recipient_count', xdr.ScVal.scvU32(2)],
+        ['split_percentages', xdr.ScVal.scvVec([xdr.ScVal.scvU32(6000), xdr.ScVal.scvU32(4000)])],
+        ['total_amount', nativeToScVal(totalAmount, { type: 'i128' })],
+      ] as const;
+      return {
+        type: 'contract',
+        ledger: 100,
+        ledgerClosedAt: '2026-10-04T00:00:00Z',
+        contractId: asset,
+        id: '0000000100000000000-0000000001',
+        pagingToken: '0000000100000000000-0000000001',
+        topic: [nativeToScVal('distribution_executed_event', { type: 'symbol' }).toXDR('base64')],
+        value: xdr.ScVal.scvMap(fields.map(([name, value]) => new xdr.ScMapEntry({
+          key: nativeToScVal(name, { type: 'symbol' }),
+          val: value,
+        }))).toXDR('base64'),
+        inSuccessfulContractCall: true,
+        txHash: 'a'.repeat(64),
+      };
+    }
+
+    it.each(['raw', 'legacy wrapper'])('indexes %s XDR through a poll without losing event fields', async (encoding) => {
+      const event = distributionEvent();
+      if (encoding === 'legacy wrapper') event.value = { xdr: event.value as string };
+      (indexer as any).CONTRACTS_TO_INDEX = [event.contractId];
+      (indexer as any).isRunning = true;
+      (pool.query as jest.Mock).mockResolvedValue({ rows: [{ last_indexed_ledger: 99 }] });
+      mockClient.query.mockResolvedValue({ rowCount: 1 });
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ result: { events: [event], latestLedger: 100 } }),
+      });
+
+      await indexer.pollOnce();
+
+      const insert = mockClient.query.mock.calls.find(([sql]: [string]) => sql.includes('INSERT INTO contract_events'));
+      expect(insert).toBeDefined();
+      const values = insert[1];
+      expect(values[2]).toBe('distribution_executed_event');
+      const payload = JSON.parse(values[3]);
+      expect(payload.value).toEqual(event.value);
+      expect(payload.decoded.value).toEqual({
+        asset,
+        recipient_count: 2,
+        split_percentages: [6000, 4000],
+        total_amount: totalAmount.toString(),
+      });
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    });
+
+    it.each(['raw', 'legacy wrapper'])('preserves malformed %s XDR without throwing', (encoding) => {
+      const event = distributionEvent();
+      event.value = encoding === 'raw' ? 'invalid-xdr' : { xdr: 'invalid-xdr' };
+
+      const payload = (indexer as any).parseEventPayload(event);
+
+      expect(payload.value).toEqual(event.value);
+      expect(payload.decoded.value).toBe('invalid-xdr');
     });
   });
 
