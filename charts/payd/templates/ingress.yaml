@@ -33,7 +33,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "payd.fullname" $ }}-{{ .service }}
+                name: {{ include "payd.serviceName" (dict "root" $ "component" .service) }}
                 port:
                   number: {{ .port }}
           {{- end }}

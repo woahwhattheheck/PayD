@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "payd.fullname" . }}-frontend
+  name: {{ include "payd.serviceName" (dict "root" . "component" "frontend") }}
   labels:
     {{- include "payd.labels" . | nindent 4 }}
     app.kubernetes.io/component: frontend
