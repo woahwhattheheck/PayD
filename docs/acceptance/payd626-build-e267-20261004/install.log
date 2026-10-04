@@ -1,0 +1,17 @@
+npm warn deprecated deep-diff@1.0.2: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+
+added 1084 packages, and audited 1085 packages in 38s
+
+170 packages are looking for funding
+  run `npm fund` for details
+
+83 vulnerabilities (22 low, 20 moderate, 37 high, 4 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.

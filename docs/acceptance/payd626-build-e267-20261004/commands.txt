@@ -1,0 +1,5 @@
+Source: 3f4b52a039aa40b7098f6bee25ca8bc347e5a836
+Working directory: frontend
+Install: npm ci --legacy-peer-deps
+Build: npm run build (tsc -b && vite build)
+Scope: issue521 original PR626 build acceptance only.

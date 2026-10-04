@@ -1,0 +1,9 @@
+v22.23.3
+10.9.9
+Linux runnervm8df0l 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+baf0f081129e5e80af267daae823e7263849f442a1a8fdbecbf6f56332c4175b  frontend/package.json
+942bc27c60790e946caec68e010b2c476053f5ee4978ea23ea87910d5404a1b2  frontend/package-lock.json
+58080eb0bf1c97f05812b8f00b17fac2c107ddad44b8a04f04a3e6ad8a6c7919  frontend/tsconfig.app.json
+f8282cc6edc6f35ff2c987ede851e0a1bf29abb96db91c078fd23eca97c3f445  frontend/tsconfig.json
+0b822d392d8a3ac0fef23df9b46141700508ef88b1a1592f28ecd9f5623fa16a  frontend/tsconfig.node.json
+8f984c23c11232b42590e67ab52df55a643c3e4ae7f25621759a117b3d449dff  frontend/vite.config.ts
