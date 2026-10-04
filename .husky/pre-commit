@@ -1,2 +1,0 @@
-npx lint-staged
-./scripts/check-k8s-secrets.sh

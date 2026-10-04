@@ -1,0 +1,107 @@
+name: Native staging acceptance
+on:
+  push:
+    branches: [validation/payd635-native-staging-relay5692]
+permissions:
+  contents: read
+concurrency:
+  group: payd635-native-staging-relay5692
+  cancel-in-progress: false
+jobs:
+  staging:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      COMPOSE_PROJECT_NAME: payd635relay5692
+      PRODUCT_SHA: dbff07d69223bc699c3af03b2d0ba57dee82dc05
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dbff07d69223bc699c3af03b2d0ba57dee82dc05
+          persist-credentials: false
+      - name: Record source and tools; generate disposable configuration
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          { git rev-parse HEAD HEAD^{tree}; docker version; docker compose version; } > evidence/source-tools.txt
+          admin_password=$(openssl rand -hex 24)
+          app_password=$(openssl rand -hex 24)
+          jwt_secret=$(openssl rand -hex 32)
+          refresh_secret=$(openssl rand -hex 32)
+          for value in "$admin_password" "$app_password" "$jwt_secret" "$refresh_secret"; do echo "::add-mask::$value"; done
+          umask 077
+          cat > backend/.env.staging <<EOF
+          STAGING_DB_ADMIN_USER=payd_staging_owner
+          STAGING_DB_ADMIN_PASSWORD=$admin_password
+          STAGING_DB_NAME=payd_staging
+          STAGING_DB_USER=payd_staging
+          STAGING_DB_PASSWORD=$app_password
+          JWT_SECRET=$jwt_secret
+          JWT_REFRESH_SECRET=$refresh_secret
+          SDS_ENABLE=false
+          STELLAR_HORIZON_URL=http://127.0.0.1:1
+          SOROBAN_RPC_URL=http://127.0.0.1:1
+          EOF
+          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml config --quiet
+      - name: Build and start the actual staging stack
+        run: |
+          set -euo pipefail
+          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml up -d --build 2>&1 | tee evidence/compose-up.log
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3101/health/live > evidence/health-live.json; then
+              echo 'Staging API liveness passed' | tee evidence/health-result.txt
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Staging API liveness failed' | tee evidence/health-result.txt
+          exit 1
+      - name: Check repeated bootstrap and production auth admission
+        run: |
+          set -euo pipefail
+          dc() { docker compose --env-file backend/.env.staging -f docker-compose.staging.yml "$@"; }
+          counts() { dc exec -T postgres psql -U payd_staging_owner -d payd_staging -Atc 'SELECT (SELECT count(*) FROM organizations),(SELECT count(*) FROM employees),(SELECT count(*) FROM transactions),(SELECT count(*) FROM schema_migrations),(SELECT count(*) FROM staging_bootstrap);'; }
+          counts > evidence/seed-counts-before.txt
+          dc run --rm migrate 2>&1 | tee evidence/bootstrap-repeat.log
+          counts > evidence/seed-counts-after.txt
+          diff -u evidence/seed-counts-before.txt evidence/seed-counts-after.txt
+          dc exec -T postgres psql -U payd_staging_owner -d payd_staging -Atc 'SELECT version();' > evidence/postgres-version.txt
+          dc exec -T api node --version > evidence/node-version.txt
+          for path in /api/employees /api/admin; do
+            status=$(curl --silent -o /dev/null -w '%{http_code}' "http://127.0.0.1:3101$path")
+            echo "Anonymous $path: $status" | tee -a evidence/auth-status.txt
+            test "$status" = 401
+          done
+      - name: Execute existing native PostgreSQL and HTTP acceptance
+        run: |
+          set -euo pipefail
+          set -a
+          source backend/.env.staging
+          set +a
+          RLS_TEST_DATABASE_URL="postgresql://$STAGING_DB_ADMIN_USER:$STAGING_DB_ADMIN_PASSWORD@postgres:5432/$STAGING_DB_NAME"
+          echo "::add-mask::$RLS_TEST_DATABASE_URL"
+          export RLS_TEST_DATABASE_URL
+          timeout 180 docker compose --env-file backend/.env.staging -f docker-compose.staging.yml run --rm --no-deps \
+            --entrypoint node \
+            -v "$PWD/backend/tests:/usr/src/app/tests:ro" \
+            -v "$PWD/backend/staging:/usr/src/app/staging:ro" \
+            -v "$PWD/backend/src/db:/usr/src/app/src/db:ro" \
+            -e RLS_TEST_DATABASE_URL -e STAGING_DB_USER -e STAGING_DB_PASSWORD \
+            -e NODE_ENV=test api tests/tenant-rls-postgres.mjs 2>&1 | tee evidence/native-rls-http.log
+      - name: Collect logs and remove this run's disposable resources
+        if: always()
+        run: |
+          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml ps --all > evidence/compose-ps.txt 2>&1 || true
+          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml logs --no-color > evidence/compose.log 2>&1 || true
+          docker compose --env-file backend/.env.staging -f docker-compose.staging.yml down --volumes --remove-orphans || true
+      - name: Retain execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payd635-native-staging-relay5692
+          path: evidence/
+          retention-days: 2
