@@ -1,0 +1,43 @@
+{
+  "source_commit": "2ad0076b92971dd087a7ca58a11bdc584eb1ad71",
+  "workflow_commit": "fdcd2ffe736847cb6ce21dd4a501a27f24c20ca0",
+  "run_id": "37194035823",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "node": "v22.23.3",
+  "npm": "10.9.9",
+  "files": {
+    "backend/src/services/contractEventIndexer.ts": "0e6260626b2869e1f1f128dd98a9662eb94456af",
+    "backend/src/services/__tests__/contractEventIndexer.test.ts": "462c3b2af62615bca67e47453cd47a21f3e97d21",
+    "backend/src/types/contractEvent.ts": "f561a78d6a73d20a6aae554f6a89737f69436d13",
+    "backend/jest.config.cjs": "7b6e52a7558480442e1b9e160ea523b9f165e72c",
+    "backend/tsconfig.json": "9bcf755fb55656c2454fa6bc097e562da91cc383",
+    "backend/package.json": "746a535b08bf0c6ce9c4a96f7d75c76e0bbacb95",
+    "backend/package-lock.json": "2803b2048d296fadbd21baae3ad89b660226cd47"
+  },
+  "command": "npm test -- --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile=$RUNNER_TEMP/payd632-evidence/jest-results.json",
+  "working_directory": "backend",
+  "limits": "One maintained Jest file; repository config unchanged. Existing RPC/database/timer mocks. No full suite, typecheck, live RPC or PostgreSQL.",
+  "tracked_diff": "",
+  "packages": {
+    "jest": "30.2.0",
+    "ts-jest": "29.4.12",
+    "typescript": "5.9.3",
+    "@stellar/stellar-sdk": "12.3.0"
+  },
+  "jest": {
+    "success": true,
+    "numTotalTestSuites": 1,
+    "numPassedTestSuites": 1,
+    "numFailedTestSuites": 0,
+    "numTotalTests": 24,
+    "numPassedTests": 24,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "startTime": 1791108121835
+  },
+  "selected_files": [
+    "/home/runner/work/PayD/PayD/source/backend/src/services/__tests__/contractEventIndexer.test.ts"
+  ],
+  "exit_code": 0
+}
