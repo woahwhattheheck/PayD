@@ -289,20 +289,54 @@ const stats = payrollQueryService.getCacheStats();
 
 ## Error Handling
 
-All errors return consistent format:
+Errors forwarded to the [global error middleware](src/middleware/errorHandler.ts)
+use this response shape; for example, a malformed JSON request body produces:
 
 ```json
 {
-  "error": "Error type",
-  "message": "Detailed error message"
+  "error": "ValidationError",
+  "message": "Invalid request body",
+  "code": "VALIDATION_ERROR",
+  "requestId": "example-request-id"
 }
 ```
 
-Standard HTTP status codes:
+`error` is the error type name, `code` is the machine-readable category,
+and `message` is client-facing text. `requestId` is included when the request
+has a string ID. [app.ts](src/app.ts) installs request-ID middleware before
+the JSON/form parsers and registers the not-found and error handlers after
+the routes.
 
-- **400**: Bad request (missing parameters)
-- **404**: Not found (transaction/resource)
-- **500**: Server error
+Common mappings are:
+
+| Error reaching the shared handler | HTTP status | Code |
+| --- | --- | --- |
+| `ValidationError` or malformed JSON/body syntax | `400` | `VALIDATION_ERROR` by default |
+| `AuthError` | `401` by default, or `403` when supplied | `AUTH_ERROR` by default |
+| `NotFoundError`, including the final unmatched-route handler | `404` | `NOT_FOUND` by default |
+| Request body too large or too many form parameters | `413` | `PAYLOAD_TOO_LARGE` |
+| Unsupported body charset or content encoding | `415` | `UNSUPPORTED_MEDIA_TYPE` |
+| Unknown errors | `500` | `INTERNAL_ERROR` |
+
+The [typed error classes](src/errors/AppError.ts) allow application-specific
+messages and codes. Forward them with `next(error)` to use the shared handler.
+Only recognized body-parser type/status pairs receive the parser mappings
+above; other unknown errors remain `500`.
+
+Set `NODE_ENV` before starting the process. Only `development` includes an
+available `stack`; unknown errors use `InternalServerError` and the generic
+message `An error occurred` outside development. In development their original
+message and available stack are returned. Typed `AppError` messages remain
+client-visible in every environment, so give those errors client-safe text.
+Parser errors use fixed messages; their original stack is included only in
+development.
+
+These rules apply when the error reaches the shared middleware. Existing
+[payroll routes](src/routes/payroll.routes.ts) also send some error JSON
+directly, including missing-parameter and caught-service responses. Those
+route-local bodies are not rewritten by the global handler. They can contain
+only `error`, or `error` and `message`, without `code` or `requestId`; clients
+must tolerate those existing shapes.
 
 ## Development
 
