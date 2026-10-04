@@ -105,7 +105,11 @@ function encryptSecret(secret: string): string {
 
 function decryptSecret(stored: string): string {
   const parts = stored.split('.');
-  if (parts.length !== 4 || parts[0] !== ENCRYPTION_PREFIX) {
+  const [version, iv, tag, ciphertext] = parts;
+  if (
+    parts.length !== 4 || version !== ENCRYPTION_PREFIX ||
+    iv === undefined || tag === undefined || ciphertext === undefined
+  ) {
     throw new TwoFactorError(
       'Stored 2FA secret is unreadable. Re-run 2FA setup.',
       500,
@@ -113,7 +117,6 @@ function decryptSecret(stored: string): string {
     );
   }
 
-  const [, iv, tag, ciphertext] = parts;
   const decipher = crypto.createDecipheriv(
     'aes-256-gcm',
     encryptionKey(),
@@ -144,9 +147,9 @@ export function generateRecoveryCodes(count: number = RECOVERY_CODE_COUNT): stri
     const chars: string[] = [];
     while (chars.length < 10) {
       for (const byte of crypto.randomBytes(16)) {
-        // 256 is not a multiple of 32, but 32 divides 256 exactly, so a plain
-        // mask over the low 5 bits is already uniform.
-        chars.push(RECOVERY_ALPHABET[byte & 0x1f]);
+        // The 32-character alphabet divides 256 exactly, so a mask over the
+        // low 5 bits is already uniform and always indexes an existing character.
+        chars.push(RECOVERY_ALPHABET.charAt(byte & 0x1f));
         if (chars.length === 10) break;
       }
     }

@@ -91,7 +91,7 @@ app.use(
 app.use(cors());
 
 // Attach request ID to morgan logs for end-to-end traceability
-morgan.token('request-id', (req) => (req as any).requestId || '-');
+morgan.token<express.Request>('request-id', (req) => req.requestId || '-');
 app.use(
   morgan(
     ':method :url :status :res[content-length] - :response-time ms request-id=:request-id'

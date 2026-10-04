@@ -71,9 +71,9 @@ export function auditLoggerMiddleware(options: AuditMiddlewareOptions = {}) {
 
       try {
         const auditEntry: AuditLogEntry = {
-          userId: req.user?.id,
-          userEmail: req.user?.email,
-          organizationId: req.tenantId || req.user?.organizationId,
+          userId: req.user?.id.toString(),
+          userEmail: req.user?.email ?? undefined,
+          organizationId: req.tenantId ?? req.user?.organizationId ?? undefined,
           action: determineAction(req),
           resource: determineResource(req),
           resourceId: extractResourceId(req),
@@ -201,7 +201,8 @@ function determineResource(req: Request): string {
  */
 function extractResourceId(req: Request): string | undefined {
   // Check common ID patterns in params
-  return req.params.id || req.params.employeeId || req.params.organizationId || undefined;
+  const resourceId = req.params.id || req.params.employeeId || req.params.organizationId;
+  return typeof resourceId === 'string' ? resourceId : undefined;
 }
 
 /**

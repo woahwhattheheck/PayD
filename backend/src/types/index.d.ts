@@ -1,9 +1,2 @@
-declare namespace Express {
-  interface User {
-    id: number;
-    walletAddress?: string | null;
-    email?: string | null;
-    organizationId: number | null;
-    role: 'EMPLOYER' | 'EMPLOYEE';
-  }
-}
+// Use the JWT-backed Express.User declaration for every authentication path.
+import './auth.js';

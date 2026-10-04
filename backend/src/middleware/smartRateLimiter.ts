@@ -29,9 +29,9 @@ export function smartRateLimitMiddleware(options: SmartRateLimitOptions = {}) {
 
     const organizationId = req.tenantId || req.user?.organizationId;
 
-    if (!organizationId && organizationBased) {
-      // No organization context, use IP-based limiting
-      const clientIdentifier = identifier(req);
+    if (!organizationId) {
+      // Organization metrics require an organization; the general limiter
+      // handles requests that only have an IP address.
       return next();
     }
 

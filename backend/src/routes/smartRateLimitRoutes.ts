@@ -3,6 +3,7 @@ import { smartRateLimitService } from '../services/smartRateLimitService.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 const router = express.Router();
 
@@ -12,7 +13,13 @@ const router = express.Router();
  */
 router.get('/status/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
 
     const config = await smartRateLimitService.getConfig(organizationId);
     const decision = await smartRateLimitService.checkRateLimit(organizationId);
@@ -46,7 +53,13 @@ router.get('/status/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.get('/history/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const limit = parseInt(req.query.limit as string, 10) || 10;
 
     const history = await smartRateLimitService.getRecoveryHistory(organizationId, limit);
@@ -70,7 +83,13 @@ router.get('/history/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.get('/violations/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const limit = parseInt(req.query.limit as string, 10) || 20;
 
     const result = await pool.query(
@@ -114,7 +133,13 @@ router.get('/violations/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.post('/update-score/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const { scoreDelta } = req.body;
 
     if (scoreDelta === undefined) {
@@ -150,7 +175,13 @@ router.post('/update-score/:organizationId', authenticateJWT, async (req, res) =
  */
 router.post('/restrict/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const { reason, durationMinutes } = req.body;
 
     if (!reason) {
@@ -205,7 +236,13 @@ router.post('/restrict/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.post('/unrestrict/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
 
     await pool.query(
       `UPDATE smart_rate_limit_configs

@@ -52,7 +52,7 @@ export function advancedRateLimitMiddleware(options: AdvancedRateLimitOptions = 
         const bypassValid = await validateBypassToken(
           bypassToken as string,
           req.tenantId,
-          req.user?.id
+          req.user?.id.toString()
         );
         if (bypassValid) {
           logger.info('Rate limit bypassed with valid token', {
@@ -79,7 +79,7 @@ export function advancedRateLimitMiddleware(options: AdvancedRateLimitOptions = 
     // Get dynamic limits if enabled
     let effectiveTier = tier;
     if (enableDynamicLimits && req.tenantId) {
-      const dynamicTier = await getDynamicRateLimit(req.tenantId, req.user?.id);
+      const dynamicTier = await getDynamicRateLimit(req.tenantId, req.user?.id.toString());
       if (dynamicTier) {
         effectiveTier = dynamicTier;
       }
@@ -102,7 +102,7 @@ export function advancedRateLimitMiddleware(options: AdvancedRateLimitOptions = 
           identifier: clientIdentifier,
           tier: effectiveTier,
           organizationId: req.tenantId,
-          userId: req.user?.id,
+          userId: req.user?.id.toString(),
           path: req.path,
           method: req.method,
           ipAddress: extractIpAddress(req),
@@ -198,7 +198,7 @@ export function tieredOrganizationRateLimit(options: Omit<AdvancedRateLimitOptio
 export function endpointRateLimit(config: {
   [endpoint: string]: { tier: RateLimitTierName; methods?: string[] };
 }) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     for (const [pattern, rules] of Object.entries(config)) {
       const regex = new RegExp(pattern);
       if (regex.test(req.path)) {
@@ -388,6 +388,7 @@ function getSystemLoad(): number {
   try {
     const cpus = os.cpus().length;
     const loadAvg = os.loadavg()[0]; // 1-minute load average
+    if (loadAvg === undefined || cpus === 0) return 0.5;
     return Math.min(loadAvg / cpus, 1.0);
   } catch {
     return 0.5; // safe fallback

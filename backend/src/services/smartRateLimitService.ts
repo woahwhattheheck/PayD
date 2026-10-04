@@ -10,6 +10,7 @@ export interface SmartRateLimitConfig {
   behaviorScore: number;
   isRestricted: boolean;
   restrictedUntil: Date | null;
+  consecutiveViolations: number;
 }
 
 export interface RateLimitDecision {
@@ -56,6 +57,7 @@ export class SmartRateLimitService {
           behaviorScore: parseFloat(row.behavior_score),
           isRestricted: row.is_restricted,
           restrictedUntil: row.restricted_until ? new Date(row.restricted_until) : null,
+          consecutiveViolations: row.consecutive_violations ?? 0,
         };
       }
 
@@ -69,6 +71,7 @@ export class SmartRateLimitService {
         behaviorScore: 100.0,
         isRestricted: false,
         restrictedUntil: null,
+        consecutiveViolations: 0,
       };
 
       await pool.query(
@@ -99,6 +102,7 @@ export class SmartRateLimitService {
         behaviorScore: 100.0,
         isRestricted: false,
         restrictedUntil: null,
+        consecutiveViolations: 0,
       };
     }
   }
@@ -191,7 +195,7 @@ export class SmartRateLimitService {
 
       // Check if we need to restrict the organization
       const config = await this.getConfig(organizationId);
-      if (config.consecutive_violations >= 5 && config.behaviorScore < 30) {
+      if (config.consecutiveViolations >= 5 && config.behaviorScore < 30) {
         await this.restrictOrganization(
           organizationId,
           'Excessive rate limit violations',

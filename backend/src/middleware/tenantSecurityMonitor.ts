@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import pool from '../db/index.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 /**
  * Security event severity levels
@@ -44,7 +45,7 @@ function getOrganizationId(req: Request): number | null {
   }
 
   if (req.params.organizationId) {
-    return parseInt(req.params.organizationId, 10);
+    return parseRouteInteger(req.params.organizationId);
   }
 
   return null;
@@ -213,7 +214,7 @@ export function strictTenantBoundaryCheck(): (
         requestedOrganizationId,
         req.method === 'GET' ? 'read' : req.method === 'DELETE' ? 'delete' : 'write',
         req.path.split('/')[2] || 'unknown',
-        req.params.id || null,
+        typeof req.params.id === 'string' ? req.params.id : null,
         false,
         'Cross-tenant access denied',
         ipAddress,
@@ -337,7 +338,9 @@ export function monitorTenantAccessPattern(): (
 
     // Extract resource info
     const resourceType = req.path.split('/')[2] || 'unknown';
-    const resourceId = req.params.id || req.params[Object.keys(req.params)[0]] || null;
+    const firstParam = Object.values(req.params)[0];
+    const resourceParam = req.params.id || firstParam;
+    const resourceId = typeof resourceParam === 'string' ? resourceParam : null;
 
     // Log the access (fire-and-forget)
     logTenantAccess(
@@ -477,12 +480,13 @@ export function comprehensiveTenantSecurity(): (
     ];
 
     const executeChain = async (index: number): Promise<void> => {
-      if (index >= chain.length) {
+      const middleware = chain[index];
+      if (!middleware) {
         return next();
       }
 
       return new Promise((resolve, reject) => {
-        chain[index](req, res, (err?: any) => {
+        middleware(req, res, (err?: any) => {
           if (err) {
             reject(err);
           } else if (res.headersSent) {
@@ -579,7 +583,7 @@ export async function resolveSecurityEvent(
     [eventId, resolvedBy]
   );
 
-  return result.rowCount > 0;
+  return (result.rowCount ?? 0) > 0;
 }
 
 /**

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import pool from '../db/index.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 /**
  * Rate limit tier configurations
@@ -16,7 +17,8 @@ export interface RateLimitTier {
 /**
  * Predefined rate limit tiers
  */
-export const RATE_LIMIT_TIERS: Record<string, RateLimitTier> = {
+export const RATE_LIMIT_TIERS: Record<string, RateLimitTier> &
+  Record<'free' | 'standard' | 'premium' | 'enterprise', RateLimitTier> = {
   free: {
     requestsPerMinute: 10,
     requestsPerHour: 100,
@@ -83,7 +85,7 @@ function getOrganizationId(req: Request): number | null {
   }
 
   if (req.params.organizationId) {
-    return parseInt(req.params.organizationId, 10);
+    return parseRouteInteger(req.params.organizationId);
   }
 
   return null;
@@ -495,7 +497,7 @@ export async function revokeBypassToken(tokenPrefix: string): Promise<boolean> {
     [tokenPrefix]
   );
 
-  return result.rowCount > 0;
+  return (result.rowCount ?? 0) > 0;
 }
 
 /**

@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import pool from '../db/index.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 /**
  * Configuration options for request audit logging
@@ -121,7 +122,7 @@ function getOrganizationId(req: Request): number | null {
 
   // From route params
   if (req.params.organizationId) {
-    return parseInt(req.params.organizationId, 10);
+    return parseRouteInteger(req.params.organizationId);
   }
 
   return null;
@@ -320,7 +321,9 @@ export function auditCriticalOperation(
     const organizationId = getOrganizationId(req);
     const userId = getUserId(req);
     const resourceType = req.path.split('/')[2] || 'unknown'; // e.g., /api/employees/:id -> 'employees'
-    const resourceId = req.params.id || req.params[Object.keys(req.params)[0]];
+    const firstParam = Object.values(req.params)[0];
+    const resourceParam = req.params.id || firstParam;
+    const resourceId = typeof resourceParam === 'string' ? resourceParam : undefined;
 
     // Capture before state if this is an update/delete
     let beforeState: any = null;

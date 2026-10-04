@@ -3,6 +3,7 @@ import { auditAnalyticsService } from '../services/auditAnalyticsService.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 const router = express.Router();
 
@@ -12,7 +13,13 @@ const router = express.Router();
  */
 router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const startDate = req.query.startDate
       ? new Date(req.query.startDate as string)
       : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
@@ -44,7 +51,13 @@ router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.get('/trends/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const startDate = req.query.startDate
       ? new Date(req.query.startDate as string)
       : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
@@ -78,7 +91,13 @@ router.get('/trends/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.get('/endpoints/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const limit = parseInt(req.query.limit as string, 10) || 10;
 
     const result = await pool.query(
@@ -122,7 +141,13 @@ router.get('/endpoints/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.get('/errors/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const limit = parseInt(req.query.limit as string, 10) || 20;
 
     const result = await pool.query(
@@ -211,7 +236,13 @@ router.post('/record', authenticateJWT, async (req, res) => {
  */
 router.delete('/cache/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
 
     const result = await pool.query(
       `DELETE FROM audit_log_aggregation_cache

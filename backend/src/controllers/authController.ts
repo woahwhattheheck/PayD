@@ -301,13 +301,13 @@ export class AuthController {
    */
   static oauthCallback(req: express.Request, res: express.Response) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const user = req.user as (express.User & { is_2fa_enabled?: boolean }) | undefined;
+    const user = req.user;
 
     if (!user) {
       return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
     }
 
-    if (user.is_2fa_enabled) {
+    if ('is_2fa_enabled' in user && user.is_2fa_enabled) {
       const challengeToken = generateTwoFactorChallengeToken(user.id);
       return res.redirect(
         `${frontendUrl}/auth-callback?requires2fa=1&challengeToken=${encodeURIComponent(challengeToken)}`

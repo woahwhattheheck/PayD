@@ -83,7 +83,9 @@ async function runWithAdvisoryLock(
       [lockId],
     );
 
-    if (!rows[0].acquired) {
+    const lockResult = rows[0];
+    if (!lockResult) throw new Error('Advisory lock query returned no result');
+    if (!lockResult.acquired) {
       logger.debug(`[${jobName}] Lock held by another pod — skipping`);
       return;
     }

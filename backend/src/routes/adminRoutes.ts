@@ -5,6 +5,7 @@ import { pool } from '../config/database.js';
 import { requireAdminJustification } from '../middleware/requireAdminJustification.js';
 import { auditSensitiveOperation } from '../middleware/auditLogger.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 const router = Router();
 
@@ -48,7 +49,7 @@ router.get(
  * Return the current effective rate limit overrides for an organisation.
  */
 router.get('/tenants/:orgId/rate-limits', requireAdminJustification, async (req: Request, res: Response) => {
-  const orgId = parseInt(req.params.orgId, 10);
+  const orgId = parseRouteInteger(req.params.orgId);
   if (isNaN(orgId)) {
     res.status(400).json({ error: 'Invalid orgId' });
     return;
@@ -71,7 +72,7 @@ router.get('/tenants/:orgId/rate-limits', requireAdminJustification, async (req:
  * Only the tiers provided in the body are updated; omitted tiers keep their current values.
  */
 router.patch('/tenants/:orgId/rate-limits', requireAdminJustification, async (req: Request, res: Response) => {
-  const orgId = parseInt(req.params.orgId, 10);
+  const orgId = parseRouteInteger(req.params.orgId);
   if (isNaN(orgId)) {
     res.status(400).json({ error: 'Invalid orgId' });
     return;
@@ -155,7 +156,7 @@ router.get('/access-logs', requireAdminJustification, async (req: Request, res: 
  * Return quota config and current usage for an organisation.
  */
 router.get('/tenants/:orgId/quotas', requireAdminJustification, async (req: Request, res: Response) => {
-  const orgId = parseInt(req.params.orgId, 10);
+  const orgId = parseRouteInteger(req.params.orgId);
   if (isNaN(orgId)) { res.status(400).json({ error: 'Invalid orgId' }); return; }
 
   try {
@@ -177,7 +178,7 @@ router.get('/tenants/:orgId/quotas', requireAdminJustification, async (req: Requ
  * Body: { "maxEmployees": 1000, "maxMonthlyTransactions": 50000 }
  */
 router.patch('/tenants/:orgId/quotas', requireAdminJustification, async (req: Request, res: Response) => {
-  const orgId = parseInt(req.params.orgId, 10);
+  const orgId = parseRouteInteger(req.params.orgId);
   if (isNaN(orgId)) { res.status(400).json({ error: 'Invalid orgId' }); return; }
 
   const { maxEmployees, maxMonthlyTransactions, maxStorageMb } = req.body ?? {};

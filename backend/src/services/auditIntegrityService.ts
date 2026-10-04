@@ -71,7 +71,9 @@ export class AuditIntegrityService {
     const countResult = await pool.query<{ count: string }>(
       'SELECT COUNT(*) FROM api_audit_logs'
     );
-    const totalRows = parseInt(countResult.rows[0].count, 10);
+    const countRow = countResult.rows[0];
+    if (!countRow) throw new Error('Audit row count query returned no result');
+    const totalRows = parseInt(countRow.count, 10);
 
     const result = await pool.query<AuditRowForVerification>(
       `SELECT id, user_id, user_email, organization_id, action, resource, resource_id,

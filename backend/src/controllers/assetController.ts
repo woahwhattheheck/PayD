@@ -87,7 +87,11 @@ export class AssetController {
         `SELECT COUNT(*) AS count FROM clawback_audit_logs ${whereClause}`,
         params
       );
-      const total = parseInt(countResult.rows[0].count, 10);
+      const countRow = countResult.rows[0];
+      if (!countRow) {
+        throw new Error('Clawback count query did not return a row');
+      }
+      const total = parseInt(countRow.count, 10);
 
       // Paginated rows
       const dataParams = [...params, limit, offset];

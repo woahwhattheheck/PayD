@@ -102,7 +102,7 @@ export class RateLimitService {
     tier: RateLimitTierName = 'api',
     organizationId?: number
   ): Promise<RateLimitResult> {
-    let tierConfig = RATE_LIMIT_TIERS[tier];
+    let tierConfig: RateLimitTier = RATE_LIMIT_TIERS[tier];
 
     // --- Per-tenant rate limit overrides ---
     if (organizationId) {

@@ -3,6 +3,7 @@ import { tenantSecurityService } from '../services/tenantSecurityService.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { parseRouteInteger } from '../utils/routeParams.js';
 
 const router = express.Router();
 
@@ -12,7 +13,13 @@ const router = express.Router();
  */
 router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
 
     const summary = await tenantSecurityService.getSecuritySummary(organizationId);
 
@@ -35,7 +42,13 @@ router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.get('/events/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const {
       eventType,
       severity,
@@ -77,9 +90,15 @@ router.get('/events/:organizationId', authenticateJWT, async (req, res) => {
  */
 router.post('/events/:eventId/resolve', authenticateJWT, async (req, res) => {
   try {
-    const eventId = parseInt(req.params.eventId, 10);
+    const eventId = parseRouteInteger(req.params.eventId);
+    if (Number.isNaN(eventId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid eventId',
+      });
+    }
     const { resolutionNotes } = req.body;
-    const resolvedBy = req.user?.id ? parseInt(req.user.id as string, 10) : undefined;
+    const resolvedBy = req.user?.id;
 
     if (!resolvedBy) {
       return res.status(401).json({
@@ -116,7 +135,13 @@ router.post('/events/:eventId/resolve', authenticateJWT, async (req, res) => {
  */
 router.post('/detect-anomalies/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
 
     const anomalies = await tenantSecurityService.detectAnomalies(organizationId);
 
@@ -140,7 +165,13 @@ router.post('/detect-anomalies/:organizationId', authenticateJWT, async (req, re
  */
 router.get('/anomalies/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const limit = parseInt(req.query.limit as string, 10) || 20;
 
     const result = await pool.query(
@@ -210,7 +241,13 @@ router.get('/organizations', authenticateJWT, async (req, res) => {
  */
 router.get('/access-logs/:organizationId', authenticateJWT, async (req, res) => {
   try {
-    const organizationId = parseInt(req.params.organizationId, 10);
+    const organizationId = parseRouteInteger(req.params.organizationId);
+    if (Number.isNaN(organizationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid organizationId',
+      });
+    }
     const limit = parseInt(req.query.limit as string, 10) || 50;
 
     const result = await pool.query(

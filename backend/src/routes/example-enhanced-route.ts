@@ -6,7 +6,7 @@
  * - Strengthened multi-tenant isolation
  */
 
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { auditLoggerMiddleware, auditSensitiveOperation } from '../middleware/auditLogger.js';
 import {
   comprehensiveTenantIsolation,
@@ -34,7 +34,7 @@ router.get(
   tieredOrganizationRateLimit(),
   authenticateJWT,
   comprehensiveTenantIsolation,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     // Your controller logic here
     res.json({
       message: 'This endpoint has enhanced security',
@@ -144,7 +144,7 @@ router.delete(
   authenticateJWT,
   comprehensiveTenantIsolation,
   auditSensitiveOperation('admin_purge_data'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     // Check admin role
     if (req.user?.role !== 'ADMIN') {
       return res.status(403).json({ error: 'Admin access required' });
@@ -175,7 +175,7 @@ router.post(
   }),
   authenticateJWT,
   comprehensiveTenantIsolation,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { items } = req.body;
 
     // Batch processing logic
