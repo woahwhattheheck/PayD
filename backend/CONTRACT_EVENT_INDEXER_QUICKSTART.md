@@ -23,13 +23,23 @@ The canonical indexer requires the `contract_events` and `indexer_state`
 layout described by
 [`016_create_contract_events.sql`](src/db/migrations/016_create_contract_events.sql).
 
-Review the existing schema before starting the indexer:
-[`015_create_contract_events.sql`](src/db/migrations/015_create_contract_events.sql)
-also creates `contract_events`, with a different column layout. Migration 016
-uses `CREATE TABLE IF NOT EXISTS`, so it does not upgrade a table created by
-015. The 015 layout lacks columns used by the canonical indexer and by 016's
-later indexes. Have that schema mismatch reconciled before treating setup as
-complete; applying 015 alone does not satisfy the canonical indexer's schema.
+[`015_reconcile_contract_events.sql`](src/db/migrations/015_reconcile_contract_events.sql)
+runs between the original 015 migrations and 016. It preserves a legacy 015
+`contract_events` table as `contract_events_legacy_015`, including its rows,
+indexes, and sequence, so 016 can create the canonical table. Existing migration
+files and recorded checksums are unchanged; an already-canonical table is left
+alone. An unknown mixed layout or an existing archive is reported for explicit
+reconciliation instead of overwriting data. Use the transactional runner below;
+if 016 was previously run manually without a transaction, reconcile any indexes
+it left behind before retrying.
+
+Legacy rows remain available in `contract_events_legacy_015`; the API reads the
+new canonical table. The legacy layout does not retain authoritative organization
+ownership or ledger closure time. Recover those values from verified event records
+before backfilling; do not use organization 1 or the old local insertion time as
+substitutes. The old `contract_event_index_state` is also preserved, but its cursor
+is not copied into `indexer_state`, because the archived events have not been
+backfilled. Historical reindexing depends on the RPC provider's event retention.
 
 The backend manifest defines `db:migrate`, not `migrate`. From the repository
 root, invoke the maintained runner with:
@@ -42,6 +52,16 @@ npm run db:migrate
 The [runner](src/db/migrate.ts) processes all pending SQL migrations in filename
 order and records them in `schema_migrations`; it is not limited to the indexer
 tables. Check its result before starting the server.
+
+For the focused migration regression, use a separate PostgreSQL test database:
+
+```bash
+MIGRATION_TEST_DATABASE_URL=postgresql://localhost/payd_test npm test -- --runInBand --runTestsByPath src/db/__tests__/contractEventSchema.integration.test.ts
+```
+
+The three cases execute the actual SQL in temporary schemas and roll them back.
+They cover the original failure, preservation of legacy data and cursor state,
+canonical insert deduplication, and an already-canonical installation.
 
 ### 3. Start the Server
 
