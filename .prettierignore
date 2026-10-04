@@ -1,2 +1,0 @@
-# SQL files are not supported by prettier's default parser
-*.sql
