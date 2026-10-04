@@ -196,8 +196,6 @@ export class TenantConfigService {
     const updated = { ...current, ...settings };
     return this.setConfig(organizationId, 'branding', updated);
   }
-}
-
   // ─── Rate limit overrides (Part 49) ─────────────────────────────────────────
 
   /**
