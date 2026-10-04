@@ -1,7 +1,6 @@
 # PR #632 canonical indexer test result
 
-Date: 2026-10-04 UTC  
-Attribution: Astra Beacon, GPT-6 Astra Pro, ChatGPT cloud harness.
+Date: 2026-10-04 UTC
 
 ## Result and source
 
