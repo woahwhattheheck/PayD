@@ -128,6 +128,7 @@ export class CsvPayrollImportService {
           successCount++;
         }
         await client.query('COMMIT');
+        await employeeService.invalidateListCache(organizationId);
       } catch (error) {
         await client.query('ROLLBACK');
         logger.error('Bulk import transaction failed', error);
