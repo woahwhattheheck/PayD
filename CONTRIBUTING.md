@@ -124,16 +124,43 @@ Important backend variables (see `backend/.env.example`):
 
 ### 3. Database
 
-Using Docker:
+For a new local development database, replace all `DATABASE_URL` and `DB_*`
+assignments in `backend/.env` with this single matching block. Do not append it
+to the copied example: that file contains two different `DATABASE_URL` entries,
+and neither uses the credentials for the database below.
+
+```dotenv
+DATABASE_URL=postgresql://payd_user:payd_password@localhost:5432/payd_db
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=payd_user
+DB_PASSWORD=payd_password
+DB_NAME=payd_db
+```
+
+These are local development credentials, not production settings. When using an
+existing database, substitute its actual connection details consistently in
+both the URL and the individual fields; do not remove existing data to follow
+this example.
+
+Create the matching database using Docker:
 
 ```bash
 docker run --name payd-postgres \
-  -e POSTGRES_PASSWORD=mypassword \
+  -e POSTGRES_USER=payd_user \
+  -e POSTGRES_PASSWORD=payd_password \
   -e POSTGRES_DB=payd_db \
   -p 5432:5432 -d postgres:15
 ```
 
-Then run migrations from `backend/`:
+Wait until PostgreSQL is ready before running migrations:
+
+```bash
+docker exec payd-postgres pg_isready -U payd_user -d payd_db
+# Continue when this reports "accepting connections".
+```
+
+Then, from the repository root, run migrations from `backend/`:
 
 ```bash
 cd backend
