@@ -1,0 +1,82 @@
+2026-10-04T10:25:37.0437756Z /usr/src/app/node_modules/require-addon/lib/node.js:50
+2026-10-04T10:25:37.0438493Z     const err = new Error(message, cause ? { cause } : {})
+2026-10-04T10:25:37.0439220Z                 ^
+2026-10-04T10:25:37.0439368Z 
+2026-10-04T10:25:37.0439678Z Error: Cannot find addon '.' imported from 'file:///usr/src/app/node_modules/sodium-native/index.js'
+2026-10-04T10:25:37.0440925Z Candidates:
+2026-10-04T10:25:37.0441770Z - file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0442863Z - file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0444233Z - file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0445288Z - file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0446295Z - file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0447191Z - file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0447962Z - file:///usr/src/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0448643Z - file:///usr/src/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0449323Z - file:///usr/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0450160Z - file:///usr/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0450781Z - file:///prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0451452Z - file:///prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0452043Z - linked:libsodium-native.4.3.3.so
+2026-10-04T10:25:37.0452459Z - linked:libsodium-native.so
+2026-10-04T10:25:37.0453201Z     at Function.addon (/usr/src/app/node_modules/require-addon/lib/node.js:50:17)
+2026-10-04T10:25:37.0454159Z     at Object.<anonymous> (/usr/src/app/node_modules/sodium-native/index.js:3:26)
+2026-10-04T10:25:37.0454966Z     ... 6 lines matching cause stack trace ...
+2026-10-04T10:25:37.0455566Z     at file:///usr/src/app/[eval1]:19:16 {
+2026-10-04T10:25:37.0456267Z   code: 'ADDON_NOT_FOUND',
+2026-10-04T10:25:37.0456759Z   specifier: '.',
+2026-10-04T10:25:37.0457374Z   referrer: file:///usr/src/app/node_modules/sodium-native/index.js,
+2026-10-04T10:25:37.0458003Z   candidates: [
+2026-10-04T10:25:37.0458694Z     file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0460221Z     file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0461248Z     file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0462677Z     file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0463522Z     file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0464301Z     file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0465040Z     file:///usr/src/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0465755Z     file:///usr/src/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0466443Z     file:///usr/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0467111Z     file:///usr/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0467756Z     file:///prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0468388Z     file:///prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0468900Z     linked:libsodium-native.4.3.3.so,
+2026-10-04T10:25:37.0469198Z     linked:libsodium-native.so
+2026-10-04T10:25:37.0469438Z   ],
+2026-10-04T10:25:37.0470050Z   [cause]: Error: Cannot find module '/prebuilds/linux-x64-musl/sodium-native.node'
+2026-10-04T10:25:37.0470495Z   Require stack:
+2026-10-04T10:25:37.0470760Z   - /usr/src/app/node_modules/require-addon/lib/node.js
+2026-10-04T10:25:37.0471115Z   - /usr/src/app/node_modules/sodium-native/index.js
+2026-10-04T10:25:37.0471498Z   - /usr/src/app/node_modules/@stellar/stellar-base/lib/signing.js
+2026-10-04T10:25:37.0471927Z   - /usr/src/app/node_modules/@stellar/stellar-base/lib/index.js
+2026-10-04T10:25:37.0472371Z   - /usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/server.js
+2026-10-04T10:25:37.0472857Z   - /usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/index.js
+2026-10-04T10:25:37.0473304Z   - /usr/src/app/node_modules/@stellar/stellar-sdk/lib/index.js
+2026-10-04T10:25:37.0473644Z   - /usr/src/app/package.json
+2026-10-04T10:25:37.0473999Z       at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+2026-10-04T10:25:37.0474433Z       at Module._load (node:internal/modules/cjs/loader:1038:27)
+2026-10-04T10:25:37.0475209Z       at Module.require (node:internal/modules/cjs/loader:1289:19)
+2026-10-04T10:25:37.0475892Z       at require (node:internal/modules/helpers:182:18)
+2026-10-04T10:25:37.0476647Z       at Function.addon (/usr/src/app/node_modules/require-addon/lib/node.js:35:20)
+2026-10-04T10:25:37.0477564Z       at Object.<anonymous> (/usr/src/app/node_modules/sodium-native/index.js:3:26)
+2026-10-04T10:25:37.0478370Z       at Module._compile (node:internal/modules/cjs/loader:1521:14)
+2026-10-04T10:25:37.0479112Z       at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+2026-10-04T10:25:37.0480036Z       at Module.load (node:internal/modules/cjs/loader:1266:32)
+2026-10-04T10:25:37.0481139Z       at Module._load (node:internal/modules/cjs/loader:1091:12)
+2026-10-04T10:25:37.0481852Z       at Module.require (node:internal/modules/cjs/loader:1289:19)
+2026-10-04T10:25:37.0482491Z       at require (node:internal/modules/helpers:182:18)
+2026-10-04T10:25:37.0483022Z       at file:///usr/src/app/[eval1]:19:16 {
+2026-10-04T10:25:37.0483526Z     code: 'MODULE_NOT_FOUND',
+2026-10-04T10:25:37.0484029Z     requireStack: [
+2026-10-04T10:25:37.0484309Z       '/usr/src/app/node_modules/require-addon/lib/node.js',
+2026-10-04T10:25:37.0484748Z       '/usr/src/app/node_modules/sodium-native/index.js',
+2026-10-04T10:25:37.0485341Z       '/usr/src/app/node_modules/@stellar/stellar-base/lib/signing.js',
+2026-10-04T10:25:37.0485832Z       '/usr/src/app/node_modules/@stellar/stellar-base/lib/index.js',
+2026-10-04T10:25:37.0486285Z       '/usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/server.js',
+2026-10-04T10:25:37.0486771Z       '/usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/index.js',
+2026-10-04T10:25:37.0487213Z       '/usr/src/app/node_modules/@stellar/stellar-sdk/lib/index.js',
+2026-10-04T10:25:37.0487567Z       '/usr/src/app/package.json'
+2026-10-04T10:25:37.0488015Z     ]
+2026-10-04T10:25:37.0488189Z   }
+2026-10-04T10:25:37.0488360Z }
+2026-10-04T10:25:37.0488454Z 
+2026-10-04T10:25:37.0488547Z Node.js v20.20.2
+2026-10-04T10:25:37.0995866Z ##[error]Process completed with exit code 1.

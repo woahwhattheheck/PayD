@@ -1,0 +1,10 @@
+diff --git a/backend/src/index.ts b/backend/src/index.ts
+index c883ae8..094f789 100644
+--- a/backend/src/index.ts
++++ b/backend/src/index.ts
+@@ -109,3 +109,5 @@ const shutdown = () => {
+ // Listen for termination signals
+ process.on('SIGTERM', shutdown);
+ process.on('SIGINT', shutdown);
++
++// Temporary source-only Docker dependency-cache probe.

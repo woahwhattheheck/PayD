@@ -1,0 +1,540 @@
+﻿2026-10-04T10:23:56.8231864Z Current runner version: '2.337.0'
+2026-10-04T10:23:56.8258599Z ##[group]Runner Image Provisioner
+2026-10-04T10:23:56.8259610Z Hosted Compute Agent
+2026-10-04T10:23:56.8260529Z Version: 20260901.588
+2026-10-04T10:23:56.8261172Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-04T10:23:56.8261974Z Build Date: 2026-09-01T19:56:44Z
+2026-10-04T10:23:56.8262655Z Worker ID: {12673543-f93f-4465-bf61-01c729bb2387}
+2026-10-04T10:23:56.8263383Z Azure Region: westus
+2026-10-04T10:23:56.8264018Z ##[endgroup]
+2026-10-04T10:23:56.8265880Z ##[group]Operating System
+2026-10-04T10:23:56.8266963Z Ubuntu
+2026-10-04T10:23:56.8267598Z 24.04.5
+2026-10-04T10:23:56.8268098Z LTS
+2026-10-04T10:23:56.8268674Z ##[endgroup]
+2026-10-04T10:23:56.8269234Z ##[group]Runner Image
+2026-10-04T10:23:56.8270108Z Image: ubuntu-24.04
+2026-10-04T10:23:56.8270765Z Version: 20260927.320.1
+2026-10-04T10:23:56.8272068Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-04T10:23:56.8273641Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-04T10:23:56.8274652Z ##[endgroup]
+2026-10-04T10:23:56.8275818Z ##[group]GITHUB_TOKEN Permissions
+2026-10-04T10:23:56.8278026Z Contents: read
+2026-10-04T10:23:56.8278658Z Metadata: read
+2026-10-04T10:23:56.8279217Z ##[endgroup]
+2026-10-04T10:23:56.8281679Z Secret source: Actions
+2026-10-04T10:23:56.8282690Z Cache mode: write
+2026-10-04T10:23:56.8283737Z Prepare workflow directory
+2026-10-04T10:23:56.8721320Z Prepare all required actions
+2026-10-04T10:23:56.8770579Z Getting action download info
+2026-10-04T10:23:57.2427500Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-04T10:23:57.3547942Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-04T10:23:57.5678810Z Complete job name: docker
+2026-10-04T10:23:57.6462438Z ##[group]Run actions/checkout@v4
+2026-10-04T10:23:57.6463346Z with:
+2026-10-04T10:23:57.6463866Z   ref: 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:57.6464483Z   persist-credentials: false
+2026-10-04T10:23:57.6465014Z   repository: woahwhattheheck/PayD
+2026-10-04T10:23:57.6468892Z   token: ***
+2026-10-04T10:23:57.6469334Z   ssh-strict: true
+2026-10-04T10:23:57.6470023Z   ssh-user: git
+2026-10-04T10:23:57.6470458Z   clean: true
+2026-10-04T10:23:57.6470901Z   sparse-checkout-cone-mode: true
+2026-10-04T10:23:57.6471427Z   fetch-depth: 1
+2026-10-04T10:23:57.6471857Z   fetch-tags: false
+2026-10-04T10:23:57.6472304Z   show-progress: true
+2026-10-04T10:23:57.6472741Z   lfs: false
+2026-10-04T10:23:57.6473152Z   submodules: false
+2026-10-04T10:23:57.6473604Z   set-safe-directory: true
+2026-10-04T10:23:57.6474107Z   allow-unsafe-pr-checkout: false
+2026-10-04T10:23:57.6474891Z env:
+2026-10-04T10:23:57.6475381Z   SOURCE_SHA: 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:57.6476155Z   DOCKERFILE_BLOB: 22464e99c7126c051d674a34ff15e6ed5fa60424
+2026-10-04T10:23:57.6476824Z   IMAGE: payd633:source
+2026-10-04T10:23:57.6477282Z ##[endgroup]
+2026-10-04T10:23:57.7516134Z Syncing repository: woahwhattheheck/PayD
+2026-10-04T10:23:57.7519098Z ##[group]Getting Git version info
+2026-10-04T10:23:57.7520635Z Working directory is '/home/runner/work/PayD/PayD'
+2026-10-04T10:23:57.7522213Z [command]/usr/bin/git version
+2026-10-04T10:23:57.7742502Z git version 2.55.0
+2026-10-04T10:23:57.7766376Z ##[endgroup]
+2026-10-04T10:23:57.7783302Z Temporarily overriding HOME='/home/runner/work/_temp/4218a0c4-f1c2-4568-9033-d89210990f69' before making global git config changes
+2026-10-04T10:23:57.7785755Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T10:23:57.7788971Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/PayD/PayD
+2026-10-04T10:23:57.7878815Z Deleting the contents of '/home/runner/work/PayD/PayD'
+2026-10-04T10:23:57.7881593Z ##[group]Initializing the repository
+2026-10-04T10:23:57.7883142Z [command]/usr/bin/git init /home/runner/work/PayD/PayD
+2026-10-04T10:23:57.8013278Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-04T10:23:57.8015074Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-04T10:23:57.8016684Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-04T10:23:57.8017995Z hint: call:
+2026-10-04T10:23:57.8018708Z hint:
+2026-10-04T10:23:57.8019512Z hint: 	git config --global init.defaultBranch <name>
+2026-10-04T10:23:57.8020743Z hint:
+2026-10-04T10:23:57.8021660Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-04T10:23:57.8023207Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-04T10:23:57.8024368Z hint:
+2026-10-04T10:23:57.8025085Z hint: 	git branch -m <name>
+2026-10-04T10:23:57.8025902Z hint:
+2026-10-04T10:23:57.8027000Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-04T10:23:57.8028571Z Initialized empty Git repository in /home/runner/work/PayD/PayD/.git/
+2026-10-04T10:23:57.8033211Z [command]/usr/bin/git remote add origin https://github.com/woahwhattheheck/PayD
+2026-10-04T10:23:57.8097181Z ##[endgroup]
+2026-10-04T10:23:57.8098382Z ##[group]Disabling automatic garbage collection
+2026-10-04T10:23:57.8101775Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-04T10:23:57.8139052Z ##[endgroup]
+2026-10-04T10:23:57.8140458Z ##[group]Setting up auth
+2026-10-04T10:23:57.8147034Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T10:23:57.8203621Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T10:23:57.8608346Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T10:23:57.8646378Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T10:23:57.8907290Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T10:23:57.8956650Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T10:23:57.9224300Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-04T10:23:57.9274834Z ##[endgroup]
+2026-10-04T10:23:57.9276547Z ##[group]Fetching the repository
+2026-10-04T10:23:57.9288262Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:58.5343768Z From https://github.com/woahwhattheheck/PayD
+2026-10-04T10:23:58.5345355Z  * branch            16b3e8a4a967fe403dc313956a92214b172ed966 -> FETCH_HEAD
+2026-10-04T10:23:58.5349207Z ##[endgroup]
+2026-10-04T10:23:58.5350932Z ##[group]Determining the checkout info
+2026-10-04T10:23:58.5352503Z ##[endgroup]
+2026-10-04T10:23:58.5358808Z [command]/usr/bin/git sparse-checkout disable
+2026-10-04T10:23:58.5415946Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-04T10:23:58.5451111Z ##[group]Checking out the ref
+2026-10-04T10:23:58.5462820Z [command]/usr/bin/git checkout --progress --force 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:58.5936528Z Note: switching to '16b3e8a4a967fe403dc313956a92214b172ed966'.
+2026-10-04T10:23:58.5937309Z 
+2026-10-04T10:23:58.5937759Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-04T10:23:58.5938830Z changes and commit them, and you can discard any commits you make in this
+2026-10-04T10:23:58.5940289Z state without impacting any branches by switching back to a branch.
+2026-10-04T10:23:58.5941044Z 
+2026-10-04T10:23:58.5941495Z If you want to create a new branch to retain commits you create, you may
+2026-10-04T10:23:58.5942736Z do so (now or later) by using -c with the switch command. Example:
+2026-10-04T10:23:58.5943291Z 
+2026-10-04T10:23:58.5943551Z   git switch -c <new-branch-name>
+2026-10-04T10:23:58.5943936Z 
+2026-10-04T10:23:58.5944184Z Or undo this operation with:
+2026-10-04T10:23:58.5944563Z 
+2026-10-04T10:23:58.5944787Z   git switch -
+2026-10-04T10:23:58.5945130Z 
+2026-10-04T10:23:58.5945639Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-04T10:23:58.5946423Z 
+2026-10-04T10:23:58.5946928Z HEAD is now at 16b3e8a Keep the PayD runtime image below the Docker size budget
+2026-10-04T10:23:58.5954301Z ##[endgroup]
+2026-10-04T10:23:58.6004384Z [command]/usr/bin/git log -1 --format=%H
+2026-10-04T10:23:58.6038145Z 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:58.6051752Z ##[group]Removing auth
+2026-10-04T10:23:58.6055106Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T10:23:58.6095932Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T10:23:58.6356060Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T10:23:58.6388892Z http.https://github.com/.extraheader
+2026-10-04T10:23:58.6397485Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-04T10:23:58.6438500Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T10:23:58.6676919Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T10:23:58.6714687Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T10:23:58.6950521Z ##[endgroup]
+2026-10-04T10:23:58.7209256Z ##[group]Run set -euo pipefail
+2026-10-04T10:23:58.7210895Z [36;1mset -euo pipefail[0m
+2026-10-04T10:23:58.7212119Z [36;1mmkdir -p evidence[0m
+2026-10-04T10:23:58.7213478Z [36;1mtest "$(git rev-parse HEAD)" = "$SOURCE_SHA"[0m
+2026-10-04T10:23:58.7215392Z [36;1mtest "$(git hash-object backend/Dockerfile)" = "$DOCKERFILE_BLOB"[0m
+2026-10-04T10:23:58.7220510Z [36;1m{ git rev-parse HEAD HEAD^{tree}; git ls-tree HEAD backend/Dockerfile backend/package.json backend/package-lock.json backend/tsconfig.json backend/.dockerignore; docker version; docker buildx version; } > evidence/source-tools.txt[0m
+2026-10-04T10:23:58.7225167Z [36;1mcp backend/Dockerfile evidence/Dockerfile[0m
+2026-10-04T10:23:58.7512460Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-04T10:23:58.7514622Z env:
+2026-10-04T10:23:58.7516106Z   SOURCE_SHA: 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:58.7517927Z   DOCKERFILE_BLOB: 22464e99c7126c051d674a34ff15e6ed5fa60424
+2026-10-04T10:23:58.7519660Z   IMAGE: payd633:source
+2026-10-04T10:23:58.7520963Z ##[endgroup]
+2026-10-04T10:23:59.1537045Z ##[group]Run set -euo pipefail
+2026-10-04T10:23:59.1538281Z [36;1mset -euo pipefail[0m
+2026-10-04T10:23:59.1540155Z [36;1m/usr/bin/time -f '%e' -o evidence/first-build-seconds.txt \[0m
+2026-10-04T10:23:59.1542683Z [36;1m  docker build --pull --progress=plain --tag "$IMAGE" backend 2>&1 | tee evidence/first-build.log[0m
+2026-10-04T10:23:59.1545253Z [36;1mdocker image inspect "$IMAGE" > evidence/image-inspect.json[0m
+2026-10-04T10:23:59.1547332Z [36;1mdocker history --no-trunc "$IMAGE" > evidence/image-history.txt[0m
+2026-10-04T10:23:59.1550464Z [36;1mdocker run --rm --network none --entrypoint sh "$IMAGE" -c 'id -u; cat /etc/alpine-release' > evidence/runtime-identity.txt[0m
+2026-10-04T10:23:59.1554828Z [36;1mdocker run --rm --network none --entrypoint sh "$IMAGE" -c 'du -k -d 2 /usr/src/app/node_modules /usr/local /opt 2>/dev/null | sort -nr | head -60' > evidence/runtime-footprint.txt[0m
+2026-10-04T10:23:59.1623242Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-04T10:23:59.1624715Z env:
+2026-10-04T10:23:59.1625727Z   SOURCE_SHA: 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:23:59.1627347Z   DOCKERFILE_BLOB: 22464e99c7126c051d674a34ff15e6ed5fa60424
+2026-10-04T10:23:59.1628852Z   IMAGE: payd633:source
+2026-10-04T10:23:59.1629979Z ##[endgroup]
+2026-10-04T10:23:59.5416986Z #0 building with "default" instance using docker driver
+2026-10-04T10:23:59.5419463Z 
+2026-10-04T10:23:59.5420994Z #1 [internal] load build definition from Dockerfile
+2026-10-04T10:23:59.5423880Z #1 transferring dockerfile: 1.90kB done
+2026-10-04T10:23:59.5425500Z #1 DONE 0.0s
+2026-10-04T10:23:59.5426179Z 
+2026-10-04T10:23:59.5427105Z #2 [internal] load metadata for docker.io/library/alpine:3.23
+2026-10-04T10:23:59.7711057Z #2 ...
+2026-10-04T10:23:59.7711526Z 
+2026-10-04T10:23:59.7711916Z #3 [auth] library/node:pull token for registry-1.docker.io
+2026-10-04T10:23:59.7712657Z #3 DONE 0.0s
+2026-10-04T10:23:59.7712923Z 
+2026-10-04T10:23:59.7713270Z #4 [auth] library/alpine:pull token for registry-1.docker.io
+2026-10-04T10:23:59.7713934Z #4 DONE 0.0s
+2026-10-04T10:23:59.9213152Z 
+2026-10-04T10:23:59.9214418Z #5 [internal] load metadata for docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-10-04T10:24:00.2176184Z #5 DONE 0.8s
+2026-10-04T10:24:00.2176438Z 
+2026-10-04T10:24:00.2176679Z #2 [internal] load metadata for docker.io/library/alpine:3.23
+2026-10-04T10:24:00.3186164Z #2 DONE 0.9s
+2026-10-04T10:24:00.3187344Z 
+2026-10-04T10:24:00.3187975Z #6 [internal] load .dockerignore
+2026-10-04T10:24:00.3189428Z #6 transferring context: 96B done
+2026-10-04T10:24:00.3190036Z #6 DONE 0.0s
+2026-10-04T10:24:00.3190525Z 
+2026-10-04T10:24:00.3190761Z #7 [internal] load build context
+2026-10-04T10:24:00.3191250Z #7 transferring context: 2.02MB 0.0s done
+2026-10-04T10:24:00.3191801Z #7 DONE 0.0s
+2026-10-04T10:24:00.3192156Z 
+2026-10-04T10:24:00.3194024Z #8 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-10-04T10:24:00.3195261Z #8 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 done
+2026-10-04T10:24:00.4711595Z #8 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 3.86MB / 3.86MB 0.1s done
+2026-10-04T10:24:00.4713187Z #8 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 0B / 43.23MB 0.2s
+2026-10-04T10:24:00.4714597Z #8 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 1.26MB / 1.26MB 0.2s done
+2026-10-04T10:24:00.4716126Z #8 sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 7.67kB / 7.67kB done
+2026-10-04T10:24:00.4718169Z #8 sha256:afdf98210b07b586eb71fa22ba2e432e058e4cd1304d31ed60888755b8c865fb 1.72kB / 1.72kB done
+2026-10-04T10:24:00.4721425Z #8 sha256:11cedc39e663e7c5d5cb9cc77a461a0d2adc25537b94e6831a6108f09cb2001b 6.52kB / 6.52kB done
+2026-10-04T10:24:00.4723036Z #8 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb
+2026-10-04T10:24:00.4723712Z #8 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 0B / 445B 0.2s
+2026-10-04T10:24:00.5726922Z #8 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 20.97MB / 43.23MB 0.3s
+2026-10-04T10:24:00.5728386Z #8 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.1s done
+2026-10-04T10:24:00.5730984Z #8 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 445B / 445B 0.2s done
+2026-10-04T10:24:00.6955391Z #8 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 43.23MB / 43.23MB 0.4s
+2026-10-04T10:24:00.6956575Z #8 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287
+2026-10-04T10:24:00.8052451Z #8 ...
+2026-10-04T10:24:00.8053172Z 
+2026-10-04T10:24:00.8070142Z #9 [production 1/8] FROM docker.io/library/alpine:3.23@sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0
+2026-10-04T10:24:00.8092551Z #9 resolve docker.io/library/alpine:3.23@sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0 done
+2026-10-04T10:24:00.8120772Z #9 sha256:1f3591b8a02ea153f41c5bba878ad477f63ab3d19349762cb77504db02a23e15 1.02kB / 1.02kB done
+2026-10-04T10:24:00.8135338Z #9 sha256:f6d31b983274a75183386cda3aac54849498fac0fc3e0d98f92ff56ed517d92b 611B / 611B done
+2026-10-04T10:24:00.8147430Z #9 sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0 9.22kB / 9.22kB done
+2026-10-04T10:24:00.8151140Z #9 sha256:d0c1d894c237d8192cbcd37e435031ad4eddec173299568a5a05869c2e40dfa3 3.85MB / 3.85MB 0.3s done
+2026-10-04T10:24:00.8154570Z #9 extracting sha256:d0c1d894c237d8192cbcd37e435031ad4eddec173299568a5a05869c2e40dfa3 0.1s done
+2026-10-04T10:24:00.8155724Z #9 DONE 0.4s
+2026-10-04T10:24:00.8155942Z 
+2026-10-04T10:24:00.8156142Z #10 [production 2/8] WORKDIR /usr/src/app
+2026-10-04T10:24:00.8162316Z #10 DONE 0.0s
+2026-10-04T10:24:00.8162550Z 
+2026-10-04T10:24:00.8163842Z #8 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-10-04T10:24:01.7028585Z #8 ...
+2026-10-04T10:24:01.7028827Z 
+2026-10-04T10:24:01.7029932Z #11 [production 3/8] RUN apk add --no-cache libstdc++ wget   && addgroup -S payd && adduser -S -G payd payd   && chown payd:payd /usr/src/app   && ln -s node /usr/local/bin/nodejs
+2026-10-04T10:24:01.7031102Z #11 0.663 (1/6) Installing libgcc (15.2.0-r2)
+2026-10-04T10:24:01.7031576Z #11 0.669 (2/6) Installing libstdc++ (15.2.0-r2)
+2026-10-04T10:24:01.7031985Z #11 0.689 (3/6) Installing libunistring (1.4.1-r0)
+2026-10-04T10:24:01.7032411Z #11 0.703 (4/6) Installing libidn2 (2.3.8-r0)
+2026-10-04T10:24:01.7032856Z #11 0.707 (5/6) Installing pcre2 (10.49-r0)
+2026-10-04T10:24:01.7033163Z #11 0.714 (6/6) Installing wget (1.25.0-r2)
+2026-10-04T10:24:01.7033473Z #11 0.719 Executing busybox-1.37.0-r30.trigger
+2026-10-04T10:24:01.7034209Z #11 0.727 OK: 14.0 MiB in 22 packages
+2026-10-04T10:24:01.7034586Z #11 DONE 0.8s
+2026-10-04T10:24:01.7034807Z 
+2026-10-04T10:24:01.7035479Z #8 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-10-04T10:24:02.1069114Z #8 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 1.3s done
+2026-10-04T10:24:02.1071285Z #8 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122
+2026-10-04T10:24:02.3478950Z #8 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0.0s done
+2026-10-04T10:24:02.3482730Z #8 extracting sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 done
+2026-10-04T10:24:02.3485072Z #8 DONE 1.9s
+2026-10-04T10:24:02.3485754Z 
+2026-10-04T10:24:02.3496685Z #12 [builder 2/7] WORKDIR /usr/src/app
+2026-10-04T10:24:02.3497631Z #12 DONE 0.0s
+2026-10-04T10:24:02.3498220Z 
+2026-10-04T10:24:02.3498699Z #13 [builder 3/7] COPY package*.json ./
+2026-10-04T10:24:02.3499416Z #13 DONE 0.0s
+2026-10-04T10:24:02.3500261Z 
+2026-10-04T10:24:02.3501316Z #14 [production-deps 3/5] RUN addgroup -S payd && adduser -S -G payd payd   && chown payd:payd /usr/src/app
+2026-10-04T10:24:02.3502747Z #14 DONE 0.2s
+2026-10-04T10:24:02.3503282Z 
+2026-10-04T10:24:02.3503656Z #15 [builder 4/7] RUN npm ci
+2026-10-04T10:24:02.5269253Z #15 ...
+2026-10-04T10:24:02.5270177Z 
+2026-10-04T10:24:02.5270758Z #16 [production-deps 4/5] COPY --chown=payd:payd package*.json ./
+2026-10-04T10:24:02.5271715Z #16 DONE 0.0s
+2026-10-04T10:24:02.6772892Z 
+2026-10-04T10:24:02.6774812Z #17 [production-deps 5/5] RUN npm ci --omit=dev   && rm -rf node_modules/exceljs/dist     node_modules/@stellar/stellar-sdk/dist     node_modules/@stellar/stellar-base/dist   && npm cache clean --force
+2026-10-04T10:24:05.7143419Z #17 3.338 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T10:24:05.9789626Z #17 3.600 npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+2026-10-04T10:24:06.3181508Z #17 3.942 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-04T10:24:06.5536911Z #17 4.026 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T10:24:06.9739985Z #17 4.598 npm warn deprecated @otplib/preset-default@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T10:24:07.1980811Z #17 4.659 npm warn deprecated @otplib/plugin-crypto@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T10:24:07.1982470Z #17 4.668 npm warn deprecated fstream@1.0.12: This package is no longer supported.
+2026-10-04T10:24:07.1983959Z #17 4.671 npm warn deprecated @otplib/plugin-thirty-two@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T10:24:07.7394618Z #17 5.362 npm warn deprecated jpeg-exif@1.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T10:24:09.4690607Z #17 7.092 
+2026-10-04T10:24:09.4720634Z #17 7.092 added 376 packages, and audited 377 packages in 7s
+2026-10-04T10:24:09.6793489Z #17 7.092 
+2026-10-04T10:24:09.6796078Z #17 7.092 52 packages are looking for funding
+2026-10-04T10:24:09.6797172Z #17 7.092   run `npm fund` for details
+2026-10-04T10:24:09.6797737Z #17 7.151 
+2026-10-04T10:24:09.6798181Z #17 7.151 19 vulnerabilities (1 low, 7 moderate, 11 high)
+2026-10-04T10:24:09.6798714Z #17 7.151 
+2026-10-04T10:24:09.6799170Z #17 7.151 To address issues that do not require attention, run:
+2026-10-04T10:24:09.6800796Z #17 7.151   npm audit fix
+2026-10-04T10:24:09.6801240Z #17 7.151 
+2026-10-04T10:24:09.6801743Z #17 7.151 To address all issues (including breaking changes), run:
+2026-10-04T10:24:09.6802403Z #17 7.151   npm audit fix --force
+2026-10-04T10:24:09.6802824Z #17 7.151 
+2026-10-04T10:24:09.6803209Z #17 7.151 Run `npm audit` for details.
+2026-10-04T10:24:09.6803690Z #17 7.153 npm notice
+2026-10-04T10:24:09.6804247Z #17 7.153 npm notice New major version of npm available! 10.8.2 -> 12.2.0
+2026-10-04T10:24:09.6805144Z #17 7.153 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+2026-10-04T10:24:09.6806115Z #17 7.153 npm notice To update run: npm install -g npm@12.2.0
+2026-10-04T10:24:09.6806753Z #17 7.153 npm notice
+2026-10-04T10:24:09.7551193Z #17 7.377 npm warn using --force Recommended protections disabled.
+2026-10-04T10:24:10.8608558Z #17 ...
+2026-10-04T10:24:10.8610687Z 
+2026-10-04T10:24:10.8611232Z #15 [builder 4/7] RUN npm ci
+2026-10-04T10:24:10.8612239Z #15 4.807 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2026-10-04T10:24:10.8614515Z #15 5.635 npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+2026-10-04T10:24:10.8626731Z #15 6.376 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-04T10:24:10.8640361Z #15 6.487 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T10:24:10.8642635Z #15 7.290 npm warn deprecated fstream@1.0.12: This package is no longer supported.
+2026-10-04T10:24:10.8644087Z #15 7.851 npm warn deprecated @otplib/plugin-crypto@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T10:24:10.8646143Z #15 7.851 npm warn deprecated @otplib/preset-default@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T10:24:10.8647922Z #15 7.946 npm warn deprecated @otplib/plugin-thirty-two@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+2026-10-04T10:24:10.8649454Z #15 8.072 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+2026-10-04T10:24:10.8653231Z #15 8.212 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+2026-10-04T10:24:10.8654636Z #15 ...
+2026-10-04T10:24:10.8655020Z 
+2026-10-04T10:24:10.8656205Z #17 [production-deps 5/5] RUN npm ci --omit=dev   && rm -rf node_modules/exceljs/dist     node_modules/@stellar/stellar-sdk/dist     node_modules/@stellar/stellar-base/dist   && npm cache clean --force
+2026-10-04T10:24:10.8657794Z #17 DONE 8.5s
+2026-10-04T10:24:11.0471041Z 
+2026-10-04T10:24:11.0472016Z #15 [builder 4/7] RUN npm ci
+2026-10-04T10:24:11.0473105Z #15 8.760 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-04T10:24:11.0475186Z #15 8.849 npm warn deprecated jpeg-exif@1.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-04T10:24:12.0587715Z #15 ...
+2026-10-04T10:24:12.0592435Z 
+2026-10-04T10:24:12.0593464Z #18 [production 4/8] COPY --from=production-deps /usr/local/bin/node /usr/local/bin/node
+2026-10-04T10:24:12.0594401Z #18 DONE 0.1s
+2026-10-04T10:24:12.2749051Z 
+2026-10-04T10:24:12.2763582Z #19 [production 5/8] COPY --from=production-deps /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+2026-10-04T10:24:12.2764749Z #19 DONE 0.0s
+2026-10-04T10:24:12.2764972Z 
+2026-10-04T10:24:12.2765412Z #20 [production 6/8] COPY --chown=payd:payd package*.json ./
+2026-10-04T10:24:12.2765972Z #20 DONE 0.0s
+2026-10-04T10:24:12.2766321Z 
+2026-10-04T10:24:12.2767005Z #21 [production 7/8] COPY --from=production-deps --chown=payd:payd /usr/src/app/node_modules ./node_modules
+2026-10-04T10:24:14.0164912Z #21 DONE 1.9s
+2026-10-04T10:24:14.0165217Z 
+2026-10-04T10:24:14.0165399Z #15 [builder 4/7] RUN npm ci
+2026-10-04T10:24:14.0167337Z #15 10.14 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T10:24:14.0171466Z #15 10.14 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T10:24:14.0175223Z #15 10.16 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-04T10:24:14.0177813Z #15 11.47 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-10-04T10:25:26.5483169Z #15 84.35 
+2026-10-04T10:25:26.5483760Z #15 84.35 added 826 packages, and audited 827 packages in 1m
+2026-10-04T10:25:26.6987133Z #15 84.35 
+2026-10-04T10:25:26.6987767Z #15 84.35 135 packages are looking for funding
+2026-10-04T10:25:26.6988341Z #15 84.35   run `npm fund` for details
+2026-10-04T10:25:26.8695726Z #15 84.67 
+2026-10-04T10:25:26.8696669Z #15 84.67 63 vulnerabilities (3 low, 8 moderate, 52 high)
+2026-10-04T10:25:26.8697559Z #15 84.67 
+2026-10-04T10:25:26.8698118Z #15 84.67 To address issues that do not require attention, run:
+2026-10-04T10:25:26.8698671Z #15 84.67   npm audit fix
+2026-10-04T10:25:26.8699375Z #15 84.67 
+2026-10-04T10:25:26.8700042Z #15 84.67 To address all issues possible (including breaking changes), run:
+2026-10-04T10:25:26.8700671Z #15 84.67   npm audit fix --force
+2026-10-04T10:25:26.8701051Z #15 84.67 
+2026-10-04T10:25:26.8701435Z #15 84.67 Some issues need review, and may require choosing
+2026-10-04T10:25:26.8701954Z #15 84.67 a different dependency.
+2026-10-04T10:25:26.8702328Z #15 84.67 
+2026-10-04T10:25:26.8702640Z #15 84.67 Run `npm audit` for details.
+2026-10-04T10:25:26.9941436Z #15 84.67 npm notice
+2026-10-04T10:25:26.9941991Z #15 84.67 npm notice New major version of npm available! 10.8.2 -> 12.2.0
+2026-10-04T10:25:26.9942907Z #15 84.67 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+2026-10-04T10:25:26.9943850Z #15 84.67 npm notice To update run: npm install -g npm@12.2.0
+2026-10-04T10:25:26.9944424Z #15 84.67 npm notice
+2026-10-04T10:25:26.9944722Z #15 DONE 84.8s
+2026-10-04T10:25:27.2074370Z 
+2026-10-04T10:25:27.2075120Z #22 [builder 5/7] COPY tsconfig*.json ./
+2026-10-04T10:25:27.2075648Z #22 DONE 0.0s
+2026-10-04T10:25:27.2075828Z 
+2026-10-04T10:25:27.2075975Z #23 [builder 6/7] COPY src/ ./src/
+2026-10-04T10:25:27.2076366Z #23 DONE 0.0s
+2026-10-04T10:25:27.2076535Z 
+2026-10-04T10:25:27.2076669Z #24 [builder 7/7] RUN npm run build
+2026-10-04T10:25:27.3344413Z #24 0.277 
+2026-10-04T10:25:27.3344896Z #24 0.277 > payd-backend@1.0.0 build
+2026-10-04T10:25:27.3345443Z #24 0.277 > tsc -p tsconfig.build.json
+2026-10-04T10:25:27.3345911Z #24 0.277 
+2026-10-04T10:25:34.0361502Z #24 DONE 7.0s
+2026-10-04T10:25:34.4291708Z 
+2026-10-04T10:25:34.4292872Z #25 [production 8/8] COPY --from=builder --chown=payd:payd /usr/src/app/dist ./dist
+2026-10-04T10:25:34.5350842Z #25 DONE 0.1s
+2026-10-04T10:25:34.6872255Z 
+2026-10-04T10:25:34.6872912Z #26 exporting to image
+2026-10-04T10:25:34.6873400Z #26 exporting layers
+2026-10-04T10:25:35.6841711Z #26 exporting layers 1.1s done
+2026-10-04T10:25:35.7145954Z #26 writing image sha256:c96f773cd73d904bfcdc40ab256fb0c67b28f2ddfe0d26f4a6ac61a54bce46b4 done
+2026-10-04T10:25:35.7147355Z #26 naming to docker.io/library/payd633:source done
+2026-10-04T10:25:35.7148428Z #26 DONE 1.2s
+2026-10-04T10:25:36.2360145Z ##[group]Run set -euo pipefail
+2026-10-04T10:25:36.2360599Z [36;1mset -euo pipefail[0m
+2026-10-04T10:25:36.2361131Z [36;1mdocker run --rm -i --network none "$IMAGE" node --input-type=module > evidence/runtime-smoke.json <<'JS'[0m
+2026-10-04T10:25:36.2361712Z [36;1mimport assert from 'node:assert/strict';[0m
+2026-10-04T10:25:36.2362067Z [36;1mimport { createRequire } from 'node:module';[0m
+2026-10-04T10:25:36.2362495Z [36;1mconst require = createRequire(process.cwd() + '/package.json');[0m
+2026-10-04T10:25:36.2362937Z [36;1massert.match(process.version, /^v20\./);[0m
+2026-10-04T10:25:36.2363324Z [36;1mconst { Keypair } = require('@stellar/stellar-sdk');[0m
+2026-10-04T10:25:36.2363784Z [36;1mconst { Keypair: BaseKeypair } = require('@stellar/stellar-base');[0m
+2026-10-04T10:25:36.2364268Z [36;1mconst message = Buffer.from('PayD Docker 529 runtime smoke');[0m
+2026-10-04T10:25:36.2364756Z [36;1mconst keypair = Keypair.fromRawEd25519Seed(Buffer.alloc(32, 7));[0m
+2026-10-04T10:25:36.2365215Z [36;1mconst signature = keypair.sign(message);[0m
+2026-10-04T10:25:36.2365596Z [36;1massert.equal(keypair.verify(message, signature), true);[0m
+2026-10-04T10:25:36.2366174Z [36;1massert.equal(BaseKeypair.fromPublicKey(keypair.publicKey()).verify(message, signature), true);[0m
+2026-10-04T10:25:36.2366698Z [36;1mconst ExcelJS = require('exceljs');[0m
+2026-10-04T10:25:36.2367018Z [36;1mconst workbook = new ExcelJS.Workbook();[0m
+2026-10-04T10:25:36.2367425Z [36;1mworkbook.addWorksheet('smoke').getCell('A1').value = 'PayD #529';[0m
+2026-10-04T10:25:36.2367872Z [36;1mconst xlsx = await workbook.xlsx.writeBuffer();[0m
+2026-10-04T10:25:36.2368220Z [36;1mconst restored = new ExcelJS.Workbook();[0m
+2026-10-04T10:25:36.2368528Z [36;1mawait restored.xlsx.load(xlsx);[0m
+2026-10-04T10:25:36.2368954Z [36;1massert.equal(restored.getWorksheet('smoke').getCell('A1').value, 'PayD #529');[0m
+2026-10-04T10:25:36.2369610Z [36;1mconst sodium = require('sodium-native');[0m
+2026-10-04T10:25:36.2370358Z [36;1mconst random = Buffer.alloc(32);[0m
+2026-10-04T10:25:36.2370655Z [36;1msodium.randombytes_buf(random);[0m
+2026-10-04T10:25:36.2370997Z [36;1massert.equal(random.some(value => value !== 0), true);[0m
+2026-10-04T10:25:36.2371349Z [36;1mconsole.log(JSON.stringify({[0m
+2026-10-04T10:25:36.2371614Z [36;1m  passed: true,[0m
+2026-10-04T10:25:36.2371860Z [36;1m  node_version: process.version,[0m
+2026-10-04T10:25:36.2372138Z [36;1m  stellar_sign_verify: true,[0m
+2026-10-04T10:25:36.2372414Z [36;1m  stellar_base_verify: true,[0m
+2026-10-04T10:25:36.2372681Z [36;1m  exceljs_xlsx_roundtrip: true,[0m
+2026-10-04T10:25:36.2372968Z [36;1m  sodium_native_randombytes: true[0m
+2026-10-04T10:25:36.2373240Z [36;1m}, null, 2));[0m
+2026-10-04T10:25:36.2373456Z [36;1mJS[0m
+2026-10-04T10:25:36.2373663Z [36;1mcat evidence/runtime-smoke.json[0m
+2026-10-04T10:25:36.2441012Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-04T10:25:36.2441370Z env:
+2026-10-04T10:25:36.2441636Z   SOURCE_SHA: 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:25:36.2442013Z   DOCKERFILE_BLOB: 22464e99c7126c051d674a34ff15e6ed5fa60424
+2026-10-04T10:25:36.2442342Z   IMAGE: payd633:source
+2026-10-04T10:25:36.2442555Z ##[endgroup]
+2026-10-04T10:25:37.0437756Z /usr/src/app/node_modules/require-addon/lib/node.js:50
+2026-10-04T10:25:37.0438493Z     const err = new Error(message, cause ? { cause } : {})
+2026-10-04T10:25:37.0439220Z                 ^
+2026-10-04T10:25:37.0439368Z 
+2026-10-04T10:25:37.0439678Z Error: Cannot find addon '.' imported from 'file:///usr/src/app/node_modules/sodium-native/index.js'
+2026-10-04T10:25:37.0440925Z Candidates:
+2026-10-04T10:25:37.0441770Z - file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0442863Z - file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0444233Z - file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0445288Z - file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0446295Z - file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0447191Z - file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0447962Z - file:///usr/src/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0448643Z - file:///usr/src/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0449323Z - file:///usr/prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0450160Z - file:///usr/prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0450781Z - file:///prebuilds/linux-x64-musl/sodium-native@4.3.3.node
+2026-10-04T10:25:37.0451452Z - file:///prebuilds/linux-x64-musl/sodium-native.node
+2026-10-04T10:25:37.0452043Z - linked:libsodium-native.4.3.3.so
+2026-10-04T10:25:37.0452459Z - linked:libsodium-native.so
+2026-10-04T10:25:37.0453201Z     at Function.addon (/usr/src/app/node_modules/require-addon/lib/node.js:50:17)
+2026-10-04T10:25:37.0454159Z     at Object.<anonymous> (/usr/src/app/node_modules/sodium-native/index.js:3:26)
+2026-10-04T10:25:37.0454966Z     ... 6 lines matching cause stack trace ...
+2026-10-04T10:25:37.0455566Z     at file:///usr/src/app/[eval1]:19:16 {
+2026-10-04T10:25:37.0456267Z   code: 'ADDON_NOT_FOUND',
+2026-10-04T10:25:37.0456759Z   specifier: '.',
+2026-10-04T10:25:37.0457374Z   referrer: file:///usr/src/app/node_modules/sodium-native/index.js,
+2026-10-04T10:25:37.0458003Z   candidates: [
+2026-10-04T10:25:37.0458694Z     file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0460221Z     file:///usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0461248Z     file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0462677Z     file:///usr/src/app/node_modules/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0463522Z     file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0464301Z     file:///usr/src/app/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0465040Z     file:///usr/src/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0465755Z     file:///usr/src/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0466443Z     file:///usr/prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0467111Z     file:///usr/prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0467756Z     file:///prebuilds/linux-x64-musl/sodium-native@4.3.3.node,
+2026-10-04T10:25:37.0468388Z     file:///prebuilds/linux-x64-musl/sodium-native.node,
+2026-10-04T10:25:37.0468900Z     linked:libsodium-native.4.3.3.so,
+2026-10-04T10:25:37.0469198Z     linked:libsodium-native.so
+2026-10-04T10:25:37.0469438Z   ],
+2026-10-04T10:25:37.0470050Z   [cause]: Error: Cannot find module '/prebuilds/linux-x64-musl/sodium-native.node'
+2026-10-04T10:25:37.0470495Z   Require stack:
+2026-10-04T10:25:37.0470760Z   - /usr/src/app/node_modules/require-addon/lib/node.js
+2026-10-04T10:25:37.0471115Z   - /usr/src/app/node_modules/sodium-native/index.js
+2026-10-04T10:25:37.0471498Z   - /usr/src/app/node_modules/@stellar/stellar-base/lib/signing.js
+2026-10-04T10:25:37.0471927Z   - /usr/src/app/node_modules/@stellar/stellar-base/lib/index.js
+2026-10-04T10:25:37.0472371Z   - /usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/server.js
+2026-10-04T10:25:37.0472857Z   - /usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/index.js
+2026-10-04T10:25:37.0473304Z   - /usr/src/app/node_modules/@stellar/stellar-sdk/lib/index.js
+2026-10-04T10:25:37.0473644Z   - /usr/src/app/package.json
+2026-10-04T10:25:37.0473999Z       at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+2026-10-04T10:25:37.0474433Z       at Module._load (node:internal/modules/cjs/loader:1038:27)
+2026-10-04T10:25:37.0475209Z       at Module.require (node:internal/modules/cjs/loader:1289:19)
+2026-10-04T10:25:37.0475892Z       at require (node:internal/modules/helpers:182:18)
+2026-10-04T10:25:37.0476647Z       at Function.addon (/usr/src/app/node_modules/require-addon/lib/node.js:35:20)
+2026-10-04T10:25:37.0477564Z       at Object.<anonymous> (/usr/src/app/node_modules/sodium-native/index.js:3:26)
+2026-10-04T10:25:37.0478370Z       at Module._compile (node:internal/modules/cjs/loader:1521:14)
+2026-10-04T10:25:37.0479112Z       at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+2026-10-04T10:25:37.0480036Z       at Module.load (node:internal/modules/cjs/loader:1266:32)
+2026-10-04T10:25:37.0481139Z       at Module._load (node:internal/modules/cjs/loader:1091:12)
+2026-10-04T10:25:37.0481852Z       at Module.require (node:internal/modules/cjs/loader:1289:19)
+2026-10-04T10:25:37.0482491Z       at require (node:internal/modules/helpers:182:18)
+2026-10-04T10:25:37.0483022Z       at file:///usr/src/app/[eval1]:19:16 {
+2026-10-04T10:25:37.0483526Z     code: 'MODULE_NOT_FOUND',
+2026-10-04T10:25:37.0484029Z     requireStack: [
+2026-10-04T10:25:37.0484309Z       '/usr/src/app/node_modules/require-addon/lib/node.js',
+2026-10-04T10:25:37.0484748Z       '/usr/src/app/node_modules/sodium-native/index.js',
+2026-10-04T10:25:37.0485341Z       '/usr/src/app/node_modules/@stellar/stellar-base/lib/signing.js',
+2026-10-04T10:25:37.0485832Z       '/usr/src/app/node_modules/@stellar/stellar-base/lib/index.js',
+2026-10-04T10:25:37.0486285Z       '/usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/server.js',
+2026-10-04T10:25:37.0486771Z       '/usr/src/app/node_modules/@stellar/stellar-sdk/lib/federation/index.js',
+2026-10-04T10:25:37.0487213Z       '/usr/src/app/node_modules/@stellar/stellar-sdk/lib/index.js',
+2026-10-04T10:25:37.0487567Z       '/usr/src/app/package.json'
+2026-10-04T10:25:37.0488015Z     ]
+2026-10-04T10:25:37.0488189Z   }
+2026-10-04T10:25:37.0488360Z }
+2026-10-04T10:25:37.0488454Z 
+2026-10-04T10:25:37.0488547Z Node.js v20.20.2
+2026-10-04T10:25:37.0995866Z ##[error]Process completed with exit code 1.
+2026-10-04T10:25:37.1086613Z ##[group]Run actions/upload-artifact@v4
+2026-10-04T10:25:37.1086920Z with:
+2026-10-04T10:25:37.1087156Z   name: payd633-docker-acceptance-ledger0938
+2026-10-04T10:25:37.1087461Z   path: evidence/
+2026-10-04T10:25:37.1087667Z   retention-days: 7
+2026-10-04T10:25:37.1087883Z   if-no-files-found: error
+2026-10-04T10:25:37.1088122Z   compression-level: 6
+2026-10-04T10:25:37.1088338Z   overwrite: false
+2026-10-04T10:25:37.1088556Z   include-hidden-files: false
+2026-10-04T10:25:37.1088790Z env:
+2026-10-04T10:25:37.1089018Z   SOURCE_SHA: 16b3e8a4a967fe403dc313956a92214b172ed966
+2026-10-04T10:25:37.1089385Z   DOCKERFILE_BLOB: 22464e99c7126c051d674a34ff15e6ed5fa60424
+2026-10-04T10:25:37.1089970Z   IMAGE: payd633:source
+2026-10-04T10:25:37.1090222Z ##[endgroup]
+2026-10-04T10:25:37.2879421Z (node:3235) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-04T10:25:37.2880599Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-04T10:25:37.2976844Z With the provided path, there will be 9 files uploaded
+2026-10-04T10:25:37.2984312Z Artifact name is valid!
+2026-10-04T10:25:37.2985199Z Root directory input is valid!
+2026-10-04T10:25:37.6769397Z Beginning upload of artifact content to blob storage
+2026-10-04T10:25:37.7111938Z (node:3235) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-04T10:25:37.9688052Z Uploaded bytes 8352
+2026-10-04T10:25:38.0424249Z Finished uploading artifact content to blob storage!
+2026-10-04T10:25:38.0425745Z SHA256 digest of uploaded artifact zip is d998385e74418be5bd55563800c246f5ae9c927c031658eff751ea7299aba5e1
+2026-10-04T10:25:38.0427105Z Finalizing artifact upload
+2026-10-04T10:25:38.3136222Z Artifact payd633-docker-acceptance-ledger0938.zip successfully finalized. Artifact ID 11300895713
+2026-10-04T10:25:38.3138037Z Artifact payd633-docker-acceptance-ledger0938 has been successfully uploaded! Final size is 8352 bytes. Artifact ID is 11300895713
+2026-10-04T10:25:38.3143978Z Artifact download URL: https://github.com/woahwhattheheck/PayD/actions/runs/37195231306/artifacts/11300895713
+2026-10-04T10:25:38.3387209Z Post job cleanup.
+2026-10-04T10:25:38.4319404Z [command]/usr/bin/git version
+2026-10-04T10:25:38.4366222Z git version 2.55.0
+2026-10-04T10:25:38.4409250Z Temporarily overriding HOME='/home/runner/work/_temp/67919c40-7955-469c-9432-4822640c4d11' before making global git config changes
+2026-10-04T10:25:38.4410776Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T10:25:38.4416436Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/PayD/PayD
+2026-10-04T10:25:38.4463328Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T10:25:38.4501036Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T10:25:38.4765904Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T10:25:38.4811529Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T10:25:38.5101841Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T10:25:38.5148749Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T10:25:38.5585479Z Cleaning up orphan processes
+2026-10-04T10:25:38.5946258Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

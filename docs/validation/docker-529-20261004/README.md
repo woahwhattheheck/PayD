@@ -1,5 +1,7 @@
 # Docker build prerequisites for issue #529
 
+Later production build repairs and image-size work are documented in the [completed Docker acceptance report](ACCEPTANCE.md). The two failed attempts below remain historical evidence for their exact source commits.
+
 These are the two initial, source-pinned Docker build attempts for [issue #529](https://github.com/Protocol-Guild/PayD/issues/529) and [the existing contribution #633](https://github.com/Protocol-Guild/PayD/pull/633). Both stopped at TypeScript compilation before a final image was exported. They establish concrete build prerequisites; they do not establish image-size, runtime-user, healthcheck-execution, or dependency-cache acceptance.
 
 ## Executed sources and results

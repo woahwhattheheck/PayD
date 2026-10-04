@@ -1,0 +1,110 @@
+{
+  "source_commit": "16b3e8a4a967fe403dc313956a92214b172ed966",
+  "dockerfile_blob": "22464e99c7126c051d674a34ff15e6ed5fa60424",
+  "github_run_id": "37195859147",
+  "base_digests_from_build": [
+    "sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+  ],
+  "final_alpine_base_digests_from_build": [
+    "sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0"
+  ],
+  "image_id": "sha256:62316961ed6e1e23c2eecc8ecb2311237a63ad3bc619a0a59dc39523f4fc7e3f",
+  "size_uncompressed_bytes": 198093652,
+  "size_limit_bytes": 200000000,
+  "configured_user": "payd",
+  "observed_uid": 100,
+  "alpine_release": "3.23.6",
+  "healthcheck": {
+    "Test": [
+      "CMD-SHELL",
+      "wget -qO- \"http://127.0.0.1:${PORT:-3001}/health/live\" || exit 1"
+    ],
+    "Interval": 30000000000,
+    "Timeout": 5000000000,
+    "StartPeriod": 20000000000,
+    "Retries": 3
+  },
+  "stages": [
+    [
+      "node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293",
+      "builder"
+    ],
+    [
+      "node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293",
+      "production-deps"
+    ],
+    [
+      "alpine:3.23",
+      "production"
+    ]
+  ],
+  "dependency_cache_steps": [
+    {
+      "step": "10",
+      "stage": "builder",
+      "command": "npm ci",
+      "cached": true
+    },
+    {
+      "step": "16",
+      "stage": "production-deps",
+      "command": "npm ci --omit=dev   && rm -rf node_modules/exceljs/dist     node_modules/@stellar/stellar-sdk/dist     node_modules/@stellar/stellar-base/dist   && npm cache clean --force",
+      "cached": true
+    }
+  ],
+  "first_build_seconds": 72.91,
+  "source_change_build_seconds": 5.93,
+  "cache_probe": "one temporary comment in backend/src/index.ts; first image and product source unchanged",
+  "runtime_smoke": {
+    "passed": true,
+    "node_version": "v20.20.2",
+    "stellar_sign_verify": true,
+    "stellar_base_verify": true,
+    "exceljs_xlsx_roundtrip": true,
+    "fast_signing": false,
+    "sodium_native": {
+      "package_version": "4.3.3",
+      "prebuild_directories": [
+        "android-arm",
+        "android-arm64",
+        "android-ia32",
+        "android-x64",
+        "darwin-arm64",
+        "darwin-x64",
+        "ios-arm64",
+        "ios-arm64-simulator",
+        "ios-x64-simulator",
+        "linux-arm64",
+        "linux-x64",
+        "win32-arm64",
+        "win32-x64"
+      ],
+      "musl_candidates": [
+        {
+          "path": "/usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native@4.3.3.node",
+          "exists": false
+        },
+        {
+          "path": "/usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native.node",
+          "exists": false
+        }
+      ],
+      "available": false,
+      "error_code": "ADDON_NOT_FOUND",
+      "randombytes_passed": null,
+      "supported_fallback": "TweetNaCl"
+    }
+  },
+  "runtime_scope": "id, Alpine release, Node version, Stellar sign/verify, ExcelJS XLSX buffer roundtrip, optional sodium-native availability and supported TweetNaCl fallback; application/database health was not executed",
+  "criteria": {
+    "under_200MB": true,
+    "non_root": true,
+    "healthcheck_configured": true,
+    "multi_stage_alpine": true,
+    "both_dependency_layers_cached": true,
+    "base_digest_recorded": true,
+    "final_alpine_base_digest_recorded": true,
+    "runtime_smoke_passed": true
+  },
+  "passed": true
+}

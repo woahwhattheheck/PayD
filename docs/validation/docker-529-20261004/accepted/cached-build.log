@@ -1,0 +1,84 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.90kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/alpine:3.23
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 96B done
+#4 DONE 0.0s
+
+#5 [production 1/8] FROM docker.io/library/alpine:3.23@sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0
+#5 DONE 0.0s
+
+#6 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 19.77kB 0.0s done
+#7 DONE 0.0s
+
+#8 [builder 2/7] WORKDIR /usr/src/app
+#8 CACHED
+
+#9 [builder 3/7] COPY package*.json ./
+#9 CACHED
+
+#10 [builder 4/7] RUN npm ci
+#10 CACHED
+
+#11 [builder 5/7] COPY tsconfig*.json ./
+#11 CACHED
+
+#12 [builder 6/7] COPY src/ ./src/
+#12 DONE 0.0s
+
+#13 [builder 7/7] RUN npm run build
+#13 0.230 
+#13 0.230 > payd-backend@1.0.0 build
+#13 0.230 > tsc -p tsconfig.build.json
+#13 0.230 
+#13 DONE 4.9s
+
+#14 [production 3/8] RUN apk add --no-cache libstdc++ wget   && addgroup -S payd && adduser -S -G payd payd   && chown payd:payd /usr/src/app   && ln -s node /usr/local/bin/nodejs
+#14 CACHED
+
+#15 [production-deps 4/5] COPY --chown=payd:payd package*.json ./
+#15 CACHED
+
+#16 [production-deps 5/5] RUN npm ci --omit=dev   && rm -rf node_modules/exceljs/dist     node_modules/@stellar/stellar-sdk/dist     node_modules/@stellar/stellar-base/dist   && npm cache clean --force
+#16 CACHED
+
+#17 [production 4/8] COPY --from=production-deps /usr/local/bin/node /usr/local/bin/node
+#17 CACHED
+
+#18 [production 6/8] COPY --chown=payd:payd package*.json ./
+#18 CACHED
+
+#19 [production 2/8] WORKDIR /usr/src/app
+#19 CACHED
+
+#20 [production-deps 3/5] RUN addgroup -S payd && adduser -S -G payd payd   && chown payd:payd /usr/src/app
+#20 CACHED
+
+#21 [production 5/8] COPY --from=production-deps /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+#21 CACHED
+
+#22 [production 7/8] COPY --from=production-deps --chown=payd:payd /usr/src/app/node_modules ./node_modules
+#22 CACHED
+
+#23 [production 8/8] COPY --from=builder --chown=payd:payd /usr/src/app/dist ./dist
+#23 DONE 0.1s
+
+#24 exporting to image
+#24 exporting layers
+#24 exporting layers 0.3s done
+#24 writing image sha256:a5cf193ce0611ce2fc06eb0c2f1edb9cdeac7378bd5e0ca993722749889b84f6 done
+#24 naming to docker.io/library/payd633:cache-probe done
+#24 DONE 0.4s

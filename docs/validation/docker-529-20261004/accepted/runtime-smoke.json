@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "node_version": "v20.20.2",
+  "stellar_sign_verify": true,
+  "stellar_base_verify": true,
+  "exceljs_xlsx_roundtrip": true,
+  "fast_signing": false,
+  "sodium_native": {
+    "package_version": "4.3.3",
+    "prebuild_directories": [
+      "android-arm",
+      "android-arm64",
+      "android-ia32",
+      "android-x64",
+      "darwin-arm64",
+      "darwin-x64",
+      "ios-arm64",
+      "ios-arm64-simulator",
+      "ios-x64-simulator",
+      "linux-arm64",
+      "linux-x64",
+      "win32-arm64",
+      "win32-x64"
+    ],
+    "musl_candidates": [
+      {
+        "path": "/usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native@4.3.3.node",
+        "exists": false
+      },
+      {
+        "path": "/usr/src/app/node_modules/sodium-native/prebuilds/linux-x64-musl/sodium-native.node",
+        "exists": false
+      }
+    ],
+    "available": false,
+    "error_code": "ADDON_NOT_FOUND",
+    "randombytes_passed": null,
+    "supported_fallback": "TweetNaCl"
+  }
+}

@@ -1,0 +1,60 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 913B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 96B done
+#3 DONE 0.0s
+
+#4 [builder 1/7] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 19.77kB done
+#5 DONE 0.0s
+
+#6 [builder 4/7] RUN npm ci
+#6 CACHED
+
+#7 [builder 2/7] WORKDIR /usr/src/app
+#7 CACHED
+
+#8 [builder 3/7] COPY package*.json ./
+#8 CACHED
+
+#9 [builder 5/7] COPY tsconfig*.json ./
+#9 CACHED
+
+#10 [builder 6/7] COPY src/ ./src/
+#10 DONE 0.0s
+
+#11 [builder 7/7] RUN npm run build
+#11 0.206 
+#11 0.206 > payd-backend@1.0.0 build
+#11 0.206 > tsc -p tsconfig.build.json
+#11 0.206 
+#11 DONE 4.9s
+
+#12 [production 3/6] RUN apk add --no-cache wget   && addgroup -S payd && adduser -S -G payd payd   && chown payd:payd /usr/src/app
+#12 CACHED
+
+#13 [production 4/6] COPY --chown=payd:payd package*.json ./
+#13 CACHED
+
+#14 [production 5/6] RUN npm ci --omit=dev && npm cache clean --force
+#14 CACHED
+
+#15 [production 6/6] COPY --from=builder --chown=payd:payd /usr/src/app/dist ./dist
+#15 DONE 0.1s
+
+#16 exporting to image
+#16 exporting layers
+#16 exporting layers 0.5s done
+#16 writing image sha256:febbc4509a5c7f26dfbc1b645e997fba0eb670ae23cc9ab67071515ce7353503 done
+#16 naming to docker.io/library/payd633:cache-probe done
+#16 DONE 0.5s

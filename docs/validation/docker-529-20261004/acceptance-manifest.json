@@ -1,0 +1,293 @@
+{
+  "issue": "https://github.com/Protocol-Guild/PayD/issues/529",
+  "pull_request": "https://github.com/Protocol-Guild/PayD/pull/633",
+  "measure": "docker image inspect .Size, uncompressed image bytes; decimal 200 MB limit",
+  "attempts": [
+    {
+      "run_id": 37194143600,
+      "job_id": 111412372477,
+      "controller_commit": "9cfc0dbbe55e4593f443aa83eef23d0e472ffaa3",
+      "artifact_id": 11300157797,
+      "artifact_zip_sha256": "7fe3c3f9ade28295f7c832a493d90e1631df3df063378d688c5272338582b724",
+      "directory": "combined-oversize",
+      "product_commit": "9f05ce2afe17af24a46b030b60f76b8a4f6ee99c",
+      "dockerfile_blob": "cca91a6ccb01255f8c0ea8787898025793ceda3e",
+      "passed": false,
+      "files": [
+        {
+          "path": "combined-oversize/Dockerfile",
+          "bytes": 874,
+          "sha256": "8162246d17be5884c3add6e38db1a7147d182d45ab2c3ae1faacff449c9e78bb",
+          "git_blob": "cca91a6ccb01255f8c0ea8787898025793ceda3e"
+        },
+        {
+          "path": "combined-oversize/cache-probe-before-blob.txt",
+          "bytes": 41,
+          "sha256": "65d773497429e863d6c5eb93bc7696410065dc8bdde42cf18a8de658e1e9cbf2",
+          "git_blob": "04f4840ecb3c7f1a2d2dac6e867866e844c85be9"
+        },
+        {
+          "path": "combined-oversize/cache-probe-paths.txt",
+          "bytes": 21,
+          "sha256": "be71429b17f9883e6eca5c41660f926c76dace153710c65ed2528f94031e101b",
+          "git_blob": "97354a25ce9f878f52db3ccbe0db6158ed399751"
+        },
+        {
+          "path": "combined-oversize/cache-probe.diff",
+          "bytes": 347,
+          "sha256": "b359db48624c7a9d953ed92ffd57ea47e6c805469cc6ea184faec4d1c98befc9",
+          "git_blob": "bcad6d83f64a923b031129e6ce32cb7ace1b6443"
+        },
+        {
+          "path": "combined-oversize/cached-build-seconds.txt",
+          "bytes": 5,
+          "sha256": "5f3af8c08ac1e2ea663b186a107d27f9af16e20eb18942913af98dfc61c093ce",
+          "git_blob": "5a33ecbd4c1cb7b4d4dc39127c0edf199755f235"
+        },
+        {
+          "path": "combined-oversize/cached-build.log",
+          "bytes": 1574,
+          "sha256": "88b5068cebf748c27d17869262d7fc3d606d03559406187e30882c81aabf58fc",
+          "git_blob": "7febb8bbaa004ba28b14effcc39d889a84e735f4"
+        },
+        {
+          "path": "combined-oversize/first-build-seconds.txt",
+          "bytes": 6,
+          "sha256": "e6a1a2a18c6810a39b461d589aacf56b1d644f646c834d04bf6def09a98ba5ce",
+          "git_blob": "cf95da20a70a8d2c50383d32a0eec321fb6a4dbe"
+        },
+        {
+          "path": "combined-oversize/first-build.log",
+          "bytes": 9880,
+          "sha256": "49926b52e2a1b75249fbfe30503284ac244ea5524c3756ba0b502540c200e8a6",
+          "git_blob": "6a94a8e5282a60186d2b8778af1be8fef4e1d97c"
+        },
+        {
+          "path": "combined-oversize/image-history.txt",
+          "bytes": 59816,
+          "sha256": "7fec3d2c91f965ea0d7f0897cd84b004e6fe11eac0504ea455126cf6bc241aa2",
+          "git_blob": "45ccca1531c3f13de104f23f602a7dca6faf528b"
+        },
+        {
+          "path": "combined-oversize/image-inspect.json",
+          "bytes": 3768,
+          "sha256": "9618ae18610936a4873fafa818c615f334a75b0f4f765cb9b2f93fa77e87b2ba",
+          "git_blob": "8e2e4b76c8fcb80430249ec88642a78063acc3f5"
+        },
+        {
+          "path": "combined-oversize/result.json",
+          "bytes": 1687,
+          "sha256": "2f76554c9508bafdefb433171bfbcb33750d68a117b24c67574f693830aec41d",
+          "git_blob": "31de3041c6cb9fb06bdd94b52d4d8e745f9004a6"
+        },
+        {
+          "path": "combined-oversize/runtime-footprint.txt",
+          "bytes": 2364,
+          "sha256": "6ed9393c8d401fb6500d646dc5e6ac82397233136ed41a0779ea63e3b4eb111a",
+          "git_blob": "6719bddb5e05ab58ef0f477fc9a334c300e8b24c"
+        },
+        {
+          "path": "combined-oversize/runtime-identity.txt",
+          "bytes": 11,
+          "sha256": "c1ff6e405feb13f8e396f3a1f520a1de798efc133ae6da58c7fcc5e5f9f4d374",
+          "git_blob": "4b6cb11fcc7b2de3310882438251cbca9a700b6a"
+        },
+        {
+          "path": "combined-oversize/source-tools.txt",
+          "bytes": 1300,
+          "sha256": "b94419d1940de4a9f0645c2a7cf92a68de1fa0fbfbc96ba90aa2841268c7181b",
+          "git_blob": "f1aa2029ec100f8600e00ac7edde8a1c4762894c"
+        }
+      ]
+    },
+    {
+      "run_id": 37195231306,
+      "job_id": 111415603262,
+      "controller_commit": "d1e5ed5446b910d6767edf2c6196d4846179ff4c",
+      "artifact_id": 11300895713,
+      "artifact_zip_sha256": "d998385e74418be5bd55563800c246f5ae9c927c031658eff751ea7299aba5e1",
+      "failure": "Direct require of optional sodium-native raised ADDON_NOT_FOUND for linux-x64-musl; later cache probe and final evaluation were skipped.",
+      "measured_size_uncompressed_bytes": 198093652,
+      "record_source": "Native job log and artifact image-inspect.json; this attempt produced no result.json and an empty runtime-smoke.json.",
+      "directory": "optional-native-check",
+      "product_commit": "16b3e8a4a967fe403dc313956a92214b172ed966",
+      "dockerfile_blob": "22464e99c7126c051d674a34ff15e6ed5fa60424",
+      "passed": false,
+      "files": [
+        {
+          "path": "optional-native-check/Dockerfile",
+          "bytes": 1858,
+          "sha256": "d84676fb1e860d9bb90b80306d8293af42756ac5fccb44fd88daf4c8f331bea2",
+          "git_blob": "22464e99c7126c051d674a34ff15e6ed5fa60424"
+        },
+        {
+          "path": "optional-native-check/first-build-seconds.txt",
+          "bytes": 6,
+          "sha256": "aa63da77309886d75b216595d8d01e56ff849593467782ba0af83e84fd05d43c",
+          "git_blob": "935c8e02b07f0f4cf4945ec2c424bb5d4f734fee"
+        },
+        {
+          "path": "optional-native-check/first-build.log",
+          "bytes": 11994,
+          "sha256": "5d50df0156cc4c17187fab8a9191077f7e03c87b9cb2fa97892e86e54b8d7da5",
+          "git_blob": "b01b301964fbae5a8cf2b9bcd331143cb0adec5d"
+        },
+        {
+          "path": "optional-native-check/image-history.txt",
+          "bytes": 4650,
+          "sha256": "61a3c9a8c0cff4f2c356a378881c63935573721ae44da900b21414d7db12fe16",
+          "git_blob": "0e2ff33ab9d43e6d2cc0c2e9abeb0dc0ff9fc240"
+        },
+        {
+          "path": "optional-native-check/image-inspect.json",
+          "bytes": 3424,
+          "sha256": "7ccf652f8e89e4376416405ec2cd9a395560e9e34ebd4ccda8027fc868fd1cb8",
+          "git_blob": "7d89c71da9cfacf2a32834b4e611307e6718a7e7"
+        },
+        {
+          "path": "optional-native-check/runtime-footprint.txt",
+          "bytes": 2497,
+          "sha256": "f8a93d6edb73ea0f25c9f0c4cefa36f13cd662ff54a685a5bffeea09b82684c1",
+          "git_blob": "1c8fe5c16f5f82c9c00400513e6b31a09698a7ec"
+        },
+        {
+          "path": "optional-native-check/runtime-identity.txt",
+          "bytes": 11,
+          "sha256": "76c12573861f8465393dc7ab6610b355836cfd9ab66bbfaf675f8070eb62f6d4",
+          "git_blob": "bd3432cfd6f0a0bc0dba6c05030bbefe5eefb0fe"
+        },
+        {
+          "path": "optional-native-check/runtime-smoke.json",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        },
+        {
+          "path": "optional-native-check/source-tools.txt",
+          "bytes": 1300,
+          "sha256": "4fd03676be721918eca2ca0e9bf0353e34639e1fe43fd763bc8097315500c4bc",
+          "git_blob": "d7f976bddf1d959054ba9835d855cf5a499bfd1b"
+        }
+      ],
+      "additional_job_log_files": [
+        {
+          "path": "optional-native-check/native-job.log",
+          "bytes": 45458,
+          "sha256": "e45caa2658e84c9caa59495fdfe7e471c1fb0ffb14343af6acee795e7d849664",
+          "git_blob": "eb70a76139b0a260891faabd739285836068e8a0",
+          "provenance": "Retained native GitHub job log response, separate from the unmodified downloaded artifact."
+        },
+        {
+          "path": "optional-native-check/runtime-smoke-error.log",
+          "bytes": 7011,
+          "sha256": "58a0da47eaf710e407e9c420d7fd3043a31e392616fed57a3fbb851f650f397e",
+          "git_blob": "02ffc785e2919f53b77454412c49e01559c6aad8",
+          "provenance": "Retained native GitHub job log response, separate from the unmodified downloaded artifact."
+        }
+      ]
+    },
+    {
+      "run_id": 37195859147,
+      "job_id": 111417452161,
+      "controller_commit": "be55f1d69920089e2b059af72f0070c164ba5199",
+      "artifact_id": 11301155924,
+      "artifact_zip_sha256": "dadda645e90a45525696a8c0c95bb417582ade5d7a7ac13485840c41aa834a31",
+      "directory": "accepted",
+      "product_commit": "16b3e8a4a967fe403dc313956a92214b172ed966",
+      "dockerfile_blob": "22464e99c7126c051d674a34ff15e6ed5fa60424",
+      "passed": true,
+      "files": [
+        {
+          "path": "accepted/Dockerfile",
+          "bytes": 1858,
+          "sha256": "d84676fb1e860d9bb90b80306d8293af42756ac5fccb44fd88daf4c8f331bea2",
+          "git_blob": "22464e99c7126c051d674a34ff15e6ed5fa60424"
+        },
+        {
+          "path": "accepted/cache-probe-before-blob.txt",
+          "bytes": 41,
+          "sha256": "65d773497429e863d6c5eb93bc7696410065dc8bdde42cf18a8de658e1e9cbf2",
+          "git_blob": "04f4840ecb3c7f1a2d2dac6e867866e844c85be9"
+        },
+        {
+          "path": "accepted/cache-probe-paths.txt",
+          "bytes": 21,
+          "sha256": "be71429b17f9883e6eca5c41660f926c76dace153710c65ed2528f94031e101b",
+          "git_blob": "97354a25ce9f878f52db3ccbe0db6158ed399751"
+        },
+        {
+          "path": "accepted/cache-probe.diff",
+          "bytes": 347,
+          "sha256": "b359db48624c7a9d953ed92ffd57ea47e6c805469cc6ea184faec4d1c98befc9",
+          "git_blob": "bcad6d83f64a923b031129e6ce32cb7ace1b6443"
+        },
+        {
+          "path": "accepted/cached-build-seconds.txt",
+          "bytes": 5,
+          "sha256": "5c9ddf0726d82aad9587843a6834d2a744db524cda8682ce8042e5c281d29394",
+          "git_blob": "283513d8f16cd181e4df7217b6fb851480ea520e"
+        },
+        {
+          "path": "accepted/cached-build.log",
+          "bytes": 2660,
+          "sha256": "489b8f74b09ed2c4f89d5e7dfd253889c3958382b094e5fdc5d437ca9d85ea0d",
+          "git_blob": "5f7831b56cebe3d1b888588837596e8afa56564f"
+        },
+        {
+          "path": "accepted/first-build-seconds.txt",
+          "bytes": 6,
+          "sha256": "e06a7ae26faf54b7c1404b173a6608eb3367101f7e580d5bb749d8ddd706fbc2",
+          "git_blob": "108f30f05ae0fc57a021164d7c7150e3d116f3d5"
+        },
+        {
+          "path": "accepted/first-build.log",
+          "bytes": 11670,
+          "sha256": "ec0a29cabd1f3c68fb9d48d33f149e877d9f0eb31714ae303004d074200a9798",
+          "git_blob": "5dc834b423db6d80dd859a8b8d49368bb2259ef1"
+        },
+        {
+          "path": "accepted/image-history.txt",
+          "bytes": 4650,
+          "sha256": "28786e8189952d18d11124133a4b268e57eb10da559e7973e524031b4665086d",
+          "git_blob": "87c9ad02c51a0c7c07f5d5493d2ba76f9191bb76"
+        },
+        {
+          "path": "accepted/image-inspect.json",
+          "bytes": 3424,
+          "sha256": "f94d0c2d97ab987104acdc204a26f704e38cdf7d057911fa09b66f39948131eb",
+          "git_blob": "e8afbe8152cc72cba9224be0898e632e31291784"
+        },
+        {
+          "path": "accepted/result.json",
+          "bytes": 3461,
+          "sha256": "27ca20402b7d282e5034584a2e3c3f05d97cc207041cb1461cf1c622f61dbd93",
+          "git_blob": "e7992c3cbbe9dce1cdcb060645ada6ab75ce6e03"
+        },
+        {
+          "path": "accepted/runtime-footprint.txt",
+          "bytes": 2497,
+          "sha256": "f8a93d6edb73ea0f25c9f0c4cefa36f13cd662ff54a685a5bffeea09b82684c1",
+          "git_blob": "1c8fe5c16f5f82c9c00400513e6b31a09698a7ec"
+        },
+        {
+          "path": "accepted/runtime-identity.txt",
+          "bytes": 11,
+          "sha256": "76c12573861f8465393dc7ab6610b355836cfd9ab66bbfaf675f8070eb62f6d4",
+          "git_blob": "bd3432cfd6f0a0bc0dba6c05030bbefe5eefb0fe"
+        },
+        {
+          "path": "accepted/runtime-smoke.json",
+          "bytes": 1006,
+          "sha256": "93120d814e39d1e80f601287aa72449027490a6b51917d3ad2119421d45fafa3",
+          "git_blob": "bd7b3637649ba962cb18130e999317579783c62a"
+        },
+        {
+          "path": "accepted/source-tools.txt",
+          "bytes": 1300,
+          "sha256": "4fd03676be721918eca2ca0e9bf0353e34639e1fe43fd763bc8097315500c4bc",
+          "git_blob": "d7f976bddf1d959054ba9835d855cf5a499bfd1b"
+        }
+      ]
+    }
+  ]
+}

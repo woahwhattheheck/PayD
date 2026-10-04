@@ -323,7 +323,7 @@ npm run lint
 ### Type Checking
 
 ```bash
-npm run type-check
+npm run typecheck
 ```
 
 ## Deployment
@@ -334,6 +334,10 @@ npm run type-check
 docker build -t payd-backend .
 docker run -p 3001:3001 --env-file .env payd-backend
 ```
+
+The runtime image runs as `payd` and starts `node dist/index.js`. It contains the Node runtime and production dependencies; npm, Yarn and compilation tools stay in the build stages. The image defines a HEALTHCHECK for `/health/live` and keeps dependency installation separate from source copying so source-only rebuilds reuse dependency layers.
+
+See the [source-pinned Docker acceptance report](../docs/validation/docker-529-20261004/ACCEPTANCE.md) for the measured uncompressed image size, actual runtime UID, dependency-cache results, package execution checks and their limits.
 
 ### Environment Variables (Production)
 

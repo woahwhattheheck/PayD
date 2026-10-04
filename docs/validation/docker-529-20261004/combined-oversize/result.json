@@ -1,0 +1,61 @@
+{
+  "source_commit": "9f05ce2afe17af24a46b030b60f76b8a4f6ee99c",
+  "dockerfile_blob": "cca91a6ccb01255f8c0ea8787898025793ceda3e",
+  "github_run_id": "37194143600",
+  "base_digests_from_build": [
+    "sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293"
+  ],
+  "image_id": "sha256:a253b0858ed3de0cb7846e4719158828be91c660896dd8a3835183a02c7fa95e",
+  "size_uncompressed_bytes": 246366943,
+  "size_limit_bytes": 200000000,
+  "configured_user": "payd",
+  "observed_uid": 100,
+  "alpine_release": "3.23.4",
+  "healthcheck": {
+    "Test": [
+      "CMD-SHELL",
+      "wget -qO- \"http://127.0.0.1:${PORT:-3001}/health/live\" || exit 1"
+    ],
+    "Interval": 30000000000,
+    "Timeout": 5000000000,
+    "StartPeriod": 20000000000,
+    "Retries": 3
+  },
+  "stages": [
+    [
+      "node:20-alpine",
+      "builder"
+    ],
+    [
+      "node:20-alpine",
+      "production"
+    ]
+  ],
+  "dependency_cache_steps": [
+    {
+      "step": "6",
+      "stage": "builder",
+      "command": "npm ci",
+      "cached": true
+    },
+    {
+      "step": "14",
+      "stage": "production",
+      "command": "npm ci --omit=dev && npm cache clean --force",
+      "cached": true
+    }
+  ],
+  "first_build_seconds": 72.76,
+  "source_change_build_seconds": 6.1,
+  "cache_probe": "one temporary comment in backend/src/index.ts; first image and product source unchanged",
+  "runtime_scope": "id and Alpine release only; application/database health was not executed",
+  "criteria": {
+    "under_200MB": false,
+    "non_root": true,
+    "healthcheck_configured": true,
+    "multi_stage_alpine": true,
+    "both_dependency_layers_cached": true,
+    "base_digest_recorded": true
+  },
+  "passed": false
+}
