@@ -26,10 +26,10 @@ layout described by
 [`015_reconcile_contract_events.sql`](src/db/migrations/015_reconcile_contract_events.sql)
 runs between the original 015 migrations and 016. It preserves a legacy 015
 `contract_events` table as `contract_events_legacy_015`, including its rows,
-indexes, and sequence, so 016 can create the canonical table. Existing migration
-files and recorded checksums are unchanged; an already-canonical table is left
-alone. An unknown mixed layout or an existing archive is reported for explicit
-reconciliation instead of overwriting data. Use the transactional runner below;
+indexes, and sequence, so 016 can create the canonical table. The original 015
+and 016 migration files and their checksums are unchanged; an already-canonical
+table is left alone. An unknown mixed layout or an existing archive is reported
+for explicit reconciliation instead of overwriting data. Use the transactional runner below;
 if 016 was previously run manually without a transaction, reconcile any indexes
 it left behind before retrying.
 
@@ -57,6 +57,10 @@ The PostgreSQL installation must provide the supplied `btree_gist` and `pgcrypto
 extensions. The migration sequence enables them when needed. The audit IP index
 is then explicitly rebuilt with the core `inet_ops` class for subnet queries;
 the original audit migration and its checksum remain unchanged.
+
+The startup corrections to 004 and 027 change those two files in place. If a
+database already records their earlier checksums, stop and reconcile that
+installation explicitly; do not bypass the runner's checksum-drift check.
 
 For the focused migration regression, use a separate PostgreSQL test database:
 
