@@ -19,6 +19,7 @@ describe('ContractEventIndexer', () => {
   let mockClient: any;
 
   beforeEach(() => {
+    (global.fetch as jest.Mock).mockReset();
     indexer = new ContractEventIndexer();
     mockClient = {
       query: jest.fn(),
