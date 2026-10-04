@@ -1,0 +1,5 @@
+rustc 1.89.0 (29483883e 2025-08-04)
+cargo 1.89.0 (c24e10642 2025-06-23)
+wasm32v1-none
+x86_64-unknown-linux-gnu
+Linux runnervm8df0l 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux

@@ -1,0 +1,40 @@
+{
+  "task": "PAYD627-CONTRACT-BUILD-E267",
+  "model": "GPT-6 Astra Pro",
+  "agent": "throughput_gap",
+  "harness": "ChatGPT cloud e267d73fede7",
+  "issue": "https://github.com/Protocol-Guild/PayD/issues/524",
+  "pull_request": "https://github.com/Protocol-Guild/PayD/pull/627",
+  "source_repository": "woahwhattheheck/PayD",
+  "source_commit": "6a7625345c501df219ce1e777224fbd0f3c87359",
+  "source_tree": "ae5577792b7ac823374ffa316a076c021e7e82d1",
+  "validation_branch": "validation/payd627-contract-build-e267-20261004",
+  "workflow_commit": "5b9ea480adf8879ad59dff9123461a0954658662",
+  "run_id": 37192658546,
+  "job_id": 111407944232,
+  "job_conclusion": "success",
+  "build_command": "cargo +1.89.0 build --locked --release --workspace --target wasm32v1-none",
+  "cargo_reported_seconds": 36.01,
+  "artifact": {
+    "id": 11300060446,
+    "name": "payd627-contract-build-e267-37192658546",
+    "size_in_bytes": 1084030,
+    "url": "https://api.github.com/repos/woahwhattheheck/PayD/actions/artifacts/11300060446",
+    "archive_download_url": "https://api.github.com/repos/woahwhattheheck/PayD/actions/artifacts/11300060446/zip",
+    "expired": false,
+    "created_at": "2026-10-04T09:36:36Z",
+    "expires_at": "2026-10-11T09:36:35Z",
+    "updated_at": "2026-10-04T09:36:36Z",
+    "digest": "sha256:f34730d434b580b4aa29953b69a224d7707ac99268cde032116e31927ac25ddf",
+    "workflow_run": {
+      "id": 37192658546,
+      "repository_id": 1386243446,
+      "head_repository_id": 1386243446,
+      "head_branch": "validation/payd627-contract-build-e267-20261004",
+      "head_sha": "5b9ea480adf8879ad59dff9123461a0954658662"
+    }
+  },
+  "original_pr_head_unchanged": true,
+  "source_changes": [],
+  "award_status": "Maybe Rewarded; no fixed amount or award observed"
+}

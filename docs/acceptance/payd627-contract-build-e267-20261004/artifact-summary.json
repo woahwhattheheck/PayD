@@ -1,0 +1,56 @@
+{
+  "archive_sha256": "f34730d434b580b4aa29953b69a224d7707ac99268cde032116e31927ac25ddf",
+  "source_sha": "6a7625345c501df219ce1e777224fbd0f3c87359",
+  "build_exit": 0,
+  "build_seconds": 36,
+  "environment": "rustc 1.89.0 (29483883e 2025-08-04)\ncargo 1.89.0 (c24e10642 2025-06-23)\nwasm32v1-none\nx86_64-unknown-linux-gnu\nLinux runnervm8df0l 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux\n",
+  "members": {
+    "members": [
+      "contracts/common",
+      "contracts/bulk_payment",
+      "contracts/revenue_split",
+      "contracts/cross_asset_payment",
+      "contracts/vesting_escrow"
+    ],
+    "hello_world_removed": true
+  },
+  "wasm": [
+    {
+      "name": "bulk_payment.wasm",
+      "bytes": 18641,
+      "sha256": "d4ec532c0e16c1f38c5345224adea467937dc6af4f98eb65b893ecf1a083e413"
+    },
+    {
+      "name": "cross_asset_payment.wasm",
+      "bytes": 18560,
+      "sha256": "81479faecab937b1e425b857347d29257935b6d5cd39246539f5452658ed30a3"
+    },
+    {
+      "name": "revenue_split.wasm",
+      "bytes": 18956,
+      "sha256": "8c75a057c6dca432f3b778d8f5c4efc21f4937c2c3397815483296bee57615f6"
+    },
+    {
+      "name": "vesting_escrow.wasm",
+      "bytes": 26846,
+      "sha256": "a2efbfc6d1efa48bc24a6bb0290f3c977e7d7de5849ad2bccf7d6f36e5c739c3"
+    }
+  ],
+  "compiler_tail": [
+    "   Compiling bulk_payment v0.0.1 (/home/runner/work/PayD/PayD/source/contracts/bulk_payment)",
+    "   Compiling vesting_escrow v0.0.1 (/home/runner/work/PayD/PayD/source/contracts/vesting_escrow)",
+    "   Compiling stellar-tokens v0.6.0 (https://github.com/OpenZeppelin/stellar-contracts?tag=v0.6.0#82f97111)",
+    "   Compiling revenue_split v0.0.1 (/home/runner/work/PayD/PayD/source/contracts/revenue_split)",
+    "warning: use of deprecated method `soroban_sdk::events::Events::publish`: use the #[contractevent] macro on a contract event type",
+    "   --> contracts/revenue_split/src/lib.rs:130:26",
+    "    |",
+    "130 |             env.events().publish((Symbol::new(&env, \"distribute\"), token.clone()), amount);",
+    "    |                          ^^^^^^^",
+    "    |",
+    "    = note: `#[warn(deprecated)]` on by default",
+    "",
+    "warning: `revenue_split` (lib) generated 1 warning",
+    "   Compiling cross_asset_payment v0.0.1 (/home/runner/work/PayD/PayD/source/contracts/cross_asset_payment)",
+    "    Finished `release` profile [optimized] target(s) in 36.01s"
+  ]
+}

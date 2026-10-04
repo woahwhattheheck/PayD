@@ -1,0 +1,5 @@
+Source: 6a7625345c501df219ce1e777224fbd0f3c87359
+Working directory: repository root
+Toolchain: repository-pinned Rust 1.89.0
+Build: cargo +1.89.0 build --locked --release --workspace --target wasm32v1-none
+Scope: issue524 original PR627 contract build acceptance only.

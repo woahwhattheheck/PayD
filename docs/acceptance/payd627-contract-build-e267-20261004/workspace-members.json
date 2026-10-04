@@ -1,0 +1,10 @@
+{
+  "members": [
+    "contracts/common",
+    "contracts/bulk_payment",
+    "contracts/revenue_split",
+    "contracts/cross_asset_payment",
+    "contracts/vesting_escrow"
+  ],
+  "hello_world_removed": true
+}

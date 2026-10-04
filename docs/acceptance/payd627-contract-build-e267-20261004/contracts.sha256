@@ -1,0 +1,4 @@
+d4ec532c0e16c1f38c5345224adea467937dc6af4f98eb65b893ecf1a083e413  /home/runner/work/PayD/PayD/acceptance/wasm/bulk_payment.wasm
+81479faecab937b1e425b857347d29257935b6d5cd39246539f5452658ed30a3  /home/runner/work/PayD/PayD/acceptance/wasm/cross_asset_payment.wasm
+8c75a057c6dca432f3b778d8f5c4efc21f4937c2c3397815483296bee57615f6  /home/runner/work/PayD/PayD/acceptance/wasm/revenue_split.wasm
+a2efbfc6d1efa48bc24a6bb0290f3c977e7d7de5849ad2bccf7d6f36e5c739c3  /home/runner/work/PayD/PayD/acceptance/wasm/vesting_escrow.wasm
