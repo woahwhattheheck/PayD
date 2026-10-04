@@ -3,15 +3,13 @@ import { Request, Response, NextFunction } from 'express';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const BULK_TIMEOUT_MS = 120_000;
 
+// Match operation names, not unrelated segments such as "importer" or "exporters".
+// Keep plural collections and compound names used by batches, exports and bulk-import.
+const BULK_OPERATION_PATH = /\/(?:bulk|batch(?:es)?|imports?|exports?)(?:[/-]|$)/i;
+const PAYROLL_RUN_PATH = /\/payroll\/run(?:[/-]|$)/i;
+
 function isBulkPath(path: string): boolean {
-  const p = path.toLowerCase();
-  return (
-    p.includes('/bulk') ||
-    p.includes('/batch') ||
-    p.includes('/import') ||
-    p.includes('/export') ||
-    p.includes('/payroll/run')
-  );
+  return BULK_OPERATION_PATH.test(path) || PAYROLL_RUN_PATH.test(path);
 }
 
 /**
