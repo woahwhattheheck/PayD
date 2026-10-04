@@ -5,6 +5,8 @@ use common::CommonError;
 
 #[cfg(test)]
 mod test;
+#[cfg(test)]
+mod arithmetic_test;
 
 #[contracttype]
 pub enum DataKey {
@@ -131,8 +133,13 @@ impl RevenueSplitContract {
                         client.transfer(&from, &share.destination, &final_amount);
                     }
                 } else {
-                    let recipient_amount =
-                        (amount * share.basis_points as i128) / TOTAL_BASIS_POINTS as i128;
+                    // Divide first without losing the fractional contribution.
+                    // Validated weights are <= 10000, so neither product nor
+                    // their sum can exceed the positive input amount.
+                    let divisor = TOTAL_BASIS_POINTS as i128;
+                    let weight = share.basis_points as i128;
+                    let recipient_amount = (amount / divisor) * weight
+                        + ((amount % divisor) * weight) / divisor;
                     if recipient_amount > 0 {
                         client.transfer(&from, &share.destination, &recipient_amount);
                         amount_distributed += recipient_amount;
@@ -166,7 +173,9 @@ impl RevenueSplitContract {
         let mut seen: Vec<Address> = Vec::new(env);
 
         for share in shares.iter() {
-            total_bp = total_bp.wrapping_add(share.basis_points);
+            total_bp = total_bp
+                .checked_add(share.basis_points)
+                .ok_or(ContractError::SharesMustSumToTotal)?;
 
             // Prevent duplicates; duplicates create ambiguity and can cause unexpected dust behavior.
             for addr in seen.iter() {
