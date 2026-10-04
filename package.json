@@ -4,14 +4,14 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "preview": "npm run preview --prefix frontend",
-    "lint": "npm run lint --prefix frontend",
+    "dev": "npm run dev --prefix frontend --",
+    "build": "npm run build --prefix frontend --",
+    "preview": "npm run preview --prefix frontend --",
+    "lint": "npm run lint --prefix frontend --",
     "format": "prettier . --write",
     "prepare": "husky",
-    "backend:dev": "npm run dev --prefix backend",
-    "backend:test": "npm test --prefix backend"
+    "backend:dev": "npm run dev --prefix backend --",
+    "backend:test": "npm test --prefix backend --"
   },
   "workspaces": [
     "packages/*"
