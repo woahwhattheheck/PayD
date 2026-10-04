@@ -1,0 +1,65 @@
+name: Revenue split arithmetic replay
+on:
+  push:
+    branches: [validation/payd-636-arithmetic-rivet76f4-20261004]
+permissions:
+  contents: read
+jobs:
+  native-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: '2'
+      CARGO_TERM_COLOR: never
+      RUST_BACKTRACE: '0'
+    steps:
+      - name: Checkout exact product source
+        uses: actions/checkout@v4
+        with:
+          ref: 7470e965d1eb610598a4598a3abb1bfe99fd22f1
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record source and runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p replay-logs
+          { git rev-parse HEAD; git rev-parse HEAD^{tree}; rustc -Vv; cargo --version; uname -a; sha256sum Cargo.lock contracts/revenue_split/src/{lib,arithmetic_test,test}.rs; } | tee replay-logs/environment.log
+      - name: Compile the actual contract and tests
+        shell: bash
+        run: cargo test --locked -p revenue_split --lib --no-run 2>&1 | tee replay-logs/compile.log
+      - name: Reproduce the three baseline failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp contracts/revenue_split/src/lib.rs "$RUNNER_TEMP/revenue-split-fixed.rs"
+          git show e04c31bd6e594b24b4bcb7c56c5a2132e1e43921:contracts/revenue_split/src/lib.rs > contracts/revenue_split/src/lib.rs
+          printf '\n#[cfg(test)]\nmod arithmetic_test;\n' >> contracts/revenue_split/src/lib.rs
+          trap 'cp "$RUNNER_TEMP/revenue-split-fixed.rs" contracts/revenue_split/src/lib.rs' EXIT
+          for name in overflowing_share_total_is_rejected_at_init overflowing_share_update_preserves_active_split large_distribution_preserves_balances_and_event_payload; do
+            set +e
+            cargo test --locked -p revenue_split --lib "arithmetic_test::$name" -- --exact --nocapture 2>&1 | tee "replay-logs/baseline-$name.log"
+            code=${PIPESTATUS[0]}
+            set -e
+            echo "$name exit=$code" | tee -a replay-logs/baseline-status.log
+            test "$code" -ne 0
+            grep -q 'running 1 test' "replay-logs/baseline-$name.log"
+            if grep -q '^error\[E[0-9]' "replay-logs/baseline-$name.log"; then exit 1; fi
+          done
+      - name: Execute all maintained revenue split tests on exact repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object contracts/revenue_split/src/lib.rs)" = 9a9540dee5ffc07b251e2f335d1dcbd44ab82159
+          test "$(git hash-object contracts/revenue_split/src/arithmetic_test.rs)" = f03e46404c0256fa09479a286a696afcae099d8b
+          cargo test --locked -p revenue_split --lib 2>&1 | tee replay-logs/fixed.log
+          grep -q '15 passed; 0 failed' replay-logs/fixed.log
+          git diff --exit-code -- Cargo.toml Cargo.lock contracts/revenue_split/src/lib.rs contracts/revenue_split/src/arithmetic_test.rs contracts/revenue_split/src/test.rs
+      - name: Preserve bounded replay logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revenue-split-arithmetic-7470e965
+          path: replay-logs
+          retention-days: 1
+          if-no-files-found: error
