@@ -29,25 +29,64 @@ ALLOWED_VALUES=(
   "payd_user"
 )
 
-# Extract values from the stringData block. Uses Python for reliable YAML
-# parsing — avoids fragile awk/grep that breaks on edge cases.
-values=$(python3 -c "
-import sys, re
+# Read the expected flat stringData mapping. Unsupported syntax fails closed
+# instead of silently stopping before an entry that the checker must inspect.
+values=$(python3 - "$SECRET_FILE" <<'PY'
+from pathlib import Path
+import re
+import sys
 
-with open('$SECRET_FILE') as f:
-    content = f.read()
-
-# Find the stringData block
-match = re.search(r'^stringData:\s*\n((?:\s+\w+:.*\n?)*)', content, re.MULTILINE)
-if not match:
+try:
+    content = Path(sys.argv[1]).read_text()
+except (OSError, UnicodeError):
     sys.exit(2)
 
-block = match.group(1)
-for line in block.strip().splitlines():
-    # Extract value after the key: separator
-    val = line.split(':', 1)[1].strip().strip('\"')
-    print(val)
-" 2>/dev/null)
+lines = content.splitlines()
+headers = [
+    i for i, line in enumerate(lines)
+    if re.fullmatch(r'stringData:[ \t]*(?:#.*)?', line)
+]
+if len(headers) != 1 or re.search(r'^[ \t]*(?:data|"data"|\'data\')[ \t]*:', content, re.MULTILINE):
+    sys.exit(2)
+
+# This guard supports one Secret document, not lists or nested Secret objects.
+for line in lines[:headers[0]]:
+    if not line.strip() or line.lstrip().startswith('#'):
+        continue
+    if line.startswith((' ', '\t')):
+        if re.match(r'^[ \t]*(?:stringData|"stringData"|\'stringData\')[ \t]*:', line):
+            sys.exit(2)
+        continue
+    if not re.fullmatch(r'(?:apiVersion:[ \t]+v1|kind:[ \t]+Secret|metadata:[ \t]*|type:[ \t]+Opaque)(?:[ \t]+#.*)?', line):
+        sys.exit(2)
+
+values = []
+keys = set()
+indent = None
+for line in lines[headers[0] + 1:]:
+    if not line.strip() or line.lstrip().startswith('#'):
+        continue
+    entry = re.fullmatch(r'( +)([A-Za-z0-9_.-]+):[ \t]*(.*)', line)
+    if not entry:
+        sys.exit(2)
+    spaces, key, value = entry.groups()
+    if indent is None:
+        indent = len(spaces)
+    if len(spaces) != indent or key in keys:
+        sys.exit(2)
+    keys.add(key)
+    value = value.strip()
+    if value.startswith('"') or value.endswith('"'):
+        if len(value) < 2 or not (value.startswith('"') and value.endswith('"')) or '"' in value[1:-1]:
+            sys.exit(2)
+        value = value[1:-1]
+    values.append(value)
+
+if not values:
+    sys.exit(2)
+print('\n'.join(values))
+PY
+)
 
 if [[ -z "$values" ]]; then
   echo "ERROR: Could not parse stringData values from $SECRET_FILE"
