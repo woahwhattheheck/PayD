@@ -1,0 +1,89 @@
+name: PayD 627 required contract build E267
+
+on:
+  push:
+    branches: [validation/payd627-contract-build-e267-20261004]
+
+permissions:
+  contents: read
+
+jobs:
+  contract-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the original contribution
+        uses: actions/checkout@v4
+        with:
+          ref: 6a7625345c501df219ce1e777224fbd0f3c87359
+          path: source
+          persist-credentials: false
+      - name: Retain source and required build command
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/acceptance"
+          test "$(git rev-parse HEAD)" = 6a7625345c501df219ce1e777224fbd0f3c87359
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/acceptance/source-sha.txt"
+          git archive --format=tar HEAD | gzip -n > "$GITHUB_WORKSPACE/acceptance/source-6a762534.tar.gz"
+          python3 - <<'PY' > "$GITHUB_WORKSPACE/acceptance/workspace-members.json"
+          import json
+          from pathlib import Path
+          import tomllib
+          manifest = tomllib.loads(Path("Cargo.toml").read_text())
+          members = manifest["workspace"]["members"]
+          assert "contracts/hello_world" not in members
+          assert not Path("contracts/hello_world").exists()
+          lock = tomllib.loads(Path("Cargo.lock").read_text())
+          assert all(package["name"] != "hello_world" for package in lock["package"])
+          print(json.dumps({"members": members, "hello_world_removed": True}, indent=2))
+          PY
+          printf '%s\n' 'Source: 6a7625345c501df219ce1e777224fbd0f3c87359' 'Working directory: repository root' 'Toolchain: repository-pinned Rust 1.89.0' 'Build: cargo +1.89.0 build --locked --release --workspace --target wasm32v1-none' 'Scope: issue524 original PR627 contract build acceptance only.' > "$GITHUB_WORKSPACE/acceptance/commands.txt"
+          sha256sum Cargo.toml Cargo.lock rust-toolchain.toml > "$GITHUB_WORKSPACE/acceptance/build-inputs.sha256"
+      - name: Install the repository Rust toolchain and target
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.89.0 --profile minimal --target wasm32v1-none
+          {
+            rustc +1.89.0 --version
+            cargo +1.89.0 --version
+            rustup target list --installed --toolchain 1.89.0
+            uname -a
+          } > "$GITHUB_WORKSPACE/acceptance/environment.txt"
+      - name: Build the remaining production workspace contracts
+        working-directory: source
+        shell: bash
+        env:
+          CARGO_TERM_COLOR: never
+        run: |
+          set -uo pipefail
+          set +e
+          started=$(date +%s)
+          cargo +1.89.0 build --locked --release --workspace --target wasm32v1-none 2>&1 | tee "$GITHUB_WORKSPACE/acceptance/build.log"
+          result=${PIPESTATUS[0]}
+          printf '%s\n' "$result" > "$GITHUB_WORKSPACE/acceptance/build.exit"
+          printf '%s\n' "$(( $(date +%s) - started ))" > "$GITHUB_WORKSPACE/acceptance/build.seconds"
+          exit "$result"
+      - name: Retain compiled contracts
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/acceptance/wasm"
+          for contract in bulk_payment revenue_split cross_asset_payment vesting_escrow; do
+            test -s "target/wasm32v1-none/release/$contract.wasm"
+            cp "target/wasm32v1-none/release/$contract.wasm" "$GITHUB_WORKSPACE/acceptance/wasm/"
+          done
+          sha256sum "$GITHUB_WORKSPACE/acceptance/wasm/"*.wasm > "$GITHUB_WORKSPACE/acceptance/contracts.sha256"
+          git diff --exit-code
+      - name: Retain the actual outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payd627-contract-build-e267-${{ github.run_id }}
+          path: acceptance/
+          retention-days: 7
+          if-no-files-found: error
