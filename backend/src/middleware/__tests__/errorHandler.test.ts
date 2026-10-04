@@ -121,6 +121,33 @@ describe('errorHandler middleware', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it.each<[string, () => unknown]>([
+    ['null-prototype object', () => Object.create(null)],
+    ['throwing toString', () => ({ toString() { throw new Error('conversion failed'); } })],
+    ['throwing primitive conversion', () => ({
+      [Symbol.toPrimitive]() { throw new Error('conversion failed'); },
+    })],
+  ])('returns the fallback when an unknown error cannot be stringified: %s', (_name, createError) => {
+    for (const nodeEnv of ['production', 'development']) {
+      (config as any).nodeEnv = nodeEnv;
+      errorHandler(createError(), req as Request, res as Response, next);
+
+      expect(statusMock).toHaveBeenLastCalledWith(500);
+      expect(jsonMock).toHaveBeenLastCalledWith({
+        error: 'InternalServerError',
+        message: 'An error occurred',
+        code: 'INTERNAL_ERROR',
+        requestId: 'req-abc-123',
+      });
+      expect(logger.error).toHaveBeenLastCalledWith('Unhandled error', expect.objectContaining({
+        message: 'An error occurred',
+        stack: undefined,
+        requestId: 'req-abc-123',
+      }));
+    }
+    expect(next).not.toHaveBeenCalled();
+  });
+
   it('includes stack traces only in development', () => {
     (config as any).nodeEnv = 'development';
     const err = new AppError('boom', 500, 'BOOM');

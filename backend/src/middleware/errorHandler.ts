@@ -16,6 +16,15 @@ function requestIdOf(req: Request): string | undefined {
   return typeof req.requestId === 'string' ? req.requestId : undefined;
 }
 
+/** Thrown values need not support JavaScript's string conversion. */
+function unknownErrorMessage(err: unknown): string {
+  try {
+    return String(err);
+  } catch {
+    return 'An error occurred';
+  }
+}
+
 /** Preserve known body-parser client failures without exposing their raw body. */
 function normalizeBodyParserError(err: unknown): unknown {
   if (!(err instanceof Error) || err instanceof AppError) {
@@ -106,7 +115,7 @@ export function errorHandler(
     return;
   }
 
-  const message = err instanceof Error ? err.message : String(err);
+  const message = err instanceof Error ? err.message : unknownErrorMessage(err);
   const stack = err instanceof Error ? err.stack : undefined;
 
   logger.error('Unhandled error', {
