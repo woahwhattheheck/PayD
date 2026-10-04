@@ -3,6 +3,7 @@ import { ContractEventController } from '../contractEventController';
 import { default as pool } from '../../config/database';
 
 jest.mock('../../config/database', () => ({
+  __esModule: true,
   default: {
     query: jest.fn(),
   },
