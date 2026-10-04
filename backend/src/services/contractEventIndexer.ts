@@ -9,11 +9,17 @@ export class ContractEventIndexer {
   private intervalId: NodeJS.Timeout | null = null;
   private readonly POLL_INTERVAL_MS = 10000; // Poll every 10 seconds
   private readonly BATCH_SIZE = 100;
-  private readonly CONTRACTS_TO_INDEX = [
-    process.env.BULK_PAYMENT_CONTRACT_ID,
-    process.env.VESTING_ESCROW_CONTRACT_ID,
-    process.env.REVENUE_SPLIT_CONTRACT_ID,
-  ].filter(Boolean) as string[];
+  private readonly CONTRACTS_TO_INDEX = Array.from(
+    new Set(
+      [
+        process.env.BULK_PAYMENT_CONTRACT_ID,
+        process.env.VESTING_ESCROW_CONTRACT_ID,
+        process.env.REVENUE_SPLIT_CONTRACT_ID,
+      ]
+        .map((value) => (value || '').trim())
+        .filter(Boolean)
+    )
+  );
 
   private readonly RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
 
