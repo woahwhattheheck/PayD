@@ -68,7 +68,7 @@ services:
       POSTGRES_PASSWORD: ${STAGING_DB_ADMIN_PASSWORD:?Set STAGING_DB_ADMIN_PASSWORD}
       POSTGRES_DB: ${STAGING_DB_NAME:-payd_staging}
     ports:
-      - '5433:5432'
+      - '127.0.0.1:5433:5432'
     volumes:
       - postgres_staging_data:/var/lib/postgresql/data
     healthcheck:
@@ -81,7 +81,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - '6380:6379'
+      - '127.0.0.1:6380:6379'
     volumes:
       - redis_staging_data:/data
     healthcheck:

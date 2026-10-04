@@ -13,6 +13,14 @@ The API is available on port 3101, PostgreSQL on 5433, and Redis on 6380. These
 services have their own named volumes and network. Stellar endpoints default to
 testnet; staging does not inherit a production `.env` file.
 
+The PostgreSQL and Redis host ports bind to `127.0.0.1` only. Connect from the
+Docker host using `127.0.0.1:5433` and `127.0.0.1:6380`, or run database tools with
+`docker compose ... exec` on the service. Remote administration should use an SSH
+tunnel rather than exposing these ports: Redis has no application authentication,
+and publishing its port must not bypass the API's access controls. Container
+connections still use `postgres:5432` and `redis:6379` on the staging network;
+the authenticated API's host publication on port 3101 is unchanged.
+
 ## Startup and repeated runs
 
 PostgreSQL becomes healthy only when its normal TCP listener is available. The
