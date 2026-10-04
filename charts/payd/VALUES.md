@@ -99,7 +99,7 @@ rendered from their own values and are not removed based on component flags.
 | `backend.autoscaling.targetCPUUtilizationPercentage` | CPU utilization target; a zero or omitted target is not rendered. |
 | `backend.autoscaling.targetMemoryUtilizationPercentage` | Memory utilization target; a zero or omitted target is not rendered. Keep at least one metric configured when HPA is enabled. |
 | `backend.service.type`, `frontend.service.type` | Kubernetes Service types. |
-| `backend.service.port` | Backend Service port and container's named `http` port. Keep `backend.config.PORT` and ingress backend ports consistent; default probes use the named `http` port. |
+| `backend.service.port` | Backend Service-facing port; it targets the container's named `http` listener derived from `backend.config.PORT`. Keep ingress backend ports consistent with this Service port. |
 | `frontend.service.port` | Frontend Service port; it targets the container's fixed named `http` port 80. |
 | `backend.healthCheck.startupProbe` | Startup probe mapping; default checks `/health/live`, with up to 300 seconds for application startup. Set to `null` to omit it. |
 | `backend.healthCheck.livenessProbe` | Complete probe mapping copied to the backend container. |
@@ -115,8 +115,13 @@ liveness/readiness probes take over; this is a configured allowance, not a
 measured startup duration.
 
 Default HTTP probes use the container's named `http` port, which follows
-`backend.service.port`. Keep `backend.config.PORT` and ingress ports aligned
-when changing that port. Each mapping supports the Kubernetes probe fields;
+`backend.config.PORT` (3001 when omitted or empty), matching the
+[backend listener configuration](../../backend/src/config/index.ts). The Service
+can expose a different port: for example, `backend.service.port: 8080` forwards
+to the default listener at 3001. Ingress backend ports must match the Service
+port, not the listener. Set `backend.config.PORT` to a valid decimal TCP port;
+quoted strings and numeric Helm values are supported. Each probe mapping
+supports the Kubernetes probe fields;
 Helm merges environment overrides with defaults. To switch a probe to another
 handler such as `exec`, explicitly set its inherited `httpGet` to `null`.
 Setting the entire startup mapping to `null` omits the startup probe. The
@@ -140,7 +145,7 @@ secret material in the named Secret entries.
 
 | Path | Meaning |
 |---|---|
-| `backend.config.PORT` | Application listener port; keep it aligned with the backend service and probes. |
+| `backend.config.PORT` | Application listener port and the container's named `http` target for the Service and default probes; omitted or empty uses the runtime default 3001. Independent of `backend.service.port`. |
 | `backend.config.NODE_ENV` | Backend runtime mode: `development`, `production` or `test`. Staging intentionally uses `production`. |
 | `backend.config.DB_HOST`, `backend.config.DB_PORT`, `backend.config.DB_NAME` | Database connection fields supplied to the backend environment. Configure them consistently with the selected database and connection URL. |
 | `backend.config.REDIS_URL` | Redis URL supplied to the backend. |

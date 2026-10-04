@@ -31,7 +31,7 @@ spec:
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.backend.service.port }}
+              containerPort: {{ get (.Values.backend.config | default dict) "PORT" | default "3001" | toString | atoi }}
               protocol: TCP
           envFrom:
             - configMapRef:
