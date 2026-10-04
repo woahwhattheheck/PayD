@@ -1,7 +1,6 @@
 # Event ingestion follow-up: maintained indexer test result
 
-Date: 2026-10-04 UTC  
-Attribution: Astra Beacon, GPT-6 Astra Pro, ChatGPT cloud harness.
+Date: 2026-10-04 UTC
 
 ## Result and source mapping
 
@@ -15,7 +14,7 @@ The maintained canonical indexer Jest file passed **24 of 24 tests**, with one s
 
 The follow-up parent restored the ingestion implementation while preserving the cleanup and controller correction. Its selected source, original test, types, Jest/TypeScript configuration, package manifest, and lockfile were byte-identical to the original pre-fix inputs. Applying the exact tested fixture blob therefore produces the same seven input blobs listed below. The executed commit remains `2ad0076b`; this report reuses its scoped result through that explicit input mapping.
 
-The original cleanup PR has its own [16-case result](https://github.com/woahwhattheheck/PayD/blob/834da4c03bb3130e17f0235e0fdd2fb4f1de16bf/docs/acceptance/PAYD632_CURRENT_INDEXER_TESTS.md). This independent ingestion follow-up retains the raw-XDR decoding and cursor changes separately.
+The original cleanup PR has its own [16-case result](https://github.com/woahwhattheheck/PayD/blob/e5a8926c171693117dc6c64ca4f10ca8d64bd36b/docs/acceptance/PAYD632_CURRENT_INDEXER_TESTS.md). This independent ingestion follow-up retains the raw-XDR decoding and cursor changes separately.
 
 ## Fixture repair
 
