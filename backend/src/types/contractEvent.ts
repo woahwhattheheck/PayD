@@ -61,4 +61,5 @@ export interface SorobanEvent {
 export interface GetEventsResponse {
   events: SorobanEvent[];
   latestLedger: number;
+  cursor?: string;
 }

@@ -5,6 +5,7 @@ import * as StellarSdk from '@stellar/stellar-sdk';
 
 export class ContractEventIndexer {
   private isRunning = false;
+  private isPolling = false;
   private intervalId: NodeJS.Timeout | null = null;
   private readonly POLL_INTERVAL_MS = 10000; // Poll every 10 seconds
   private readonly BATCH_SIZE = 100;
@@ -69,37 +70,39 @@ export class ContractEventIndexer {
   }
 
   private async pollAndIndexEvents(): Promise<void> {
-    if (!this.isRunning) return;
+    if (!this.isRunning || this.isPolling) return;
+    this.isPolling = true;
 
     try {
       const lastIndexedLedger = await this.getLastIndexedLedger();
       console.log(`[ContractEventIndexer] Last indexed ledger: ${lastIndexedLedger}`);
 
-      for (const contractId of this.CONTRACTS_TO_INDEX) {
-        try {
-          await this.indexContractEvents(contractId, lastIndexedLedger);
-        } catch (error) {
-          console.error(`[ContractEventIndexer] Error indexing contract ${contractId}:`, error);
-          await this.updateIndexerState(lastIndexedLedger, 'error', String(error));
-        }
+      try {
+        // The state row is shared, so every contract must complete the same scan.
+        await this.indexContractEvents(this.CONTRACTS_TO_INDEX, lastIndexedLedger);
+      } catch (error) {
+        console.error('[ContractEventIndexer] Error indexing contracts:', error);
+        await this.updateIndexerState(lastIndexedLedger, 'error', String(error));
       }
     } catch (error) {
       console.error('[ContractEventIndexer] Error in polling loop:', error);
+    } finally {
+      this.isPolling = false;
     }
   }
 
   /**
-   * Fetch and index events for a specific contract
+   * Fetch and index all configured contracts before advancing their shared state
    */
-  private async indexContractEvents(contractId: string, fromLedger: number): Promise<void> {
-    const events = await this.fetchEventsFromRPC(contractId, fromLedger);
+  private async indexContractEvents(contractIds: string[], fromLedger: number): Promise<void> {
+    const events = await this.fetchEventsFromRPC(contractIds, fromLedger);
     
     if (events.length === 0) {
-      console.log(`[ContractEventIndexer] No new events for contract ${contractId}`);
+      console.log('[ContractEventIndexer] No new events for configured contracts');
       return;
     }
 
-    console.log(`[ContractEventIndexer] Found ${events.length} new events for contract ${contractId}`);
+    console.log(`[ContractEventIndexer] Found ${events.length} new events across configured contracts`);
 
     const client = await pool.connect();
     try {
@@ -135,46 +138,78 @@ export class ContractEventIndexer {
   }
 
   /**
-   * Fetch events from Soroban RPC
+   * Drain one RPC cursor through the first response's ledger snapshot
    */
-  private async fetchEventsFromRPC(contractId: string, startLedger: number): Promise<SorobanEvent[]> {
+  private async fetchEventsFromRPC(contractIds: string[], startLedger: number): Promise<SorobanEvent[]> {
+    const events: SorobanEvent[] = [];
+    const seenCursors = new Set<string>();
+    let cursor: string | undefined;
+    let targetLedger: number | undefined;
+
     try {
-      const response = await fetch(this.RPC_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getEvents',
-          params: {
-            startLedger: startLedger + 1,
-            filters: [
-              {
-                type: 'contract',
-                contractIds: [contractId],
-              },
-            ],
-            pagination: {
-              limit: this.BATCH_SIZE,
-            },
+      while (true) {
+        const response = await fetch(this.RPC_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getEvents',
+            params: {
+              // RPC cursor requests must omit both startLedger and endLedger.
+              ...(cursor === undefined ? { startLedger: startLedger + 1 } : {}),
+              filters: [
+                {
+                  type: 'contract',
+                  contractIds,
+                },
+              ],
+              pagination: {
+                limit: this.BATCH_SIZE,
+                ...(cursor === undefined ? {} : { cursor }),
+              },
+            },
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const data = (await response.json()) as { error?: { message?: string }; result?: GetEventsResponse };
+
+        if (data.error) {
+          throw new Error(`RPC error: ${data.error.message || 'Unknown RPC error'}`);
+        }
+
+        if (!data.result || !Array.isArray(data.result.events)) {
+          throw new Error('RPC response is missing a valid events page');
+        }
+        const result = data.result;
+        if (targetLedger === undefined) {
+          if (!Number.isSafeInteger(result.latestLedger) || result.latestLedger < 0) {
+            throw new Error('RPC response is missing a valid latestLedger');
+          }
+          targetLedger = result.latestLedger;
+        }
+
+        const page = result.events;
+        for (const event of page) {
+          // Events are ledger ordered. Leave later arrivals for the next poll.
+          if (event.ledger > targetLedger) return events;
+          events.push(event);
+        }
+        if (page.length < this.BATCH_SIZE) return events;
+
+        const nextCursor = result.cursor;
+        if (typeof nextCursor !== 'string' || nextCursor.length === 0 || seenCursors.has(nextCursor)) {
+          throw new Error('RPC pagination cursor is missing or did not advance');
+        }
+        seenCursors.add(nextCursor);
+        cursor = nextCursor;
       }
-
-      const data = (await response.json()) as { error?: { message?: string }; result?: GetEventsResponse };
-
-      if (data.error) {
-        throw new Error(`RPC error: ${data.error.message || 'Unknown RPC error'}`);
-      }
-
-      const result: GetEventsResponse = (data.result || {}) as GetEventsResponse;
-      return result.events || [];
     } catch (error) {
       console.error(`[ContractEventIndexer] Error fetching events from RPC:`, error);
       throw error;
@@ -341,7 +376,12 @@ export class ContractEventIndexer {
     `;
 
     const result = await pool.query(query);
-    return result.rows[0]?.last_indexed_ledger || 0;
+    // PostgreSQL BIGINT values arrive as strings with the default pg parser.
+    const ledger = Number(result.rows[0]?.last_indexed_ledger ?? 0);
+    if (!Number.isSafeInteger(ledger) || ledger < 0) {
+      throw new Error('Invalid contract event indexer ledger');
+    }
+    return ledger;
   }
 
   /**

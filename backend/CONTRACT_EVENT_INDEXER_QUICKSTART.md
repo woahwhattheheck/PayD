@@ -111,7 +111,7 @@ You should see logs like:
 [ContractEventIndexer] Monitoring contracts: CTEST123..., CTEST456...
 [ContractEventIndexer] Started polling every 10000ms
 [ContractEventIndexer] Last indexed ledger: 0
-[ContractEventIndexer] Found 5 new events for contract CTEST123...
+[ContractEventIndexer] Found 5 new events across configured contracts
 [ContractEventIndexer] Indexed 5 events, skipped 0 duplicates
 ```
 
@@ -126,6 +126,24 @@ stored under `payload.decoded.value`. Integer values decoded as bigint remain
 decimal strings, including distribution amounts.
 
 This applies to newly indexed events. Existing stored rows are not rewritten.
+
+## Polling and Checkpoints
+
+All configured contracts are read through one shared RPC stream. The indexer
+follows 100-event pages through the response cursor, including events that share
+the last ledger on a full page. Each scan stops at the first response's latest
+ledger; newer arrivals are collected by the next poll.
+
+The complete scan is fetched before opening the database transaction. Its events
+and shared checkpoint are committed together. A failed or malformed page, or a
+missing or repeated continuation cursor, leaves the previous ledger in place for
+retry. PostgreSQL `BIGINT` checkpoint strings are converted to numbers before
+calculating the next ledger, and overlapping polls on one indexer instance are
+skipped while the current poll finishes.
+
+These protections apply to subsequent polls. Events skipped before an upgrade
+require historical reindexing within the RPC provider's retention period; the
+stored checkpoint is not automatically rewound.
 
 ## Query Events
 
