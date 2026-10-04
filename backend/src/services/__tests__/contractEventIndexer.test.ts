@@ -1,6 +1,5 @@
 import { ContractEventIndexer } from '../contractEventIndexer';
 import { default as pool } from '../../config/database';
-import { Address, nativeToScVal, xdr } from '@stellar/stellar-sdk';
 import type { SorobanEvent } from '../../types/contractEvent';
 
 // Mock the database pool
@@ -212,7 +211,7 @@ describe('ContractEventIndexer', () => {
     });
   });
 
-  describe('lossless RPC pagination', () => {
+  describe('behavior preserved from the removed indexer', () => {
     const contractIds = ['CBULK', 'CVESTING', 'CREVENUE'];
     const contractEnvNames = [
       'BULK_PAYMENT_CONTRACT_ID',
@@ -229,18 +228,15 @@ describe('ContractEventIndexer', () => {
         contractId: contractIds[index % contractIds.length]!,
         id,
         pagingToken: id,
-        topic: [nativeToScVal('payment', { type: 'symbol' }).toXDR('base64')],
-        value: nativeToScVal(index, { type: 'u32' }).toXDR('base64'),
+        topic: ['cGF5bWVudA=='],
+        value: { xdr: 'test' },
         inSuccessfulContractCall: true,
         txHash: index.toString(16).padStart(64, '0'),
       };
     }
 
-    function rpcPage(events: SorobanEvent[], cursor?: string, latestLedger = 100) {
-      return {
-        ok: true,
-        json: async () => ({ result: { events, latestLedger, cursor } }),
-      };
+    function rpcPage(events: SorobanEvent[], latestLedger = 100) {
+      return { ok: true, json: async () => ({ result: { events, latestLedger } }) };
     }
 
     let checkpoint: number;
@@ -271,82 +267,26 @@ describe('ContractEventIndexer', () => {
       });
     });
 
-    it('indexes every event in a full ledger and defers arrivals beyond the initial RPC head', async () => {
-      const firstLedger = Array.from({ length: 101 }, (_, i) => indexedEvent(i + 1));
-      const nextLedger = Array.from({ length: 99 }, (_, i) => indexedEvent(i + 102, 101));
-      (global.fetch as jest.Mock)
-        .mockResolvedValueOnce(rpcPage(firstLedger.slice(0, 100), 'page-1'))
-        .mockResolvedValueOnce(rpcPage([firstLedger[100]!, ...nextLedger], 'page-2', 101))
-        .mockResolvedValueOnce(rpcPage(nextLedger, undefined, 101));
+    it('increments a string ledger numerically and commits one combined contract batch', async () => {
+      const events = [indexedEvent(1), indexedEvent(2), indexedEvent(3)];
+      (global.fetch as jest.Mock).mockResolvedValue(rpcPage(events));
 
       await indexer.initialize();
 
-      const requests = (global.fetch as jest.Mock).mock.calls.map(([, options]) => JSON.parse(options.body).params);
-      expect(requests).toHaveLength(2);
-      expect(requests[0].startLedger).toBe(100); // pg returns BIGINT checkpoint "99".
-      expect(requests[1].pagination).toEqual({ limit: 100, cursor: 'page-1' });
-      expect(requests[1]).not.toHaveProperty('startLedger');
-      expect(requests[1]).not.toHaveProperty('endLedger');
-      requests.forEach((params) => expect(params.filters[0].contractIds).toEqual(contractIds));
-      const inserts = mockClient.query.mock.calls.filter(([sql]: [string]) => sql.includes('INSERT INTO contract_events'));
-      expect(inserts).toHaveLength(101);
-      expect(new Set(inserts.map(([, values]: [string, any[]]) => values[5])).size).toBe(101);
-      expect(inserts.every(([, values]: [string, any[]]) => values[4] === 100)).toBe(true);
-      expect(checkpoint).toBe(100);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      const params = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body).params;
+      expect(params.startLedger).toBe(100);
+      expect(params.filters[0].contractIds).toEqual(contractIds);
       const writes = mockClient.query.mock.calls;
+      expect(writes.filter(([sql]: [string]) => sql.includes('INSERT INTO contract_events'))).toHaveLength(3);
       expect(writes[0]).toEqual(['BEGIN']);
       expect(writes[writes.length - 2][1]).toEqual([100, 'active', null]);
       expect(writes[writes.length - 1]).toEqual(['COMMIT']);
       expect(writes.filter(([sql]: [string]) => sql.includes('UPDATE indexer_state'))).toHaveLength(1);
-
-      await indexer.pollOnce();
-
-      const nextRequest = JSON.parse((global.fetch as jest.Mock).mock.calls[2][1].body).params;
-      expect(nextRequest.startLedger).toBe(101);
-      expect(checkpoint).toBe(101);
-      expect(mockClient.query.mock.calls.filter(([sql]: [string]) => sql.includes('INSERT INTO contract_events'))).toHaveLength(200);
-    });
-
-    it.each(['RPC error', 'missing cursor', 'repeated cursor', 'invalid page'])('keeps the checkpoint and retries after a %s', async (failure) => {
-      const events = Array.from({ length: 101 }, (_, i) => indexedEvent(i + 1));
-      const firstPage = events.slice(0, 100);
-      (global.fetch as jest.Mock).mockResolvedValueOnce(rpcPage(firstPage, failure === 'missing cursor' ? undefined : 'page-1'));
-      if (failure === 'RPC error') {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ error: { message: 'continuation unavailable' } }),
-        });
-      } else if (failure === 'repeated cursor') {
-        (global.fetch as jest.Mock).mockResolvedValueOnce(rpcPage(firstPage, 'page-1'));
-      } else if (failure === 'invalid page') {
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ result: {} }),
-        });
-      }
-
-      await indexer.initialize();
-
-      expect(checkpoint).toBe(99);
-      expect(pool.connect).not.toHaveBeenCalled();
-      expect(mockClient.query).not.toHaveBeenCalled(); // No BEGIN before all pages arrive.
-      expect(pool.query).toHaveBeenLastCalledWith(
-        expect.stringContaining('UPDATE indexer_state'),
-        [99, 'error', expect.stringMatching(/continuation unavailable|pagination cursor|valid events page/)]
-      );
-
-      (global.fetch as jest.Mock).mockReset()
-        .mockResolvedValueOnce(rpcPage(firstPage, 'page-1'))
-        .mockResolvedValueOnce(rpcPage(events.slice(100), 'page-2'));
-      await indexer.pollOnce();
-
-      expect(JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body).params.startLedger).toBe(100);
       expect(checkpoint).toBe(100);
-      expect(mockClient.query.mock.calls.filter(([sql]: [string]) => sql.includes('INSERT INTO contract_events'))).toHaveLength(101);
-      expect(mockClient.query).toHaveBeenLastCalledWith('COMMIT');
     });
 
-    it('keeps all contracts visible when a new ledger arrives after an empty response', async () => {
+    it('preserves both contracts when a ledger arrives after an empty response', async () => {
       let visibleEvents: SorobanEvent[] = [];
       let latestLedger = 100;
       const arrivals = [indexedEvent(3, 101), indexedEvent(4, 101)];
@@ -355,7 +295,7 @@ describe('ContractEventIndexer', () => {
         const events = visibleEvents.filter((event) =>
           event.ledger >= params.startLedger && params.filters[0].contractIds.includes(event.contractId)
         );
-        const response = rpcPage(events, undefined, latestLedger);
+        const response = rpcPage(events, latestLedger);
         visibleEvents = arrivals;
         latestLedger = 101;
         return response;
@@ -372,7 +312,7 @@ describe('ContractEventIndexer', () => {
       expect(checkpoint).toBe(101);
     });
 
-    it('prevents an overlapping poll from overwriting a completed checkpoint', async () => {
+    it('prevents an overlapping poll from reverting a completed checkpoint', async () => {
       let releaseFirst!: (response: any) => void;
       let releaseSecond!: (response: any) => void;
       let markStarted!: () => void;
@@ -387,7 +327,7 @@ describe('ContractEventIndexer', () => {
       await started;
       const overlapping = indexer.pollOnce();
       await Promise.resolve();
-      releaseFirst(rpcPage([indexedEvent(1)]));
+      releaseFirst(rpcPage([indexedEvent(3)]));
       await initializing;
       releaseSecond({ ok: false, status: 500, statusText: 'late failure' });
       await overlapping;
@@ -395,74 +335,6 @@ describe('ContractEventIndexer', () => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(checkpoint).toBe(100);
       expect(mockClient.query).toHaveBeenLastCalledWith('COMMIT');
-    });
-  });
-
-  describe('distribution event RPC payloads', () => {
-    const asset = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';
-    const totalAmount = 9007199254740993n;
-
-    function distributionEvent(): SorobanEvent {
-      const fields = [
-        ['asset', new Address(asset).toScVal()],
-        ['recipient_count', xdr.ScVal.scvU32(2)],
-        ['split_percentages', xdr.ScVal.scvVec([xdr.ScVal.scvU32(6000), xdr.ScVal.scvU32(4000)])],
-        ['total_amount', nativeToScVal(totalAmount, { type: 'i128' })],
-      ] as const;
-      return {
-        type: 'contract',
-        ledger: 100,
-        ledgerClosedAt: '2026-10-04T00:00:00Z',
-        contractId: asset,
-        id: '0000000100000000000-0000000001',
-        pagingToken: '0000000100000000000-0000000001',
-        topic: [nativeToScVal('distribution_executed_event', { type: 'symbol' }).toXDR('base64')],
-        value: xdr.ScVal.scvMap(fields.map(([name, value]) => new xdr.ScMapEntry({
-          key: nativeToScVal(name, { type: 'symbol' }),
-          val: value,
-        }))).toXDR('base64'),
-        inSuccessfulContractCall: true,
-        txHash: 'a'.repeat(64),
-      };
-    }
-
-    it.each(['raw', 'legacy wrapper'])('indexes %s XDR through a poll without losing event fields', async (encoding) => {
-      const event = distributionEvent();
-      if (encoding === 'legacy wrapper') event.value = { xdr: event.value as string };
-      (indexer as any).CONTRACTS_TO_INDEX = [event.contractId];
-      (indexer as any).isRunning = true;
-      (pool.query as jest.Mock).mockResolvedValue({ rows: [{ last_indexed_ledger: 99 }] });
-      mockClient.query.mockResolvedValue({ rowCount: 1 });
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        json: async () => ({ result: { events: [event], latestLedger: 100 } }),
-      });
-
-      await indexer.pollOnce();
-
-      const insert = mockClient.query.mock.calls.find(([sql]: [string]) => sql.includes('INSERT INTO contract_events'));
-      expect(insert).toBeDefined();
-      const values = insert[1];
-      expect(values[2]).toBe('distribution_executed_event');
-      const payload = JSON.parse(values[3]);
-      expect(payload.value).toEqual(event.value);
-      expect(payload.decoded.value).toEqual({
-        asset,
-        recipient_count: 2,
-        split_percentages: [6000, 4000],
-        total_amount: totalAmount.toString(),
-      });
-      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
-    });
-
-    it.each(['raw', 'legacy wrapper'])('preserves malformed %s XDR without throwing', (encoding) => {
-      const event = distributionEvent();
-      event.value = encoding === 'raw' ? 'invalid-xdr' : { xdr: 'invalid-xdr' };
-
-      const payload = (indexer as any).parseEventPayload(event);
-
-      expect(payload.value).toEqual(event.value);
-      expect(payload.decoded.value).toBe('invalid-xdr');
     });
   });
 

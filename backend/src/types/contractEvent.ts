@@ -50,8 +50,7 @@ export interface SorobanEvent {
   id: string;
   pagingToken: string;
   topic: string[];
-  // Raw getEvents returns a base64 ScVal string; retain the legacy wrapper.
-  value: string | {
+  value: {
     xdr: string;
   };
   inSuccessfulContractCall: boolean;
@@ -61,5 +60,4 @@ export interface SorobanEvent {
 export interface GetEventsResponse {
   events: SorobanEvent[];
   latestLedger: number;
-  cursor?: string;
 }
