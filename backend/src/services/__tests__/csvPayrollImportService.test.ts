@@ -14,6 +14,7 @@ jest.mock('../../config/database', () => ({
 jest.mock('../employeeService', () => ({
   employeeService: {
     create: jest.fn(),
+    invalidateListCache: jest.fn(),
   },
 }));
 
