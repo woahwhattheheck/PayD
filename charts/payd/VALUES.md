@@ -189,9 +189,13 @@ arbitrary additions to `backend.secrets`:
 | `stellar.sorobanRpcUrl` | Backend `SOROBAN_RPC_URL`. |
 
 Configure the three effective Stellar values together. They are emitted beside
-`backend.config` in the backend ConfigMap. Do not repeat those generated
-environment names inside `backend.config`, which would create duplicate YAML
-keys. The chart's ingress paths do not add or remove `/api` or `/api/v1`.
+`backend.config` in the backend ConfigMap. When the backend is enabled, repeating
+any of those three environment names inside `backend.config` stops rendering
+with an error identifying the corresponding `stellar.*` setting. Remove the
+repeated key and configure that canonical setting instead. Presence is checked,
+so an empty repeated value is rejected too; no supplied value is echoed in the
+error. With the backend disabled, its unused configuration is not checked.
+The chart's ingress paths do not add or remove `/api` or `/api/v1`.
 
 ### Frontend image configuration
 
@@ -278,3 +282,27 @@ passed the supplied refresh value to the backend Secret. The observed HPA
 ranges, frontend replicas, resources, backend endpoints and inherited frontend
 environment matched the tables above. This confirms manifest rendering; it
 does not establish cluster readiness, browser-to-API connectivity or capacity.
+
+### Duplicate Stellar-key render check — October 4, 2026
+
+A single chart-only comparison on Ubuntu 24.04 with Helm
+`v3.22.0+g144ca65` exercised the chart at source
+`19012e70822c75350ba0bbcb1ac688aa98819f5e`, replacing only ConfigMap template
+blob `015d31eb4886d3577cde6ab4c23cf95705653445` with
+`b66bb87babcb8a677e64635b72100c101335704d`.
+
+All 11 comparisons passed. Defaults, staging, production, ordinary empty/false/
+zero config values and a disabled backend produced byte-identical complete
+manifests before and after. For each of the three reserved names, both nonempty
+and empty overrides previously rendered the key twice with exit 0; the repaired
+chart exits 1 with the canonical-setting diagnostic and no manifest output.
+The synthetic override value did not appear in the diagnostic.
+
+[Executed command and assertions](https://github.com/woahwhattheheck/PayD/blob/8d1b7fed81558a25939cfe9045dce5f06ae1f79d/.github/workflows/payd634-configmap-keys.yml),
+[successful run 37204990939](https://github.com/woahwhattheheck/PayD/actions/runs/37204990939),
+and artifact `11304641544` retain the source pins and per-case result. The
+602-byte artifact archive was downloaded and matched SHA-256
+`7bff43aba60f9142e08133bde3330663c89e960e4e4e17c86ce42961378d9d1b`.
+The execution workflow stays on its separate check branch. No application
+suite, dependency installation, Kubernetes apply, cluster rollout or live
+Stellar request was performed by this check.
