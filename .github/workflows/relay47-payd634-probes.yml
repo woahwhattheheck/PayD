@@ -1,0 +1,51 @@
+name: PayD Helm probe acceptance
+on:
+  push:
+    branches: [validation/payd634-probes-relay47-20261004]
+permissions:
+  contents: write
+concurrency:
+  group: payd634-probes-relay47
+  cancel-in-progress: false
+jobs:
+  chart-probes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: carrier
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: subject
+          ref: a3099111c392b504565cd27a6c0c6f4d952a33fe
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.19.0
+      - name: Render exact chart before and after probe repair
+        working-directory: subject
+        shell: bash
+        env:
+          EVIDENCE: ${{ runner.temp }}/payd634-probe-evidence
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = a3099111c392b504565cd27a6c0c6f4d952a33fe
+          test "$(git hash-object charts/payd/values.yaml)" = 269c215f63510329e8882289f347d1b6f8e4d330
+          test "$(git hash-object charts/payd/templates/backend-deployment.yaml)" = c0828146c68e1b3a9322781552a67d1dd14fb3f8
+          test "$(git hash-object charts/payd/VALUES.md)" = 9725ee3040a2d4c2bc5011f672b4939e4d0b428c
+          test ! -e charts/payd/PROBE_VALIDATION.md
+          /usr/bin/python3 ../carrier/accept.py
+          git diff --check
+          git diff > "$EVIDENCE/source.patch"
+          git add charts/payd/values.yaml charts/payd/templates/backend-deployment.yaml charts/payd/VALUES.md charts/payd/PROBE_VALIDATION.md
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(helm): separate process probes from dependency readiness [skip ci]'
+          { git rev-parse HEAD HEAD^{tree} HEAD^; git show --stat --oneline HEAD; } | tee "$EVIDENCE/candidate.txt"
+          git push origin HEAD:refs/heads/relay47/payd634-probes-candidate-20261004
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payd634-probes-relay47
+          path: ${{ runner.temp }}/payd634-probe-evidence
+          retention-days: 14
+          if-no-files-found: error
