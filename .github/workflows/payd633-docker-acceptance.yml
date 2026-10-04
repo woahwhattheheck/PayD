@@ -15,13 +15,13 @@ jobs:
       run:
         shell: bash
     env:
-      SOURCE_SHA: 9507c7c7e3634cc6e3f85da8fb8a04ca400d5c88
-      DOCKERFILE_BLOB: da34233df80f6fa808ef01bb2c9a12cee1d13750
+      SOURCE_SHA: 9f05ce2afe17af24a46b030b60f76b8a4f6ee99c
+      DOCKERFILE_BLOB: cca91a6ccb01255f8c0ea8787898025793ceda3e
       IMAGE: payd633:source
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 9507c7c7e3634cc6e3f85da8fb8a04ca400d5c88
+          ref: 9f05ce2afe17af24a46b030b60f76b8a4f6ee99c
           persist-credentials: false
       - name: Pin source and record Docker tools
         run: |
@@ -39,6 +39,7 @@ jobs:
           docker image inspect "$IMAGE" > evidence/image-inspect.json
           docker history --no-trunc "$IMAGE" > evidence/image-history.txt
           docker run --rm --network none --entrypoint sh "$IMAGE" -c 'id -u; cat /etc/alpine-release' > evidence/runtime-identity.txt
+          docker run --rm --network none --entrypoint sh "$IMAGE" -c 'du -k -d 2 /usr/src/app/node_modules /usr/local /opt 2>/dev/null | sort -nr | head -60' > evidence/runtime-footprint.txt
       - name: Rebuild after a temporary source-only change
         run: |
           set -euo pipefail
