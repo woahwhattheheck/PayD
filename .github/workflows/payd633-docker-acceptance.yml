@@ -15,13 +15,13 @@ jobs:
       run:
         shell: bash
     env:
-      SOURCE_SHA: b6aeb6f162c01145188cf77ce3ac80945f8935e8
+      SOURCE_SHA: 9507c7c7e3634cc6e3f85da8fb8a04ca400d5c88
       DOCKERFILE_BLOB: da34233df80f6fa808ef01bb2c9a12cee1d13750
       IMAGE: payd633:source
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: b6aeb6f162c01145188cf77ce3ac80945f8935e8
+          ref: 9507c7c7e3634cc6e3f85da8fb8a04ca400d5c88
           persist-credentials: false
       - name: Pin source and record Docker tools
         run: |
