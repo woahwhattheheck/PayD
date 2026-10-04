@@ -1,0 +1,3 @@
+Baseline exit: 1
+Fixed exit: 0
+Only the database mock ES module marker changed.

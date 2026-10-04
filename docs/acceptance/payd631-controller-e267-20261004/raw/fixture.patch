@@ -1,0 +1,12 @@
+diff --git a/backend/src/controllers/__tests__/contractEventController.test.ts b/backend/src/controllers/__tests__/contractEventController.test.ts
+index dfb3c6f..71078ee 100644
+--- a/backend/src/controllers/__tests__/contractEventController.test.ts
++++ b/backend/src/controllers/__tests__/contractEventController.test.ts
+@@ -3,6 +3,7 @@ import { ContractEventController } from '../contractEventController';
+ import { default as pool } from '../../config/database';
+ 
+ jest.mock('../../config/database', () => ({
++  __esModule: true,
+   default: {
+     query: jest.fn(),
+   },

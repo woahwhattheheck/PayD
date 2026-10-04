@@ -1,0 +1,5 @@
+Source: 98bad9c9ff9cbf2bce4c050975419188c7dd0ba9
+Working directory: backend
+Install: npm ci --legacy-peer-deps --no-audit --no-fund
+Acceptance: npm test -- --runInBand --runTestsByPath src/controllers/__tests__/contractEventController.test.ts
+Scope: eight maintained controller tests; conditional one-line database mock interop fix only.

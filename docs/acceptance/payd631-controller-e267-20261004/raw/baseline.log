@@ -1,0 +1,110 @@
+
+> payd-backend@1.0.0 test
+> jest --runInBand --runTestsByPath src/controllers/__tests__/contractEventController.test.ts --json --outputFile=/home/runner/work/PayD/PayD/acceptance/baseline.json
+
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+FAIL src/controllers/__tests__/contractEventController.test.ts
+  ContractEventController
+    getEventsByContract
+      ✕ should return paginated events for a contract (3 ms)
+      ✓ should return 403 if user has no organization (4 ms)
+      ✕ should apply filters correctly (8 ms)
+    getAllEvents
+      ✕ should return all events for organization (2 ms)
+      ✓ should return 403 if user has no organization (2 ms)
+    getIndexerStatus
+      ✕ should return indexer status (1 ms)
+      ✕ should return 404 if indexer state not found
+      ✕ should handle errors (1 ms)
+
+  ● ContractEventController › getEventsByContract › should return paginated events for a contract
+
+    TypeError: Cannot read properties of undefined (reading 'mockResolvedValueOnce')
+
+    [0m [90m 44 |[39m
+     [90m 45 |[39m       (pool[33m.[39mquery [36mas[39m jest[33m.[39m[33mMock[39m)
+    [31m[1m>[22m[39m[90m 46 |[39m         [33m.[39mmockResolvedValueOnce({ rows[33m:[39m [{ total[33m:[39m [32m'5'[39m }] })
+     [90m    |[39m          [31m[1m^[22m[39m
+     [90m 47 |[39m         [33m.[39mmockResolvedValueOnce({
+     [90m 48 |[39m           rows[33m:[39m [
+     [90m 49 |[39m             {[0m
+
+      at Object.<anonymous> (src/controllers/__tests__/contractEventController.test.ts:46:10)
+
+  ● ContractEventController › getEventsByContract › should apply filters correctly
+
+    TypeError: Cannot read properties of undefined (reading 'mockResolvedValueOnce')
+
+    [0m [90m 106 |[39m
+     [90m 107 |[39m       (pool[33m.[39mquery [36mas[39m jest[33m.[39m[33mMock[39m)
+    [31m[1m>[22m[39m[90m 108 |[39m         [33m.[39mmockResolvedValueOnce({ rows[33m:[39m [{ total[33m:[39m [32m'15'[39m }] })
+     [90m     |[39m          [31m[1m^[22m[39m
+     [90m 109 |[39m         [33m.[39mmockResolvedValueOnce({ rows[33m:[39m [] })[33m;[39m
+     [90m 110 |[39m
+     [90m 111 |[39m       [36mawait[39m [33mContractEventController[39m[33m.[39mgetEventsByContract([0m
+
+      at Object.<anonymous> (src/controllers/__tests__/contractEventController.test.ts:108:10)
+
+  ● ContractEventController › getAllEvents › should return all events for organization
+
+    TypeError: Cannot read properties of undefined (reading 'mockResolvedValueOnce')
+
+    [0m [90m 126 |[39m
+     [90m 127 |[39m       (pool[33m.[39mquery [36mas[39m jest[33m.[39m[33mMock[39m)
+    [31m[1m>[22m[39m[90m 128 |[39m         [33m.[39mmockResolvedValueOnce({ rows[33m:[39m [{ total[33m:[39m [32m'10'[39m }] })
+     [90m     |[39m          [31m[1m^[22m[39m
+     [90m 129 |[39m         [33m.[39mmockResolvedValueOnce({
+     [90m 130 |[39m           rows[33m:[39m [
+     [90m 131 |[39m             {[0m
+
+      at Object.<anonymous> (src/controllers/__tests__/contractEventController.test.ts:128:10)
+
+  ● ContractEventController › getIndexerStatus › should return indexer status
+
+    TypeError: Cannot read properties of undefined (reading 'mockResolvedValue')
+
+    [0m [90m 171 |[39m   describe([32m'getIndexerStatus'[39m[33m,[39m () [33m=>[39m {
+     [90m 172 |[39m     it([32m'should return indexer status'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 173 |[39m       (pool[33m.[39mquery [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockResolvedValue({
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 174 |[39m         rows[33m:[39m [
+     [90m 175 |[39m           {
+     [90m 176 |[39m             indexerName[33m:[39m [32m'contract_event_indexer'[39m[33m,[39m[0m
+
+      at Object.<anonymous> (src/controllers/__tests__/contractEventController.test.ts:173:33)
+
+  ● ContractEventController › getIndexerStatus › should return 404 if indexer state not found
+
+    TypeError: Cannot read properties of undefined (reading 'mockResolvedValue')
+
+    [0m [90m 199 |[39m
+     [90m 200 |[39m     it([32m'should return 404 if indexer state not found'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 201 |[39m       (pool[33m.[39mquery [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockResolvedValue({ rows[33m:[39m [] })[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 202 |[39m
+     [90m 203 |[39m       [36mawait[39m [33mContractEventController[39m[33m.[39mgetIndexerStatus(
+     [90m 204 |[39m         mockRequest [36mas[39m [33mRequest[39m[33m,[39m[0m
+
+      at Object.<anonymous> (src/controllers/__tests__/contractEventController.test.ts:201:33)
+
+  ● ContractEventController › getIndexerStatus › should handle errors
+
+    TypeError: Cannot read properties of undefined (reading 'mockRejectedValue')
+
+    [0m [90m 213 |[39m
+     [90m 214 |[39m     it([32m'should handle errors'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 215 |[39m       (pool[33m.[39mquery [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockRejectedValue([36mnew[39m [33mError[39m([32m'Database error'[39m))[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 216 |[39m
+     [90m 217 |[39m       [36mawait[39m [33mContractEventController[39m[33m.[39mgetIndexerStatus(
+     [90m 218 |[39m         mockRequest [36mas[39m [33mRequest[39m[33m,[39m[0m
+
+      at Object.<anonymous> (src/controllers/__tests__/contractEventController.test.ts:215:33)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 2 passed, 8 total
+Snapshots:   0 total
+Time:        3.053 s
+Ran all test suites within paths "src/controllers/__tests__/contractEventController.test.ts".
+Test results written to: ../../acceptance/baseline.json

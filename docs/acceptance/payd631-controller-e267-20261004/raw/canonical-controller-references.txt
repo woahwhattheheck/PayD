@@ -1,0 +1,2 @@
+backend/src/__tests__/contractIntegration.test.ts:303:import { ContractEventController } from '../controllers/contractEventController.js';
+backend/src/routes/contractEventRoutes.ts:2:import { ContractEventController } from '../controllers/contractEventController.js';
