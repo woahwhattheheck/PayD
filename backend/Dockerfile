@@ -45,6 +45,8 @@ COPY --from=production-deps /usr/local/bin/docker-entrypoint.sh /usr/local/bin/d
 COPY --chown=payd:payd package*.json ./
 COPY --from=production-deps --chown=payd:payd /usr/src/app/node_modules ./node_modules
 COPY --from=builder --chown=payd:payd /usr/src/app/dist ./dist
+# Public metadata served by dist/app.js; TypeScript does not copy this asset.
+COPY --chown=payd:payd .well-known/stellar.toml ./.well-known/stellar.toml
 
 USER payd
 
