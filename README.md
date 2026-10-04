@@ -158,7 +158,6 @@ Clone the repository, then install and run from its root:
 ```bash
 git clone https://github.com/Protocol-Guild/PayD.git
 cd PayD
-npm install
 npm install --prefix frontend
 npm run dev
 ```
@@ -168,6 +167,10 @@ The application source is in [`frontend/src/`](frontend/src/). The root
 [`frontend/package.json`](frontend/package.json). Its `packages/*` workspace
 pattern does not include `frontend/` or `backend/`, so installing only the root
 package does not install either application's declared dependencies.
+
+The frontend commands above need only the frontend installation. Run `npm install`
+in the root separately when you need repository-wide formatting or the Git hooks;
+those tools are declared in the root package.
 
 `npm run dev` starts Vite only. Open the URL printed by Vite; it does not start
 the backend, a database, or a local Stellar network.
