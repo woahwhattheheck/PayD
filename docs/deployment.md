@@ -40,6 +40,8 @@ This guide covers deploying PayD to a Kubernetes cluster using either raw manife
 
 ## Option 1: Using Raw Manifests
 
+Run this option's commands from the repository root.
+
 ### 1. Create Secrets
 
 **Do not commit real secret values.** Production `k8s/base/` requires External
@@ -95,23 +97,24 @@ spec:
     - host: api.payd.yourdomain.com
 ```
 
-### 4. Build and Push Docker Images
+### 4. Prepare Docker Images
 
 ```bash
-# Build backend
-cd backend
-docker build -t your-registry/payd-backend:latest .
+# Build and push the backend image from the repository root
+docker build -t your-registry/payd-backend:latest backend/
 docker push your-registry/payd-backend:latest
-
-# Build frontend
-cd frontend
-docker build -t your-registry/payd-frontend:latest .
-docker push your-registry/payd-frontend:latest
 ```
+
+This repository does not include a frontend Dockerfile. Supply a published
+frontend image that serves the app over HTTP on port 80, as expected by the
+[frontend Deployment](../k8s/base/frontend-deployment.yaml) and
+[Service](../k8s/base/frontend-service.yaml). Set that image's registry reference
+in Step 5 before deploying.
 
 ### 5. Update Image References
 
-Edit the deployment files to use your registry:
+Set the deployment image references to the backend image you pushed and the
+published frontend image you supply:
 
 ```yaml
 # k8s/base/backend-deployment.yaml
@@ -140,9 +143,9 @@ traffic. For a local cluster without ESO, use the manifest list in
 ### 7. Verify Deployment
 
 ```bash
-kubectl get pods -l app=payd
-kubectl get services -l app=payd
-kubectl get ingress payd-ingress
+kubectl -n payd get pods -l app=payd
+kubectl -n payd get services -l app=payd
+kubectl -n payd get ingress payd-ingress
 ```
 
 ## Option 2: Using Helm Chart
