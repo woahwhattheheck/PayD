@@ -111,6 +111,10 @@ impl RevenueSplitContract {
             .get(&DataKey::Recipients)
             .ok_or(ContractError::NotInitialized)?;
 
+        // Build event weights only after the first successful asset distribution.
+        // Later events reuse the immutable host vector through cloned handles.
+        let mut event_split_percentages: Option<Vec<u32>> = None;
+
         for asset_pair in assets.iter() {
             let token = asset_pair.0;
             let amount = asset_pair.1;
@@ -147,16 +151,19 @@ impl RevenueSplitContract {
                 }
             }
 
-            let mut split_percentages: Vec<u32> = Vec::new(&env);
-            for share in shares.iter() {
-                split_percentages.push_back(share.basis_points);
-            }
+            let split_percentages = event_split_percentages.get_or_insert_with(|| {
+                let mut percentages = Vec::new(&env);
+                for share in shares.iter() {
+                    percentages.push_back(share.basis_points);
+                }
+                percentages
+            });
 
             DistributionExecutedEvent {
                 asset: token.clone(),
                 total_amount: amount,
                 recipient_count: shares.len(),
-                split_percentages,
+                split_percentages: split_percentages.clone(),
             }
             .publish(&env);
         }
