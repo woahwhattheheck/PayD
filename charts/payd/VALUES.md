@@ -99,14 +99,27 @@ rendered from their own values and are not removed based on component flags.
 | `backend.autoscaling.targetCPUUtilizationPercentage` | CPU utilization target; a zero or omitted target is not rendered. |
 | `backend.autoscaling.targetMemoryUtilizationPercentage` | Memory utilization target; a zero or omitted target is not rendered. Keep at least one metric configured when HPA is enabled. |
 | `backend.service.type`, `frontend.service.type` | Kubernetes Service types. |
-| `backend.service.port` | Backend Service port and container's named `http` port. Keep `backend.config.PORT`, probe ports and ingress backend ports consistent. |
+| `backend.service.port` | Backend Service port and container's named `http` port. Keep `backend.config.PORT` and ingress backend ports consistent; default probes use the named `http` port. |
 | `frontend.service.port` | Frontend Service port; it targets the container's fixed named `http` port 80. |
+| `backend.healthCheck.startupProbe` | Startup probe mapping; default checks `/health/live`, with up to 300 seconds for application startup. Set to `null` to omit it. |
 | `backend.healthCheck.livenessProbe` | Complete probe mapping copied to the backend container. |
 | `backend.healthCheck.readinessProbe` | Complete probe mapping copied to the backend container. |
 
-Both backend probe mappings support the supplied `httpGet.path`,
-`httpGet.port`, `initialDelaySeconds`, `periodSeconds`, `timeoutSeconds` and
-`failureThreshold` fields; each whole mapping is rendered as provided. The
+All three backend probe mappings are rendered as configured. Startup and
+liveness default to `/health/live`, the backend's dependency-independent process
+check. Readiness stays on `/health`, which checks PostgreSQL, Redis and Horizon.
+A dependency outage can therefore remove a ready endpoint without making that
+same dependency failure trigger the routine liveness restart policy. Startup
+allows up to 300 seconds (60 failures at 5-second intervals) before the normal
+liveness/readiness probes take over; this is a configured allowance, not a
+measured startup duration.
+
+Default HTTP probes use the container's named `http` port, which follows
+`backend.service.port`. Keep `backend.config.PORT` and ingress ports aligned
+when changing that port. Each mapping supports the Kubernetes probe fields;
+Helm merges environment overrides with defaults. To switch a probe to another
+handler such as `exec`, explicitly set its inherited `httpGet` to `null`.
+Setting the entire startup mapping to `null` omits the startup probe. The
 frontend template fixes its probes to `/` on its named port 80 and does not
 expose a corresponding values mapping.
 
