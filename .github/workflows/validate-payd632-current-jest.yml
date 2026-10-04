@@ -1,0 +1,79 @@
+name: PayD632 current canonical indexer Jest
+on:
+  push:
+    branches: ["validate/payd632-current-jest-beacon-8447-20261004"]
+permissions:
+  contents: read
+jobs:
+  canonical-indexer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CI: 'true'
+      NODE_ENV: test
+      SOROBAN_RPC_URL: http://127.0.0.1:1
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out exact original contribution source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: woahwhattheheck/PayD
+          ref: 4669cdc0dcb0d893bf47b18ee9191df9d3ddcb1d
+          path: source
+          persist-credentials: false
+      - name: Set up standard Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install lockfile dependencies
+        working-directory: source/backend
+        run: |
+          mkdir -p "$RUNNER_TEMP/payd632-evidence"
+          npm ci --no-audit --no-fund 2>&1 | tee "$RUNNER_TEMP/payd632-evidence/npm-ci.log"
+      - name: Execute only maintained canonical indexer tests
+        working-directory: source/backend
+        run: |
+          set +e
+          npm test -- --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile="$RUNNER_TEMP/payd632-evidence/jest-results.json" 2>&1 | tee "$RUNNER_TEMP/payd632-evidence/jest.log"
+          test_exit=${PIPESTATUS[0]}
+          set -e
+          printf '%s\n' "$test_exit" > "$RUNNER_TEMP/payd632-evidence/exit-code.txt"
+          exit "$test_exit"
+      - name: Record source and native result
+        if: always()
+        run: |
+          python - <<'BEACON_RECEIPT_PY'
+          import json, os, pathlib, subprocess, platform
+          root = pathlib.Path('source')
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'payd632-evidence'
+          out.mkdir(exist_ok=True)
+          def git(*args):
+              return subprocess.check_output(['git', '-C', str(root), *args], text=True).strip()
+          files = ['backend/src/services/contractEventIndexer.ts', 'backend/src/services/__tests__/contractEventIndexer.test.ts', 'backend/src/types/contractEvent.ts', 'backend/jest.config.cjs', 'backend/tsconfig.json', 'backend/package.json', 'backend/package-lock.json']
+          data = {'source_commit': git('rev-parse', 'HEAD'), 'workflow_commit': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'], 'platform': platform.platform(), 'node': subprocess.check_output(['node','--version'], text=True).strip(), 'npm': subprocess.check_output(['npm','--version'], text=True).strip(), 'files': {p: git('rev-parse', 'HEAD:' + p) for p in files}, 'command': 'npm test -- --config jest.config.cjs --runInBand --runTestsByPath src/services/__tests__/contractEventIndexer.test.ts --json --outputFile=$RUNNER_TEMP/payd632-evidence/jest-results.json', 'working_directory': 'backend', 'limits': 'One maintained Jest file; repository config unchanged. Existing RPC/database/timer mocks. No full suite, typecheck, live RPC or PostgreSQL.'}
+          data['tracked_diff'] = git('diff', '--stat')
+          versions = {}
+          for name in ['jest', 'ts-jest', 'typescript', '@stellar/stellar-sdk']:
+              p = root / 'backend/node_modules' / name / 'package.json'
+              if p.exists(): versions[name] = json.loads(p.read_text())['version']
+          data['packages'] = versions
+          result = out / 'jest-results.json'
+          if result.exists():
+              j = json.loads(result.read_text())
+              data['jest'] = {k: j.get(k) for k in ['success','numTotalTestSuites','numPassedTestSuites','numFailedTestSuites','numTotalTests','numPassedTests','numFailedTests','numPendingTests','numTodoTests','startTime']}
+              data['selected_files'] = [r['name'] for r in j.get('testResults', [])]
+          exit_file = out / 'exit-code.txt'
+          if exit_file.exists(): data['exit_code'] = int(exit_file.read_text().strip())
+          (out / 'result.json').write_text(json.dumps(data, indent=2) + '\n')
+          print(json.dumps(data, indent=2))
+          BEACON_RECEIPT_PY
+      - name: Retain exact raw evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: payd632-current-jest-beacon-8447
+          path: ${{ runner.temp }}/payd632-evidence
+          retention-days: 7
+          if-no-files-found: error
