@@ -32,3 +32,24 @@ This establishes chart rendering and probe configuration, not a running cluster,
 load result, dependency-outage experiment, deployment or bounty acceptance.
 No backend health handler, authentication, secret template or frontend source
 was modified. The isolated runner is not included in the product branch.
+
+## Configuration rollout follow-through
+
+Parent `458b8c8a616000a014ba3f7a4066649b37f1b207`; native Helm `v3.19.0+g3d8990f`.
+[Focused render execution](https://github.com/woahwhattheheck/PayD/actions/runs/37193857701) used the staging preset with only
+disposable render-only key strings. No live configuration or key was changed.
+
+Before the two checksum annotations, changing `LOG_LEVEL` or the refresh
+key left the backend pod template byte-equivalent as parsed YAML. After the
+change, only the corresponding configuration/secret checksum changes. An
+identical rerender stays identical. Removing the two new annotations leaves
+the entire pod template identical to the original in all three cases, including
+the previously delivered probe definitions. These are actual Helm renders,
+not an executed Kubernetes rollout or a secret-rotation deployment.
+
+- Deployment source: `cd62401c00e9a65a7e1d82f59c0d27f8dea61ab9`.
+- Values guide: `adef402de5f000d82d9bdec90d390b551942d197`.
+
+The execution retains the source patch and a machine-readable result with
+checksum values, never real credentials. Existing config/secret templates,
+backend application code, probe values and earlier report content are preserved.

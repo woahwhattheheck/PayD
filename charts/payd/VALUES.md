@@ -125,6 +125,15 @@ expose a corresponding values mapping.
 
 ### Backend environment and secrets
 
+The backend pod template includes deterministic checksums of its rendered
+ConfigMap and Secret. A chart-managed configuration or key change therefore
+changes the pod template on `helm upgrade`, allowing the Deployment's normal
+rolling-update mechanism to replace pods and load the new environment.
+Identical rendered inputs keep both checksums stable; no random restart token
+is used. Direct out-of-band edits to a live ConfigMap or Secret are not watched
+by Helm: reconcile them through the release or arrange an explicit restart.
+Checksums do not replace secret access control or secure credential generation.
+
 Every entry under `backend.config` is quoted into the backend ConfigMap, which
 the Deployment imports through `envFrom`. Keep ordinary controls here and
 secret material in the named Secret entries.
