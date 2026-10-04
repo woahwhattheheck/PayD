@@ -1,0 +1,78 @@
+name: PayD 626 required frontend build E267
+
+on:
+  push:
+    branches: [validation/payd626-build-e267-20261004]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the original contribution
+        uses: actions/checkout@v4
+        with:
+          ref: 3f4b52a039aa40b7098f6bee25ca8bc347e5a836
+          path: source
+          persist-credentials: false
+      - name: Use the documented Node major
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retain source and build contract
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/acceptance"
+          test "$(git rev-parse HEAD)" = 3f4b52a039aa40b7098f6bee25ca8bc347e5a836
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/acceptance/source-sha.txt"
+          git archive --format=tar HEAD | gzip -n > "$GITHUB_WORKSPACE/acceptance/source-3f4b52a0.tar.gz"
+          {
+            node --version
+            npm --version
+            uname -a
+            git status --porcelain
+            sha256sum frontend/package.json frontend/package-lock.json frontend/tsconfig*.json frontend/vite.config.ts
+          } > "$GITHUB_WORKSPACE/acceptance/environment.txt"
+          if git ls-files | grep -E '(^src_backup/|^upstream_.*\.tsx$)'; then
+            echo 'Original issue deletion criterion failed.'
+            exit 1
+          fi
+          git grep -n -E '(src_backup|upstream_EmployeeEntry|upstream_PayrollScheduler)' -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' > "$GITHUB_WORKSPACE/acceptance/orphan-references.txt" || true
+          printf '%s\n' 'Source: 3f4b52a039aa40b7098f6bee25ca8bc347e5a836' 'Working directory: frontend' 'Install: npm ci --legacy-peer-deps' 'Build: npm run build (tsc -b && vite build)' 'Scope: issue521 original PR626 build acceptance only.' > "$GITHUB_WORKSPACE/acceptance/commands.txt"
+      - name: Install exact frontend lock dependencies
+        working-directory: source/frontend
+        shell: bash
+        env:
+          HUSKY: '0'
+        run: |
+          set -uo pipefail
+          started=$(date +%s)
+          npm ci --legacy-peer-deps 2>&1 | tee "$GITHUB_WORKSPACE/acceptance/install.log"
+          result=${PIPESTATUS[0]}
+          printf '%s\n' "$result" > "$GITHUB_WORKSPACE/acceptance/install.exit"
+          printf '%s\n' "$(( $(date +%s) - started ))" > "$GITHUB_WORKSPACE/acceptance/install.seconds"
+          exit "$result"
+      - name: Run the actual required frontend build
+        working-directory: source/frontend
+        shell: bash
+        run: |
+          set -uo pipefail
+          started=$(date +%s)
+          npm run build 2>&1 | tee "$GITHUB_WORKSPACE/acceptance/build.log"
+          result=${PIPESTATUS[0]}
+          printf '%s\n' "$result" > "$GITHUB_WORKSPACE/acceptance/build.exit"
+          printf '%s\n' "$(( $(date +%s) - started ))" > "$GITHUB_WORKSPACE/acceptance/build.seconds"
+          exit "$result"
+      - name: Retain the actual outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payd626-build-e267-${{ github.run_id }}
+          path: acceptance/
+          retention-days: 7
+          if-no-files-found: error
