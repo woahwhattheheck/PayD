@@ -44,6 +44,7 @@ jobs:
             echo "stellar-scaffold already installed. Clear cache to force reinstall."
           fi
       - name: Build with Scaffold and build client packages
+        shell: bash
         run: STELLAR_SCAFFOLD_ENV=development stellar-scaffold build --build-clients 2>&1 | tee build_clients.log
       - name: Install official Stellar CLI
         run: |
