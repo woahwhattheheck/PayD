@@ -53,6 +53,11 @@ The [runner](src/db/migrate.ts) processes all pending SQL migrations in filename
 order and records them in `schema_migrations`; it is not limited to the indexer
 tables. Check its result before starting the server.
 
+The PostgreSQL installation must provide the supplied `btree_gist` and `pgcrypto`
+extensions. The migration sequence enables them when needed. The audit IP index
+is then explicitly rebuilt with the core `inet_ops` class for subnet queries;
+the original audit migration and its checksum remain unchanged.
+
 For the focused migration regression, use a separate PostgreSQL test database:
 
 ```bash
