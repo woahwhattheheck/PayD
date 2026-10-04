@@ -61,6 +61,43 @@ SDS_ENDPOINT=https://sds-api.stellar.org
 STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
 ```
 
+### Browser and Socket.IO origins
+
+`CORS_ORIGIN` configures the shared origin list used by the HTTP API and Socket.IO.
+Set it before starting the backend; the list is built when
+[`corsOrigins.ts`](./src/config/corsOrigins.ts) is imported. Restart the backend
+after changing this setting.
+
+```dotenv
+# Example only: replace these with the origins of your deployed browser clients.
+CORS_ORIGIN=https://payroll.example,https://admin.example
+```
+
+Entries are comma-separated, trimmed, deduplicated and matched as exact strings.
+Use the browser origin (scheme, hostname and optional port), without a path or
+trailing slash. `*` is a literal entry here, not a wildcard policy.
+
+| `NODE_ENV` | Origins added to the configured list |
+| --- | --- |
+| `development` (the default) | `http://localhost:5173`, `http://localhost:3000`, `http://127.0.0.1:5173`, `http://127.0.0.1:3000` |
+| `production` or `test` | None |
+
+With an unset or blank `CORS_ORIGIN`, production and test have an empty list;
+configure the actual browser origins before deploying. An Origin header containing
+`null` is also a string and is not treated as an absent header.
+
+The [HTTP CORS middleware](./src/app.ts) enables credentials for allowed origins
+and handles their preflight requests with status 204 for the configured methods
+(`GET`, `HEAD`, `PUT`, `PATCH`, `POST`, `DELETE`, `OPTIONS`). Disallowed HTTP
+origins receive no CORS approval; this does not reject a request as an application
+authorization check. CORS alone does not constrain non-browser clients.
+
+[Socket.IO](./src/services/socketService.ts) uses the same list and credentials
+support for its CORS configuration, plus `allowRequest` to reject handshakes
+with an unlisted Origin across its polling and WebSocket transports. The current
+policy preserves clients with no Origin header in both paths. The origin setting
+is not a replacement for authentication or authorization.
+
 ### Running
 
 **Development**:
