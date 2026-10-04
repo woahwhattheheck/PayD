@@ -16,14 +16,32 @@ VESTING_ESCROW_CONTRACT_ID=CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 REVENUE_SPLIT_CONTRACT_ID=CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
-### 2. Run Database Migration
+### 2. Check the Schema and Run Migrations
+
+Set `DATABASE_URL` in `backend/.env` for the intended PostgreSQL database.
+The canonical indexer requires the `contract_events` and `indexer_state`
+layout described by
+[`016_create_contract_events.sql`](src/db/migrations/016_create_contract_events.sql).
+
+Review the existing schema before starting the indexer:
+[`015_create_contract_events.sql`](src/db/migrations/015_create_contract_events.sql)
+also creates `contract_events`, with a different column layout. Migration 016
+uses `CREATE TABLE IF NOT EXISTS`, so it does not upgrade a table created by
+015. The 015 layout lacks columns used by the canonical indexer and by 016's
+later indexes. Have that schema mismatch reconciled before treating setup as
+complete; applying 015 alone does not satisfy the canonical indexer's schema.
+
+The backend manifest defines `db:migrate`, not `migrate`. From the repository
+root, invoke the maintained runner with:
 
 ```bash
 cd backend
-npm run migrate
+npm run db:migrate
 ```
 
-This will create the `contract_events` and `indexer_state` tables.
+The [runner](src/db/migrate.ts) processes all pending SQL migrations in filename
+order and records them in `schema_migrations`; it is not limited to the indexer
+tables. Check its result before starting the server.
 
 ### 3. Start the Server
 
@@ -117,7 +135,8 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 
 1. Verify PostgreSQL is running
 2. Check `DATABASE_URL` is correct
-3. Ensure migrations have been applied: `npm run migrate`
+3. Ensure migrations have been applied with `npm run db:migrate` and that the
+   canonical schema prerequisite above is satisfied.
 
 ## Testing
 
