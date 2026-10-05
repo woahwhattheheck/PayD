@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   BarChart,
   Bar,
@@ -49,18 +49,26 @@ export default function CashFlowForecast() {
     forecastDays: 90,
   });
 
+  const canLoadForecast =
+    params.distributionAccount.trim().length > 0 && params.assetIssuer.trim().length > 0;
+
   const loadForecast = useCallback(async () => {
-    if (!params.distributionAccount || !params.assetIssuer) {
-      notifyError('Please provide distribution account and asset issuer');
+    if (!params.distributionAccount.trim() || !params.assetIssuer.trim()) {
       return;
     }
+
+    const requestParams: ForecastParams = {
+      ...params,
+      distributionAccount: params.distributionAccount.trim(),
+      assetIssuer: params.assetIssuer.trim(),
+    };
 
     setIsLoading(true);
     try {
       const [forecastData, historicalData, alertsData] = await Promise.all([
-        getForecast(params),
+        getForecast(requestParams),
         getHistoricalData(6),
-        getAlerts(params),
+        getAlerts(requestParams),
       ]);
 
       setForecast(forecastData);
@@ -73,10 +81,6 @@ export default function CashFlowForecast() {
       setIsLoading(false);
     }
   }, [params, notifyError, notifySuccess]);
-
-  useEffect(() => {
-    void loadForecast();
-  }, [loadForecast]);
 
   const chartData = useMemo(() => {
     if (!forecast) return [];
@@ -178,7 +182,7 @@ export default function CashFlowForecast() {
             onClick={() => {
               void loadForecast();
             }}
-            disabled={isLoading}
+            disabled={isLoading || !canLoadForecast}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-(--text) rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px] touch-manipulation"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
