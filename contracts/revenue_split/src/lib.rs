@@ -44,6 +44,16 @@ pub struct RecipientShare {
 
 pub const TOTAL_BASIS_POINTS: u32 = 10000; // 100%
 
+fn proportional_amount(amount: i128, basis_points: u32) -> i128 {
+    let total_basis_points = TOTAL_BASIS_POINTS as i128;
+    let basis_points = basis_points as i128;
+
+    // Compute floor(amount * basis_points / TOTAL_BASIS_POINTS) without
+    // overflowing the intermediate multiplication for large token amounts.
+    (amount / total_basis_points) * basis_points
+        + ((amount % total_basis_points) * basis_points) / total_basis_points
+}
+
 #[contract]
 pub struct RevenueSplitContract;
 
@@ -109,21 +119,23 @@ impl RevenueSplitContract {
             let mut amount_distributed = 0;
 
             for (i, share) in shares.iter().enumerate() {
-                // Calculate slice of the total amount using basis points
-                // Formula: amount * basis_points / 10000
-                let recipient_amount = (amount as i128 * share.basis_points as i128) / TOTAL_BASIS_POINTS as i128;
-                
-                if recipient_amount > 0 {
-                    // To avoid precision loss dust, the last recipient takes any minor remainders.
-                    if i as u32 == shares.len() - 1 {
-                        let final_amount = amount - amount_distributed;
-                        if final_amount > 0 {
-                            client.transfer(&from, &share.destination, &final_amount);
-                        }
-                    } else {
-                        client.transfer(&from, &share.destination, &recipient_amount);
-                        amount_distributed += recipient_amount;
+                let is_last_recipient = i as u32 == shares.len() - 1;
+
+                if is_last_recipient {
+                    // Assign all accumulated integer-division dust to the final
+                    // recipient so a successful distribution never strands funds.
+                    let final_amount = amount - amount_distributed;
+                    if final_amount > 0 {
+                        client.transfer(&from, &share.destination, &final_amount);
                     }
+                    continue;
+                }
+
+                let recipient_amount = proportional_amount(amount, share.basis_points);
+
+                if recipient_amount > 0 {
+                    client.transfer(&from, &share.destination, &recipient_amount);
+                    amount_distributed += recipient_amount;
                 }
             }
 
@@ -142,7 +154,13 @@ impl RevenueSplitContract {
         let mut seen: Vec<Address> = Vec::new(env);
 
         for share in shares.iter() {
-            total_bp = total_bp.wrapping_add(share.basis_points);
+            total_bp = total_bp
+                .checked_add(share.basis_points)
+                .ok_or(ContractError::SharesMustSumToTotal)?;
+
+            if total_bp > TOTAL_BASIS_POINTS {
+                return Err(ContractError::SharesMustSumToTotal);
+            }
 
             // Prevent duplicates; duplicates create ambiguity and can cause unexpected dust behavior.
             for addr in seen.iter() {
