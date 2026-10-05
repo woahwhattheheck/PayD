@@ -2,7 +2,8 @@
 
 use super::*;
 use soroban_sdk::{
-    testutils::Address as _,
+    events::Event,
+    testutils::{Address as _, Events as _},
     token::{Client as TokenClient, StellarAssetClient},
     Address, Env, String,
 };
@@ -53,6 +54,18 @@ fn initiate(s: &Setup, amount: i128) -> u64 {
         &String::from_str(&s.env, "EUR"),
         &String::from_str(&s.env, "anchor-eu"),
     )
+}
+
+fn assert_contract_event<E: Event>(env: &Env, contract_id: &Address, expected: &E) {
+    let expected_topics = expected.topics(env);
+    let expected_data = expected.data(env);
+
+    assert!(
+        env.events().all().iter().any(|(address, topics, data)| {
+            address == *contract_id && topics == expected_topics && data == expected_data
+        }),
+        "expected contract event was not emitted"
+    );
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
@@ -200,4 +213,71 @@ fn test_cancel_non_pending_panics() {
 fn test_cancel_not_found_panics() {
     let s = setup(0);
     s.client.cancel_payment(&s.sender, &999);
+}
+
+
+// ── Event emission ────────────────────────────────────────────────────────────
+
+#[test]
+fn test_initiate_payment_emits_event_with_expected_data() {
+    let s = setup(0);
+    let receiver_id = String::from_str(&s.env, "worker-event");
+    let target_asset = String::from_str(&s.env, "EUR");
+    let anchor_id = String::from_str(&s.env, "anchor-event");
+
+    let payment_id = s.client.initiate_payment(
+        &s.sender,
+        &750,
+        &s.token,
+        &receiver_id,
+        &target_asset,
+        &anchor_id,
+    );
+
+    assert_contract_event(
+        &s.env,
+        &s.contract_id,
+        &PaymentInitiatedEvent {
+            payment_id,
+            from: s.sender.clone(),
+            amount: 750,
+            target_asset,
+            anchor_id,
+        },
+    );
+}
+
+#[test]
+fn test_update_status_emits_event_with_expected_data() {
+    let s = setup(0);
+    let payment_id = initiate(&s, 500);
+    let new_status = symbol_short!("success");
+
+    s.client.update_status(&payment_id, &new_status);
+
+    assert_contract_event(
+        &s.env,
+        &s.contract_id,
+        &PaymentStatusUpdatedEvent {
+            payment_id,
+            new_status,
+        },
+    );
+}
+
+#[test]
+fn test_cancel_payment_emits_event_with_expected_refund() {
+    let s = setup(200); // 2% fee: 10_000 gross -> 9_800 refundable escrow
+    let payment_id = initiate(&s, 10_000);
+
+    s.client.cancel_payment(&s.sender, &payment_id);
+
+    assert_contract_event(
+        &s.env,
+        &s.contract_id,
+        &PaymentCancelledEvent {
+            payment_id,
+            refunded_amount: 9_800,
+        },
+    );
 }
