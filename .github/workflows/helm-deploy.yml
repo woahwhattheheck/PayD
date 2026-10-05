@@ -42,6 +42,7 @@ jobs:
       - name: Validate and deploy the selected immutable image tag
         shell: bash
         env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
           IMAGE_TAG: ${{ inputs.image_tag }}
           RELEASE: ${{ inputs.release }}
           NAMESPACE: ${{ inputs.namespace }}
@@ -58,8 +59,12 @@ jobs:
           workdir=$(mktemp -d)
           trap 'rm -rf -- "$workdir"' EXIT
           printf '%s' "$HELM_VALUES" > "$workdir/site-values.yaml"
-          values=(--values charts/payd/values-production.yaml
-                  --values "$workdir/site-values.yaml"
+          # Production selects MAINNET; never inherit it in staging by default.
+          values=()
+          if [[ "$TARGET_ENVIRONMENT" == "production" ]]; then
+            values+=(--values charts/payd/values-production.yaml)
+          fi
+          values+=(--values "$workdir/site-values.yaml"
                   --set-string "backend.image.tag=$IMAGE_TAG"
                   --set-string "frontend.image.tag=$IMAGE_TAG")
           # Validate the merged values before any Kubernetes request.
