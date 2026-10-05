@@ -37,6 +37,9 @@ export class ContractEventIndexer {
     
     // Run immediately on startup
     await this.pollAndIndexEvents();
+
+    // Shutdown may have stopped the indexer while the initial poll was pending.
+    if (!this.isRunning) return;
     
     // Then poll at regular intervals
     this.intervalId = setInterval(async () => {
