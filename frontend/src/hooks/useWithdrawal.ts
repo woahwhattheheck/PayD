@@ -33,7 +33,7 @@ interface UseWithdrawalReturn {
   initiateWithdrawal: (
     destinationType: 'bank_account' | 'mobile_money',
     destinationDetails: Record<string, string>
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   openInteractiveUrl: () => void;
   pollTransactionStatus: () => Promise<void>;
   cancelWithdrawal: () => Promise<void>;
@@ -122,18 +122,18 @@ export function useWithdrawal(
     ) => {
       if (!state.selectedAnchor || !state.amount) {
         setState((prev) => ({ ...prev, error: 'Please select an anchor and enter an amount' }));
-        return;
+        return false;
       }
 
       const amount = parseFloat(state.amount);
       if (isNaN(amount) || amount <= 0) {
         setState((prev) => ({ ...prev, error: 'Please enter a valid amount' }));
-        return;
+        return false;
       }
 
       if (amount > balance) {
         setState((prev) => ({ ...prev, error: 'Insufficient balance' }));
-        return;
+        return false;
       }
 
       setState((prev) => ({ ...prev, isLoading: true, error: null, step: 'confirm' }));
@@ -165,6 +165,7 @@ export function useWithdrawal(
           isLoading: false,
           step: 'processing',
         }));
+        return true;
       } catch (err) {
         setState((prev) => ({
           ...prev,
@@ -172,6 +173,7 @@ export function useWithdrawal(
           error: err instanceof Error ? err.message : 'Failed to initiate withdrawal',
           step: 'enter_amount',
         }));
+        return false;
       }
     },
     [state.selectedAnchor, state.amount, balance]

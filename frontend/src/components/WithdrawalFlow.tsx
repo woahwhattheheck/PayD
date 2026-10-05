@@ -55,8 +55,8 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
   };
 
   const handleConfirmWithdrawal = async () => {
-    await initiateWithdrawal(destinationType, destinationDetails);
-    if (state.step !== 'failed') {
+    const initiated = await initiateWithdrawal(destinationType, destinationDetails);
+    if (initiated) {
       onSuccess();
     }
   };
