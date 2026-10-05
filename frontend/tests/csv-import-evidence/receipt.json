@@ -1,0 +1,91 @@
+{
+  "operation": "PAYD685-CSV-REAL-INTERFACE-20261005",
+  "product_commit": "9d01aa6961e96be78d006ed4bc2a2b7785a2bb5b",
+  "base_commit": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+  "evidence_commit": "8ee71e238d1a7e538e51f7513e56934f967698d8",
+  "evidence_url": "https://github.com/woahwhattheheck/PayD/tree/8ee71e238d1a7e538e51f7513e56934f967698d8/frontend/tests/csv-import-evidence",
+  "browser_before": {
+    "sourceBase": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+    "employeeEntrySha256": "79d86b0f424ce57a6166ff99cf56bbb66ad20f62a32b8773e1e35aae3aa9c00a",
+    "runtime": "v24.19.0",
+    "browser": "151.0.7922.34",
+    "transport": "Loopback HTTP fixture; no live database or credentials",
+    "previewRows": 20,
+    "totalRows": 25,
+    "rawCsvExact": true,
+    "oneAuthenticatedRequest": true,
+    "listReads": 3,
+    "resultVisible": false,
+    "pageErrors": []
+  },
+  "browser_after": {
+    "sourceBase": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+    "employeeEntrySha256": "dd5291a794c13505b114a69c3bbcb7c94d8a649b0ec919b6aee331b3a8c98434",
+    "runtime": "v24.19.0",
+    "browser": "151.0.7922.34",
+    "transport": "Loopback HTTP fixture; no live database or credentials",
+    "previewRows": 20,
+    "totalRows": 25,
+    "rawCsvExact": true,
+    "oneAuthenticatedRequest": true,
+    "listReads": 6,
+    "resultVisible": true,
+    "pageErrors": [],
+    "cases": [
+      "file-picker quoted/multiline preview20-of25",
+      "byte-exact authenticated request",
+      "success survives awaited GET",
+      "partial summary survives awaited GET",
+      "rejected POST preserves retryable preview",
+      "replacement suppresses stale result",
+      "closed preview retains progress",
+      "mobile real FileReader drag/drop"
+    ],
+    "importRequests": 5
+  },
+  "frontend_build": {
+    "before": 0,
+    "after": 0,
+    "command": "npm run build",
+    "modules": 2817,
+    "warning": "existing large minified chunk"
+  },
+  "existing_csv_tests": {
+    "command": "node --test tests/csvPreview.test.mjs",
+    "pass": 8,
+    "fail": 0
+  },
+  "parser_differential": {
+    "cases": 48,
+    "counts": {
+      "same-records": 32,
+      "different-records": 2,
+      "same-acceptance": 8,
+      "different-acceptance": 6
+    },
+    "universal_parity": false
+  },
+  "backend_validation": {
+    "cases": 73,
+    "valid_count_mismatches": 15,
+    "mismatch_names": [
+      "salary-junk-suffix",
+      "salary-whitespace",
+      "invalid-wallet",
+      "overlong-first_name",
+      "overlong-last_name",
+      "overlong-position",
+      "overlong-department",
+      "overlong-currency",
+      "email-validation-0",
+      "email-validation-1",
+      "email-validation-2",
+      "salary-validation-0",
+      "salary-validation-2",
+      "salary-validation-9",
+      "mixed-valid-and-invalid-wallet"
+    ],
+    "live_database": false
+  },
+  "scope": "Actual frontend browser and build; actual locked backend parser/schema with memory recording stubs; no live backend import/database/signing/payment or complete hosted CI/acceptance claim"
+}
