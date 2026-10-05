@@ -1,7 +1,7 @@
 #![cfg(test)]
 use super::*;
 use soroban_sdk::{
-    testutils::{storage::Persistent as _, Address as _, Events},
+    testutils::{storage::{Instance as _, Persistent as _}, Address as _, Events},
     token::{Client as TokenClient, StellarAssetClient},
     Address, Env, FromVal, Symbol, Vec,
 };
@@ -180,6 +180,10 @@ fn test_batch_record_uses_persistent_storage_with_ttl() {
         assert!(env.storage().persistent().has(&key));
         assert!(
             env.storage().persistent().get_ttl(&key)
+                >= BATCH_TTL_LEDGERS.saturating_sub(1)
+        );
+        assert!(
+            env.storage().instance().get_ttl()
                 >= BATCH_TTL_LEDGERS.saturating_sub(1)
         );
     });
