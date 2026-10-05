@@ -1,3 +1,4 @@
+import './instrument.js';
 import dotenv from 'dotenv';
 import { createServer } from 'node:http';
 import app from './app.js';
