@@ -106,6 +106,10 @@ fn test_vesting_flow() {
         has_event(&e, &contract_id, "vesting_clawed_event"),
         "VestingClawedEvent was not emitted"
     );
+    assert!(
+        has_event(&e, &contract_id, "vesting_cancelled_event"),
+        "VestingCancelledEvent was not emitted"
+    );
     
     // Check admin balance
     assert_eq!(token_client.balance(&clawback_admin), 5000);
