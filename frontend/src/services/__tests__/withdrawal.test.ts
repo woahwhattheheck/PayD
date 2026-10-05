@@ -36,7 +36,7 @@ describe('withdrawalService', () => {
     const failure = new Error('Request failed with status code 500');
     vi.spyOn(axios, 'get').mockRejectedValueOnce(failure);
 
-    await expect(withdrawalService.getTransactionStatus('tx-1', 'anchor.ng')).rejects.toBe(failure);
+    await expect(withdrawalService.getTransactionStatus('tx-1', 'anchor')).rejects.toBe(failure);
   });
 
   it('propagates cancellation failures instead of resolving silently', async () => {
