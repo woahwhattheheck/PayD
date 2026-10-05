@@ -137,16 +137,17 @@ fn test_vesting_validation_returns_typed_errors() {
     );
     assert_eq!(
         client.try_initialize(
-            &funder, &beneficiary, &token, &0, &0, &0, &100, &clawback_admin, &upgrade_admin,
-        ),
-        Err(Ok(ContractError::InvalidDuration))
-    );
-    assert_eq!(
-        client.try_initialize(
             &funder, &beneficiary, &token, &0, &0, &10, &0, &clawback_admin, &upgrade_admin,
         ),
         Err(Ok(ContractError::InvalidAmount))
     );
+
+    // Preserve the pre-refactor semantics: zero cliff + zero duration vests immediately.
+    token::StellarAssetClient::new(&e, &token).mint(&funder, &100);
+    client.initialize(
+        &funder, &beneficiary, &token, &0, &0, &0, &100, &clawback_admin, &upgrade_admin,
+    );
+    assert_eq!(client.get_vested_amount(), 100);
 }
 
 #[test]

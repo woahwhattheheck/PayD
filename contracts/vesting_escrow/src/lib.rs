@@ -126,7 +126,7 @@ impl VestingContract {
 
         funder.require_auth();
 
-        if duration_seconds == 0 || duration_seconds < cliff_seconds {
+        if duration_seconds < cliff_seconds {
             return Err(ContractError::InvalidDuration);
         }
         if amount <= 0 {
