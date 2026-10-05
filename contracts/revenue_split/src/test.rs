@@ -243,6 +243,44 @@ fn test_update_recipients() {
 }
 
 
+#[test]
+fn test_distribution_assigns_all_dust_to_last_recipient() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let token_admin = Address::generate(&env);
+    let (token_id, stellar_asset_client, token_client) =
+        create_token_contract(&env, &token_admin);
+
+    let contract_id = env.register(RevenueSplitContract, ());
+    let contract_client = RevenueSplitContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let first_recipient = Address::generate(&env);
+    let last_recipient = Address::generate(&env);
+    let shares = Vec::from_array(&env, [
+        RecipientShare {
+            destination: first_recipient.clone(),
+            basis_points: 9999,
+        },
+        RecipientShare {
+            destination: last_recipient.clone(),
+            basis_points: 1,
+        },
+    ]);
+    contract_client.init(&admin, &shares);
+
+    let sender = Address::generate(&env);
+    stellar_asset_client.mint(&sender, &1);
+    let assets = Vec::from_array(&env, [(token_id, 1i128)]);
+    contract_client.distribute(&sender, &assets);
+
+    assert_eq!(token_client.balance(&sender), 0);
+    assert_eq!(token_client.balance(&first_recipient), 0);
+    assert_eq!(token_client.balance(&last_recipient), 1);
+}
+
+
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(10_000))]
 
