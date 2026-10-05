@@ -61,10 +61,11 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
 
     try {
       // Attempt to claim the key.
-      const existing = await idempotencyService.claimKey(organizationId, idempotencyKey, ttlMs);
+      const claim = await idempotencyService.claimKey(organizationId, idempotencyKey, ttlMs);
 
-      if (existing) {
-        // Replay: return the stored response
+      if (claim.kind === 'replay') {
+        const existing = claim.record;
+
         logger.info('Idempotency replay', {
           organizationId,
           idempotencyKey,
@@ -76,7 +77,10 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
         return;
       }
 
-      // New request — intercept the response to store the result.
+      // New request — intercept the response to store the result. The exact
+      // lease expiry identifies this claim generation, so a stale request
+      // cannot overwrite a row recycled by a later request.
+      const leaseExpiresAt = claim.expiresAt;
       const originalJson = res.json.bind(res);
 
       res.json = function (body: unknown) {
@@ -87,7 +91,15 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
         // 5xx errors are not stored so retries can attempt again.
         if (statusCode < 500) {
           idempotencyService
-            .completeKey(organizationId, idempotencyKey, statusCode, body)
+            .completeKey(organizationId, idempotencyKey, leaseExpiresAt, statusCode, body)
+            .then((stored) => {
+              if (!stored) {
+                logger.warn('Skipped stale idempotency completion', {
+                  organizationId,
+                  idempotencyKey,
+                });
+              }
+            })
             .catch((err) => {
               logger.error('Failed to store idempotency result', {
                 organizationId,
@@ -96,9 +108,17 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
               });
             });
         } else {
-          // Server errors: mark as failed so retries work
+          // Server errors: mark as failed so retries work.
           idempotencyService
-            .failKey(organizationId, idempotencyKey, statusCode, body)
+            .failKey(organizationId, idempotencyKey, leaseExpiresAt, statusCode, body)
+            .then((stored) => {
+              if (!stored) {
+                logger.warn('Skipped stale idempotency failure', {
+                  organizationId,
+                  idempotencyKey,
+                });
+              }
+            })
             .catch((err) => {
               logger.error('Failed to mark idempotency key as failed', {
                 organizationId,
