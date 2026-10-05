@@ -13,18 +13,15 @@ import {
   X,
   BarChart2,
   TrendingUp,
+  LogOut,
 } from 'lucide-react';
 import { Avatar } from './Avatar';
+import { useAuth } from '../providers/AuthProvider';
 
 const AppNav: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Mock user data - replace with actual user context
-  const currentUser = {
-    email: 'user@example.com',
-    name: 'John Doe',
-    imageUrl: undefined,
-  };
+  const { user, loading, logout } = useAuth();
 
   const navLinks = (
     <>
@@ -202,6 +199,46 @@ const AppNav: React.FC = () => {
     </>
   );
 
+  const displayName = user?.name || user?.email || user?.walletAddress || '';
+  const displayDetail = user?.email || user?.walletAddress || '';
+
+  const userProfile = loading ? (
+    <div
+      aria-label="Loading account"
+      className="h-9 w-40 rounded-lg bg-(--surface-hi) animate-pulse"
+    />
+  ) : user ? (
+    <div className="flex items-center gap-2">
+      <div className="p-1 bg-(--surface-hi) rounded-lg flex items-center gap-2">
+        <Avatar
+          email={user.email || user.walletAddress || String(user.id)}
+          name={displayName}
+          size="sm"
+        />
+        <div className="hidden md:block flex-1 min-w-0">
+          <p className="text-[10px] font-semibold text-(--text) truncate">{displayName}</p>
+          <p className="text-[10px] text-(--muted) truncate">{displayDetail}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={logout}
+        aria-label="Sign out"
+        title="Sign out"
+        className="p-2 rounded-lg text-(--muted) hover:text-(--text) hover:bg-(--surface-hi) transition"
+      >
+        <LogOut className="w-4 h-4" />
+      </button>
+    </div>
+  ) : (
+    <Link
+      to="/login"
+      className="px-3 py-1.5 rounded-lg text-[13px] font-semibold text-(--link) hover:text-(--accent) transition"
+    >
+      Sign in
+    </Link>
+  );
+
   return (
     <nav className="relative w-full">
       <div className="flex items-center justify-between gap-4 px-3 py-2">
@@ -220,20 +257,7 @@ const AppNav: React.FC = () => {
         </button>
 
         {/* User profile */}
-        <div className="ml-auto flex items-center gap-2">
-          <div className="p-1 bg-(--surface-hi) rounded-lg flex items-center gap-2">
-            <Avatar
-              email={currentUser.email}
-              name={currentUser.name}
-              imageUrl={currentUser.imageUrl}
-              size="sm"
-            />
-            <div className="hidden md:block flex-1 min-w-0">
-              <p className="text-[10px] font-semibold text-(--text) truncate">{currentUser.name}</p>
-              <p className="text-[10px] text-(--muted) truncate">{currentUser.email}</p>
-            </div>
-          </div>
-        </div>
+        <div className="ml-auto flex items-center gap-2">{userProfile}</div>
       </div>
 
       {/* Mobile dropdown menu */}
@@ -274,22 +298,7 @@ const AppNav: React.FC = () => {
               </div>
 
               {/* Mobile menu footer with user info */}
-              <div className="p-4 border-t border-(--border)">
-                <div className="flex items-center gap-3 p-3 bg-(--surface-hi) rounded-lg">
-                  <Avatar
-                    email={currentUser.email}
-                    name={currentUser.name}
-                    imageUrl={currentUser.imageUrl}
-                    size="sm"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-(--text) truncate">
-                      {currentUser.name}
-                    </p>
-                    <p className="text-xs text-(--muted) truncate">{currentUser.email}</p>
-                  </div>
-                </div>
-              </div>
+              <div className="p-4 border-t border-(--border)">{userProfile}</div>
             </div>
           </div>
         </>
