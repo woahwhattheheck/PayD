@@ -21,15 +21,15 @@ import {
 } from '../services/twoFactorService.js';
 
 /**
- * Translates a {@link TwoFactorError} into its HTTP response. Anything else is
- * reported as a generic 500 so internal details never reach the client.
+ * Preserves client-error {@link TwoFactorError} responses. Internal failures use
+ * the shared logged 500 response with details limited to development mode.
  */
 function sendTwoFactorError(
   req: express.Request,
   res: express.Response,
   error: unknown
 ) {
-  if (error instanceof TwoFactorError) {
+  if (error instanceof TwoFactorError && error.status >= 400 && error.status < 500) {
     return res.status(error.status).json({ error: error.message, code: error.code });
   }
 
