@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import pg from 'pg';
 import { Redis } from 'ioredis';
 import { config } from '../config/env.js';
+import { MailerService } from '../services/notifications/mailerService.js';
 import { StellarService } from '../services/stellarService.js';
 
 const pool = new pg.Pool({ connectionString: config.DATABASE_URL });
@@ -16,6 +17,7 @@ export const redis: Redis | null = config.REDIS_URL
 export interface DependencyStatus {
   status: 'connected' | 'disconnected' | 'not_configured' | 'unknown';
   error?: string;
+  queuedRetries?: number;
 }
 
 export interface HealthReport {
@@ -28,6 +30,7 @@ export interface HealthReport {
     database: DependencyStatus;
     redis: DependencyStatus;
     horizon: DependencyStatus;
+    email: DependencyStatus;
   };
 }
 
@@ -90,6 +93,7 @@ export class HealthController {
         database: { status: 'unknown' },
         redis: { status: 'unknown' },
         horizon: { status: 'unknown' },
+        email: { status: 'unknown' },
       },
     };
 
@@ -112,43 +116,62 @@ export class HealthController {
       'Horizon feeStats timeout'
     );
 
-    const [dbResult, redisResult, horizonResult] = await Promise.allSettled([
+    const emailPromise = withTimeout(
+      MailerService.getHealthStatus(),
+      healthConfig.timeoutMs,
+      'Email service health check timeout'
+    );
+
+    const [dbResult, redisResult, horizonResult, emailResult] = await Promise.allSettled([
       dbPromise,
       redisPromise,
       horizonPromise,
+      emailPromise,
     ]);
 
     let isHealthy = true;
 
-    // 1. Database check response
     if (dbResult.status === 'fulfilled') {
       statusReport.dependencies.database.status = 'connected';
     } else {
       isHealthy = false;
       statusReport.dependencies.database.status = 'disconnected';
-      statusReport.dependencies.database.error = dbResult.reason instanceof Error ? dbResult.reason.message : String(dbResult.reason);
+      statusReport.dependencies.database.error =
+        dbResult.reason instanceof Error ? dbResult.reason.message : String(dbResult.reason);
     }
 
-    // 2. Redis check response
     if (redis) {
       if (redisResult.status === 'fulfilled') {
         statusReport.dependencies.redis.status = 'connected';
       } else {
         isHealthy = false;
         statusReport.dependencies.redis.status = 'disconnected';
-        statusReport.dependencies.redis.error = redisResult.reason instanceof Error ? redisResult.reason.message : String(redisResult.reason);
+        statusReport.dependencies.redis.error =
+          redisResult.reason instanceof Error ? redisResult.reason.message : String(redisResult.reason);
       }
     } else {
       statusReport.dependencies.redis.status = 'not_configured';
     }
 
-    // 3. Horizon check response
     if (horizonResult.status === 'fulfilled') {
       statusReport.dependencies.horizon.status = 'connected';
     } else {
       isHealthy = false;
       statusReport.dependencies.horizon.status = 'disconnected';
-      statusReport.dependencies.horizon.error = horizonResult.reason instanceof Error ? horizonResult.reason.message : String(horizonResult.reason);
+      statusReport.dependencies.horizon.error =
+        horizonResult.reason instanceof Error ? horizonResult.reason.message : String(horizonResult.reason);
+    }
+
+    if (emailResult.status === 'fulfilled') {
+      statusReport.dependencies.email = emailResult.value;
+      if (emailResult.value.status === 'disconnected') {
+        isHealthy = false;
+      }
+    } else {
+      isHealthy = false;
+      statusReport.dependencies.email.status = 'disconnected';
+      statusReport.dependencies.email.error =
+        emailResult.reason instanceof Error ? emailResult.reason.message : String(emailResult.reason);
     }
 
     if (!isHealthy) {
