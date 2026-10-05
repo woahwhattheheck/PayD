@@ -384,7 +384,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                       setShowEditModal({ open: true, employee });
                     }}
                   >
-                    <Pencil className="w-4 h-5" />
+                    <Pencil className="w-4 h-4" />
                     Edit
                   </button>
                   <button
