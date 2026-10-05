@@ -2,9 +2,9 @@
 
 use super::*;
 use soroban_sdk::{
-    testutils::Address as _,
+    testutils::{Address as _, Events},
     token::{Client as TokenClient, StellarAssetClient},
-    Address, Env, String,
+    Address, Env, FromVal, String, Symbol,
 };
 
 // ── Error codes ───────────────────────────────────────────────────────────────
@@ -53,6 +53,13 @@ fn initiate(s: &Setup, amount: i128) -> u64 {
         &String::from_str(&s.env, "EUR"),
         &String::from_str(&s.env, "anchor-eu"),
     )
+}
+
+fn has_event(env: &Env, contract_addr: &Address, event_name: &str) -> bool {
+    let target = Symbol::new(env, event_name);
+    env.events().all().iter().any(|(addr, topics, _data)| {
+        addr == *contract_addr && topics.iter().any(|topic| Symbol::from_val(env, &topic) == target)
+    })
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
@@ -134,6 +141,29 @@ fn test_payment_count_increments() {
         initiate(&s, 100);
         assert_eq!(s.client.get_payment_count(), i);
     }
+}
+
+#[test]
+fn test_payment_lifecycle_emits_contract_events() {
+    let s = setup(0);
+    let id = initiate(&s, 500);
+
+    assert!(
+        has_event(&s.env, &s.contract_id, "payment_initiated_event"),
+        "PaymentInitiatedEvent was not emitted"
+    );
+
+    s.client.update_status(&id, &symbol_short!("pending"));
+    assert!(
+        has_event(&s.env, &s.contract_id, "payment_status_updated_event"),
+        "PaymentStatusUpdatedEvent was not emitted"
+    );
+
+    s.client.cancel_payment(&s.sender, &id);
+    assert!(
+        has_event(&s.env, &s.contract_id, "payment_cancelled_event"),
+        "PaymentCancelledEvent was not emitted"
+    );
 }
 
 // ── update_status ─────────────────────────────────────────────────────────────
