@@ -164,7 +164,7 @@ export class HealthController {
 
     if (emailResult.status === 'fulfilled') {
       statusReport.dependencies.email = emailResult.value;
-      if (emailResult.value.status === 'disconnected') {
+      if (emailResult.value.status !== 'connected') {
         isHealthy = false;
       }
     } else {

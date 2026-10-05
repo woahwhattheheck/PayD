@@ -10,10 +10,17 @@ jest.mock('../../config/env.js', () => ({
   },
 }));
 
+jest.mock('../../services/notifications/mailerService.js', () => ({
+  MailerService: {
+    getHealthStatus: jest.fn(),
+  },
+}));
+
 import { HealthController, healthConfig } from '../healthController.js';
 import pg from 'pg';
 import { Redis } from 'ioredis';
 import { StellarService } from '../../services/stellarService.js';
+import { MailerService } from '../../services/notifications/mailerService.js';
 
 // Setup Mock for pg
 jest.mock('pg', () => {
@@ -63,12 +70,16 @@ describe('HealthController GET /health', () => {
     pool = new pg.Pool();
     redisClient = new Redis();
     mockServer = { feeStats: jest.fn() };
-    (StellarService.getServer as jest.Mock).mockReturnValue(mockServer);
 
     // Reset default timeout
     healthConfig.timeoutMs = 5000;
 
     jest.clearAllMocks();
+    (StellarService.getServer as jest.Mock).mockReturnValue(mockServer);
+    (MailerService.getHealthStatus as jest.Mock).mockResolvedValue({
+      status: 'connected',
+      queuedRetries: 0,
+    });
   });
 
   it('returns 200 OK when all dependencies are healthy', async () => {
@@ -83,6 +94,28 @@ describe('HealthController GET /health', () => {
     expect(response.body.dependencies.database.status).toBe('connected');
     expect(response.body.dependencies.redis.status).toBe('connected');
     expect(response.body.dependencies.horizon.status).toBe('connected');
+    expect(response.body.dependencies.email.status).toBe('connected');
+  });
+
+  it('returns 503 Degraded when email is not configured', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    redisClient.ping.mockResolvedValueOnce('PONG');
+    mockServer.feeStats.mockResolvedValueOnce({});
+    (MailerService.getHealthStatus as jest.Mock).mockResolvedValueOnce({
+      status: 'not_configured',
+      error: 'SMTP configuration incomplete',
+      queuedRetries: 0,
+    });
+
+    const response = await request(app).get('/health');
+
+    expect(response.status).toBe(503);
+    expect(response.body.status).toBe('degraded');
+    expect(response.body.dependencies.email).toEqual({
+      status: 'not_configured',
+      error: 'SMTP configuration incomplete',
+      queuedRetries: 0,
+    });
   });
 
   it('returns 503 Degraded when Postgres goes down', async () => {
