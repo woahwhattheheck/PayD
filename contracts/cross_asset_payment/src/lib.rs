@@ -182,7 +182,8 @@ impl CrossAssetPaymentContract {
             amount,
             target_asset,
             anchor_id,
-        };
+        }
+        .publish(&env);
 
         Ok(count)
     }
@@ -207,7 +208,7 @@ impl CrossAssetPaymentContract {
             PAYMENT_TTL_LEDGERS,
         );
 
-        PaymentStatusUpdatedEvent { payment_id, new_status };
+        PaymentStatusUpdatedEvent { payment_id, new_status }.publish(&env);
 
         Ok(())
     }
@@ -247,7 +248,7 @@ impl CrossAssetPaymentContract {
             token_client.transfer(&env.current_contract_address(), &record.from, &refund);
         }
 
-        PaymentCancelledEvent { payment_id, refunded_amount: refund };
+        PaymentCancelledEvent { payment_id, refunded_amount: refund }.publish(&env);
 
         Ok(())
     }
