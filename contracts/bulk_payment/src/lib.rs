@@ -80,6 +80,18 @@ pub struct BatchRecord {
     pub status: soroban_sdk::Symbol,
 }
 
+/// Bounded page of persistent-record occupancy. Callers can follow
+/// `next_batch_id` until it is zero without forcing an unbounded contract scan.
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct BatchStorageUsagePage {
+    pub total_batches: u64,
+    pub start_batch_id: u64,
+    pub scanned_batches: u32,
+    pub live_batches: u32,
+    pub next_batch_id: u64,
+}
+
 #[contracttype]
 pub enum DataKey {
     Admin,
@@ -89,6 +101,10 @@ pub enum DataKey {
 }
 
 const MAX_BATCH_SIZE: u32 = 100;
+// ~30 days at 5 s/ledger. Persistent entries expire independently instead of
+// accumulating inside the contract's size-limited instance entry.
+const BATCH_TTL_LEDGERS: u32 = 518_400;
+const MAX_STORAGE_USAGE_SCAN: u32 = 100;
 
 // ── Contract ──────────────────────────────────────────────────────────────────
 
@@ -149,7 +165,7 @@ impl BulkPaymentContract {
         }
 
         let batch_id = Self::next_batch_id(&env);
-        env.storage().instance().set(&DataKey::Batch(batch_id), &BatchRecord {
+        Self::store_batch_record(&env, batch_id, &BatchRecord {
             sender,
             token,
             total_sent: total,
@@ -241,7 +257,7 @@ impl BulkPaymentContract {
         };
 
         let batch_id = Self::next_batch_id(&env);
-        env.storage().instance().set(&DataKey::Batch(batch_id), &BatchRecord {
+        Self::store_batch_record(&env, batch_id, &BatchRecord {
             sender,
             token,
             total_sent,
@@ -260,7 +276,7 @@ impl BulkPaymentContract {
 
     pub fn get_batch(env: Env, batch_id: u64) -> Result<BatchRecord, ContractError> {
         env.storage()
-            .instance()
+            .persistent()
             .get(&DataKey::Batch(batch_id))
             .ok_or(ContractError::BatchNotFound)
     }
@@ -269,7 +285,52 @@ impl BulkPaymentContract {
         env.storage().instance().get(&DataKey::BatchCount).unwrap_or(0)
     }
 
+    /// Report persistent batch-record occupancy without an unbounded scan.
+    /// `start_batch_id == 0` is normalized to the first batch and `limit`
+    /// is capped so this read path remains predictable as history grows.
+    pub fn get_storage_usage(
+        env: Env,
+        start_batch_id: u64,
+        limit: u32,
+    ) -> BatchStorageUsagePage {
+        let total_batches: u64 = env
+            .storage()
+            .instance()
+            .get(&DataKey::BatchCount)
+            .unwrap_or(0);
+        let start_batch_id = core::cmp::max(1, start_batch_id);
+        let scan_limit = core::cmp::min(limit, MAX_STORAGE_USAGE_SCAN);
+
+        let mut batch_id = start_batch_id;
+        let mut scanned_batches: u32 = 0;
+        let mut live_batches: u32 = 0;
+
+        while batch_id <= total_batches && scanned_batches < scan_limit {
+            if env.storage().persistent().has(&DataKey::Batch(batch_id)) {
+                live_batches += 1;
+            }
+            scanned_batches += 1;
+            batch_id += 1;
+        }
+
+        BatchStorageUsagePage {
+            total_batches,
+            start_batch_id,
+            scanned_batches,
+            live_batches,
+            next_batch_id: if batch_id <= total_batches { batch_id } else { 0 },
+        }
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
+
+    fn store_batch_record(env: &Env, batch_id: u64, record: &BatchRecord) {
+        let key = DataKey::Batch(batch_id);
+        env.storage().persistent().set(&key, record);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, BATCH_TTL_LEDGERS, BATCH_TTL_LEDGERS);
+    }
 
     fn check_and_advance_sequence(env: &Env, expected: u64) -> Result<(), ContractError> {
         let current: u64 = env.storage().instance().get(&DataKey::Sequence).unwrap_or(0);
