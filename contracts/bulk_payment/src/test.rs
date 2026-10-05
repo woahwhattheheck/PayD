@@ -1,7 +1,7 @@
 #![cfg(test)]
 use super::*;
 use soroban_sdk::{
-    testutils::{Address as _, Events},
+    testutils::{storage::Persistent as _, Address as _, Events},
     token::{Client as TokenClient, StellarAssetClient},
     Address, Env, FromVal, Symbol, Vec,
 };
@@ -165,6 +165,47 @@ fn test_batch_count_increments() {
     client.execute_batch(&sender, &token, &payments, &1);
 
     assert_eq!(client.get_batch_count(), 2);
+}
+
+#[test]
+fn test_batch_record_uses_persistent_storage_with_ttl() {
+    let (env, sender, token, client) = setup();
+    let payments = one_payment(&env);
+
+    let batch_id = client.execute_batch(&sender, &token, &payments, &0);
+
+    env.as_contract(&client.address, || {
+        let key = DataKey::Batch(batch_id);
+        assert!(!env.storage().instance().has(&key));
+        assert!(env.storage().persistent().has(&key));
+        assert!(
+            env.storage().persistent().get_ttl(&key)
+                >= BATCH_TTL_LEDGERS.saturating_sub(1)
+        );
+    });
+}
+
+#[test]
+fn test_storage_usage_query_is_pageable_and_bounded() {
+    let (env, sender, token, client) = setup();
+
+    for sequence in 0u64..3 {
+        let payments = one_payment(&env);
+        client.execute_batch(&sender, &token, &payments, &sequence);
+    }
+
+    let first = client.get_storage_usage(&1, &2);
+    assert_eq!(first.total_batches, 3);
+    assert_eq!(first.start_batch_id, 1);
+    assert_eq!(first.scanned_batches, 2);
+    assert_eq!(first.live_batches, 2);
+    assert_eq!(first.next_batch_id, 3);
+
+    let second = client.get_storage_usage(&first.next_batch_id, &0);
+    assert_eq!(second.start_batch_id, 3);
+    assert_eq!(second.scanned_batches, 1);
+    assert_eq!(second.live_batches, 1);
+    assert_eq!(second.next_batch_id, 0);
 }
 
 // ── execute_batch_partial ─────────────────────────────────────────────────────
