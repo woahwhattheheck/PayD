@@ -115,6 +115,110 @@ fn test_vesting_flow() {
     assert_eq!(token_client.balance(&contract_id), 0);
 }
 
+#[test]
+fn test_vesting_validation_returns_typed_errors() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let funder = Address::generate(&e);
+    let beneficiary = Address::generate(&e);
+    let clawback_admin = Address::generate(&e);
+    let upgrade_admin = Address::generate(&e);
+    let contract_id = e.register(VestingContract, ());
+    let client = VestingContractClient::new(&e, &contract_id);
+    let token_admin = Address::generate(&e);
+    let token = e.register_stellar_asset_contract_v2(token_admin).address();
+
+    assert_eq!(
+        client.try_initialize(
+            &funder, &beneficiary, &token, &0, &10, &9, &100, &clawback_admin, &upgrade_admin,
+        ),
+        Err(Ok(ContractError::InvalidDuration))
+    );
+    assert_eq!(
+        client.try_initialize(
+            &funder, &beneficiary, &token, &0, &0, &10, &0, &clawback_admin, &upgrade_admin,
+        ),
+        Err(Ok(ContractError::InvalidAmount))
+    );
+
+    // Preserve the pre-refactor semantics: zero cliff + zero duration vests immediately.
+    token::StellarAssetClient::new(&e, &token).mint(&funder, &100);
+    client.initialize(
+        &funder, &beneficiary, &token, &0, &0, &0, &100, &clawback_admin, &upgrade_admin,
+    );
+    assert_eq!(client.get_vested_amount(), 100);
+}
+
+#[test]
+fn test_uninitialized_and_revoked_paths_return_typed_errors() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let contract_id = e.register(VestingContract, ());
+    let client = VestingContractClient::new(&e, &contract_id);
+
+    assert_eq!(client.try_get_config(), Err(Ok(ContractError::NotInitialized)));
+    assert_eq!(client.try_get_vested_amount(), Err(Ok(ContractError::NotInitialized)));
+    assert_eq!(client.try_get_claimable_amount(), Err(Ok(ContractError::NotInitialized)));
+    assert_eq!(client.try_claim(), Err(Ok(ContractError::NotInitialized)));
+    assert_eq!(client.try_clawback(), Err(Ok(ContractError::NotInitialized)));
+
+    let funder = Address::generate(&e);
+    let beneficiary = Address::generate(&e);
+    let clawback_admin = Address::generate(&e);
+    let upgrade_admin = Address::generate(&e);
+    let token_admin = Address::generate(&e);
+    let token = e.register_stellar_asset_contract_v2(token_admin.clone()).address();
+    token::StellarAssetClient::new(&e, &token).mint(&funder, &100);
+
+    client.initialize(
+        &funder, &beneficiary, &token, &0, &0, &10, &100, &clawback_admin, &upgrade_admin,
+    );
+    assert_eq!(
+        client.try_initialize(
+            &funder, &beneficiary, &token, &0, &0, &10, &100, &clawback_admin, &upgrade_admin,
+        ),
+        Err(Ok(ContractError::AlreadyInitialized))
+    );
+
+    client.clawback();
+    assert_eq!(client.try_clawback(), Err(Ok(ContractError::AlreadyRevoked)));
+}
+
+#[test]
+fn test_vesting_math_overflow_returns_typed_error() {
+    let e = Env::default();
+    let contract_id = e.register(VestingContract, ());
+    let beneficiary = Address::generate(&e);
+    let token = Address::generate(&e);
+    let clawback_admin = Address::generate(&e);
+
+    e.ledger().set_timestamp(2);
+    e.as_contract(&contract_id, || {
+        e.storage().instance().set(
+            &DataKey::Config,
+            &VestingConfig {
+                beneficiary,
+                token,
+                start_time: 0,
+                cliff_seconds: 0,
+                duration_seconds: 3,
+                total_amount: i128::MAX,
+                claimed_amount: 0,
+                clawback_admin,
+                is_active: true,
+            },
+        );
+    });
+
+    let client = VestingContractClient::new(&e, &contract_id);
+    assert_eq!(
+        client.try_get_vested_amount(),
+        Err(Ok(ContractError::ArithmeticOverflow))
+    );
+}
+
 // ── Upgradeability ────────────────────────────────────────────────────────────
 
 /// The contract the upgrade tests upgrade *to*. See
