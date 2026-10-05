@@ -220,6 +220,8 @@ describe('idempotencyService', () => {
         201,
         '{"id":42}',
       ]);
+      const completionSql = (query as jest.Mock).mock.calls[0][0] as string;
+      expect(completionSql).toContain('expires_at > NOW()');
     });
   });
 
@@ -235,6 +237,8 @@ describe('idempotencyService', () => {
         400,
         '{"error":"Bad Request"}',
       ]);
+      const failureSql = (query as jest.Mock).mock.calls[0][0] as string;
+      expect(failureSql).toContain('expires_at > NOW()');
     });
   });
 
