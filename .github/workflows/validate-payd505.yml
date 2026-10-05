@@ -1,0 +1,26 @@
+name: Validate PayD 505
+
+on:
+  push:
+    branches:
+      - validation/sol56-p505
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+      - name: Run focused mailer and health tests
+        working-directory: backend
+        run: npm test -- --runInBand src/services/notifications/__tests__/mailerService.test.ts src/controllers/__tests__/healthController.test.ts
