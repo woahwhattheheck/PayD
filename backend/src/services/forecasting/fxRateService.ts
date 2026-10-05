@@ -41,7 +41,7 @@ export class FxRateService {
     }
 
     const result = await pool.query(
-      `SELECT rate_date, rate
+      `SELECT to_char(rate_date::timestamp, 'YYYY-MM-DD') AS rate_date_text, rate
        FROM fx_rates
        WHERE base_currency = $1
          AND quote_currency = $2
@@ -52,7 +52,7 @@ export class FxRateService {
     );
 
     const rates = result.rows.map((r: any) => ({
-      rateDate: new Date(r.rate_date).toISOString().slice(0, 10),
+      rateDate: r.rate_date_text,
       rate: Number(r.rate),
     }));
 
