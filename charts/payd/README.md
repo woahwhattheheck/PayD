@@ -96,3 +96,36 @@ This renders the actual chart with both default and production values, checks
 SHA/SemVer tags in both Deployment images, and rejects missing, `latest` and
 `stable` tags independently for each component. It does not contact Kubernetes
 or a registry, and does not claim that any image has been published.
+
+## Recorded local Helm validation — October 5, 2026
+
+The actual chart was checked locally at source
+`cc43910cfaf90c746fb9f315e26db98cb0e01b5f` on Linux x86_64 with
+`Helm v3.19.5+g4a19a5b`, matching the workflow's pinned Helm version.
+The official [Linux amd64 archive](https://get.helm.sh/helm-v3.19.5-linux-amd64.tar.gz)
+was checked against its official SHA-256 checksum:
+`a0a5e8c592ed3f376ac110715eff214730c7422f9a44d96cf98117d2b8b0e6c0`.
+
+- `bash charts/payd/tests/image-tags.sh` passed with real Helm: four successful
+  renders (default/production values, each with a full SHA and
+  `v1.2.3-rc.1`) and twelve expected rejections (empty, `latest` and `stable`,
+  independently for backend and frontend under both profiles).
+- Both local chart lint commands below passed. Their only informational message
+  recommended a chart icon.
+
+```bash
+helm lint charts/payd \
+  --set-string backend.image.tag=171c74b454daba241bfb75f36d10a0a3a77a68e5 \
+  --set-string frontend.image.tag=171c74b454daba241bfb75f36d10a0a3a77a68e5
+helm lint charts/payd -f charts/payd/values-production.yaml \
+  --set-string backend.image.tag=v1.2.3-rc.1 \
+  --set-string frontend.image.tag=v1.2.3-rc.1
+```
+
+The working tree remained clean after execution. This receipt is a later
+documentation-only addition; the executed source is the commit pinned above.
+These checks rendered the chart and validated its merged schema. They did not
+contact a Kubernetes cluster or registry, run the deployment workflow, read
+deployment secrets, build/publish images, or run application tests or the full
+repository suite. No deployment, upstream CI approval, reward or payment is
+established by these local results.
