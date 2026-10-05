@@ -13,6 +13,7 @@ router.use(logTenantAccess);
 
 router.post('/subscribe', WebhookController.subscribe);
 router.get('/subscriptions', WebhookController.listSubscriptions);
+router.patch('/subscriptions/:id', WebhookController.updateSubscription);
 router.delete('/subscriptions/:id', WebhookController.deleteSubscription);
 
 const requireNonProduction = (req: Request, res: Response, next: NextFunction) => {

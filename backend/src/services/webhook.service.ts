@@ -1,5 +1,7 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
+import { v4 as uuidv4 } from 'uuid';
+import pool from '../config/database.js';
 
 export interface WebhookSubscription {
   id: string;
@@ -9,8 +11,29 @@ export interface WebhookSubscription {
   organizationId: number;
 }
 
-// In-memory storage for demonstration (in a real app, this would be a database)
-const subscriptions: WebhookSubscription[] = [];
+interface WebhookSubscriptionRow {
+  id: string;
+  url: string;
+  secret: string;
+  events: string[];
+  organization_id: number;
+}
+
+interface WebhookSubscriptionUpdates {
+  url?: string;
+  secret?: string;
+  events?: string[];
+}
+
+function toSubscription(row: WebhookSubscriptionRow): WebhookSubscription {
+  return {
+    id: row.id,
+    url: row.url,
+    secret: row.secret,
+    events: row.events,
+    organizationId: row.organization_id,
+  };
+}
 
 export class WebhookService {
   static async subscribe(
@@ -19,36 +42,88 @@ export class WebhookService {
     secret: string,
     events: string[]
   ): Promise<WebhookSubscription> {
-    const subscription: WebhookSubscription = {
-      id: Math.random().toString(36).substring(2, 11),
-      url,
-      secret,
-      events,
-      organizationId,
-    };
-    subscriptions.push(subscription);
-    return subscription;
-  }
-
-  static listSubscriptions(organizationId: number): WebhookSubscription[] {
-    return subscriptions.filter((s) => s.organizationId === organizationId);
-  }
-
-  static deleteSubscription(id: string, organizationId: number): boolean {
-    const index = subscriptions.findIndex(
-      (s) => s.id === id && s.organizationId === organizationId
+    const id = uuidv4();
+    const result = await pool.query<WebhookSubscriptionRow>(
+      `INSERT INTO webhook_subscriptions (id, organization_id, url, secret, events)
+       VALUES ($1, $2, $3, $4, $5::text[])
+       RETURNING id, url, secret, events, organization_id`,
+      [id, organizationId, url, secret, events]
     );
-    if (index !== -1) {
-      subscriptions.splice(index, 1);
-      return true;
+
+    return toSubscription(result.rows[0]);
+  }
+
+  static async listSubscriptions(organizationId: number): Promise<WebhookSubscription[]> {
+    const result = await pool.query<WebhookSubscriptionRow>(
+      `SELECT id, url, secret, events, organization_id
+       FROM webhook_subscriptions
+       WHERE organization_id = $1
+       ORDER BY created_at ASC`,
+      [organizationId]
+    );
+
+    return result.rows.map(toSubscription);
+  }
+
+  static async updateSubscription(
+    id: string,
+    organizationId: number,
+    updates: WebhookSubscriptionUpdates
+  ): Promise<WebhookSubscription | null> {
+    const assignments: string[] = [];
+    const values: unknown[] = [];
+
+    if (updates.url !== undefined) {
+      values.push(updates.url);
+      assignments.push(`url = $${values.length}`);
     }
-    return false;
+    if (updates.secret !== undefined) {
+      values.push(updates.secret);
+      assignments.push(`secret = $${values.length}`);
+    }
+    if (updates.events !== undefined) {
+      values.push(updates.events);
+      assignments.push(`events = $${values.length}::text[]`);
+    }
+
+    if (assignments.length === 0) {
+      return null;
+    }
+
+    values.push(id, organizationId);
+    const idParameter = values.length - 1;
+    const organizationParameter = values.length;
+
+    const result = await pool.query<WebhookSubscriptionRow>(
+      `UPDATE webhook_subscriptions
+       SET ${assignments.join(', ')}
+       WHERE id = $${idParameter} AND organization_id = $${organizationParameter}
+       RETURNING id, url, secret, events, organization_id`,
+      values
+    );
+
+    return result.rows[0] ? toSubscription(result.rows[0]) : null;
+  }
+
+  static async deleteSubscription(id: string, organizationId: number): Promise<boolean> {
+    const result = await pool.query(
+      `DELETE FROM webhook_subscriptions
+       WHERE id = $1 AND organization_id = $2`,
+      [id, organizationId]
+    );
+
+    return (result.rowCount ?? 0) > 0;
   }
 
   static async dispatch(eventType: string, payload: any): Promise<void> {
-    const relevantSubscriptions = subscriptions.filter(
-      (s) => s.events.includes(eventType) || s.events.includes('*')
+    const result = await pool.query<WebhookSubscriptionRow>(
+      `SELECT id, url, secret, events, organization_id
+       FROM webhook_subscriptions
+       WHERE events @> ARRAY[$1]::text[]
+          OR events @> ARRAY['*']::text[]`,
+      [eventType]
     );
+    const relevantSubscriptions = result.rows.map(toSubscription);
 
     const dispatchPromises = relevantSubscriptions.map(async (sub) => {
       const timestamp = Date.now().toString();
