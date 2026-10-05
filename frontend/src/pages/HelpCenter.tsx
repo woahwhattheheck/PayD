@@ -1,56 +1,25 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown } from 'lucide-react';
 
-const docs = [
-  {
-    category: 'FAQs',
-    items: [
-      {
-        question: 'How do I add an employee?',
-        answer:
-          "Go to the Employees page and click 'Add Employee'. Fill in the required details and save.",
-      },
-      {
-        question: 'How do I reset my password?',
-        answer:
-          "Click your profile in the sidebar, then select 'Reset Password' and follow the instructions.",
-      },
-    ],
-  },
-  {
-    category: 'Stellar Concepts',
-    items: [
-      {
-        question: 'What is a trustline?',
-        answer:
-          'A trustline is a permission you grant to hold a specific asset on the Stellar network.',
-      },
-      {
-        question: 'What is an anchor?',
-        answer:
-          'An anchor is an entity that issues assets and connects the Stellar network to traditional banking.',
-      },
-    ],
-  },
-  {
-    category: 'Troubleshooting',
-    items: [
-      {
-        question: 'Payroll failed to send.',
-        answer:
-          'Check your account balance and trustlines. Ensure all employees have valid Stellar addresses.',
-      },
-      {
-        question: 'Employee not receiving payments.',
-        answer:
-          'Verify the employee’s Stellar address and that they have established the necessary trustlines.',
-      },
-    ],
-  },
-];
-
 export default function HelpCenter() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
+
+  const docs = [
+    { category: t('helpCenter.faqs'), items: [
+      { question: t('helpCenter.addEmployeeQuestion'), answer: t('helpCenter.addEmployeeAnswer') },
+      { question: t('helpCenter.resetPasswordQuestion'), answer: t('helpCenter.resetPasswordAnswer') },
+    ]},
+    { category: t('helpCenter.stellarConcepts'), items: [
+      { question: t('helpCenter.trustlineQuestion'), answer: t('helpCenter.trustlineAnswer') },
+      { question: t('helpCenter.anchorQuestion'), answer: t('helpCenter.anchorAnswer') },
+    ]},
+    { category: t('helpCenter.troubleshooting'), items: [
+      { question: t('helpCenter.payrollFailedQuestion'), answer: t('helpCenter.payrollFailedAnswer') },
+      { question: t('helpCenter.employeeMissingQuestion'), answer: t('helpCenter.employeeMissingAnswer') },
+    ]},
+  ];
   const [openItem, setOpenItem] = useState<string | null>(null);
 
   const toggleItem = (id: string) => {
@@ -74,10 +43,10 @@ export default function HelpCenter() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold tracking-tight mb-4">
-            Help <span className="text-(--accent)">Center</span>
+            {t('helpCenter.titlePrefix')} <span className="text-(--accent)">{t('helpCenter.titleHighlight')}</span>
           </h1>
           <p className="text-(--muted) text-sm font-mono uppercase tracking-widest">
-            Documentation · FAQs · Troubleshooting
+            {t('helpCenter.subtitle')}
           </p>
         </div>
 
@@ -85,7 +54,7 @@ export default function HelpCenter() {
         <div className="mb-10">
           <input
             type="text"
-            placeholder="Search documentation..."
+            placeholder={t('helpCenter.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full px-5 py-3 rounded-xl bg-(--surface-hi) border border-(--border) focus:outline-none focus:ring-2 focus:ring-(--accent) text-sm transition"
@@ -94,7 +63,7 @@ export default function HelpCenter() {
 
         {/* Results */}
         {filteredDocs.length === 0 && (
-          <p className="text-center text-(--muted)">No results found.</p>
+          <p className="text-center text-(--muted)">{t('helpCenter.noResults')}</p>
         )}
 
         {/* Accordion Sections */}

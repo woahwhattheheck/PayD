@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -46,6 +47,7 @@ interface TaxConfig {
 }
 
 const TaxComplianceWizard: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -168,20 +170,20 @@ const TaxComplianceWizard: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-black mb-2">Tax Compliance Wizard</h1>
+        <h1 className="text-3xl font-black mb-2">{t('taxCompliance.title')}</h1>
         <p className="text-muted">
-          Configure tax rules and generate compliance reports for your organization
+          {t('taxCompliance.subtitle')}
         </p>
       </div>
 
       <div className="card glass noise w-full p-6 sm:p-8 flex flex-col gap-6">
         <div className="flex justify-between items-center border-b border-hi pb-4">
           <h2 className="text-xl font-black">
-            {step === 1 && 'Step 1: Select Country'}
-            {step === 2 && 'Step 2: Tax Configuration'}
-            {step === 3 && 'Step 3: Preview Calculator'}
-            {step === 4 && 'Step 4: Generate Report'}
-            {step === 5 && 'Step 5: Export Summary'}
+            {step === 1 && t('taxCompliance.steps.selectCountry')}
+            {step === 2 && t('taxCompliance.steps.configuration')}
+            {step === 3 && t('taxCompliance.steps.preview')}
+            {step === 4 && t('taxCompliance.steps.report')}
+            {step === 5 && t('taxCompliance.steps.export')}
           </h2>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -201,7 +203,7 @@ const TaxComplianceWizard: React.FC = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
               <input
                 type="text"
-                placeholder="Search countries..."
+                placeholder={t('taxCompliance.searchCountries')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-black/20 border border-hi rounded-xl p-4 pl-12 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
@@ -225,7 +227,7 @@ const TaxComplianceWizard: React.FC = () => {
             {filteredCountries.length === 0 && (
               <div className="text-center py-8 text-muted">
                 <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No countries found matching "{searchQuery}"</p>
+                <p>{t('taxCompliance.noCountries', { query: searchQuery })}</p>
               </div>
             )}
           </div>
@@ -237,7 +239,7 @@ const TaxComplianceWizard: React.FC = () => {
               <span className="text-2xl">{COUNTRY_FLAGS[config.country] || '🌍'}</span>
               <div>
                 <h3 className="font-bold">{config.country}</h3>
-                <p className="text-sm text-muted">Tax compliance configuration</p>
+                <p className="text-sm text-muted">{t('taxCompliance.configuration')}</p>
               </div>
             </div>
 
@@ -276,7 +278,7 @@ const TaxComplianceWizard: React.FC = () => {
             {taxRules.length > 0 && (
               <div className="mt-4 p-4 bg-surface/50 border border-hi rounded-xl">
                 <h4 className="text-sm font-bold uppercase tracking-widest text-muted mb-3">
-                  Active Tax Rules ({taxRules.length})
+                  {t('taxCompliance.activeRules', { count: taxRules.length })}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {taxRules.slice(0, 5).map((rule) => (
@@ -295,7 +297,7 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="flex items-center gap-2 p-4 bg-accent/10 border border-accent/20 rounded-xl">
               <Building2 className="w-5 h-5 text-accent" />
               <span className="text-sm text-accent">
-                Configure tax identifiers and rates for {config.country} compliance
+                {t('taxCompliance.configureForCountry', { country: config.country })}
               </span>
             </div>
           </div>
@@ -306,7 +308,7 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-2 ml-1">
-                  Default Gross Pay (per employee)
+                  {t('taxCompliance.defaultGrossPay')}
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">$</span>
@@ -320,7 +322,7 @@ const TaxComplianceWizard: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-2 ml-1">
-                  Number of Employees
+                  {t('taxCompliance.numberOfEmployees')}
                 </label>
                 <input
                   type="number"
@@ -335,30 +337,30 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="bg-surface/50 border border-hi rounded-xl p-6">
               <h3 className="font-bold mb-4 flex items-center gap-2">
                 <Calculator className="w-5 h-5 text-accent" />
-                Tax Preview Summary
+                {t('taxCompliance.previewSummary')}
               </h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="p-4 bg-black/20 rounded-xl">
-                  <p className="text-xs text-muted uppercase tracking-wider mb-1">Gross Pay</p>
+                  <p className="text-xs text-muted uppercase tracking-wider mb-1">{t('taxCompliance.grossPay')}</p>
                   <p className="text-xl font-bold font-mono">
                     ${(parseFloat(grossPay) || 0).toLocaleString()}
                   </p>
                 </div>
                 <div className="p-4 bg-black/20 rounded-xl">
-                  <p className="text-xs text-muted uppercase tracking-wider mb-1">Est. Tax</p>
+                  <p className="text-xs text-muted uppercase tracking-wider mb-1">{t('taxCompliance.estimatedTax')}</p>
                   <p className="text-xl font-bold font-mono text-danger">
                     ${((parseFloat(grossPay) || 0) * 0.25).toFixed(2)}
                   </p>
                 </div>
                 <div className="p-4 bg-black/20 rounded-xl">
-                  <p className="text-xs text-muted uppercase tracking-wider mb-1">Net Pay</p>
+                  <p className="text-xs text-muted uppercase tracking-wider mb-1">{t('taxCompliance.netPay')}</p>
                   <p className="text-xl font-bold font-mono text-success">
                     ${((parseFloat(grossPay) || 0) * 0.75).toFixed(2)}
                   </p>
                 </div>
               </div>
               <p className="text-xs text-muted mt-4 text-center">
-                * Based on default 25% tax rate. Actual calculations will use configured rates.
+                {t('taxCompliance.defaultRateNote')}
               </p>
             </div>
           </div>
@@ -369,7 +371,7 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-2 ml-1">
-                  Report Start Date
+                  {t('taxCompliance.reportStartDate')}
                 </label>
                 <input
                   type="date"
@@ -380,7 +382,7 @@ const TaxComplianceWizard: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-2 ml-1">
-                  Report End Date
+                  {t('taxCompliance.reportEndDate')}
                 </label>
                 <input
                   type="date"
@@ -394,16 +396,16 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="bg-surface/50 border border-hi rounded-xl p-6">
               <h3 className="font-bold mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-accent" />
-                Report Preview
+                {t('taxCompliance.reportPreview')}
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-surface/50 text-xs uppercase text-muted tracking-wider border-b border-hi">
                     <tr>
-                      <th className="px-4 py-3">Employee</th>
-                      <th className="px-4 py-3">Gross Pay</th>
-                      <th className="px-4 py-3">Tax Amount</th>
-                      <th className="px-4 py-3">Net Pay</th>
+                      <th className="px-4 py-3">{t('taxCompliance.employee')}</th>
+                      <th className="px-4 py-3">{t('taxCompliance.grossPay')}</th>
+                      <th className="px-4 py-3">{t('taxCompliance.taxAmount')}</th>
+                      <th className="px-4 py-3">{t('taxCompliance.netPay')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-hi">
@@ -424,7 +426,7 @@ const TaxComplianceWizard: React.FC = () => {
               </div>
               {taxPreviews.length > 5 && (
                 <p className="text-xs text-muted mt-2 text-center">
-                  And {taxPreviews.length - 5} more employees...
+                  {t('taxCompliance.moreEmployees', { count: taxPreviews.length - 5 })}
                 </p>
               )}
             </div>
@@ -436,32 +438,32 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="bg-success/10 border border-success/20 rounded-xl p-6 text-center">
               <Check className="w-12 h-12 mx-auto mb-2 text-success" />
               <h3 className="text-xl font-bold text-success mb-1">
-                Report Generated Successfully!
+                {t('taxCompliance.reportGenerated')}
               </h3>
               <p className="text-muted">
-                Your tax compliance report for {config.country} is ready for export
+                {t('taxCompliance.reportReady', { country: config.country })}
               </p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-surface/50 border border-hi rounded-xl p-4 text-center">
-                <p className="text-xs text-muted uppercase tracking-wider">Total Employees</p>
+                <p className="text-xs text-muted uppercase tracking-wider">{t('taxCompliance.totalEmployees')}</p>
                 <p className="text-2xl font-bold">{reportData.employeeCount}</p>
               </div>
               <div className="bg-surface/50 border border-hi rounded-xl p-4 text-center">
-                <p className="text-xs text-muted uppercase tracking-wider">Total Gross</p>
+                <p className="text-xs text-muted uppercase tracking-wider">{t('taxCompliance.totalGross')}</p>
                 <p className="text-2xl font-bold font-mono">
                   ${reportData.totalGrossPay.toLocaleString()}
                 </p>
               </div>
               <div className="bg-surface/50 border border-hi rounded-xl p-4 text-center">
-                <p className="text-xs text-muted uppercase tracking-wider">Tax Collected</p>
+                <p className="text-xs text-muted uppercase tracking-wider">{t('taxCompliance.taxCollected')}</p>
                 <p className="text-2xl font-bold font-mono text-danger">
                   ${reportData.totalTaxCollected.toLocaleString()}
                 </p>
               </div>
               <div className="bg-surface/50 border border-hi rounded-xl p-4 text-center">
-                <p className="text-xs text-muted uppercase tracking-wider">Total Net</p>
+                <p className="text-xs text-muted uppercase tracking-wider">{t('taxCompliance.totalNet')}</p>
                 <p className="text-2xl font-bold font-mono text-success">
                   ${reportData.totalNetPay.toLocaleString()}
                 </p>
@@ -474,10 +476,10 @@ const TaxComplianceWizard: React.FC = () => {
                 className="flex items-center justify-center gap-2 py-4 px-6 rounded-full bg-accent text-on-accent font-bold hover:bg-accent-hover transition-all"
               >
                 <Download className="w-5 h-5" />
-                Download CSV Report
+                {t('taxCompliance.downloadCsv')}
               </button>
               <p className="text-xs text-muted text-center">
-                Export as CSV for local government filing
+                {t('taxCompliance.exportHint')}
               </p>
             </div>
           </div>
@@ -493,10 +495,10 @@ const TaxComplianceWizard: React.FC = () => {
             onClick={step === 1 ? () => navigate('/') : handleBack}
           >
             {step === 1 ? (
-              'Cancel'
+              t('taxCompliance.cancel')
             ) : (
               <span className="flex items-center gap-2">
-                <ChevronLeft className="w-4 h-4" /> Back
+                <ChevronLeft className="w-4 h-4" /> {t('taxCompliance.back')}
               </span>
             )}
           </button>
@@ -507,7 +509,7 @@ const TaxComplianceWizard: React.FC = () => {
                 className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={handleValidateConfig}
               >
-                Validate & Continue
+                {t('taxCompliance.validateContinue')}
               </button>
             )}
             {step === 3 && (
@@ -518,7 +520,7 @@ const TaxComplianceWizard: React.FC = () => {
                 }}
                 disabled={isLoading}
               >
-                {isLoading ? 'Calculating...' : 'Calculate Preview'}
+                {isLoading ? t('taxCompliance.calculating') : t('taxCompliance.calculatePreview')}
               </button>
             )}
             {step === 4 && (
@@ -526,7 +528,7 @@ const TaxComplianceWizard: React.FC = () => {
                 className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={handleGenerateReport}
               >
-                Generate Report
+                {t('taxCompliance.generateReport')}
               </button>
             )}
             {step < 5 && step > 3 && (
@@ -534,7 +536,7 @@ const TaxComplianceWizard: React.FC = () => {
                 className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={handleNext}
               >
-                Continue <ChevronRight className="w-4 h-4 inline" />
+                {t('taxCompliance.continue')} <ChevronRight className="w-4 h-4 inline" />
               </button>
             )}
           </div>

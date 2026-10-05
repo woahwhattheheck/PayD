@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -38,6 +39,7 @@ interface ForecastParams {
 }
 
 export default function CashFlowForecast() {
+  const { t } = useTranslation();
   const { notifyError, notifySuccess } = useNotification();
   const [forecast, setForecast] = useState<ForecastType | null>(null);
   const [historical, setHistorical] = useState<HistoricalPayrollData[]>([]);
@@ -51,7 +53,7 @@ export default function CashFlowForecast() {
 
   const loadForecast = useCallback(async () => {
     if (!params.distributionAccount || !params.assetIssuer) {
-      notifyError('Please provide distribution account and asset issuer');
+      notifyError(t('cashFlowForecast.errors.missingInputs'));
       return;
     }
 
@@ -66,13 +68,13 @@ export default function CashFlowForecast() {
       setForecast(forecastData);
       setHistorical(historicalData.historical);
       setAlerts(alertsData.alerts);
-      notifySuccess('Cash flow forecast updated');
+      notifySuccess(t('cashFlowForecast.updated'));
     } catch (error) {
-      notifyError(error instanceof Error ? error.message : 'Failed to load cash flow forecast');
+      notifyError(error instanceof Error ? error.message : t('cashFlowForecast.errors.loadFailed'));
     } finally {
       setIsLoading(false);
     }
-  }, [params, notifyError, notifySuccess]);
+  }, [params, notifyError, notifySuccess, t]);
 
   useEffect(() => {
     void loadForecast();
@@ -145,29 +147,29 @@ export default function CashFlowForecast() {
     <div className="p-4 sm:p-6 lg:p-12 space-y-6">
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-(--text) mb-2">Cash Flow Forecast</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-(--text) mb-2">{t('cashFlowForecast.title')}</h1>
           <p className="text-sm text-(--muted)">
-            Analyze historical payroll data and project future cash flow requirements
+            {t('cashFlowForecast.subtitle')}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <input
             type="text"
-            placeholder="Distribution Account"
+            placeholder={t('cashFlowForecast.distributionAccount')}
             value={params.distributionAccount}
             onChange={(e) => setParams({ ...params, distributionAccount: e.target.value })}
             className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
           />
           <input
             type="text"
-            placeholder="Asset Issuer"
+            placeholder={t('cashFlowForecast.assetIssuer')}
             value={params.assetIssuer}
             onChange={(e) => setParams({ ...params, assetIssuer: e.target.value })}
             className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
           />
           <input
             type="number"
-            placeholder="Days (90)"
+            placeholder={t('cashFlowForecast.daysPlaceholder')}
             value={params.forecastDays}
             onChange={(e) =>
               setParams({ ...params, forecastDays: parseInt(e.target.value, 10) || 90 })
@@ -182,7 +184,7 @@ export default function CashFlowForecast() {
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-(--text) rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px] touch-manipulation"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            {isLoading ? 'Loading...' : 'Refresh'}
+            {isLoading ? t('cashFlowForecast.loading') : t('cashFlowForecast.refresh')}
           </button>
         </div>
       </header>
@@ -202,7 +204,7 @@ export default function CashFlowForecast() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-(--muted)">Current Balance</span>
+                <span className="text-sm text-(--muted)">{t('cashFlowForecast.currentBalance')}</span>
                 <DollarSign className="w-5 h-5 text-(--muted)" />
               </div>
               <p className="text-2xl font-bold text-(--text)">
@@ -216,7 +218,7 @@ export default function CashFlowForecast() {
 
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-(--muted)">Projected Outflow</span>
+                <span className="text-sm text-(--muted)">{t('cashFlowForecast.projectedOutflow')}</span>
                 <Calendar className="w-5 h-5 text-(--muted)" />
               </div>
               <p className="text-2xl font-bold text-(--text)">
@@ -226,13 +228,13 @@ export default function CashFlowForecast() {
                 })}
               </p>
               <p className="text-xs text-(--muted) mt-1">
-                {forecast.projections.length} scheduled payments
+                {t('cashFlowForecast.scheduledPayments', { count: forecast.projections.length })}
               </p>
             </div>
 
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-(--muted)">Projected Balance</span>
+                <span className="text-sm text-(--muted)">{t('cashFlowForecast.projectedBalance')}</span>
                 <TrendingDown className="w-5 h-5 text-(--muted)" />
               </div>
               <p
@@ -245,12 +247,12 @@ export default function CashFlowForecast() {
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="text-xs text-(--muted) mt-1">After all projections</p>
+              <p className="text-xs text-(--muted) mt-1">{t('cashFlowForecast.afterProjections')}</p>
             </div>
 
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-(--muted)">Trend</span>
+                <span className="text-sm text-(--muted)">{t('cashFlowForecast.trend')}</span>
                 {getTrendIcon()}
               </div>
               <p className="text-2xl font-bold text-(--text) capitalize">
@@ -258,7 +260,7 @@ export default function CashFlowForecast() {
               </p>
               <p className="text-xs text-(--muted) mt-1">
                 {forecast.trendAnalysis.changePercent > 0 ? '+' : ''}
-                {forecast.trendAnalysis.changePercent.toFixed(1)}% vs historical
+                {t('cashFlowForecast.vsHistorical', { percent: forecast.trendAnalysis.changePercent.toFixed(1) })}
               </p>
             </div>
           </div>
@@ -268,7 +270,7 @@ export default function CashFlowForecast() {
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <h2 className="text-xl font-bold text-(--text) mb-4 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-400" />
-                Budget Alerts ({alerts.length})
+                {t('cashFlowForecast.budgetAlerts', { count: alerts.length })}
               </h2>
               <div className="space-y-3">
                 {alerts.map((alert) => (
@@ -304,7 +306,7 @@ export default function CashFlowForecast() {
                         <p className="text-sm text-(--text) mb-1">{alert.message}</p>
                         {alert.shortfall && (
                           <p className="text-xs text-red-400 font-mono">
-                            Shortfall: {alert.shortfall.toFixed(2)} ORGUSD
+                            {t('cashFlowForecast.shortfall', { amount: alert.shortfall.toFixed(2), asset: 'ORGUSD' })}
                           </p>
                         )}
                       </div>
@@ -319,7 +321,7 @@ export default function CashFlowForecast() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Cash Flow Projection Chart */}
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
-              <h3 className="text-lg font-bold text-(--text) mb-4">Cash Flow Projection</h3>
+              <h3 className="text-lg font-bold text-(--text) mb-4">{t('cashFlowForecast.cashFlowProjection')}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={balanceProjectionData}>
                   <defs>
@@ -351,7 +353,7 @@ export default function CashFlowForecast() {
 
             {/* Historical vs Projected Chart */}
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
-              <h3 className="text-lg font-bold text-(--text) mb-4">Historical vs Projected</h3>
+              <h3 className="text-lg font-bold text-(--text) mb-4">{t('cashFlowForecast.historicalVsProjected')}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -365,8 +367,8 @@ export default function CashFlowForecast() {
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="historical" fill="#10b981" name="Historical" />
-                  <Bar dataKey="projected" fill="#3b82f6" name="Projected" />
+                  <Bar dataKey="historical" fill="#10b981" name={t('cashFlowForecast.historical')} />
+                  <Bar dataKey="projected" fill="#3b82f6" name={t('cashFlowForecast.projected')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -374,10 +376,10 @@ export default function CashFlowForecast() {
 
           {/* Historical Averages */}
           <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
-            <h3 className="text-lg font-bold text-(--text) mb-4">Historical Averages</h3>
+            <h3 className="text-lg font-bold text-(--text) mb-4">{t('cashFlowForecast.historicalAverages')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-(--surface) rounded-lg border border-(--border)">
-                <p className="text-sm text-(--muted) mb-1">Weekly Average</p>
+                <p className="text-sm text-(--muted) mb-1">{t('cashFlowForecast.weeklyAverage')}</p>
                 <p className="text-2xl font-bold text-(--text)">
                   {forecast.historicalAverage.weekly.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
@@ -386,7 +388,7 @@ export default function CashFlowForecast() {
                 </p>
               </div>
               <div className="p-4 bg-(--surface) rounded-lg border border-(--border)">
-                <p className="text-sm text-(--muted) mb-1">Biweekly Average</p>
+                <p className="text-sm text-(--muted) mb-1">{t('cashFlowForecast.biweeklyAverage')}</p>
                 <p className="text-2xl font-bold text-(--text)">
                   {forecast.historicalAverage.biweekly.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
@@ -395,7 +397,7 @@ export default function CashFlowForecast() {
                 </p>
               </div>
               <div className="p-4 bg-(--surface) rounded-lg border border-(--border)">
-                <p className="text-sm text-(--muted) mb-1">Monthly Average</p>
+                <p className="text-sm text-(--muted) mb-1">{t('cashFlowForecast.monthlyAverage')}</p>
                 <p className="text-2xl font-bold text-(--text)">
                   {forecast.historicalAverage.monthly.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
@@ -409,7 +411,7 @@ export default function CashFlowForecast() {
       ) : (
         <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-12 text-center">
           <p className="text-(--muted)">
-            Enter distribution account and asset issuer to load forecast
+            {t('cashFlowForecast.emptyPrompt')}
           </p>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CartesianGrid,
   Line,
@@ -22,7 +23,7 @@ import {
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
-  return 'Unknown error';
+  return '';
 }
 
 type LiquidityAlertPayload = {
@@ -51,6 +52,7 @@ function statusClasses(status: 'green' | 'yellow' | 'red'): string {
 }
 
 export default function Forecasting() {
+  const { t } = useTranslation();
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [monthsForward, setMonthsForward] = useState(6);
@@ -82,7 +84,7 @@ export default function Forecasting() {
           subscribeToOrganization(f.organizationId);
         }
       } catch (e: unknown) {
-        notifyError(getErrorMessage(e) || 'Failed to load forecast');
+        notifyError(getErrorMessage(e) || t('forecasting.errors.loadFailed'));
       } finally {
         setIsLoading(false);
       }
@@ -104,7 +106,11 @@ export default function Forecasting() {
     const handler = (payload: unknown) => {
       const normalized = normalizeLiquidityAlertPayload(payload);
       notifyError(
-        `Liquidity ${String(normalized.severity || '').toUpperCase()}: shortfall ${normalized.shortfallAmount ?? ''} ${normalized.assetCode ?? ''}`
+        t('forecasting.alertShortfall', {
+          severity: String(normalized.severity || '').toUpperCase(),
+          amount: normalized.shortfallAmount ?? '',
+          asset: normalized.assetCode ?? '',
+        })
       );
     };
 
@@ -112,7 +118,7 @@ export default function Forecasting() {
     return () => {
       socket.off('liquidity:alert', handler);
     };
-  }, [socket, notifyError]);
+  }, [socket, notifyError, t]);
 
   const chartData = useMemo(() => forecast?.monthly || [], [forecast]);
 
@@ -122,12 +128,12 @@ export default function Forecasting() {
     try {
       const updated = await updateLiquiditySettings(settingsDraft);
       setSettings(updated);
-      notifySuccess('Liquidity settings updated');
+      notifySuccess(t('forecasting.settingsUpdated'));
 
       const f = await getForecast(monthsForward);
       setForecast(f);
     } catch (e: unknown) {
-      notifyError(getErrorMessage(e) || 'Failed to update settings');
+      notifyError(getErrorMessage(e) || t('forecasting.errors.updateFailed'));
     }
   };
 
@@ -136,10 +142,10 @@ export default function Forecasting() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <Heading as="h1" size="sm">
-            Payroll Forecasting
+            {t('forecasting.title')}
           </Heading>
           <Text size="sm" as="p">
-            Project payroll liabilities and monitor liquidity risk.
+            {t('forecasting.subtitle')}
           </Text>
         </div>
 
@@ -150,7 +156,7 @@ export default function Forecasting() {
             onChange={(e) =>
               setMonthsForward(Math.min(6, Math.max(3, Number(e.target.value) || 6)))
             }
-            label="Months"
+            label={t('forecasting.months')}
             type="number"
             fieldSize="sm"
           />
@@ -164,12 +170,12 @@ export default function Forecasting() {
                   const f = await getForecast(monthsForward);
                   setForecast(f);
                 } catch (e: unknown) {
-                  notifyError(getErrorMessage(e) || 'Failed to refresh');
+                  notifyError(getErrorMessage(e) || t('forecasting.errors.refreshFailed'));
                 }
               })()
             }
           >
-            Refresh
+            {t('forecasting.refresh')}
           </Button>
         </div>
       </div>
@@ -178,16 +184,19 @@ export default function Forecasting() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <Heading as="h2" size="xs">
-              Liquidity Status
+              {t('forecasting.liquidityStatus')}
             </Heading>
             {liquidity ? (
               <Text size="sm" as="p">
-                Available: {liquidity.availableBalance} {liquidity.assetCode} · Required (next 2
-                runs): {liquidity.requiredNext2Runs} {liquidity.assetCode}
+                {t('forecasting.liquidityAvailable', {
+                  available: liquidity.availableBalance,
+                  required: liquidity.requiredNext2Runs,
+                  asset: liquidity.assetCode,
+                })}
               </Text>
             ) : (
               <Text size="sm" as="p">
-                Configure liquidity settings to calculate status.
+                {t('forecasting.configureLiquidity')}
               </Text>
             )}
           </div>
@@ -198,7 +207,7 @@ export default function Forecasting() {
                 liquidity.status
               )}`}
             >
-              {liquidity.status}
+              {t(`forecasting.status.${liquidity.status}`)}
             </div>
           )}
         </div>
@@ -206,7 +215,7 @@ export default function Forecasting() {
 
       <Card>
         <Heading as="h2" size="xs">
-          Projected Monthly Payroll Cost
+          {t('forecasting.projectedMonthlyPayroll')}
         </Heading>
         <div className="h-72 mt-4">
           <ResponsiveContainer width="100%" height="100%">
@@ -229,12 +238,12 @@ export default function Forecasting() {
 
       <Card>
         <Heading as="h2" size="xs">
-          Liquidity Settings
+          {t('forecasting.liquiditySettings')}
         </Heading>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <Input
             id="distributionAccount"
-            label="Distribution Account"
+            label={t('forecasting.distributionAccount')}
             value={settingsDraft.distributionAccount}
             onChange={(e) =>
               setSettingsDraft((s) => ({ ...s, distributionAccount: e.target.value }))
@@ -243,21 +252,21 @@ export default function Forecasting() {
           />
           <Input
             id="assetIssuer"
-            label="Asset Issuer"
+            label={t('forecasting.assetIssuer')}
             value={settingsDraft.assetIssuer}
             onChange={(e) => setSettingsDraft((s) => ({ ...s, assetIssuer: e.target.value }))}
             fieldSize="sm"
           />
           <Input
             id="assetCode"
-            label="Asset Code"
+            label={t('forecasting.assetCode')}
             value={settingsDraft.assetCode || 'ORGUSD'}
             onChange={(e) => setSettingsDraft((s) => ({ ...s, assetCode: e.target.value }))}
             fieldSize="sm"
           />
           <Input
             id="benefitsRatePct"
-            label="Benefits Rate %"
+            label={t('forecasting.benefitsRate')}
             type="number"
             value={String(settingsDraft.benefitsRatePct ?? 0)}
             onChange={(e) =>
@@ -267,7 +276,7 @@ export default function Forecasting() {
           />
           <Input
             id="yellowBufferPct"
-            label="Yellow Buffer %"
+            label={t('forecasting.yellowBuffer')}
             type="number"
             value={String(settingsDraft.yellowBufferPct ?? 10)}
             onChange={(e) =>
@@ -277,7 +286,7 @@ export default function Forecasting() {
           />
           <Input
             id="alertEmails"
-            label="Alert Emails (comma separated)"
+            label={t('forecasting.alertEmails')}
             value={(settingsDraft.alertEmails || []).join(',')}
             onChange={(e) =>
               setSettingsDraft((s) => ({
@@ -294,11 +303,11 @@ export default function Forecasting() {
 
         <div className="mt-4 flex items-center gap-3">
           <Button variant="primary" size="sm" onClick={() => void saveSettings()}>
-            Save
+            {t('forecasting.save')}
           </Button>
           {settings && (
             <Text size="sm" as="p">
-              Saved.
+              {t('forecasting.saved')}
             </Text>
           )}
         </div>

@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowUpRight,
   RefreshCw,
@@ -36,7 +37,7 @@ import {
 import WithdrawalFlow from '../components/WithdrawalFlow';
 
 /* ── Helper: status badge ────────── */
-function StatusBadge({ status }: { status: EmployeeTransaction['status'] }) {
+function StatusBadge({ status, label }: { status: EmployeeTransaction['status']; label: string }) {
   const map = {
     completed: { cls: styles.statusCompleted, dot: styles.statusDotCompleted },
     pending: { cls: styles.statusPending, dot: styles.statusDotPending },
@@ -46,20 +47,20 @@ function StatusBadge({ status }: { status: EmployeeTransaction['status'] }) {
   return (
     <span className={`${styles.statusBadge} ${cls}`}>
       <span className={`${styles.statusDot} ${dot}`} />
-      {status}
+      {label}
     </span>
   );
 }
 
 /* ── Helper: type badge ──────────── */
-function TypeBadge({ type }: { type: EmployeeTransaction['type'] }) {
+function TypeBadge({ type, label }: { type: EmployeeTransaction['type']; label: string }) {
   const map = {
     salary: { cls: styles.txMemoTypeSalary, icon: <DollarSign className="w-3 h-3" /> },
     bonus: { cls: styles.txMemoTypeBonus, icon: <Award className="w-3 h-3" /> },
     reimbursement: { cls: styles.txMemoTypeReimbursement, icon: <Receipt className="w-3 h-3" /> },
   };
   const { cls } = map[type];
-  return <span className={`${styles.txMemoType} ${cls}`}>{type}</span>;
+  return <span className={`${styles.txMemoType} ${cls}`}>{label}</span>;
 }
 
 /* ── Loading skeleton ────────────── */
@@ -75,6 +76,7 @@ function LoadingSkeleton() {
 
 /* ── Main Page Component ─────────── */
 const EmployeePortal: React.FC = () => {
+  const { t } = useTranslation();
   const { address } = useWallet();
   const { notifySuccess, notifyError } = useNotification();
   const { contractError, handleContractError, clearContractError } = useContractError();
@@ -167,7 +169,7 @@ const EmployeePortal: React.FC = () => {
       } catch (e: unknown) {
         if (!cancelled) {
           setPendingClaims([]);
-          const errorMessage = e instanceof Error ? e.message : 'Failed to load pending claims';
+          const errorMessage = e instanceof Error ? e.message : t('employeePortal.errors.loadPendingClaims');
           setPendingClaimsError(errorMessage);
         }
       }
@@ -177,7 +179,7 @@ const EmployeePortal: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [address]);
+  }, [address, t]);
 
   const handleClaim = async (claimId: string) => {
     setIsClaiming(claimId);
@@ -194,7 +196,7 @@ const EmployeePortal: React.FC = () => {
         throw new Error('Contract invocation failed');
       }
 
-      notifySuccess('Claim successful!', 'The funds have been transferred to your wallet.');
+      notifySuccess(t('employeePortal.claim.successTitle'), t('employeePortal.claim.successBody'));
 
       // Remove the claimed item from the list
       setPendingClaims((prev: PendingClaimRecord[]) =>
@@ -202,7 +204,7 @@ const EmployeePortal: React.FC = () => {
       );
     } catch (err: unknown) {
       console.error(err);
-      notifyError('Claim failed', 'A contract error occurred. Please review the details below.');
+      notifyError(t('employeePortal.claim.failedTitle'), t('employeePortal.claim.failedBody'));
     } finally {
       setIsClaiming(null);
     }
@@ -221,13 +223,13 @@ const EmployeePortal: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       notifySuccess(
-        `${assetCode} Trustline Established`,
-        'You can now receive payroll in this asset.'
+        t('employeePortal.trustline.establishedTitle', { assetCode }),
+        t('employeePortal.trustline.establishedBody')
       );
       setMissingTrustlines((prev: string[]) => prev.filter((c: string) => c !== assetCode));
     } catch (err: unknown) {
       console.error(err);
-      notifyError('Failed to establish trustline', 'Please try again.');
+      notifyError(t('employeePortal.trustline.failedTitle'), t('employeePortal.common.tryAgain'));
     } finally {
       setIsEstablishing(null);
     }
@@ -243,10 +245,10 @@ const EmployeePortal: React.FC = () => {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>
-            My <span className="text-[var(--accent)]">Portal</span>
+            {t('employeePortal.titlePrefix')} <span className="text-[var(--accent)]">{t('employeePortal.titleHighlight')}</span>
           </h1>
           <p className={styles.pageSubtitle}>
-            View your salary payments, balances, and transaction history
+            {t('employeePortal.subtitle')}
           </p>
         </div>
 
@@ -254,26 +256,26 @@ const EmployeePortal: React.FC = () => {
         {deductionsDraft && (
           <div className={styles.txSection}>
             <div className={styles.txHeader}>
-              <h2 className={styles.txTitle}>Deductions Breakdown</h2>
+              <h2 className={styles.txTitle}>{t('employeePortal.deductions.title')}</h2>
             </div>
 
             <div className={styles.statsRow}>
               <div className={styles.statCard}>
-                <div className={styles.statLabel}>Gross Pay</div>
+                <div className={styles.statLabel}>{t('employeePortal.deductions.grossPay')}</div>
                 <div className={styles.statValue}>
                   {formatCurrency(deductionsDraft.gross_amount, 'USD')}
                 </div>
               </div>
 
               <div className={styles.statCard}>
-                <div className={styles.statLabel}>Total Deductions</div>
+                <div className={styles.statLabel}>{t('employeePortal.deductions.totalDeductions')}</div>
                 <div className={styles.statValue}>
                   {formatCurrency(deductionsDraft.total_deductions, 'USD')}
                 </div>
               </div>
 
               <div className={styles.statCard}>
-                <div className={styles.statLabel}>Net Pay</div>
+                <div className={styles.statLabel}>{t('employeePortal.deductions.netPay')}</div>
                 <div className={styles.statValue}>
                   {formatCurrency(deductionsDraft.net_amount, 'USD')}
                 </div>
@@ -288,19 +290,19 @@ const EmployeePortal: React.FC = () => {
                   padding: '10px 24px',
                 }}
               >
-                <span className={styles.statLabel}>Deduction</span>
-                <span className={styles.statLabel}>Type</span>
-                <span className={styles.statLabel}>Amount</span>
-                <span className={`${styles.statLabel} hidden md:block`}>Destination</span>
-                <span className={`${styles.statLabel} hidden md:block`}>Wallet</span>
+                <span className={styles.statLabel}>{t('employeePortal.deductions.deduction')}</span>
+                <span className={styles.statLabel}>{t('employeePortal.common.type')}</span>
+                <span className={styles.statLabel}>{t('employeePortal.common.amount')}</span>
+                <span className={`${styles.statLabel} hidden md:block`}>{t('employeePortal.deductions.destination')}</span>
+                <span className={`${styles.statLabel} hidden md:block`}>{t('employeePortal.deductions.wallet')}</span>
                 <span className={styles.statLabel} />
               </div>
 
               {deductionsDraft.lines.length === 0 ? (
                 <div className={styles.emptyState}>
                   <Receipt className={styles.emptyIcon} />
-                  <p className={styles.emptyTitle}>No deductions configured</p>
-                  <p className={styles.emptyDesc}>Your net pay equals your gross pay for now.</p>
+                  <p className={styles.emptyTitle}>{t('employeePortal.deductions.emptyTitle')}</p>
+                  <p className={styles.emptyDesc}>{t('employeePortal.deductions.emptyBody')}</p>
                 </div>
               ) : (
                 deductionsDraft.lines.map((line) => (
@@ -356,7 +358,7 @@ const EmployeePortal: React.FC = () => {
       {/* ── Balance Card ─────────────── */}
       <div className={styles.balanceCard}>
         <div className="relative z-10">
-          <p className={styles.balanceLabel}>Total Balance</p>
+          <p className={styles.balanceLabel}>{t('employeePortal.balance.total')}</p>
           <div className={styles.balanceAmountRow}>
             {isLoading ? (
               <div className={`${styles.skeleton}`} style={{ width: 200, height: 48 }} />
@@ -375,12 +377,12 @@ const EmployeePortal: React.FC = () => {
           <p className={styles.rateInfo}>
             1 ORGUSD ≈ {getCurrencySymbol(selectedCurrency)}
             {balance?.exchangeRate?.toLocaleString()} {selectedCurrency}
-            {balance?.lastUpdated && <> · Updated {balance.lastUpdated.toLocaleTimeString()}</>}
+            {balance?.lastUpdated && <> · {t('employeePortal.balance.updated', { time: balance.lastUpdated.toLocaleTimeString() })}</>}
           </p>
 
           <div className={styles.currencySelector}>
             <span className="text-[11px] text-[var(--muted)] uppercase tracking-widest font-semibold">
-              Local Currency:
+              {t('employeePortal.balance.localCurrency')}
             </span>
             <select
               className={styles.currencySelect}
@@ -410,7 +412,7 @@ const EmployeePortal: React.FC = () => {
             <Wallet className="w-4 h-4 text-[var(--accent)]" />
           </div>
           <div className={styles.statValue}>{formatCurrency(totalReceived, 'USD')}</div>
-          <div className={styles.statLabel}>Total Received</div>
+          <div className={styles.statLabel}>{t('employeePortal.stats.totalReceived')}</div>
         </div>
 
         <div className={styles.statCard}>
@@ -428,8 +430,8 @@ const EmployeePortal: React.FC = () => {
             className="w-full text-left"
             disabled={!balance?.orgUsd || balance.orgUsd <= 0}
           >
-            <div className={styles.statValue}>Cash Out</div>
-            <div className={styles.statLabel}>Withdraw to Local Currency</div>
+            <div className={styles.statValue}>{t('employeePortal.stats.cashOut')}</div>
+            <div className={styles.statLabel}>{t('employeePortal.stats.withdrawLocal')}</div>
           </button>
         </div>
 
@@ -444,7 +446,7 @@ const EmployeePortal: React.FC = () => {
             <TrendingUp className="w-4 h-4 text-[var(--accent2)]" />
           </div>
           <div className={styles.statValue}>{totalTransactions}</div>
-          <div className={styles.statLabel}>Transactions</div>
+          <div className={styles.statLabel}>{t('employeePortal.stats.transactions')}</div>
         </div>
 
         <div className={styles.statCard}>
@@ -458,7 +460,7 @@ const EmployeePortal: React.FC = () => {
             <Clock className="w-4 h-4 text-[#ffd500]" />
           </div>
           <div className={styles.statValue}>{pendingCount}</div>
-          <div className={styles.statLabel}>Pending</div>
+          <div className={styles.statLabel}>{t('employeePortal.status.pending')}</div>
         </div>
 
         <div className={styles.statCard}>
@@ -479,7 +481,7 @@ const EmployeePortal: React.FC = () => {
                 })
               : '—'}
           </div>
-          <div className={styles.statLabel}>Last Payment</div>
+          <div className={styles.statLabel}>{t('employeePortal.stats.lastPayment')}</div>
         </div>
       </div>
 
@@ -488,11 +490,10 @@ const EmployeePortal: React.FC = () => {
         <div className="w-full card glass noise p-6 border-orange-500/20 bg-orange-500/5">
           <div className="flex items-center gap-3 mb-4">
             <AlertCircle className="w-5 h-5 text-orange-500" />
-            <h2 className="text-lg font-bold text-orange-100">Setup Required</h2>
+            <h2 className="text-lg font-bold text-orange-100">{t('employeePortal.trustline.setupRequired')}</h2>
           </div>
           <p className="text-sm text-orange-100/70 mb-6">
-            To receive payments in certain assets, you must first establish a trustline with the
-            issuer. This is a standard Stellar security feature.
+            {t('employeePortal.trustline.explanation')}
           </p>
           <div className="flex flex-wrap gap-4">
             {missingTrustlines.map((code: string) => (
@@ -501,7 +502,7 @@ const EmployeePortal: React.FC = () => {
                 className="flex flex-col gap-3 p-4 rounded-xl bg-black/40 border border-hi min-w-[200px]"
               >
                 <div className="text-sm font-bold">{code}</div>
-                <div className="text-xs text-[var(--muted)] mb-1">Stellar Asset Trustline</div>
+                <div className="text-xs text-[var(--muted)] mb-1">{t('employeePortal.trustline.assetTrustline')}</div>
                 <button
                   onClick={() => {
                     void handleEstablishTrustline(code);
@@ -514,7 +515,7 @@ const EmployeePortal: React.FC = () => {
                   ) : (
                     <Wallet className="w-3 h-3" />
                   )}
-                  Establish Trustline
+                  {t('employeePortal.trustline.establish')}
                 </button>
               </div>
             ))}
@@ -535,7 +536,7 @@ const EmployeePortal: React.FC = () => {
         <div className="w-full card glass noise p-6">
           <div className="flex flex-col mb-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-bold">Pending Claims</h2>
+              <h2 className="text-lg font-bold">{t('employeePortal.claim.pendingTitle')}</h2>
               <button
                 type="button"
                 onClick={() => {
@@ -548,7 +549,7 @@ const EmployeePortal: React.FC = () => {
                       } catch (e: unknown) {
                         setPendingClaims([]);
                         const errorMessage =
-                          e instanceof Error ? e.message : 'Failed to refresh pending claims';
+                          e instanceof Error ? e.message : t('employeePortal.errors.refreshPendingClaims');
                         setPendingClaimsError(errorMessage);
                       }
                     })();
@@ -557,7 +558,7 @@ const EmployeePortal: React.FC = () => {
                 className="px-3 py-1.5 rounded-lg bg-black/20 hover:bg-black/40 border border-hi text-xs font-semibold"
                 disabled={!address}
               >
-                Refresh
+                {t('employeePortal.common.refresh')}
               </button>
             </div>
             <ContractErrorPanel error={contractError} />
@@ -568,8 +569,7 @@ const EmployeePortal: React.FC = () => {
           ) : (
             <div className="flex flex-col gap-3">
               <div className="text-sm text-[var(--muted)]">
-                If you have a pending claim, add the trustline in your wallet and then claim the
-                balance.
+                {t('employeePortal.claim.help')}
               </div>
               {pendingClaims.map((c: PendingClaimRecord) => (
                 <div
@@ -581,11 +581,11 @@ const EmployeePortal: React.FC = () => {
                       {c.amount} {c.asset_code}
                     </div>
                     <div className="text-xs text-[var(--muted)]">
-                      Created {new Date(c.created_at).toLocaleString()}
+                      {t('employeePortal.claim.created', { date: new Date(c.created_at).toLocaleString() })}
                     </div>
                   </div>
                   <div className="text-xs text-[var(--muted)] break-all flex-1">
-                    Balance ID: {c.stellar_balance_id || '—'}
+                    {t('employeePortal.claim.balanceId', { id: c.stellar_balance_id || '—' })}
                   </div>
                   <button
                     onClick={() => {
@@ -599,7 +599,7 @@ const EmployeePortal: React.FC = () => {
                     ) : (
                       <ArrowUpRight className="w-3 h-3" />
                     )}
-                    Claim Funds
+                    {t('employeePortal.claim.claimFunds')}
                   </button>
                 </div>
               ))}
@@ -611,14 +611,14 @@ const EmployeePortal: React.FC = () => {
       {/* ── Transactions Table ────────── */}
       <div className={styles.txSection}>
         <div className={styles.txHeader}>
-          <h2 className={styles.txTitle}>Payment History</h2>
+          <h2 className={styles.txTitle}>{t('employeePortal.history.title')}</h2>
 
           <div className={styles.txFilters}>
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
               <input
                 type="text"
-                placeholder="Search tx hash, memo…"
+                placeholder={t('employeePortal.history.searchPlaceholder')}
                 className={styles.searchInput}
                 style={{ paddingLeft: 28 }}
                 value={searchQuery}
@@ -631,10 +631,10 @@ const EmployeePortal: React.FC = () => {
               value={filterStatus}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
             >
-              <option value="all">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
+              <option value="all">{t('employeePortal.history.allStatus')}</option>
+              <option value="completed">{t('employeePortal.status.completed')}</option>
+              <option value="pending">{t('employeePortal.status.pending')}</option>
+              <option value="failed">{t('employeePortal.status.failed')}</option>
             </select>
 
             <select
@@ -642,10 +642,10 @@ const EmployeePortal: React.FC = () => {
               value={filterType}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterType(e.target.value)}
             >
-              <option value="all">All Types</option>
-              <option value="salary">Salary</option>
-              <option value="bonus">Bonus</option>
-              <option value="reimbursement">Reimbursement</option>
+              <option value="all">{t('employeePortal.history.allTypes')}</option>
+              <option value="salary">{t('employeePortal.type.salary')}</option>
+              <option value="bonus">{t('employeePortal.type.bonus')}</option>
+              <option value="reimbursement">{t('employeePortal.type.reimbursement')}</option>
             </select>
 
             <button
@@ -667,12 +667,12 @@ const EmployeePortal: React.FC = () => {
             padding: '10px 24px',
           }}
         >
-          <span className={styles.statLabel}>Date</span>
-          <span className={styles.statLabel}>Description</span>
+          <span className={styles.statLabel}>{t('employeePortal.history.date')}</span>
+          <span className={styles.statLabel}>{t('employeePortal.history.description')}</span>
           <span className={styles.statLabel}>Amount</span>
-          <span className={`${styles.statLabel} hidden md:block`}>Status</span>
-          <span className={`${styles.statLabel} hidden md:block`}>Hash</span>
-          <span className={styles.statLabel}>Verify</span>
+          <span className={`${styles.statLabel} hidden md:block`}>{t('employeePortal.history.status')}</span>
+          <span className={`${styles.statLabel} hidden md:block`}>{t('employeePortal.history.hash')}</span>
+          <span className={styles.statLabel}>{t('employeePortal.history.verify')}</span>
         </div>
 
         {/* Rows */}
@@ -681,8 +681,8 @@ const EmployeePortal: React.FC = () => {
         ) : transactions.length === 0 ? (
           <div className={styles.emptyState}>
             <Wallet className={styles.emptyIcon} />
-            <p className={styles.emptyTitle}>No transactions found</p>
-            <p className={styles.emptyDesc}>Try adjusting your filters or check back later.</p>
+            <p className={styles.emptyTitle}>{t('employeePortal.history.emptyTitle')}</p>
+            <p className={styles.emptyDesc}>{t('employeePortal.history.emptyBody')}</p>
           </div>
         ) : (
           transactions.map((tx: EmployeeTransaction) => (
@@ -707,7 +707,7 @@ const EmployeePortal: React.FC = () => {
               {/* Memo + Type */}
               <div>
                 <span className={styles.txMemo}>{tx.memo}</span>
-                <TypeBadge type={tx.type} />
+                <TypeBadge type={tx.type} label={t(`employeePortal.type.${tx.type}`)} />
               </div>
 
               {/* Amount */}
@@ -720,7 +720,7 @@ const EmployeePortal: React.FC = () => {
 
               {/* Status */}
               <div className="hidden md:block">
-                <StatusBadge status={tx.status} />
+                <StatusBadge status={tx.status} label={t(`employeePortal.status.${tx.status}`)} />
               </div>
 
               {/* Hash */}
@@ -737,10 +737,10 @@ const EmployeePortal: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.stellarLink}
-                  title="View on Stellar Expert"
+                  title={t('employeePortal.history.viewOnExplorer')}
                 >
                   <ArrowUpRight className={styles.stellarLinkIcon} />
-                  <span className="hidden sm:inline">Explorer</span>
+                  <span className="hidden sm:inline">{t('employeePortal.history.explorer')}</span>
                 </a>
               </div>
             </div>
