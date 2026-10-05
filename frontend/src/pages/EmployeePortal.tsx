@@ -58,8 +58,13 @@ function TypeBadge({ type }: { type: EmployeeTransaction['type'] }) {
     bonus: { cls: styles.txMemoTypeBonus, icon: <Award className="w-3 h-3" /> },
     reimbursement: { cls: styles.txMemoTypeReimbursement, icon: <Receipt className="w-3 h-3" /> },
   };
-  const { cls } = map[type];
-  return <span className={`${styles.txMemoType} ${cls}`}>{type}</span>;
+  const { cls, icon } = map[type];
+  return (
+    <span className={`${styles.txMemoType} ${cls}`}>
+      {icon}
+      {type}
+    </span>
+  );
 }
 
 /* ── Loading skeleton ────────────── */
