@@ -15,10 +15,25 @@ interface Employee {
   status?: 'Active' | 'Inactive';
 }
 
+export interface BulkImportResponse {
+  message: string;
+  summary: {
+    totalRows: number;
+    successCount: number;
+    errorCount: number;
+  };
+  errors: Array<{
+    row: number;
+    email: string;
+    errors: string[];
+  }>;
+}
+
 interface EmployeeListProps {
   employees: Employee[];
   onEmployeeClick?: (employee: Employee) => void;
   onAddEmployee: (employee: Employee) => void;
+  onBulkImport?: (csvContent: string) => Promise<BulkImportResponse>;
   onEditEmployee?: (employee: Employee) => void;
   onRemoveEmployee?: (id: string) => void;
 }
@@ -26,10 +41,15 @@ interface EmployeeListProps {
 export const EmployeeList: React.FC<EmployeeListProps> = ({
   employees,
   onAddEmployee,
+  onBulkImport,
   onEditEmployee,
   onRemoveEmployee,
 }) => {
-  const [csvData, setCsvData] = useState<Employee[]>([]);
+  const [csvData, setCsvData] = useState<CSVRow[]>([]);
+  const [csvContent, setCsvContent] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<BulkImportResponse | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   const [showCSVUploader, setShowCSVUploader] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState<{ open: boolean; employee?: Employee }>({
@@ -41,25 +61,27 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   const [sortKey, setSortKey] = useState<keyof Employee>('name');
   const [sortAsc, setSortAsc] = useState(true);
 
-  const handleDataParsed = (data: CSVRow[]) => {
-    const newEmployees = data.map((row) => ({
-      id: String(Date.now() + Math.random()),
-      name: row.data.name,
-      email: row.data.email,
-      wallet: row.data.wallet,
-      position: row.data.position,
-      salary: Number(row.data.salary) || 0,
-      status: (row.data.status as 'Active' | 'Inactive') || 'Active',
-    }));
-    setCsvData(newEmployees);
+  const handleDataParsed = (data: CSVRow[], rawCsv: string) => {
+    setCsvData(data);
+    setCsvContent(rawCsv);
+    setImportResult(null);
+    setImportError(null);
   };
 
-  const handleAddEmployees = () => {
-    csvData.forEach((employee) => {
-      onAddEmployee(employee);
-    });
-    setCsvData([]);
-    setShowCSVUploader(false);
+  const handleAddEmployees = async () => {
+    if (!onBulkImport || !csvContent || !csvData.some((row) => row.isValid)) return;
+
+    setIsImporting(true);
+    setImportError(null);
+    setImportResult(null);
+    try {
+      const result = await onBulkImport(csvContent);
+      setImportResult(result);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : 'Employee import failed');
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   const handleSort = (key: keyof Employee) => {
@@ -374,22 +396,44 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
         {showCSVUploader && (
           <div className="w-full max-w-2xl mx-auto">
             <CSVUploader
-              requiredColumns={['name', 'email', 'wallet', 'position', 'salary', 'status']}
+              requiredColumns={['first_name', 'last_name', 'email']}
               onDataParsed={handleDataParsed}
+              validators={{
+                email: (value) =>
+                  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : 'Invalid email address',
+                base_salary: (value) => {
+                  if (!value) return null;
+                  const salary = Number(value);
+                  return Number.isFinite(salary) && salary >= 0
+                    ? null
+                    : 'base_salary must be a non-negative number';
+                },
+              }}
             />
             <div className="flex gap-2 justify-center mt-4">
               <button
-                onClick={handleAddEmployees}
-                className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation"
+                onClick={() => void handleAddEmployees()}
+                className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ minHeight: '44px' }}
-                disabled={csvData.length === 0}
+                disabled={
+                  isImporting ||
+                  !onBulkImport ||
+                  csvData.length === 0 ||
+                  !csvData.some((row) => row.isValid)
+                }
+                aria-busy={isImporting}
               >
-                Add Employees from CSV
+                {isImporting
+                  ? 'Importing employees…'
+                  : `Import ${csvData.filter((row) => row.isValid).length} valid employees`}
               </button>
               <button
                 onClick={() => {
                   setShowCSVUploader(false);
                   setCsvData([]);
+                  setCsvContent('');
+                  setImportResult(null);
+                  setImportError(null);
                 }}
                 className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
@@ -397,6 +441,33 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 Cancel
               </button>
             </div>
+
+            {isImporting && (
+              <div className="mt-4" role="status" aria-live="polite">
+                <div className="h-2 w-full overflow-hidden rounded bg-(--surface-hi)">
+                  <div className="h-full w-2/3 animate-pulse rounded bg-blue-500" />
+                </div>
+                <p className="mt-2 text-sm text-(--muted)">Importing validated CSV rows…</p>
+              </div>
+            )}
+
+            {importResult && (
+              <div className="mt-4 rounded border border-(--border) p-3 text-left text-sm" role="status">
+                Imported {importResult.summary.successCount} of {importResult.summary.totalRows} rows.
+                {importResult.summary.errorCount > 0 && (
+                  <span className="ml-1 text-red-600">
+                    {importResult.summary.errorCount} row
+                    {importResult.summary.errorCount === 1 ? '' : 's'} rejected by the backend.
+                  </span>
+                )}
+              </div>
+            )}
+
+            {importError && (
+              <div className="mt-4 rounded border border-red-500/40 bg-red-500/10 p-3 text-left text-sm text-red-600" role="alert">
+                {importError}
+              </div>
+            )}
           </div>
         )}
       </div>
