@@ -1,3 +1,4 @@
+// Modified 2026-10-05: reject non-decimal route IDs before numeric coercion.
 import { Router } from 'express';
 import { z } from 'zod';
 import { ScheduleController } from '../controllers/scheduleController.js';
@@ -8,7 +9,12 @@ import { validateRequest } from '../middleware/validateRequest.js';
 import { createScheduleSchema, scheduleQuerySchema } from '../schemas/scheduleSchema.js';
 
 const router = Router();
-const scheduleIdParamsSchema = z.object({ id: z.coerce.number().int().positive() });
+const scheduleIdParamsSchema = z.object({
+  id: z
+    .string()
+    .regex(/^[0-9]+$/, 'ID must contain only decimal digits')
+    .pipe(z.coerce.number().int().positive()),
+});
 
 router.use(authenticateJWT);
 router.use(isolateOrganization);

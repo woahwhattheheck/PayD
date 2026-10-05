@@ -1,3 +1,4 @@
+// Modified 2026-10-05: reject non-decimal route IDs before numeric coercion.
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { employeeController } from '../controllers/employeeController.js';
@@ -19,7 +20,12 @@ import {
 } from '../schemas/employeeSchema.js';
 import { bulkImportController } from '../controllers/bulkImportController.js';
 
-const employeeIdParamsSchema = z.object({ id: z.coerce.number().int().positive() });
+const employeeIdParamsSchema = z.object({
+  id: z
+    .string()
+    .regex(/^[0-9]+$/, 'ID must contain only decimal digits')
+    .pipe(z.coerce.number().int().positive()),
+});
 const createEmployeeBodySchema = createEmployeeSchema.omit({ organization_id: true });
 const bulkImportBodySchema = z.object({
   organization_id: z.number().int().positive(),

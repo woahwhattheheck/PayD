@@ -1,3 +1,4 @@
+// Modified 2026-10-05: validate decimal pagination before numeric coercion.
 import { Router } from 'express';
 import { z } from 'zod';
 import { AssetController } from '../controllers/assetController.js';
@@ -27,8 +28,16 @@ const clawbackBodySchema = z.object({
 });
 const clawbackLogsQuerySchema = z.object({
   fromAccount: z.string().min(1).optional(),
-  page: z.coerce.number().int().positive().optional(),
-  limit: z.coerce.number().int().positive().max(100).optional(),
+  page: z
+    .string()
+    .regex(/^[0-9]+$/, 'Page must contain only decimal digits')
+    .pipe(z.coerce.number().int().positive())
+    .optional(),
+  limit: z
+    .string()
+    .regex(/^[0-9]+$/, 'Limit must contain only decimal digits')
+    .pipe(z.coerce.number().int().positive().max(100))
+    .optional(),
 });
 
 router.use(authenticateJWT);
