@@ -24,7 +24,6 @@ import {
 import {
   getForecast,
   getHistoricalData,
-  getAlerts,
   type CashFlowForecast as ForecastType,
   type BudgetAlert,
   type HistoricalPayrollData,
@@ -65,15 +64,14 @@ export default function CashFlowForecast() {
 
     setIsLoading(true);
     try {
-      const [forecastData, historicalData, alertsData] = await Promise.all([
+      const [forecastData, historicalData] = await Promise.all([
         getForecast(requestParams),
         getHistoricalData(6),
-        getAlerts(requestParams),
       ]);
 
       setForecast(forecastData);
       setHistorical(historicalData.historical);
-      setAlerts(alertsData.alerts);
+      setAlerts(forecastData.alerts);
       notifySuccess('Cash flow forecast updated');
     } catch (error) {
       notifyError(error instanceof Error ? error.message : 'Failed to load cash flow forecast');
