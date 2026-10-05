@@ -1,64 +1,38 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { FreezeController } from '../controllers/freezeController.js';
 import { rateLimitMiddleware } from '../middlewares/rateLimitMiddleware.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = Router();
-
-// Apply a slightly stricter rate limit for administrative actions
 const adminRateLimit = rateLimitMiddleware({ tier: 'api' });
 
-// ---------------------------------------------------------------------------
-// Account-level Freeze Operations
-// ---------------------------------------------------------------------------
+const baseFreezeSchema = z.object({
+  issuerSecret: z.string().min(56),
+  assetCode: z.string().min(1).max(12).regex(/^[A-Z0-9]+$/),
+  reason: z.string().max(500).optional(),
+});
+const accountFreezeSchema = baseFreezeSchema.extend({
+  targetAccount: z.string().length(56),
+});
+const targetAccountParamsSchema = z.object({ targetAccount: z.string().length(56) });
+const statusQuerySchema = z.object({
+  assetIssuer: z.string().length(56),
+  assetCode: z.string().min(1).max(12).regex(/^[A-Z0-9]+$/),
+});
+const listLogsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  targetAccount: z.string().length(56).optional(),
+  action: z.enum(['freeze', 'unfreeze']).optional(),
+  assetCode: z.string().max(12).regex(/^[A-Z0-9]+$/).optional(),
+});
 
-/**
- * @route POST /api/v1/freeze/account/freeze
- * @desc Freeze a single account's trustline for an asset
- * @access Admin (Requires issuerSecret)
- */
-router.post('/account/freeze', adminRateLimit, FreezeController.freezeAccount);
-
-/**
- * @route POST /api/v1/freeze/account/unfreeze
- * @desc Restore a single account's trustline for an asset
- * @access Admin (Requires issuerSecret)
- */
-router.post('/account/unfreeze', adminRateLimit, FreezeController.unfreezeAccount);
-
-// ---------------------------------------------------------------------------
-// Global Freeze Operations (All Holders)
-// ---------------------------------------------------------------------------
-
-/**
- * @route POST /api/v1/freeze/global/freeze
- * @desc Pause transfers for ALL accounts holding the specified asset globally
- * @access Admin (Requires issuerSecret)
- */
-router.post('/global/freeze', adminRateLimit, FreezeController.freezeGlobal);
-
-/**
- * @route POST /api/v1/freeze/global/unfreeze
- * @desc Restore transfers for ALL accounts holding the specified asset globally
- * @access Admin (Requires issuerSecret)
- */
-router.post('/global/unfreeze', adminRateLimit, FreezeController.unfreezeGlobal);
-
-// ---------------------------------------------------------------------------
-// Status & Audit
-// ---------------------------------------------------------------------------
-
-/**
- * @route GET /api/v1/freeze/status/:targetAccount
- * @desc Query the active freeze status of an account's trustline
- * @query { assetCode, assetIssuer }
- */
-router.get('/status/:targetAccount', FreezeController.checkStatus);
-
-/**
- * @route GET /api/v1/freeze/logs
- * @desc Paginated history of all freeze and unfreeze actions
- * @query { page, limit, targetAccount, action, assetCode }
- */
-router.get('/logs', FreezeController.getLogs);
+router.post('/account/freeze', adminRateLimit, validateRequest({ body: accountFreezeSchema }), FreezeController.freezeAccount);
+router.post('/account/unfreeze', adminRateLimit, validateRequest({ body: accountFreezeSchema }), FreezeController.unfreezeAccount);
+router.post('/global/freeze', adminRateLimit, validateRequest({ body: baseFreezeSchema }), FreezeController.freezeGlobal);
+router.post('/global/unfreeze', adminRateLimit, validateRequest({ body: baseFreezeSchema }), FreezeController.unfreezeGlobal);
+router.get('/status/:targetAccount', validateRequest({ params: targetAccountParamsSchema, query: statusQuerySchema }), FreezeController.checkStatus);
+router.get('/logs', validateRequest({ query: listLogsQuerySchema }), FreezeController.getLogs);
 
 export default router;
