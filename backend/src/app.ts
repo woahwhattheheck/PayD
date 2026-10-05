@@ -135,6 +135,7 @@ app.get('/.well-known/stellar.toml', (req, res) => {
 // Health check endpoints (public / unauthenticated)
 app.get('/health', HealthController.getHealthStatus);
 app.get('/health/live', HealthController.getLiveness);
+app.get('/health/db', HealthController.getDatabaseHealth);
 
 // Middleware for versioning
 app.use(apiVersionMiddleware);
