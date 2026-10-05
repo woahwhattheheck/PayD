@@ -43,6 +43,11 @@ fn test_vesting_flow() {
         &upgrade_admin,
     );
 
+    assert!(
+        has_event(&e, &contract_id, "vesting_created_event"),
+        "VestingCreatedEvent was not emitted"
+    );
+
     // Verify init state
     let config = client.get_config();
     assert_eq!(config.total_amount, amount);
@@ -67,6 +72,11 @@ fn test_vesting_flow() {
     
     // 3. Claim
     client.claim();
+
+    assert!(
+        has_event(&e, &contract_id, "vesting_claimed_event"),
+        "VestingClaimedEvent was not emitted"
+    );
     
     // Verify claim
     assert_eq!(token_client.balance(&beneficiary), expected_vested);
@@ -91,6 +101,11 @@ fn test_vesting_flow() {
     // Contract should keep 3000 (claimable).
     
     client.clawback();
+
+    assert!(
+        has_event(&e, &contract_id, "vesting_clawed_event"),
+        "VestingClawedEvent was not emitted"
+    );
     
     // Check admin balance
     assert_eq!(token_client.balance(&clawback_admin), 5000);
