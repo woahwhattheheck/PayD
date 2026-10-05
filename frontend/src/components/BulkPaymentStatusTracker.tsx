@@ -292,7 +292,7 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
               ({ run, summary, employeeCount, txHash, confirmationCount, hasFailedRecipients }) => (
                 <div
                   key={run.id}
-                  className="border border-hi/50 rounded-lg p-4 bg-black/5 space-y-3"
+                  className="border border-hi/50 rounded-lg p-4 bg-overlay-subtle space-y-3"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -302,10 +302,10 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
                     <span
                       className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${
                         run.status === 'completed'
-                          ? 'bg-emerald-500/20 text-emerald-500'
+                          ? 'bg-success/20 text-success'
                           : run.status === 'pending'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-red-500/20 text-red-500'
+                            ? 'bg-warning/20 text-warning'
+                            : 'bg-danger/20 text-danger'
                       }`}
                     >
                       {run.status}
@@ -367,13 +367,13 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
                     <div className="pt-3 border-t border-hi/30 text-xs space-y-2">
                       <div>
                         <span className="text-muted">Successful:</span>
-                        <span className="ml-1 text-emerald-400 font-bold">
+                        <span className="ml-1 text-success font-bold">
                           {summary.items.filter((item) => item.status === 'completed').length}
                         </span>
                       </div>
                       <div>
                         <span className="text-muted">Failed:</span>
-                        <span className="ml-1 text-red-400 font-bold">
+                        <span className="ml-1 text-danger font-bold">
                           {summary.items.filter((item) => item.status === 'failed').length}
                         </span>
                       </div>
@@ -475,7 +475,7 @@ function FragmentRow({
         </td>
       </tr>
       {expanded ? (
-        <tr className="border-b border-hi/40 bg-black/10">
+        <tr className="border-b border-hi/40 bg-overlay-subtle">
           <td colSpan={7} className="py-3">
             {!summary ? (
               <p className="text-sm text-muted">Loading recipient statuses...</p>
