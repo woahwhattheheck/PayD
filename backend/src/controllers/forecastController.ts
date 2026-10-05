@@ -1,8 +1,12 @@
 import { Request, Response } from 'express';
 import { ForecastingService } from '../services/forecasting/forecastingService.js';
 import tenantConfigService from '../services/tenantConfigService.js';
+import { RedisClient } from '../services/rateLimitService.js';
+import logger from '../utils/logger.js';
 
 export class ForecastController {
+  private static readonly redis = RedisClient.getInstance();
+
   static async getForecast(req: Request, res: Response): Promise<void> {
     try {
       const organizationId = req.user?.organizationId;
@@ -37,7 +41,40 @@ export class ForecastController {
         return;
       }
 
-      const settings = await tenantConfigService.getConfig(organizationId, 'liquidity_settings');
+      const cacheKey = `cache:organization-settings:${organizationId}:liquidity-settings`;
+      let settings: any | null = null;
+
+      if (this.redis) {
+        try {
+          const cached = await this.redis.get(cacheKey);
+          if (cached !== null) {
+            logger.info('Cache hit', { cache: 'organization-settings', organizationId });
+            settings = JSON.parse(cached);
+          } else {
+            logger.info('Cache miss', { cache: 'organization-settings', organizationId });
+          }
+        } catch (error) {
+          logger.warn('Organization settings cache read failed', { organizationId, error });
+        }
+      } else {
+        logger.info('Cache miss', {
+          cache: 'organization-settings',
+          organizationId,
+          reason: 'redis_not_configured',
+        });
+      }
+
+      if (settings === null) {
+        settings = await tenantConfigService.getConfig(organizationId, 'liquidity_settings');
+        if (this.redis && settings !== null) {
+          try {
+            await this.redis.setex(cacheKey, 30 * 60, JSON.stringify(settings));
+          } catch (error) {
+            logger.warn('Organization settings cache write failed', { organizationId, error });
+          }
+        }
+      }
+
       res.status(200).json({ success: true, data: settings || null });
     } catch (error: any) {
       res.status(500).json({
@@ -84,6 +121,15 @@ export class ForecastController {
       };
 
       await tenantConfigService.setConfig(organizationId, 'liquidity_settings', payload);
+
+      if (this.redis) {
+        try {
+          await this.redis.del(`cache:organization-settings:${organizationId}:liquidity-settings`);
+        } catch (error) {
+          logger.warn('Organization settings cache invalidation failed', { organizationId, error });
+        }
+      }
+
       res.status(200).json({ success: true, data: payload });
     } catch (error: any) {
       res.status(500).json({
