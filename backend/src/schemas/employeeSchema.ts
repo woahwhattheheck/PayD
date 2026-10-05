@@ -16,12 +16,16 @@ export const createEmployeeSchema = z.object({
 export const updateEmployeeSchema = createEmployeeSchema.partial().omit({ organization_id: true });
 
 export const employeeQuerySchema = z.object({
-  page: z.string().regex(/^\d+$/).transform(Number).optional().default('1' as any), // Fix: mismatch between number and string default
-  limit: z.string().regex(/^\d+$/).transform(Number).optional().default('10' as any), // Fix: mismatch between number and string default
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().optional(),
   status: z.enum(['active', 'inactive', 'pending']).optional(),
   department: z.string().optional(),
   organization_id: z.string().regex(/^\d+$/).transform(Number).optional(),
+  sort: z
+    .enum(['created_at', 'first_name', 'last_name', 'email', 'department', 'status'])
+    .default('created_at'),
+  order: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
