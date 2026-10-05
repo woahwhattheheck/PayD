@@ -113,6 +113,10 @@ app.use(
   })
 );
 
+// Modified 2026-10-05: keep public pool monitoring outside DB-dependent rate limiting.
+// Bypass-token checks and rate-limit violation logging can await the exhausted pool.
+app.get('/health/db', HealthController.getDatabaseHealth);
+
 // Global rate limiting — organization-tier based, always on
 app.use(
   tieredOrganizationRateLimit({
@@ -135,7 +139,6 @@ app.get('/.well-known/stellar.toml', (req, res) => {
 // Health check endpoints (public / unauthenticated)
 app.get('/health', HealthController.getHealthStatus);
 app.get('/health/live', HealthController.getLiveness);
-app.get('/health/db', HealthController.getDatabaseHealth);
 
 // Middleware for versioning
 app.use(apiVersionMiddleware);
