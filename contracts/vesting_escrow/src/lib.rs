@@ -19,6 +19,10 @@ pub enum ContractError {
     NoPendingUpgrade      = 5,
     TimelockNotExpired    = 6,
     TimestampOverflow     = 7,
+    InvalidDuration       = 8,
+    InvalidAmount         = 9,
+    VestingInactive       = 10,
+    ArithmeticOverflow    = 11,
 }
 
 impl From<CommonError> for ContractError {
@@ -115,20 +119,27 @@ impl VestingContract {
         amount: i128,
         clawback_admin: Address,
         upgrade_admin: Address,
-    ) {
+    ) -> Result<(), ContractError> {
         if e.storage().instance().has(&DataKey::Config) {
-            panic!("Already initialized");
+            return Err(ContractError::AlreadyInitialized);
         }
-        
+
         funder.require_auth();
 
-        if duration_seconds < cliff_seconds {
-            panic!("Duration must be greater than or equal to cliff");
+        if duration_seconds == 0 || duration_seconds < cliff_seconds {
+            return Err(ContractError::InvalidDuration);
         }
-        
+
         if amount <= 0 {
-             panic!("Amount must be positive");
+            return Err(ContractError::InvalidAmount);
         }
+
+        start_time
+            .checked_add(cliff_seconds)
+            .ok_or(ContractError::TimestampOverflow)?;
+        start_time
+            .checked_add(duration_seconds)
+            .ok_or(ContractError::TimestampOverflow)?;
 
         let config = VestingConfig {
             beneficiary: beneficiary.clone(),
@@ -144,75 +155,110 @@ impl VestingContract {
 
         e.storage().instance().set(&DataKey::Config, &config);
         e.storage().instance().set(&DataKey::UpgradeAdmin, &upgrade_admin);
-        
+
         // Transfer tokens from funder to contract
         let client = token::Client::new(&e, &token);
         client.transfer(&funder, &e.current_contract_address(), &amount);
+
+        Ok(())
     }
 
-    pub fn claim(e: Env) {
-        let mut config: VestingConfig = e.storage().instance().get(&DataKey::Config).expect("Not initialized");
-        
+    pub fn claim(e: Env) -> Result<(), ContractError> {
+        let mut config: VestingConfig = e
+            .storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(ContractError::NotInitialized)?;
+
         config.beneficiary.require_auth();
-        
-        let vested = Self::calc_vested(&e, &config);
-        let claimable = vested - config.claimed_amount;
+
+        let vested = Self::calc_vested(&e, &config)?;
+        let claimable = vested
+            .checked_sub(config.claimed_amount)
+            .ok_or(ContractError::ArithmeticOverflow)?;
 
         if claimable <= 0 {
-            // Nothing to claim, just return
-            return;
+            // Nothing to claim, just return.
+            return Ok(());
         }
 
-        // Update state
-        config.claimed_amount += claimable;
+        // Update state.
+        config.claimed_amount = config
+            .claimed_amount
+            .checked_add(claimable)
+            .ok_or(ContractError::ArithmeticOverflow)?;
         e.storage().instance().set(&DataKey::Config, &config);
 
-        // Transfer tokens
+        // Transfer tokens.
         let client = token::Client::new(&e, &config.token);
         client.transfer(&e.current_contract_address(), &config.beneficiary, &claimable);
+
+        Ok(())
     }
-    
-    pub fn clawback(e: Env) {
-        let mut config: VestingConfig = e.storage().instance().get(&DataKey::Config).expect("Not initialized");
-        
+
+    pub fn clawback(e: Env) -> Result<(), ContractError> {
+        let mut config: VestingConfig = e
+            .storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(ContractError::NotInitialized)?;
+
         config.clawback_admin.require_auth();
-        
+
         if !config.is_active {
-            panic!("Already revoked/inactive");
+            return Err(ContractError::VestingInactive);
         }
 
-        // Calculate what has vested so far
-        let vested = Self::calc_vested(&e, &config);
-        
-        // The unvested amount is the total scheduled minus what has vested
-        let unvested = config.total_amount - vested;
-        
-        // Update config to stop future vesting
-        // We set total_amount to vested, so effectively the grant is capped at what was vested at this moment
+        // Calculate what has vested so far.
+        let vested = Self::calc_vested(&e, &config)?;
+
+        // The unvested amount is the total scheduled minus what has vested.
+        let unvested = config
+            .total_amount
+            .checked_sub(vested)
+            .ok_or(ContractError::ArithmeticOverflow)?;
+
+        // Update config to stop future vesting.
+        // We set total_amount to vested, so effectively the grant is capped at what was vested at this moment.
         config.total_amount = vested;
         config.is_active = false;
         e.storage().instance().set(&DataKey::Config, &config);
 
         if unvested > 0 {
-            // Return unvested tokens to admin
+            // Return unvested tokens to admin.
             let client = token::Client::new(&e, &config.token);
             client.transfer(&e.current_contract_address(), &config.clawback_admin, &unvested);
         }
+
+        Ok(())
     }
 
-    pub fn get_vested_amount(e: Env) -> i128 {
-        let config: VestingConfig = e.storage().instance().get(&DataKey::Config).expect("Not initialized");
+    pub fn get_vested_amount(e: Env) -> Result<i128, ContractError> {
+        let config: VestingConfig = e
+            .storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(ContractError::NotInitialized)?;
         Self::calc_vested(&e, &config)
     }
-    
-    pub fn get_claimable_amount(e: Env) -> i128 {
-        let config: VestingConfig = e.storage().instance().get(&DataKey::Config).expect("Not initialized");
-        let vested = Self::calc_vested(&e, &config);
-        vested - config.claimed_amount
+
+    pub fn get_claimable_amount(e: Env) -> Result<i128, ContractError> {
+        let config: VestingConfig = e
+            .storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(ContractError::NotInitialized)?;
+        let vested = Self::calc_vested(&e, &config)?;
+        vested
+            .checked_sub(config.claimed_amount)
+            .ok_or(ContractError::ArithmeticOverflow)
     }
-    
-    pub fn get_config(e: Env) -> VestingConfig {
-        e.storage().instance().get(&DataKey::Config).expect("Not initialized")
+
+    pub fn get_config(e: Env) -> Result<VestingConfig, ContractError> {
+        e.storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(ContractError::NotInitialized)
     }
 
     // ── Upgradeability ────────────────────────────────────────────────────────
@@ -330,27 +376,40 @@ impl VestingContract {
         UPGRADE_TIMELOCK_SECONDS
     }
 
-    fn calc_vested(e: &Env, config: &VestingConfig) -> i128 {
+    fn calc_vested(e: &Env, config: &VestingConfig) -> Result<i128, ContractError> {
         let now = e.ledger().timestamp();
-        
-        if now < config.start_time + config.cliff_seconds {
-            return 0;
+
+        let cliff_at = config
+            .start_time
+            .checked_add(config.cliff_seconds)
+            .ok_or(ContractError::TimestampOverflow)?;
+        if now < cliff_at {
+            return Ok(0);
         }
-        
-        if now >= config.start_time + config.duration_seconds || !config.is_active {
-            return config.total_amount;
+
+        let end_at = config
+            .start_time
+            .checked_add(config.duration_seconds)
+            .ok_or(ContractError::TimestampOverflow)?;
+        if now >= end_at || !config.is_active {
+            return Ok(config.total_amount);
         }
-        
-        // Linear vesting
-        let time_elapsed = now - config.start_time;
-        
-        // vested = total * elapsed / duration
-        // We use i128 for calculation to avoid overflow
-        let total = config.total_amount;
-        let elapsed = time_elapsed as i128;
+
+        if config.duration_seconds == 0 {
+            return Err(ContractError::InvalidDuration);
+        }
+
+        // Linear vesting: vested = total * elapsed / duration.
+        let elapsed = now
+            .checked_sub(config.start_time)
+            .ok_or(ContractError::ArithmeticOverflow)? as i128;
         let duration = config.duration_seconds as i128;
-        
-        total.checked_mul(elapsed).unwrap().checked_div(duration).unwrap()
+
+        config
+            .total_amount
+            .checked_mul(elapsed)
+            .and_then(|value| value.checked_div(duration))
+            .ok_or(ContractError::ArithmeticOverflow)
     }
 }
 
