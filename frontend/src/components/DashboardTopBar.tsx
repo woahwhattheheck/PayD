@@ -2,10 +2,10 @@ import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import ConnectAccount from './ConnectAccount';
 import { Text } from '@stellar/design-system';
+import { useAuth } from '../providers/AuthProvider';
 
 export const DashboardTopBar: React.FC = () => {
-  // Mock org data
-  const orgName = 'FutureLabs Inc.';
+  const { user, loading } = useAuth();
   const balance = '1,250.45 USDC';
 
   return (
@@ -20,9 +20,16 @@ export const DashboardTopBar: React.FC = () => {
           >
             Organization
           </Text>
-          <Text as="span" size="sm" weight="bold" addlClassName="text-(--text)">
-            {orgName}
-          </Text>
+          {loading ? (
+            <span
+              aria-label="Loading organization"
+              className="mt-1 h-4 w-28 rounded bg-(--surface-hi) animate-pulse"
+            />
+          ) : (
+            <Text as="span" size="sm" weight="bold" addlClassName="text-(--text)">
+              {user?.organizationName ?? 'No organization'}
+            </Text>
+          )}
         </div>
 
         <div className="w-px h-6 bg-(--border) hidden lg:block" />
