@@ -124,6 +124,16 @@ variable "jwt_secret_arn" {
   type        = string
 }
 
+variable "stellar_credentials_secret_arn" {
+  description = "Secrets Manager ARN for the Stellar signing credential"
+  type        = string
+}
+
+variable "secrets_read_policy_arn" {
+  description = "IAM policy ARN granting runtime read access to application secrets"
+  type        = string
+}
+
 variable "environment_variables" {
   description = "Additional environment variables"
   type        = map(string)
@@ -203,6 +213,8 @@ resource "aws_ecs_task_definition" "main" {
         { name = "REDIS_HOST", value = var.redis_host },
         { name = "REDIS_PORT", value = tostring(var.redis_port) },
         { name = "STELLAR_NETWORK", value = var.stellar_network },
+        { name = "STELLAR_SECRET_ID", value = var.stellar_credentials_secret_arn },
+        { name = "AWS_REGION", value = data.aws_region.current.name },
         { name = "LOG_LEVEL", value = var.environment == "production" ? "info" : "debug" }
       ],
       secrets = [
@@ -523,4 +535,10 @@ output "alb_zone_id" {
 output "task_definition_arn" {
   description = "Task definition ARN"
   value       = aws_ecs_task_definition.main.arn
+}
+
+
+resource "aws_iam_role_policy_attachment" "ecs_task_secrets_read" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = var.secrets_read_policy_arn
 }
