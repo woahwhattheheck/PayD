@@ -13,6 +13,7 @@ import { auditLoggerMiddleware } from './middleware/auditLogger.js';
 import { tieredOrganizationRateLimit } from './middleware/advancedRateLimiting.js';
 import { rateLimitHeaders } from './middleware/rateLimitHeaders.js';
 import { syncTenantFromUser } from './middleware/tenantContext.js';
+import { captureRequestError } from './observability/sentry.js';
 
 // Feature Routes
 import v1Routes from './routes/v1/index.js';
@@ -187,7 +188,8 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error('Unhandled error', { err, requestId: (req as any).requestId });
+  captureRequestError(err, req);
+  logger.error('Unhandled error', { err, requestId: req.requestId });
   res.status(500).json({
     error: 'Internal Server Error',
     message: config.nodeEnv === 'development' ? err.message : 'An error occurred',
