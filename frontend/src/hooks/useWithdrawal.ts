@@ -4,6 +4,7 @@ import withdrawalService, {
   WithdrawalRequest,
   WithdrawalTransaction,
 } from '../services/withdrawal';
+import { getWithdrawalEstimate } from '../utils/withdrawalEstimate';
 
 export type WithdrawalStep =
   | 'select_anchor'
@@ -27,13 +28,14 @@ export interface WithdrawalState {
 
 interface UseWithdrawalReturn {
   state: WithdrawalState;
+  isCurrencySupported: boolean;
   setStep: (step: WithdrawalStep) => void;
   selectAnchor: (anchor: AnchorInfo) => void;
   setAmount: (amount: string) => void;
   initiateWithdrawal: (
     destinationType: 'bank_account' | 'mobile_money',
     destinationDetails: Record<string, string>
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   openInteractiveUrl: () => void;
   pollTransactionStatus: () => Promise<void>;
   cancelWithdrawal: () => Promise<void>;
@@ -49,12 +51,11 @@ export function useWithdrawal(
   exchangeRate: number,
   selectedCurrency: string
 ): UseWithdrawalReturn {
-  const [state, setState] = useState<WithdrawalState>({
+  const [state, setState] = useState<Omit<WithdrawalState, 'estimatedReceive'>>({
     step: 'select_anchor',
     anchors: [],
     selectedAnchor: null,
     amount: '',
-    estimatedReceive: 0,
     transaction: null,
     isLoading: false,
     isPolling: false,
@@ -100,20 +101,15 @@ export function useWithdrawal(
     }));
   }, []);
 
-  const setAmount = useCallback(
-    (amount: string) => {
-      const numAmount = parseFloat(amount) || 0;
-      const rate = state.selectedAnchor?.supportedCurrencies.includes(selectedCurrency)
-        ? exchangeRate
-        : exchangeRate;
-      setState((prev) => ({
-        ...prev,
-        amount,
-        estimatedReceive: numAmount * rate,
-      }));
-    },
-    [exchangeRate, selectedCurrency, state.selectedAnchor]
+  // Derive this on every render so anchor/currency/rate changes cannot leave a
+  // quote from the previous selection in state. No extra effect/render is needed.
+  const estimate = getWithdrawalEstimate(
+    state.amount, state.selectedAnchor?.supportedCurrencies, selectedCurrency, exchangeRate
   );
+
+  const setAmount = useCallback((amount: string) => {
+    setState((prev) => ({ ...prev, amount }));
+  }, []);
 
   const initiateWithdrawal = useCallback(
     async (
@@ -122,18 +118,25 @@ export function useWithdrawal(
     ) => {
       if (!state.selectedAnchor || !state.amount) {
         setState((prev) => ({ ...prev, error: 'Please select an anchor and enter an amount' }));
-        return;
+        return false;
       }
 
-      const amount = parseFloat(state.amount);
-      if (isNaN(amount) || amount <= 0) {
+      if (!estimate.isCurrencySupported) {
+        // The derived error is already visible and clears when the selection
+        // becomes supported; do not persist it over unrelated service errors.
+        setState((prev) => ({ ...prev, step: 'enter_amount' }));
+        return false;
+      }
+
+      const amount = Number(state.amount);
+      if (!Number.isFinite(amount) || amount <= 0) {
         setState((prev) => ({ ...prev, error: 'Please enter a valid amount' }));
-        return;
+        return false;
       }
 
       if (amount > balance) {
         setState((prev) => ({ ...prev, error: 'Insufficient balance' }));
-        return;
+        return false;
       }
 
       setState((prev) => ({ ...prev, isLoading: true, error: null, step: 'confirm' }));
@@ -165,6 +168,7 @@ export function useWithdrawal(
           isLoading: false,
           step: 'processing',
         }));
+        return true;
       } catch (err) {
         setState((prev) => ({
           ...prev,
@@ -172,9 +176,10 @@ export function useWithdrawal(
           error: err instanceof Error ? err.message : 'Failed to initiate withdrawal',
           step: 'enter_amount',
         }));
+        return false;
       }
     },
-    [state.selectedAnchor, state.amount, balance]
+    [state.selectedAnchor, state.amount, balance, estimate.isCurrencySupported]
   );
 
   const pollTransactionStatus = useCallback(async () => {
@@ -297,7 +302,6 @@ export function useWithdrawal(
       anchors: [],
       selectedAnchor: null,
       amount: '',
-      estimatedReceive: 0,
       transaction: null,
       isLoading: false,
       isPolling: false,
@@ -306,7 +310,12 @@ export function useWithdrawal(
   }, []);
 
   return {
-    state,
+    state: {
+      ...state,
+      estimatedReceive: estimate.estimatedReceive,
+      error: estimate.error ?? state.error,
+    },
+    isCurrencySupported: estimate.isCurrencySupported,
     setStep,
     selectAnchor,
     setAmount,

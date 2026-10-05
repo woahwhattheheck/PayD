@@ -31,6 +31,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
 }) => {
   const {
     state,
+    isCurrencySupported,
     setStep,
     selectAnchor,
     setAmount,
@@ -55,8 +56,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
   };
 
   const handleConfirmWithdrawal = async () => {
-    await initiateWithdrawal(destinationType, destinationDetails);
-    if (state.step !== 'failed') {
+    if (await initiateWithdrawal(destinationType, destinationDetails)) {
       onSuccess();
     }
   };
@@ -221,7 +221,8 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
             <button
               onClick={handleAmountSubmit}
               disabled={
-                !state.amount || parseFloat(state.amount) <= 0 || parseFloat(state.amount) > balance
+                !isCurrencySupported || !state.amount || !Number.isFinite(Number(state.amount)) ||
+                Number(state.amount) <= 0 || Number(state.amount) > balance
               }
               className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -268,7 +269,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
 
             <button
               onClick={() => void handleConfirmWithdrawal()}
-              disabled={state.isLoading}
+              disabled={state.isLoading || !isCurrencySupported}
               className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90 disabled:opacity-50"
             >
               {state.isLoading ? (
