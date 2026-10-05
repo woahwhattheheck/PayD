@@ -115,3 +115,4 @@ jobs:
         run: npm test --if-present
 
 # Workflow run retention settings
+retention-days: 30
