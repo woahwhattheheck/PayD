@@ -1,3 +1,4 @@
+// Modified 2026-10-05: validate complete decimal CSV salary values.
 import * as csv from 'fast-csv';
 import { Readable } from 'stream';
 import { StrKey } from '@stellar/stellar-sdk';
@@ -73,8 +74,10 @@ export class CsvPayrollImportService {
       }
 
       // Salary validation
-      const salary = row.base_salary ? parseFloat(row.base_salary) : 0;
-      if (row.base_salary && isNaN(salary)) {
+      const salaryText = row.base_salary?.trim() ?? '';
+      const salary = row.base_salary ? Number(salaryText) : 0;
+      const decimalSalary = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+      if (row.base_salary && (!decimalSalary.test(salaryText) || !Number.isFinite(salary))) {
         rowErrors.push('Invalid salary format: must be a number');
       } else if (salary < 0) {
         rowErrors.push('Salary cannot be negative');
