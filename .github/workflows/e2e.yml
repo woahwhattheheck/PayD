@@ -1,7 +1,9 @@
 name: Frontend E2E (Playwright)
 
-# Runs Playwright E2E tests for the frontend. Triggered manually for now
-# (per the initial rollout), and automatically on PRs that touch the frontend.
+# Runs the existing Playwright suite against a real frontend process while
+# requiring the backend to boot and become live first. The browser fixtures
+# keep their deterministic network mocks; this workflow validates the service
+# startup boundary without expanding the E2E test surface.
 on:
   workflow_dispatch:
   pull_request:
@@ -11,7 +13,6 @@ on:
       - "frontend/**"
       - ".github/workflows/e2e.yml"
 
-# Retention policy: Keep successful runs for 30 days, failed/cancelled for 7 days
 defaults:
   run:
     working-directory: frontend
@@ -21,6 +22,35 @@ jobs:
     name: Playwright tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payd_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d payd_e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      CI: "true"
+      NODE_ENV: test
+      PORT: "3000"
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/payd_e2e
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: payd_e2e
+      ENABLE_CACHING: "false"
+      SDS_ENABLE: "false"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -29,15 +59,46 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Initialize backend database
+        working-directory: backend
+        run: npm run db:migrate
+
+      - name: Start backend
+        working-directory: backend
+        run: |
+          nohup npx tsx src/index.ts > "$RUNNER_TEMP/payd-backend.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/payd-backend.pid"
+
+      - name: Require backend liveness
+        working-directory: .
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/health/live               > "$RUNNER_TEMP/payd-backend-health.json"; then
+              cat "$RUNNER_TEMP/payd-backend-health.json"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "Backend did not become live within 60 seconds." >&2
+          cat "$RUNNER_TEMP/payd-backend.log" >&2 || true
+          exit 1
+
+      - name: Install frontend dependencies
         run: npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox
 
-      - name: Run E2E tests
+      - name: Run existing E2E suite
         run: npm run test:e2e
 
       - name: Upload Playwright report
@@ -55,3 +116,19 @@ jobs:
           name: playwright-test-results
           path: frontend/test-results/
           retention-days: 14
+
+      - name: Upload backend log
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: payd-backend-log
+          path: ${{ runner.temp }}/payd-backend.log
+          retention-days: 7
+
+      - name: Stop backend
+        if: always()
+        working-directory: .
+        run: |
+          if [[ -f "$RUNNER_TEMP/payd-backend.pid" ]]; then
+            kill "$(cat "$RUNNER_TEMP/payd-backend.pid")" 2>/dev/null || true
+          fi
