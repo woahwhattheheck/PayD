@@ -28,7 +28,7 @@ jobs:
         run: |
           git rev-parse HEAD
           git hash-object contracts/vesting_escrow/tests/vesting_edge_cases.rs
-          rustup toolchain install stable --profile minimal
-          rustc +stable -Vv
+          rustup toolchain install 1.89.0 --profile minimal
+          rustc +1.89.0 -Vv
       - name: Run the requested vesting edge cases only
-        run: cargo +stable test -p vesting_escrow --test vesting_edge_cases
+        run: cargo +1.89.0 test --locked -p vesting_escrow --test vesting_edge_cases
