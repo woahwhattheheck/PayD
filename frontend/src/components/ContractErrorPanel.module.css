@@ -1,7 +1,7 @@
 .panel {
   width: 100%;
-  background: rgba(220, 38, 38, 0.05);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  background: color-mix(in srgb, var(--danger) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 20%, transparent);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s ease;
@@ -9,8 +9,8 @@
 }
 
 .panel.expanded {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.3);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
 }
 
 .header {
@@ -23,7 +23,7 @@
 }
 
 .header:hover {
-  background: rgba(220, 38, 38, 0.05);
+  background: color-mix(in srgb, var(--danger) 5%, transparent);
 }
 
 .headerLeft {
@@ -33,13 +33,13 @@
 }
 
 .errorIcon {
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .title {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #fca5a5;
+  color: var(--danger);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -57,12 +57,12 @@
   background: var(--surface-hi);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  color: #f87171;
+  color: var(--danger);
 }
 
 .content {
   padding: 0 1.25rem 1.25rem;
-  border-top: 1px solid rgba(220, 38, 38, 0.1);
+  border-top: 1px solid color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .messageSection {
@@ -88,7 +88,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .actionLabel {
@@ -144,7 +144,7 @@
 }
 
 .rawContent {
-  background: #000;
+  background: var(--code-bg);
   padding: 0.75rem;
   border-radius: 6px;
   font-family: ui-monospace, Consolas, monospace;
