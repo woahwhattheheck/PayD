@@ -1,4 +1,4 @@
-// Modified 2026-10-05: invalidate cached liquidity settings after service writes.
+// Modified 2026-10-05: cache tenant configuration reads at the service boundary.
 import { Pool } from 'pg';
 import { pool } from '../config/database.js';
 import { RedisClient } from './rateLimitService.js';
@@ -45,10 +45,71 @@ export class TenantConfigService {
     this.pool = dbPool;
   }
 
+  private static readonly CONFIG_CACHE_TTL_SECONDS = 30 * 60;
+
+  private configCacheKey(organizationId: number, configKey: string): string {
+    return `cache:organization-settings:${organizationId}:${configKey}`;
+  }
+
+  private allConfigsCacheKey(organizationId: number): string {
+    return `cache:organization-settings:${organizationId}:all`;
+  }
+
+  private async readCache<T>(
+    key: string,
+    metadata: Record<string, unknown>
+  ): Promise<{ hit: boolean; value: T | null }> {
+    const redis = RedisClient.getInstance();
+    if (!redis) {
+      logger.info('Cache miss', {
+        cache: 'organization-settings',
+        ...metadata,
+        reason: 'redis_not_configured',
+      });
+      return { hit: false, value: null };
+    }
+
+    try {
+      const cached = await redis.get(key);
+      if (cached !== null) {
+        logger.info('Cache hit', { cache: 'organization-settings', ...metadata });
+        return { hit: true, value: JSON.parse(cached) as T };
+      }
+      logger.info('Cache miss', { cache: 'organization-settings', ...metadata });
+    } catch (error) {
+      logger.warn('Organization settings cache read failed', { ...metadata, error });
+    }
+
+    return { hit: false, value: null };
+  }
+
+  private async writeCache(
+    key: string,
+    value: unknown,
+    metadata: Record<string, unknown>
+  ): Promise<void> {
+    const redis = RedisClient.getInstance();
+    if (!redis) return;
+
+    try {
+      await redis.setex(
+        key,
+        TenantConfigService.CONFIG_CACHE_TTL_SECONDS,
+        JSON.stringify(value)
+      );
+    } catch (error) {
+      logger.warn('Organization settings cache write failed', { ...metadata, error });
+    }
+  }
+
   /**
    * Get a specific configuration by key
    */
   async getConfig(organizationId: number, configKey: string): Promise<any | null> {
+    const cacheKey = this.configCacheKey(organizationId, configKey);
+    const cached = await this.readCache<any>(cacheKey, { organizationId, configKey });
+    if (cached.hit) return cached.value;
+
     const query = `
       SELECT config_value
       FROM tenant_configurations
@@ -56,13 +117,24 @@ export class TenantConfigService {
     `;
 
     const result = await this.pool.query(query, [organizationId, configKey]);
-    return result.rows[0]?.config_value || null;
+    const value = result.rows[0]?.config_value ?? null;
+    if (value !== null) {
+      await this.writeCache(cacheKey, value, { organizationId, configKey });
+    }
+    return value;
   }
 
   /**
    * Get all configurations for a tenant
    */
   async getAllConfigs(organizationId: number): Promise<Record<string, any>> {
+    const cacheKey = this.allConfigsCacheKey(organizationId);
+    const cached = await this.readCache<Record<string, any>>(cacheKey, {
+      organizationId,
+      configKey: '*',
+    });
+    if (cached.hit) return cached.value ?? {};
+
     const query = `
       SELECT config_key, config_value
       FROM tenant_configurations
@@ -77,21 +149,22 @@ export class TenantConfigService {
       configs[row.config_key] = row.config_value;
     });
 
+    await this.writeCache(cacheKey, configs, { organizationId, configKey: '*' });
     return configs;
   }
 
   private async invalidateConfigCache(organizationId: number, configKey: string): Promise<void> {
-    // This is the only tenant configuration currently cached by ForecastController.
-    if (configKey !== 'liquidity_settings') return;
-
     try {
       const redis = RedisClient.getInstance();
       if (redis) {
-        await redis.del(`cache:organization-settings:${organizationId}:liquidity-settings`);
+        await redis.del(
+          this.configCacheKey(organizationId, configKey),
+          this.allConfigsCacheKey(organizationId)
+        );
       }
     } catch (error) {
       // The database write has already succeeded; cache failure must not undo its result.
-      logger.warn('Organization settings cache invalidation failed', { organizationId, error });
+      logger.warn('Organization settings cache invalidation failed', { organizationId, configKey, error });
     }
   }
 

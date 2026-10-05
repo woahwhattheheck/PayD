@@ -6,54 +6,106 @@ jest.mock('../../config/database.js', () => ({ pool: {} }));
 jest.mock('../rateLimitService.js', () => ({ RedisClient: { getInstance: jest.fn() } }));
 jest.mock('../../utils/logger.js', () => ({
   __esModule: true,
-  default: { warn: jest.fn() },
+  default: { info: jest.fn(), warn: jest.fn() },
 }));
 
-describe('tenant configuration cache invalidation', () => {
+describe('tenant configuration cache', () => {
   const query = jest.fn();
+  const get = jest.fn();
+  const setex = jest.fn();
   const del = jest.fn();
+  const redis = { get, setex, del };
   const service = new TenantConfigService({ query } as any);
-  const key = 'cache:organization-settings:7:liquidity-settings';
 
   beforeEach(() => {
     jest.resetAllMocks();
-    (RedisClient.getInstance as jest.Mock).mockReturnValue({ del });
-    del.mockResolvedValue(1);
+    (RedisClient.getInstance as jest.Mock).mockReturnValue(redis);
+    setex.mockResolvedValue('OK');
+    del.mockResolvedValue(2);
   });
 
-  it('invalidates the same org after a successful direct setConfig', async () => {
-    const saved = { id: 1, config_value: { assetCode: 'USD' } };
-    query.mockResolvedValue({ rows: [saved] });
-    await expect(service.setConfig(7, 'liquidity_settings', saved.config_value)).resolves.toBe(saved);
-    expect(del).toHaveBeenCalledTimes(1);
-    expect(del).toHaveBeenCalledWith(key);
-    expect(query.mock.invocationCallOrder[0]).toBeLessThan(del.mock.invocationCallOrder[0]!);
+  it('returns a cached setting without querying PostgreSQL', async () => {
+    get.mockResolvedValue(JSON.stringify({ primary_color: '#123456' }));
+
+    await expect(service.getConfig(7, 'branding')).resolves.toEqual({
+      primary_color: '#123456',
+    });
+
+    expect(get).toHaveBeenCalledWith('cache:organization-settings:7:branding');
+    expect(query).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith('Cache hit', {
+      cache: 'organization-settings',
+      organizationId: 7,
+      configKey: 'branding',
+    });
   });
 
-  it('invalidates direct deletes, including stale cache entries when no row remains', async () => {
-    query.mockResolvedValueOnce({ rowCount: 1 }).mockResolvedValueOnce({ rowCount: 0 });
-    await expect(service.deleteConfig(7, 'liquidity_settings')).resolves.toBe(true);
-    await expect(service.deleteConfig(7, 'liquidity_settings')).resolves.toBe(false);
-    expect(del.mock.calls).toEqual([[key], [key]]);
+  it('caches a database miss for any configuration key for 30 minutes', async () => {
+    get.mockResolvedValue(null);
+    query.mockResolvedValue({ rows: [{ config_value: { email_notifications: true } }] });
+
+    await expect(service.getConfig(7, 'notification_settings')).resolves.toEqual({
+      email_notifications: true,
+    });
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(setex).toHaveBeenCalledWith(
+      'cache:organization-settings:7:notification_settings',
+      30 * 60,
+      JSON.stringify({ email_notifications: true })
+    );
   });
 
-  it('does not evict for other configurations or for failed database writes', async () => {
-    query.mockResolvedValue({ rows: [{}], rowCount: 1 });
-    await service.setConfig(7, 'branding', {});
-    await service.deleteConfig(7, 'branding');
-    query.mockRejectedValue(new Error('database unavailable'));
-    await expect(service.setConfig(7, 'liquidity_settings', {})).rejects.toThrow('database unavailable');
-    await expect(service.deleteConfig(7, 'liquidity_settings')).rejects.toThrow('database unavailable');
-    expect(del).not.toHaveBeenCalled();
+  it('caches and reuses the aggregate tenant settings view', async () => {
+    get.mockResolvedValueOnce(null).mockResolvedValueOnce(
+      JSON.stringify({ branding: { primary_color: '#fff' } })
+    );
+    query.mockResolvedValue({
+      rows: [{ config_key: 'branding', config_value: { primary_color: '#fff' } }],
+    });
+
+    await expect(service.getAllConfigs(7)).resolves.toEqual({
+      branding: { primary_color: '#fff' },
+    });
+    await expect(service.getAllConfigs(7)).resolves.toEqual({
+      branding: { primary_color: '#fff' },
+    });
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(setex).toHaveBeenCalledWith(
+      'cache:organization-settings:7:all',
+      30 * 60,
+      JSON.stringify({ branding: { primary_color: '#fff' } })
+    );
   });
 
-  it('preserves committed results when Redis is absent or invalidation fails', async () => {
-    const saved = { id: 1 };
-    query.mockResolvedValue({ rows: [saved], rowCount: 1 });
-    (RedisClient.getInstance as jest.Mock).mockReturnValueOnce(null);
-    await expect(service.setConfig(7, 'liquidity_settings', {})).resolves.toBe(saved);
-    del.mockRejectedValueOnce(new Error('cache unavailable'));
-    await expect(service.deleteConfig(7, 'liquidity_settings')).resolves.toBe(true);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+  it('invalidates the changed key and aggregate cache after successful writes', async () => {
+    const saved = { id: 1, config_value: { primary_color: '#000' } };
+    query
+      .mockResolvedValueOnce({ rows: [saved] })
+      .mockResolvedValueOnce({ rowCount: 1 });
+
+    await expect(service.setConfig(7, 'branding', saved.config_value)).resolves.toBe(saved);
+    await expect(service.deleteConfig(7, 'branding')).resolves.toBe(true);
+
+    expect(del.mock.calls).toEqual([
+      ['cache:organization-settings:7:branding', 'cache:organization-settings:7:all'],
+      ['cache:organization-settings:7:branding', 'cache:organization-settings:7:all'],
+    ]);
+  });
+
+  it('falls back to PostgreSQL when Redis fails and never rolls back a committed write', async () => {
+    const saved = { id: 1, config_value: { require_2fa: true } };
+    get.mockRejectedValueOnce(new Error('cache read failed'));
+    query
+      .mockResolvedValueOnce({ rows: [{ config_value: saved.config_value }] })
+      .mockResolvedValueOnce({ rows: [saved] });
+    setex.mockRejectedValueOnce(new Error('cache write failed'));
+    del.mockRejectedValueOnce(new Error('cache invalidate failed'));
+
+    await expect(service.getConfig(7, 'security_settings')).resolves.toEqual(saved.config_value);
+    await expect(service.setConfig(7, 'security_settings', saved.config_value)).resolves.toBe(saved);
+
+    expect(logger.warn).toHaveBeenCalledTimes(3);
   });
 });

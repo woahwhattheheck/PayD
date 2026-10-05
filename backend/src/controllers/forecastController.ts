@@ -1,13 +1,9 @@
-// Modified 2026-10-05: keep unbound handlers safe; invalidate cache at the service write boundary.
+// Modified 2026-10-05: keep unbound handlers safe; tenant-config caching lives in the service.
 import { Request, Response } from 'express';
 import { ForecastingService } from '../services/forecasting/forecastingService.js';
 import tenantConfigService from '../services/tenantConfigService.js';
-import { RedisClient } from '../services/rateLimitService.js';
-import logger from '../utils/logger.js';
 
 export class ForecastController {
-  private static readonly redis = RedisClient.getInstance();
-
   static async getForecast(req: Request, res: Response): Promise<void> {
     try {
       const organizationId = req.user?.organizationId;
@@ -42,39 +38,7 @@ export class ForecastController {
         return;
       }
 
-      const cacheKey = `cache:organization-settings:${organizationId}:liquidity-settings`;
-      let settings: any | null = null;
-
-      if (ForecastController.redis) {
-        try {
-          const cached = await ForecastController.redis.get(cacheKey);
-          if (cached !== null) {
-            logger.info('Cache hit', { cache: 'organization-settings', organizationId });
-            settings = JSON.parse(cached);
-          } else {
-            logger.info('Cache miss', { cache: 'organization-settings', organizationId });
-          }
-        } catch (error) {
-          logger.warn('Organization settings cache read failed', { organizationId, error });
-        }
-      } else {
-        logger.info('Cache miss', {
-          cache: 'organization-settings',
-          organizationId,
-          reason: 'redis_not_configured',
-        });
-      }
-
-      if (settings === null) {
-        settings = await tenantConfigService.getConfig(organizationId, 'liquidity_settings');
-        if (ForecastController.redis && settings !== null) {
-          try {
-            await ForecastController.redis.setex(cacheKey, 30 * 60, JSON.stringify(settings));
-          } catch (error) {
-            logger.warn('Organization settings cache write failed', { organizationId, error });
-          }
-        }
-      }
+      const settings = await tenantConfigService.getConfig(organizationId, 'liquidity_settings');
 
       res.status(200).json({ success: true, data: settings || null });
     } catch (error: any) {
