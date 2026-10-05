@@ -1,0 +1,44 @@
+name: Frontend hook tests
+
+on:
+  push:
+    branches: ['cinder/payd-534-hook-tests-20261004']
+    paths: ['frontend/**', '.github/workflows/frontend-hooks.yml']
+
+# Temporary dependency-resolution run on the isolated implementation branch.
+# The maintainer-facing workflow will use read-only permissions and npm ci.
+permissions:
+  contents: write
+
+concurrency:
+  group: frontend-hooks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hooks:
+    if: github.repository == 'woahwhattheheck/PayD'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve the two test-only dependencies
+        run: |
+          npm install --save-dev --save-exact --legacy-peer-deps --ignore-scripts --no-audit --no-fund @testing-library/react@16.3.0 jsdom@26.1.0
+          npm pkg set 'scripts.test:hooks=vitest run --config vitest.hooks.config.ts'
+      - name: Preserve only the generated package manifest and lockfile
+        run: |
+          git add package.json package-lock.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'test(frontend): lock React hook test dependencies'
+            git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
+          fi
+          git rev-parse HEAD
+      - name: Run the hook suite
+        run: npm run test:hooks
