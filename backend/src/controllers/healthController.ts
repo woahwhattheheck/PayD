@@ -13,6 +13,22 @@ export const redis: Redis | null = config.REDIS_URL
     })
   : null;
 
+export async function closeHealthDependencies(): Promise<void> {
+  const closers: Promise<unknown>[] = [pool.end()];
+  if (redis) {
+    closers.push(redis.quit());
+  }
+
+  const results = await Promise.allSettled(closers);
+  const failures = results
+    .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+    .map((result) => result.reason);
+
+  if (failures.length > 0) {
+    throw new AggregateError(failures, 'Failed to close health-check dependencies');
+  }
+}
+
 export interface DependencyStatus {
   status: 'connected' | 'disconnected' | 'not_configured' | 'unknown';
   error?: string;
