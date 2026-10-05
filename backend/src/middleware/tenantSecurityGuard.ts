@@ -9,6 +9,9 @@ export interface TenantSecurityGuardOptions {
   strictMode?: boolean;
 }
 
+const SECURITY_FAILURE_THRESHOLD = 3;
+const SECURITY_BREAKER_COOLDOWN_MS = 30_000;
+
 /**
  * Tenant security guard middleware for enhanced isolation monitoring
  */
@@ -18,6 +21,44 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
     logAccess = true,
     strictMode = false,
   } = options;
+
+  let consecutiveFailures = 0;
+  let circuitOpenUntil = 0;
+
+  const requestContext = (req: Request, organizationId: number) => ({
+    organizationId,
+    userId: req.user?.id,
+    path: req.path,
+    method: req.method,
+    ipAddress: req.ip,
+    userAgent: req.headers['user-agent'],
+  });
+
+  const recordDependencyFailure = (error: unknown, req: Request, organizationId: number) => {
+    consecutiveFailures += 1;
+    if (consecutiveFailures >= SECURITY_FAILURE_THRESHOLD) {
+      circuitOpenUntil = Date.now() + SECURITY_BREAKER_COOLDOWN_MS;
+    }
+
+    logger.error('Tenant security guard dependency failure', {
+      error,
+      ...requestContext(req, organizationId),
+      consecutiveFailures,
+      circuitOpenUntil: circuitOpenUntil || undefined,
+    });
+  };
+
+  const rejectUnavailable = (res: Response) => {
+    res.status(503).json({
+      error: 'Security check unavailable',
+      message: 'Access denied while security checks are unavailable.',
+    });
+  };
+
+  const resetBreaker = () => {
+    consecutiveFailures = 0;
+    circuitOpenUntil = 0;
+  };
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const organizationId = req.tenantId || req.user?.organizationId;
@@ -30,6 +71,20 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
         return;
       }
       return next();
+    }
+
+    if (circuitOpenUntil > 0) {
+      if (Date.now() < circuitOpenUntil) {
+        logger.error('Tenant security guard circuit open', {
+          ...requestContext(req, organizationId),
+          consecutiveFailures,
+          circuitOpenUntil,
+        });
+        rejectUnavailable(res);
+        return;
+      }
+
+      resetBreaker();
     }
 
     try {
@@ -68,6 +123,7 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
           });
 
           if (strictMode) {
+            resetBreaker();
             res.status(403).json({
               error: 'Access denied',
               message: 'Suspicious activity detected. Please contact support.',
@@ -78,7 +134,17 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
       }
 
       // Check for IP whitelist/blacklist
-      const ipAllowed = await checkIpAccess(organizationId, req.ip);
+      let ipAccessError: unknown;
+      const ipAllowed = await checkIpAccess(organizationId, req.ip, (error) => {
+        ipAccessError = error;
+      });
+
+      if (ipAccessError !== undefined) {
+        recordDependencyFailure(ipAccessError, req, organizationId);
+        rejectUnavailable(res);
+        return;
+      }
+
       if (!ipAllowed) {
         await tenantSecurityService.recordSecurityEvent({
           organizationId,
@@ -90,6 +156,7 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
           userAgent: req.headers['user-agent'],
         });
 
+        resetBreaker();
         res.status(403).json({
           error: 'Access denied',
           message: 'Your IP address is not authorized to access this resource.',
@@ -97,11 +164,11 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
         return;
       }
 
+      resetBreaker();
       next();
     } catch (error) {
-      logger.error('Tenant security guard error', { error, organizationId });
-      // Fail open in case of error
-      next();
+      recordDependencyFailure(error, req, organizationId);
+      rejectUnavailable(res);
     }
   };
 }
@@ -200,7 +267,11 @@ export function monitorTenantActivity() {
 /**
  * Check if IP is allowed for the organization
  */
-async function checkIpAccess(organizationId: number, ip?: string): Promise<boolean> {
+async function checkIpAccess(
+  organizationId: number,
+  ip?: string,
+  onError?: (error: unknown) => void
+): Promise<boolean> {
   if (!ip) return true;
 
   try {
@@ -231,7 +302,7 @@ async function checkIpAccess(organizationId: number, ip?: string): Promise<boole
 
     return true;
   } catch (error) {
-    logger.error('Failed to check IP access', { error, organizationId });
-    return true; // Fail open
+    onError?.(error);
+    return false;
   }
 }
