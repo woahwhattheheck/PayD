@@ -1,0 +1,75 @@
+# Staging values override for PayD Helm chart
+# Usage: helm upgrade --install payd charts/payd -f charts/payd/values-staging.yaml
+
+backend:
+  replicaCount: 2
+
+  image:
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      memory: "384Mi"
+      cpu: "300m"
+    limits:
+      memory: "768Mi"
+      cpu: "750m"
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  config:
+    NODE_ENV: "production"
+    LOG_LEVEL: "info"
+    ENABLE_CACHING: "true"
+    CACHE_TTL: "1800"
+
+frontend:
+  replicaCount: 2
+
+  image:
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      memory: "192Mi"
+      cpu: "150m"
+    limits:
+      memory: "384Mi"
+      cpu: "300m"
+
+  config:
+    VITE_STELLAR_NETWORK: "TESTNET"
+    VITE_STELLAR_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+    VITE_STELLAR_HORIZON_URL: "https://horizon-testnet.stellar.org"
+
+ingress:
+  enabled: true
+  hosts:
+    - host: payd-staging.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+          port: 80
+    - host: api.payd-staging.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: backend
+          port: 3001
+  tls:
+    - secretName: payd-staging-tls
+      hosts:
+        - payd-staging.yourdomain.com
+        - api.payd-staging.yourdomain.com
+
+stellar:
+  network: "TESTNET"
+  passphrase: "Test SDF Network ; September 2015"
+  horizonUrl: "https://horizon-testnet.stellar.org"
+  sorobanRpcUrl: "https://soroban-testnet.stellar.org"
