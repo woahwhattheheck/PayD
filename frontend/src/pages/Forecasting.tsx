@@ -68,35 +68,42 @@ export default function Forecasting() {
   const { socket, connected, subscribeToOrganization, unsubscribeFromOrganization } = useSocket();
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       setIsLoading(true);
       try {
         const s = await getLiquiditySettings();
+        if (cancelled) return;
         setSettings(s);
         if (s) setSettingsDraft(s);
 
         const f = await getForecast(monthsForward);
+        if (cancelled) return;
         setForecast(f);
-
-        if (connected && f?.organizationId) {
-          subscribeToOrganization(f.organizationId);
-        }
       } catch (e: unknown) {
-        notifyError(getErrorMessage(e) || 'Failed to load forecast');
+        if (!cancelled) notifyError(getErrorMessage(e) || 'Failed to load forecast');
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     void load();
 
     return () => {
-      if (forecast?.organizationId && connected) {
-        unsubscribeFromOrganization(forecast.organizationId);
-      }
+      cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monthsForward, connected]);
+  }, [monthsForward, connected, notifyError]);
+
+  const organizationId = forecast?.organizationId;
+
+  useEffect(() => {
+    if (!connected || organizationId == null) return;
+
+    subscribeToOrganization(organizationId);
+    // Capture the ID we actually subscribed to, including Refresh/Save changes.
+    return () => unsubscribeFromOrganization(organizationId);
+  }, [connected, organizationId, subscribeToOrganization, unsubscribeFromOrganization]);
 
   useEffect(() => {
     if (!socket) return;
