@@ -6,21 +6,18 @@ import { sendInternalError } from '../utils/internalError.js';
 export class BulkImportController {
   async import(req: Request, res: Response) {
     try {
-      const { organization_id } = req.body;
-      const csvContent = req.body.csv; // Assuming the CSV is sent as a string in the 'csv' field
+      const organizationId = req.tenantId ?? req.user?.organizationId;
+      const csvContent = req.body?.csv;
 
-      if (!organization_id) {
-        return res.status(400).json({ error: 'Missing organization_id' });
+      if (!organizationId) {
+        return res.status(403).json({ error: 'Authenticated organization context required' });
       }
 
-      if (!csvContent) {
+      if (typeof csvContent !== 'string' || csvContent.trim().length === 0) {
         return res.status(400).json({ error: 'Missing csv content' });
       }
 
-      const result = await csvPayrollImportService.processCsv(
-        parseInt(organization_id),
-        csvContent
-      );
+      const result = await csvPayrollImportService.processCsv(organizationId, csvContent);
 
       // Return 207 Multi-Status if there were any errors, otherwise 200/201
       const statusCode = result.errorCount > 0 ? 207 : result.successCount > 0 ? 201 : 200;
