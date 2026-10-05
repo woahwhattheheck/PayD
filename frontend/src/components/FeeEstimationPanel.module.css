@@ -19,7 +19,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text);
   margin: 0;
 }
 
@@ -31,15 +31,15 @@
   font-weight: 600;
   padding: 0.25rem 0.625rem;
   border-radius: 9999px;
-  background: #ecfdf5;
-  color: #059669;
+  background: color-mix(in srgb, var(--success) 10%, var(--surface));
+  color: var(--success);
 }
 
 .liveDot {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--success);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -69,22 +69,22 @@
 
 /* ---- Cards ---- */
 .card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--text) 6%, transparent);
   transition: box-shadow 0.2s ease;
 }
 
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .cardTitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 1rem;
@@ -102,25 +102,25 @@
 }
 
 .congestionLow {
-  background: #ecfdf5;
-  color: #059669;
+  background: color-mix(in srgb, var(--success) 10%, var(--surface));
+  color: var(--success);
 }
 
 .congestionModerate {
-  background: #fef9c3;
-  color: #b45309;
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  color: var(--warning);
 }
 
 .congestionHigh {
-  background: #fee2e2;
-  color: #dc2626;
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  color: var(--danger);
 }
 
 /* ---- Capacity bar ---- */
 .capacityBarOuter {
   width: 100%;
   height: 0.5rem;
-  background: #f3f4f6;
+  background: var(--surface-hi);
   border-radius: 9999px;
   overflow: hidden;
   margin-top: 0.75rem;
@@ -136,7 +136,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--muted);
   margin-top: 0.25rem;
 }
 
@@ -146,7 +146,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--surface-hi);
 }
 
 .statRow:last-child {
@@ -155,19 +155,19 @@
 
 .statLabel {
   font-size: 0.8125rem;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .statValue {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
 .statSub {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--muted);
   font-weight: 400;
   margin-left: 0.25rem;
 }
@@ -180,8 +180,8 @@
   gap: 0.75rem;
   padding: 1rem 1.25rem;
   border-radius: 0.75rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, var(--border));
 }
 
 .alertIcon {
@@ -200,7 +200,7 @@
 .alertContent p {
   margin: 0;
   font-size: 0.8125rem;
-  color: #dc2626;
+  color: var(--danger);
   line-height: 1.45;
 }
 
@@ -219,7 +219,7 @@
 .batchInput {
   width: 7rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-hi);
   border-radius: 0.5rem;
   font-size: 0.875rem;
   outline: none;
@@ -227,14 +227,14 @@
 }
 
 .batchInput:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: var(--info);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--info) 15%, transparent);
 }
 
 .batchBtn {
   padding: 0.5rem 1rem;
-  background: #4f46e5;
-  color: #fff;
+  background: var(--info);
+  color: var(--on-accent);
   border: none;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -244,7 +244,7 @@
 }
 
 .batchBtn:hover {
-  background: #4338ca;
+  background: var(--accent);
 }
 
 .batchBtn:disabled {
@@ -253,14 +253,14 @@
 }
 
 .batchResults {
-  background: #f9fafb;
+  background: var(--surface-hi);
   border-radius: 0.5rem;
   padding: 1rem;
 }
 
 /* ---- Skeleton loader ---- */
 .skeleton {
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, var(--surface-hi) 25%, var(--border) 50%, var(--surface-hi) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 0.375rem;
@@ -296,15 +296,15 @@
 }
 
 .errorCard p {
-  color: #dc2626;
+  color: var(--danger);
   font-weight: 500;
   margin: 0 0 1rem;
 }
 
 .retryBtn {
   padding: 0.5rem 1.25rem;
-  background: #ef4444;
-  color: #fff;
+  background: var(--danger);
+  color: var(--on-accent);
   border: none;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -313,5 +313,5 @@
 }
 
 .retryBtn:hover {
-  background: #dc2626;
+  background: var(--danger);
 }
