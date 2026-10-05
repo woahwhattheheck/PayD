@@ -46,6 +46,8 @@ helm upgrade --install payd charts/payd --namespace payd --create-namespace \
 The SHA above illustrates the format; it does not assert that these images have
 been published. Use a real tag from your registry. For independently released
 components, pass each component's own published tag instead.
+For staging/testnet, omit `values-production.yaml` and use staging site values;
+the production profile selects MAINNET and must not be inherited accidentally.
 
 ## CI deployment and rollback
 
@@ -57,6 +59,10 @@ Both image tags are passed explicitly to Helm, after the values files, so old
 site values cannot override that selection. Helm validates the merged schema
 before deployment. Runs targeting the same environment/namespace/release are
 serialized, without cancelling an in-progress deployment.
+Only an environment named exactly `production` loads `values-production.yaml`.
+Other names (including `staging`) use the base chart plus `HELM_VALUES`. Set the
+intended network and application settings explicitly in each environment's site
+values; a differently named production environment needs its complete overrides.
 
 Configure the selected environment with required reviewers/allowed deployment
 branches and these secrets before dispatching:
