@@ -330,8 +330,14 @@ export class AuthController {
       return res.status(400).json({ error: 'Missing refresh token' });
     }
 
+    let decoded: { id: number };
     try {
-      const decoded = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET) as { id: number };
+      decoded = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET) as { id: number };
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    }
+
+    try {
       const result = await query(
         'SELECT id, wallet_address, email, organization_id, role, refresh_token FROM users WHERE id = $1',
         [decoded.id]
@@ -343,7 +349,7 @@ export class AuthController {
 
       return res.json({ accessToken: generateToken(result.rows[0]) });
     } catch (error) {
-      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+      return sendInternalError(res, req, error);
     }
   }
 }
