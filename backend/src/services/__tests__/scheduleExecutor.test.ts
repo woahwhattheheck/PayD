@@ -58,11 +58,11 @@ describe('ScheduleExecutor', () => {
   });
 
   describe('initialize', () => {
-    it('should set up cron job to run every minute', () => {
+    it('should probe scheduler leadership every 15 seconds', () => {
       executor.initialize();
 
       expect(mockCron.schedule).toHaveBeenCalledWith(
-        '* * * * *',
+        '*/15 * * * * *',
         expect.any(Function)
       );
     });
@@ -77,6 +77,53 @@ describe('ScheduleExecutor', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+
+    it('should skip the scheduler pass when another pod holds leadership', async () => {
+      const leaderQuery = jest.fn().mockResolvedValueOnce({
+        rows: [{ acquired: false }],
+      });
+      const leaderRelease = jest.fn();
+      (mockPool.connect as jest.Mock).mockResolvedValueOnce({
+        query: leaderQuery,
+        release: leaderRelease,
+      });
+      const processSpy = jest.spyOn(executor, 'processDueSchedules').mockResolvedValue();
+
+      executor.initialize();
+      const callback = (mockCron.schedule as jest.Mock).mock.calls[0][1] as () => Promise<void>;
+      await callback();
+
+      expect(leaderQuery).toHaveBeenCalledWith(
+        expect.stringContaining('pg_try_advisory_lock'),
+        [expect.any(Number), expect.any(Number)]
+      );
+      expect(processSpy).not.toHaveBeenCalled();
+      expect(leaderRelease).toHaveBeenCalledWith(false);
+    });
+
+    it('should hold and release leadership around one scheduler pass', async () => {
+      const leaderQuery = jest.fn()
+        .mockResolvedValueOnce({ rows: [{ acquired: true }] })
+        .mockResolvedValueOnce({ rows: [{ unlocked: true }] });
+      const leaderRelease = jest.fn();
+      (mockPool.connect as jest.Mock).mockResolvedValueOnce({
+        query: leaderQuery,
+        release: leaderRelease,
+      });
+      const processSpy = jest.spyOn(executor, 'processDueSchedules').mockResolvedValue();
+
+      executor.initialize();
+      const callback = (mockCron.schedule as jest.Mock).mock.calls[0][1] as () => Promise<void>;
+      await callback();
+
+      expect(processSpy).toHaveBeenCalledTimes(1);
+      expect(leaderQuery).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('pg_advisory_unlock'),
+        [expect.any(Number), expect.any(Number)]
+      );
+      expect(leaderRelease).toHaveBeenCalledWith(false);
     });
   });
 
