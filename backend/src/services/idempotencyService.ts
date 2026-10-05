@@ -145,6 +145,7 @@ export async function waitForReplay(
 ): Promise<IdempotencyRecord | null> {
   const deadline = Date.now() + Math.max(0, timeoutMs);
   let pollMs = Math.max(0, initialPollMs);
+  const maxBackoffMs = Math.max(1, maxPollMs);
 
   while (true) {
     const result = await query(
@@ -181,7 +182,7 @@ export async function waitForReplay(
     if (pollMs === 0) {
       pollMs = 1;
     } else {
-      pollMs = Math.min(pollMs * 2, Math.max(pollMs, maxPollMs));
+      pollMs = Math.min(pollMs * 2, maxBackoffMs);
     }
   }
 }
