@@ -3,6 +3,11 @@ import axios, { type AxiosError } from 'axios';
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3001';
 
+function authHeaders() {
+  const token = localStorage.getItem('payd_auth_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export interface HistoricalPayrollData {
   period: string;
   totalAmount: number;
@@ -104,9 +109,7 @@ export const getForecast = async (params: ForecastParams): Promise<CashFlowForec
         distributionAccount: params.distributionAccount,
         assetIssuer: params.assetIssuer,
       },
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
-      },
+      headers: authHeaders(),
     });
 
     if (!response.data.success) {
@@ -145,9 +148,7 @@ export const getHistoricalData = async (
         params: {
           monthsBack: monthsBack || 6,
         },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
-        },
+        headers: authHeaders(),
       }
     );
 
@@ -184,9 +185,7 @@ export const getProjections = async (
         params: {
           forecastDays: forecastDays || 90,
         },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
-        },
+        headers: authHeaders(),
       }
     );
 
@@ -226,9 +225,7 @@ export const getAlerts = async (
         distributionAccount: params.distributionAccount,
         assetIssuer: params.assetIssuer,
       },
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
-      },
+      headers: authHeaders(),
     });
 
     if (!response.data.success) {
