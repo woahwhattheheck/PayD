@@ -12,6 +12,10 @@ const listQuerySchema = z.object({
   employeeId: z.string().optional(),
   asset: z.string().optional(),
   type: z.enum(['all', 'transaction', 'contract_event']).default('all'),
+  sort: z
+    .enum(['created_at', 'stellar_created_at', 'source_account', 'fee_charged', 'operation_count'])
+    .default('created_at'),
+  order: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export class TransactionAuditController {
@@ -63,19 +67,31 @@ export class TransactionAuditController {
    */
   static async listAuditRecords(req: Request, res: Response) {
     try {
-      const { page, limit, sourceAccount, dateStart, dateEnd, status, employeeId, asset, type } =
-        listQuerySchema.parse(req.query);
+      const {
+        page,
+        limit,
+        sourceAccount,
+        dateStart,
+        dateEnd,
+        status,
+        employeeId,
+        asset,
+        type,
+        sort,
+        order,
+      } = listQuerySchema.parse(req.query);
       const result = await TransactionAuditService.list(
         page,
         limit,
         sourceAccount as string | undefined,
-        { dateStart, dateEnd, status, employeeId, asset, type }
+        { dateStart, dateEnd, status, employeeId, asset, type, sort, order }
       );
 
       res.json({
         data: result.data,
         total: result.total,
         page,
+        limit,
         totalPages: Math.ceil(result.total / limit),
       });
     } catch (error) {
