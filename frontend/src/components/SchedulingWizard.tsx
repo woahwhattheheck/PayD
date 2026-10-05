@@ -145,7 +145,7 @@ export const SchedulingWizard = ({
                   </tr>
                 ) : (
                   config.preferences.map((emp, index) => (
-                    <tr key={emp.id} className="bg-black/10 hover:bg-black/20">
+                    <tr key={emp.id} className="bg-overlay-subtle hover:bg-overlay-soft">
                       <td className="px-4 py-3 font-medium">{emp.name}</td>
                       <td className="px-4 py-3 font-mono text-muted">
                         <div className="flex items-center gap-1">
@@ -229,7 +229,7 @@ export const SchedulingWizard = ({
                     dayOfWeek: parseInt(e.target.value),
                   })
                 }
-                className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all cursor-pointer"
+                className="w-full bg-overlay-soft border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all cursor-pointer"
               >
                 {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(
                   (day, i) => (
@@ -258,7 +258,7 @@ export const SchedulingWizard = ({
                     dayOfMonth: parseInt(e.target.value),
                   })
                 }
-                className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all font-mono"
+                className="w-full bg-overlay-soft border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all font-mono"
               />
             </div>
           )}
@@ -273,7 +273,7 @@ export const SchedulingWizard = ({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setConfig({ ...config, timeOfDay: e.target.value })
               }
-              className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all font-mono"
+              className="w-full bg-overlay-soft border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all font-mono"
             />
           </div>
         </div>
@@ -319,7 +319,7 @@ export const SchedulingWizard = ({
               {generatePreviewDates().map((date, i) => (
                 <li
                   key={date.toISOString()}
-                  className="flex items-center gap-4 bg-black/20 border border-hi p-4 rounded-xl"
+                  className="flex items-center gap-4 bg-overlay-soft border border-hi p-4 rounded-xl"
                 >
                   <span className="shrink-0 w-8 h-8 rounded-full bg-surface flex items-center justify-center font-bold text-muted text-xs">
                     {i + 1}
