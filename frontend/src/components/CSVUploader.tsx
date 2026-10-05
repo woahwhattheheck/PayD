@@ -10,7 +10,7 @@ export interface CSVRow {
 
 interface CSVUploaderProps {
   requiredColumns: string[];
-  onDataParsed: (data: CSVRow[]) => void;
+  onDataParsed: (data: CSVRow[], csvContent: string) => void;
   validators?: Record<string, (value: string) => string | null>;
 }
 
@@ -89,7 +89,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
       const content = e.target?.result as string;
       const rows = parseCSV(content);
       setParsedData(rows);
-      onDataParsed(rows);
+      onDataParsed(rows, content);
     };
 
     reader.readAsText(file);
@@ -130,6 +130,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
       {/* Upload Zone */}
       <div
         onDragEnter={handleDragEnter}
+        onDragOver={(e) => e.preventDefault()}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`relative border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer ${
@@ -146,7 +147,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
           className="hidden"
         />
 
-        <button onClick={() => fileInputRef.current?.click()} className="w-full">
+        <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full">
           <Upload className="w-12 h-12 mx-auto mb-2 text-(--muted)" />
           <p className="text-lg font-semibold text-(--text)">Drag and drop your CSV file</p>
           <p className="text-sm text-(--muted) mt-1">or click to browse</p>
@@ -178,7 +179,12 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
       {/* Preview Table */}
       {parsedData.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">Preview</h3>
+          <div className="mb-4 flex items-baseline justify-between gap-4">
+            <h3 className="text-lg font-semibold">Preview</h3>
+            <span className="text-xs text-(--muted)">
+              Showing first {Math.min(20, parsedData.length)} of {parsedData.length} rows
+            </span>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-left border-collapse">
               <thead>
@@ -194,7 +200,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--border)">
-                {parsedData.map((row) => (
+                {parsedData.slice(0, 20).map((row) => (
                   <tr
                     key={row.rowNumber}
                     className={`border-b transition ${
