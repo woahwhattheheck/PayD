@@ -102,7 +102,9 @@ export function errorHandler(
 
     const body: ErrorResponseBody = {
       error: err.name,
-      message: err.message,
+      message: isDev || (err.isOperational && err.statusCode < 500)
+        ? err.message
+        : 'An error occurred',
       code: err.code,
       requestId,
     };
