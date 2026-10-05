@@ -26,6 +26,7 @@
   --border-hi: rgba(10, 37, 94, 0.16);
   --text: #0a1f44;
   --muted: #5b6b86;
+  --select-arrow: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%235b6b86' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --accent: #0b3d91;
   --accent-hover: #082e6f;
   --accent2: #00857f;
@@ -71,6 +72,7 @@
   --border-hi: rgba(170, 196, 255, 0.2);
   --text: #eaf1ff;
   --muted: #9aabc8;
+  --select-arrow: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239aabc8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --accent: #3b82f6;
   --accent-hover: #2f6fe0;
   --accent2: #2dd4bf;
