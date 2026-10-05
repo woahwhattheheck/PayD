@@ -211,7 +211,7 @@ export default function EmployeeEntry() {
                 style={{
                   marginTop: '1rem',
                   padding: '1rem',
-                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  backgroundColor: 'color-mix(in srgb, var(--warning) 10%, transparent)',
                   color: 'var(--accent2)',
                   borderRadius: '8px',
                   border: '1px solid var(--border)',
