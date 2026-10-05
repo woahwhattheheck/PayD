@@ -6,6 +6,8 @@
  *   ts-node src/db/migrate.ts --dry-run
  *   ts-node src/db/migrate.ts --rollback
  *   ts-node src/db/migrate.ts --rollback --dry-run
+ *
+ * Unsupported arguments are rejected before a database connection is opened.
  */
 
 import crypto from 'crypto';
@@ -402,9 +404,16 @@ function maskConnectionString(url: string): string {
 }
 
 async function main(): Promise<void> {
+    const args = process.argv.slice(2);
+    if (args.some((arg) => arg !== '--dry-run' && arg !== '--rollback')) {
+        throw new Error(
+            'Unsupported argument. Use no arguments, --dry-run, --rollback, or --rollback --dry-run.',
+        );
+    }
+
     const databaseUrl = requireDatabaseUrl();
-    const isDryRun = process.argv.includes('--dry-run');
-    const isRollback = process.argv.includes('--rollback');
+    const isDryRun = args.includes('--dry-run');
+    const isRollback = args.includes('--rollback');
 
     console.log(
         '[migrate] Starting migration runner' +
