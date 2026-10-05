@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "backend",
+    "frontend"
+  ],
+  "properties": {
+    "backend": {
+      "$ref": "#/definitions/component"
+    },
+    "frontend": {
+      "$ref": "#/definitions/component"
+    }
+  },
+  "definitions": {
+    "component": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "enabled"
+          ],
+          "properties": {
+            "enabled": {
+              "const": false
+            }
+          }
+        },
+        {
+          "required": [
+            "image"
+          ],
+          "properties": {
+            "image": {
+              "type": "object",
+              "required": [
+                "tag"
+              ],
+              "properties": {
+                "tag": {
+                  "description": "Required full lowercase 40-character commit SHA or Docker-compatible SemVer release tag; never reuse a published tag.",
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^([0-9a-f]{40}|v?(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?)$",
+                  "not": {
+                    "pattern": "[^0-9A-Za-z.-]"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

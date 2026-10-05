@@ -12,7 +12,8 @@ backend:
   
   image:
     repository: payd-backend
-    tag: "latest"
+    # Required: full commit SHA or release version; see README.md.
+    tag: ""
     pullPolicy: IfNotPresent
   
   service:
@@ -79,7 +80,8 @@ frontend:
   
   image:
     repository: payd-frontend
-    tag: "latest"
+    # Required: full commit SHA or release version; see README.md.
+    tag: ""
     pullPolicy: IfNotPresent
   
   service:

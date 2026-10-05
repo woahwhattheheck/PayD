@@ -1,0 +1,71 @@
+name: Deploy PayD Helm release
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected deployment environment
+        type: environment
+        required: true
+      image_tag:
+        description: Already-published full commit SHA or SemVer tag (previous tag for rollback)
+        type: string
+        required: true
+      release:
+        description: Existing Helm release name, or name for a first install
+        type: string
+        required: true
+        default: payd
+      namespace:
+        description: Kubernetes namespace
+        type: string
+        required: true
+        default: payd
+
+permissions:
+  contents: read
+
+concurrency:
+  group: payd-helm-${{ inputs.environment }}-${{ inputs.namespace }}-${{ inputs.release }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.19.5
+      - name: Validate and deploy the selected immutable image tag
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          RELEASE: ${{ inputs.release }}
+          NAMESPACE: ${{ inputs.namespace }}
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
+          HELM_VALUES: ${{ secrets.HELM_VALUES }}
+        run: |
+          set -euo pipefail
+          : "${IMAGE_TAG:?An already-published image tag is required}"
+          : "${KUBECONFIG_B64:?Configure the environment KUBECONFIG_B64 secret}"
+          : "${HELM_VALUES:?Configure the environment HELM_VALUES secret}"
+          [[ "$RELEASE" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ && ${#RELEASE} -le 53 ]]
+          [[ "$NAMESPACE" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ && ${#NAMESPACE} -le 63 ]]
+          umask 077
+          workdir=$(mktemp -d)
+          trap 'rm -rf -- "$workdir"' EXIT
+          printf '%s' "$HELM_VALUES" > "$workdir/site-values.yaml"
+          values=(--values charts/payd/values-production.yaml
+                  --values "$workdir/site-values.yaml"
+                  --set-string "backend.image.tag=$IMAGE_TAG"
+                  --set-string "frontend.image.tag=$IMAGE_TAG")
+          # Validate the merged values before any Kubernetes request.
+          helm lint charts/payd "${values[@]}"
+          printf '%s' "$KUBECONFIG_B64" | base64 --decode > "$workdir/kubeconfig"
+          export KUBECONFIG="$workdir/kubeconfig"
+          helm upgrade --install "$RELEASE" charts/payd \
+            --namespace "$NAMESPACE" --create-namespace \
+            "${values[@]}" --atomic --wait --timeout 5m

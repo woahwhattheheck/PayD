@@ -1,11 +1,10 @@
 # Production values override for PayD Helm chart
-# Usage: helm install payd charts/payd -f charts/payd/values-production.yaml
+# Supply explicit backend/frontend image tags; see README.md for deploy and rollback.
 
 backend:
   replicaCount: 3
   
   image:
-    tag: "stable"
     pullPolicy: Always
   
   resources:
@@ -40,7 +39,6 @@ frontend:
   replicaCount: 3
   
   image:
-    tag: "stable"
     pullPolicy: Always
   
   resources:
