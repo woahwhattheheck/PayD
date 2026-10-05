@@ -1,0 +1,44 @@
+/* A stable, scrollable viewport keeps content below async tables in place. */
+.payd-table-region {
+  height: 20rem;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.payd-data-table {
+  width: 100%;
+  min-width: 36rem;
+  table-layout: fixed;
+}
+
+.payd-data-table > tbody > tr:not(.sr-only) {
+  height: 3rem;
+}
+
+.payd-data-table > tbody > tr > td {
+  overflow-wrap: anywhere;
+}
+
+.payd-table-placeholder {
+  display: block;
+  width: 75%;
+  height: 1rem;
+  border-radius: 0.25rem;
+  background: var(--surface-hi, #d4d4d8);
+}
+
+/* Reveal real rows only; placeholders deliberately have no shimmer or pulse. */
+@media (prefers-reduced-motion: no-preference) {
+  .payd-data-table > tbody > tr:not([data-skeleton-row]):not(.sr-only) {
+    animation: payd-table-reveal 160ms ease-out;
+  }
+}
+
+@keyframes payd-table-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

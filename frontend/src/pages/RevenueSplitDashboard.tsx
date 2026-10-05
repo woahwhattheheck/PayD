@@ -1,3 +1,4 @@
+import { TableSkeleton } from '../components/TableSkeleton';
 // RevenueSplitDashboard component
 import { useEffect, useMemo, useState } from 'react';
 import { useNotification } from '../hooks/useNotification.js';
@@ -38,7 +39,7 @@ function buildConicGradient(allocations: RevenueAllocation[]): string {
 export default function RevenueSplitDashboard() {
   const [allocations, setAllocations] = useState<RevenueAllocation[]>([]);
   const [events, setEvents] = useState<DistributionEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -349,99 +350,118 @@ export default function RevenueSplitDashboard() {
 
         <section className="card glass noise lg:col-span-2">
           <h2 className="text-base md:text-lg font-bold mb-4">Historical Distribution Events</h2>
-          {events.length === 0 ? (
-            <p className="text-sm text-(--muted)">No backend indexed distribution events found.</p>
-          ) : (
-            <>
-              {/* Desktop Table View */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="text-left text-(--muted) border-b border-(--border)">
-                    <tr>
-                      <th className="py-2 pr-4">Date</th>
-                      <th className="py-2 pr-4">Recipient</th>
-                      <th className="py-2 pr-4">Action</th>
-                      <th className="py-2 pr-4">Amount</th>
-                      <th className="py-2 pr-4">Tx</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {events.map((event) => (
-                      <tr key={event.id} className="border-b border-(--border)">
-                        <td className="py-2 pr-4 text-xs">
-                          {new Date(event.createdAt).toLocaleString()}
-                        </td>
-                        <td className="py-2 pr-4 text-xs">{event.recipientLabel}</td>
-                        <td className="py-2 pr-4 text-xs">{event.action}</td>
-                        <td className="py-2 pr-4 text-xs">
-                          {formatAmount(event.amount, event.assetCode || preferredStablecoin)}
-                        </td>
-                        <td className="py-2 pr-4 text-xs">
-                          {event.txHash ? (
-                            <a
-                              href={`https://stellar.expert/explorer/testnet/tx/${event.txHash}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-accent"
-                            >
-                              {event.txHash.slice(0, 10)}...
-                            </a>
-                          ) : (
-                            <span className="text-(--muted)">N/A</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile Card View */}
-              <div className="md:hidden space-y-3">
-                {events.map((event) => (
-                  <div
-                    key={event.id}
-                    className="bg-(--surface-hi) rounded-lg p-3 border border-(--border)"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs text-(--muted)">
-                        {new Date(event.createdAt).toLocaleDateString()}
-                      </span>
-                      <span className="text-xs font-semibold text-(--text) px-2 py-1 bg-(--surface-hi) rounded">
-                        {event.action}
-                      </span>
-                    </div>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-(--muted)">Recipient:</span>
-                        <span className="text-(--text) truncate max-w-[150px]">
-                          {event.recipientLabel}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-(--muted)">Amount:</span>
-                        <span className="text-(--text) font-semibold">
-                          {formatAmount(event.amount, event.assetCode || preferredStablecoin)}
-                        </span>
-                      </div>
-                      {event.txHash && (
-                        <div className="pt-1">
-                          <a
-                            href={`https://stellar.expert/explorer/testnet/tx/${event.txHash}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-accent text-xs hover:underline"
-                          >
-                            View Transaction: {event.txHash.slice(0, 8)}...
-                          </a>
-                        </div>
+          <>
+            {/* Desktop Table View */}
+            <div className="payd-table-region hidden md:block overflow-x-auto">
+              <table className="payd-data-table w-full text-sm">
+                <thead className="text-left text-(--muted) border-b border-(--border)">
+                  <tr>
+                    <th className="py-2 pr-4">Date</th>
+                    <th className="py-2 pr-4">Recipient</th>
+                    <th className="py-2 pr-4">Action</th>
+                    <th className="py-2 pr-4">Amount</th>
+                    <th className="py-2 pr-4">Tx</th>
+                  </tr>
+                </thead>
+                <tbody aria-busy={isLoading && events.length === 0}>
+                  {isLoading && events.length === 0 ? (
+                    <TableSkeleton
+                      rows={5}
+                      columns={5}
+                      label="Loading distribution events"
+                      cellClassName="py-2 pr-4"
+                    />
+                  ) : (
+                    <>
+                      {!isLoading && events.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-(--muted)">
+                            No backend indexed distribution events found.
+                          </td>
+                        </tr>
                       )}
-                    </div>
+                      {events.map((event) => (
+                        <tr key={event.id} className="border-b border-(--border)">
+                          <td className="py-2 pr-4 text-xs">
+                            {new Date(event.createdAt).toLocaleString()}
+                          </td>
+                          <td className="py-2 pr-4 text-xs">{event.recipientLabel}</td>
+                          <td className="py-2 pr-4 text-xs">{event.action}</td>
+                          <td className="py-2 pr-4 text-xs">
+                            {formatAmount(event.amount, event.assetCode || preferredStablecoin)}
+                          </td>
+                          <td className="py-2 pr-4 text-xs">
+                            {event.txHash ? (
+                              <a
+                                href={`https://stellar.expert/explorer/testnet/tx/${event.txHash}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-accent"
+                              >
+                                {event.txHash.slice(0, 10)}...
+                              </a>
+                            ) : (
+                              <span className="text-(--muted)">N/A</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3">
+              {!isLoading && events.length === 0 && (
+                <p className="text-sm text-(--muted)">
+                  No backend indexed distribution events found.
+                </p>
+              )}
+              {events.map((event) => (
+                <div
+                  key={event.id}
+                  className="bg-(--surface-hi) rounded-lg p-3 border border-(--border)"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs text-(--muted)">
+                      {new Date(event.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className="text-xs font-semibold text-(--text) px-2 py-1 bg-(--surface-hi) rounded">
+                      {event.action}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-(--muted)">Recipient:</span>
+                      <span className="text-(--text) truncate max-w-[150px]">
+                        {event.recipientLabel}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-(--muted)">Amount:</span>
+                      <span className="text-(--text) font-semibold">
+                        {formatAmount(event.amount, event.assetCode || preferredStablecoin)}
+                      </span>
+                    </div>
+                    {event.txHash && (
+                      <div className="pt-1">
+                        <a
+                          href={`https://stellar.expert/explorer/testnet/tx/${event.txHash}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-accent text-xs hover:underline"
+                        >
+                          View Transaction: {event.txHash.slice(0, 8)}...
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         </section>
       </div>
     </div>

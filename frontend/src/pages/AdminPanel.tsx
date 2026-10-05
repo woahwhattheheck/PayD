@@ -1,3 +1,4 @@
+import { TableSkeleton } from '../components/TableSkeleton';
 import { useState, useEffect } from 'react';
 import {
   ShieldAlert,
@@ -116,7 +117,7 @@ export default function AdminPanel() {
   const [logs, setLogs] = useState<FreezeLog[]>([]);
   const [logsTotal, setLogsTotal] = useState(0);
   const [logsPage, setLogsPage] = useState(1);
-  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsLoading, setLogsLoading] = useState(true);
 
   // Clawback
   const [clawbackTarget, setClawbackTarget] = useState('');
@@ -127,7 +128,7 @@ export default function AdminPanel() {
   const [clawbackLogs, setClawbackLogs] = useState<ClawbackLog[]>([]);
   const [clawbackLogsTotal, setClawbackLogsTotal] = useState(0);
   const [clawbackLogsPage, setClawbackLogsPage] = useState(1);
-  const [clawbackLogsLoading, setClawbackLogsLoading] = useState(false);
+  const [clawbackLogsLoading, setClawbackLogsLoading] = useState(true);
 
   useEffect(() => {
     if (activeTab === 'logs') {
@@ -644,8 +645,8 @@ export default function AdminPanel() {
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto w-full">
-              <table className="w-full text-left border-collapse text-sm">
+            <div className="payd-table-region hidden md:block overflow-x-auto w-full">
+              <table className="payd-data-table w-full text-left border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-hi text-muted uppercase tracking-wider text-[10px]">
                     <th className="p-3">Time</th>
@@ -656,46 +657,52 @@ export default function AdminPanel() {
                     <th className="p-3">Reason</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {logs.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-muted">
-                        {logsLoading ? 'Loading…' : 'No freeze logs found.'}
-                      </td>
-                    </tr>
+                <tbody aria-busy={logsLoading && logs.length === 0}>
+                  {logsLoading && logs.length === 0 ? (
+                    <TableSkeleton rows={LOGS_PER_PAGE} columns={6} label="Loading audit logs" />
                   ) : (
-                    logs.map((log: FreezeLog) => (
-                      <tr
-                        key={log.id}
-                        className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
-                      >
-                        <td className="p-3 text-xs font-mono">
-                          {new Date(log.created_at).toLocaleString()}
-                        </td>
-                        <td className="p-3 text-xs font-mono" title={log.target_account}>
-                          {log.target_account.slice(0, 8)}…{log.target_account.slice(-4)}
-                        </td>
-                        <td className="p-3 text-xs font-bold">{log.asset_code}</td>
-                        <td className="p-3">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest ${
-                              log.action === 'freeze'
-                                ? 'bg-red-500/20 text-red-500'
-                                : 'bg-emerald-500/20 text-emerald-500'
-                            }`}
+                    <>
+                      {logs.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-muted">
+                            {logsLoading ? 'Loading…' : 'No freeze logs found.'}
+                          </td>
+                        </tr>
+                      ) : (
+                        logs.map((log: FreezeLog) => (
+                          <tr
+                            key={log.id}
+                            className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
                           >
-                            {log.action}
-                          </span>
-                        </td>
-                        <td className="p-3 text-xs capitalize text-muted">{log.scope}</td>
-                        <td
-                          className="p-3 text-xs text-muted max-w-[200px] truncate"
-                          title={log.reason || ''}
-                        >
-                          {log.reason || '—'}
-                        </td>
-                      </tr>
-                    ))
+                            <td className="p-3 text-xs font-mono">
+                              {new Date(log.created_at).toLocaleString()}
+                            </td>
+                            <td className="p-3 text-xs font-mono" title={log.target_account}>
+                              {log.target_account.slice(0, 8)}…{log.target_account.slice(-4)}
+                            </td>
+                            <td className="p-3 text-xs font-bold">{log.asset_code}</td>
+                            <td className="p-3">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest ${
+                                  log.action === 'freeze'
+                                    ? 'bg-red-500/20 text-red-500'
+                                    : 'bg-emerald-500/20 text-emerald-500'
+                                }`}
+                              >
+                                {log.action}
+                              </span>
+                            </td>
+                            <td className="p-3 text-xs capitalize text-muted">{log.scope}</td>
+                            <td
+                              className="p-3 text-xs text-muted max-w-[200px] truncate"
+                              title={log.reason || ''}
+                            >
+                              {log.reason || '—'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
@@ -885,8 +892,8 @@ export default function AdminPanel() {
               </div>
 
               {/* Desktop Table */}
-              <div className="hidden md:block overflow-x-auto w-full">
-                <table className="w-full text-left border-collapse text-sm">
+              <div className="payd-table-region hidden md:block overflow-x-auto w-full">
+                <table className="payd-data-table w-full text-left border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-hi text-muted uppercase tracking-wider text-[10px]">
                       <th className="p-3">Time</th>
@@ -897,38 +904,50 @@ export default function AdminPanel() {
                       <th className="p-3">Reason</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {clawbackLogs.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="p-8 text-center text-muted">
-                          {clawbackLogsLoading ? 'Loading…' : 'No clawback records found.'}
-                        </td>
-                      </tr>
+                  <tbody aria-busy={clawbackLogsLoading && clawbackLogs.length === 0}>
+                    {clawbackLogsLoading && clawbackLogs.length === 0 ? (
+                      <TableSkeleton
+                        rows={LOGS_PER_PAGE}
+                        columns={6}
+                        label="Loading clawback records"
+                      />
                     ) : (
-                      clawbackLogs.map((log: ClawbackLog) => (
-                        <tr
-                          key={log.id}
-                          className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
-                        >
-                          <td className="p-3 text-xs font-mono">
-                            {new Date(log.created_at).toLocaleString()}
-                          </td>
-                          <td className="p-3 text-xs font-mono" title={log.from_account}>
-                            {log.from_account.slice(0, 8)}…{log.from_account.slice(-4)}
-                          </td>
-                          <td className="p-3 text-xs font-bold">{log.asset_code}</td>
-                          <td className="p-3 text-xs font-mono text-orange-400">{log.amount}</td>
-                          <td className="p-3 text-xs font-mono" title={log.transaction_hash}>
-                            {log.transaction_hash.slice(0, 10)}…
-                          </td>
-                          <td
-                            className="p-3 text-xs text-muted max-w-[180px] truncate"
-                            title={log.reason || ''}
-                          >
-                            {log.reason || '—'}
-                          </td>
-                        </tr>
-                      ))
+                      <>
+                        {clawbackLogs.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="p-8 text-center text-muted">
+                              {clawbackLogsLoading ? 'Loading…' : 'No clawback records found.'}
+                            </td>
+                          </tr>
+                        ) : (
+                          clawbackLogs.map((log: ClawbackLog) => (
+                            <tr
+                              key={log.id}
+                              className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
+                            >
+                              <td className="p-3 text-xs font-mono">
+                                {new Date(log.created_at).toLocaleString()}
+                              </td>
+                              <td className="p-3 text-xs font-mono" title={log.from_account}>
+                                {log.from_account.slice(0, 8)}…{log.from_account.slice(-4)}
+                              </td>
+                              <td className="p-3 text-xs font-bold">{log.asset_code}</td>
+                              <td className="p-3 text-xs font-mono text-orange-400">
+                                {log.amount}
+                              </td>
+                              <td className="p-3 text-xs font-mono" title={log.transaction_hash}>
+                                {log.transaction_hash.slice(0, 10)}…
+                              </td>
+                              <td
+                                className="p-3 text-xs text-muted max-w-[180px] truncate"
+                                title={log.reason || ''}
+                              >
+                                {log.reason || '—'}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </>
                     )}
                   </tbody>
                 </table>

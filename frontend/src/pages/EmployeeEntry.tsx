@@ -52,7 +52,7 @@ export default function EmployeeEntry() {
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState<EmployeeFormState>(initialFormState);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<{
     message: string;
     secretKey?: string;
@@ -339,17 +339,12 @@ export default function EmployeeEntry() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center p-12">
-          <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : (
-        <EmployeeList
-          employees={employees}
-          onEmployeeClick={(employee: EmployeeItem) => console.log('Clicked:', employee.name)}
-          onAddEmployee={(employee: EmployeeItem) => console.log('Added:', employee)}
-        />
-      )}
+      <EmployeeList
+        employees={employees}
+        isLoading={loading}
+        onEmployeeClick={(employee: EmployeeItem) => console.log('Clicked:', employee.name)}
+        onAddEmployee={(employee: EmployeeItem) => console.log('Added:', employee)}
+      />
     </div>
   );
 }

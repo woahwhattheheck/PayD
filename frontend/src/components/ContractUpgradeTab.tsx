@@ -1,3 +1,4 @@
+import { TableSkeleton } from './TableSkeleton';
 /**
  * ContractUpgradeTab
  *
@@ -109,19 +110,22 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
   const [showHistory, setShowHistory] = useState(false);
   const [logs, setLogs] = useState<UpgradeLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
 
   async function loadHistory() {
     if (logs.length > 0) {
       setShowHistory((v) => !v);
       return;
     }
+    setShowHistory(true);
+    setHistoryError(null);
     setLogsLoading(true);
     try {
       const result = await fetchUpgradeLogs(contract.id, 1, 5);
       setLogs(result.data);
       setShowHistory(true);
     } catch {
-      // Silently skip history if unavailable
+      setHistoryError('Failed to load upgrade history. Please try again.');
     } finally {
       setLogsLoading(false);
     }
@@ -215,49 +219,63 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
 
         {showHistory && (
           <div className="px-5 pb-4">
-            {logs.length === 0 ? (
-              <p className="text-xs text-muted py-3 text-center">No upgrade history yet.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-hi text-muted text-[10px] uppercase tracking-widest">
-                      <th className="py-2 pr-3">Date</th>
-                      <th className="py-2 pr-3">New Hash</th>
-                      <th className="py-2 pr-3">Status</th>
-                      <th className="py-2">TX</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {logs.map((log) => (
-                      <tr
-                        key={log.id}
-                        className="border-b border-hi/40 hover:bg-(--surface-hi) transition-colors"
-                      >
-                        <td className="py-2 pr-3 font-mono text-muted">
-                          {new Date(log.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="py-2 pr-3">
-                          <HashBadge hash={log.new_wasm_hash} />
-                        </td>
-                        <td className="py-2 pr-3">
-                          <StatusBadge status={log.status} />
-                        </td>
-                        <td className="py-2">
-                          {log.tx_hash ? (
-                            <code className="font-mono text-accent">
-                              {log.tx_hash.slice(0, 8)}…
-                            </code>
-                          ) : (
-                            <span className="text-muted">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="payd-table-region overflow-x-auto">
+              <table className="payd-data-table w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-hi text-muted text-[10px] uppercase tracking-widest">
+                    <th className="py-2 pr-3">Date</th>
+                    <th className="py-2 pr-3">New Hash</th>
+                    <th className="py-2 pr-3">Status</th>
+                    <th className="py-2">TX</th>
+                  </tr>
+                </thead>
+                <tbody aria-busy={logsLoading && logs.length === 0}>
+                  {logsLoading && logs.length === 0 ? (
+                    <TableSkeleton
+                      rows={5}
+                      columns={4}
+                      label="Loading upgrade history"
+                      cellClassName="py-2 pr-3"
+                    />
+                  ) : (
+                    <>
+                      {!logsLoading && logs.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-muted">
+                            {historyError || 'No upgrade history yet.'}
+                          </td>
+                        </tr>
+                      )}
+                      {logs.map((log) => (
+                        <tr
+                          key={log.id}
+                          className="border-b border-hi/40 hover:bg-(--surface-hi) transition-colors"
+                        >
+                          <td className="py-2 pr-3 font-mono text-muted">
+                            {new Date(log.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-2 pr-3">
+                            <HashBadge hash={log.new_wasm_hash} />
+                          </td>
+                          <td className="py-2 pr-3">
+                            <StatusBadge status={log.status} />
+                          </td>
+                          <td className="py-2">
+                            {log.tx_hash ? (
+                              <code className="font-mono text-accent">
+                                {log.tx_hash.slice(0, 8)}…
+                              </code>
+                            ) : (
+                              <span className="text-muted">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

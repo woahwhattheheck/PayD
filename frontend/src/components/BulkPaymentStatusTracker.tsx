@@ -1,3 +1,4 @@
+import { TableSkeleton } from './TableSkeleton';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNotification } from '../hooks/useNotification';
 import { useSocket } from '../hooks/useSocket';
@@ -76,7 +77,7 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
   const [summaries, setSummaries] = useState<Record<number, PayrollRunSummary>>({});
   const [expandedRunId, setExpandedRunId] = useState<number | null>(null);
   const [confirmations, setConfirmations] = useState<ConfirmationMap>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRetryingBatchId, setIsRetryingBatchId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -235,170 +236,184 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
       ) : null}
       {error ? <p className="text-xs sm:text-sm text-danger">{error}</p> : null}
 
-      {!isLoading && rows.length === 0 ? (
-        <p className="text-xs sm:text-sm text-muted">No payroll batch runs found.</p>
-      ) : (
-        <>
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-muted border-b border-hi">
-                <tr>
-                  <th className="py-2 pr-4">Batch</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Employees</th>
-                  <th className="py-2 pr-4">Total</th>
-                  <th className="py-2 pr-4">Confirmations</th>
-                  <th className="py-2 pr-4">Tx Hash</th>
-                  <th className="py-2 pr-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(
-                  ({
-                    run,
-                    summary,
-                    employeeCount,
-                    txHash,
-                    confirmationCount,
-                    hasFailedRecipients,
-                  }) => (
-                    <FragmentRow
-                      key={run.id}
-                      run={run}
-                      summary={summary}
-                      employeeCount={employeeCount}
-                      txHash={txHash}
-                      confirmationCount={confirmationCount}
-                      expanded={expandedRunId === run.id}
-                      retrying={isRetryingBatchId === run.batch_id}
-                      hasFailedRecipients={hasFailedRecipients}
-                      onToggleExpand={() => {
-                        void handleToggleExpand(run.id);
-                      }}
-                      onRetry={() => {
-                        void handleRetry(run);
-                      }}
-                    />
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Card View */}
-          <div className="md:hidden space-y-3">
-            {rows.map(
-              ({ run, summary, employeeCount, txHash, confirmationCount, hasFailedRecipients }) => (
-                <div
-                  key={run.id}
-                  className="border border-hi/50 rounded-lg p-4 bg-black/5 space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-mono text-muted mb-1">Batch: {run.batch_id}</div>
-                      <div className="text-sm font-bold capitalize">{run.status}</div>
-                    </div>
-                    <span
-                      className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${
-                        run.status === 'completed'
-                          ? 'bg-emerald-500/20 text-emerald-500'
-                          : run.status === 'pending'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-red-500/20 text-red-500'
-                      }`}
-                    >
-                      {run.status}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-muted">Employees:</span>
-                      <span className="ml-1 font-bold">{employeeCount}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted">Total:</span>
-                      <span className="ml-1 font-bold">
-                        {run.total_amount} {run.asset_code}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted">Confirmations:</span>
-                      <span className="ml-1 font-bold">{confirmationCount}</span>
-                    </div>
-                    {txHash && (
-                      <div className="col-span-2">
-                        <span className="text-muted">Tx Hash:</span>
-                        <a
-                          href={getTxExplorerUrl(txHash)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ml-1 text-accent break-all"
-                        >
-                          {txHash.slice(0, 16)}...
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2 pt-2 border-t border-hi/30">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void handleToggleExpand(run.id);
-                      }}
-                      className="flex-1 py-2 px-3 text-xs font-semibold text-accent hover:text-accent/80 hover:bg-accent/10 rounded-lg transition-colors touch-manipulation min-h-[44px]"
-                    >
-                      {expandedRunId === run.id ? 'Hide Details' : 'Show Details'}
-                    </button>
-                    {hasFailedRecipients && (
-                      <button
-                        type="button"
-                        onClick={() => {
+      <>
+        {/* Desktop Table View */}
+        <div className="payd-table-region hidden md:block overflow-x-auto">
+          <table className="payd-data-table w-full text-sm">
+            <thead className="text-left text-muted border-b border-hi">
+              <tr>
+                <th className="py-2 pr-4">Batch</th>
+                <th className="py-2 pr-4">Status</th>
+                <th className="py-2 pr-4">Employees</th>
+                <th className="py-2 pr-4">Total</th>
+                <th className="py-2 pr-4">Confirmations</th>
+                <th className="py-2 pr-4">Tx Hash</th>
+                <th className="py-2 pr-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody aria-busy={isLoading && rows.length === 0}>
+              {isLoading && rows.length === 0 ? (
+                <TableSkeleton
+                  rows={20}
+                  columns={7}
+                  label="Loading payroll runs"
+                  cellClassName="py-3 pr-4"
+                />
+              ) : (
+                <>
+                  {!isLoading && rows.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-muted">
+                        No payroll batch runs found.
+                      </td>
+                    </tr>
+                  )}
+                  {rows.map(
+                    ({
+                      run,
+                      summary,
+                      employeeCount,
+                      txHash,
+                      confirmationCount,
+                      hasFailedRecipients,
+                    }) => (
+                      <FragmentRow
+                        key={run.id}
+                        run={run}
+                        summary={summary}
+                        employeeCount={employeeCount}
+                        txHash={txHash}
+                        confirmationCount={confirmationCount}
+                        expanded={expandedRunId === run.id}
+                        retrying={isRetryingBatchId === run.batch_id}
+                        hasFailedRecipients={hasFailedRecipients}
+                        onToggleExpand={() => {
+                          void handleToggleExpand(run.id);
+                        }}
+                        onRetry={() => {
                           void handleRetry(run);
                         }}
-                        disabled={isRetryingBatchId === run.batch_id}
-                        className="flex-1 py-2 px-3 text-xs font-semibold text-danger hover:text-danger/80 hover:bg-danger/10 rounded-lg transition-colors disabled:opacity-60 touch-manipulation min-h-[44px]"
-                      >
-                        {isRetryingBatchId === run.batch_id ? 'Retrying...' : 'Retry Failed'}
-                      </button>
-                    )}
+                      />
+                    )
+                  )}
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3">
+          {!isLoading && rows.length === 0 && (
+            <p className="text-xs sm:text-sm text-muted">No payroll batch runs found.</p>
+          )}
+          {rows.map(
+            ({ run, summary, employeeCount, txHash, confirmationCount, hasFailedRecipients }) => (
+              <div key={run.id} className="border border-hi/50 rounded-lg p-4 bg-black/5 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-mono text-muted mb-1">Batch: {run.batch_id}</div>
+                    <div className="text-sm font-bold capitalize">{run.status}</div>
                   </div>
-                  {expandedRunId === run.id && summary && (
-                    <div className="pt-3 border-t border-hi/30 text-xs space-y-2">
-                      <div>
-                        <span className="text-muted">Successful:</span>
-                        <span className="ml-1 text-emerald-400 font-bold">
-                          {summary.items.filter((item) => item.status === 'completed').length}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted">Failed:</span>
-                        <span className="ml-1 text-red-400 font-bold">
-                          {summary.items.filter((item) => item.status === 'failed').length}
-                        </span>
-                      </div>
-                      {summary.items.filter((item) => item.status === 'failed').length > 0 && (
-                        <div className="mt-2">
-                          <div className="text-muted mb-1">Failed Recipients:</div>
-                          <div className="space-y-1">
-                            {summary.items
-                              .filter((item) => item.status === 'failed')
-                              .map((item) => (
-                                <div key={item.id} className="font-mono text-[10px] break-all">
-                                  {getEmployeeName(item)}
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
+                  <span
+                    className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${
+                      run.status === 'completed'
+                        ? 'bg-emerald-500/20 text-emerald-500'
+                        : run.status === 'pending'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-red-500/20 text-red-500'
+                    }`}
+                  >
+                    {run.status}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-muted">Employees:</span>
+                    <span className="ml-1 font-bold">{employeeCount}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted">Total:</span>
+                    <span className="ml-1 font-bold">
+                      {run.total_amount} {run.asset_code}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted">Confirmations:</span>
+                    <span className="ml-1 font-bold">{confirmationCount}</span>
+                  </div>
+                  {txHash && (
+                    <div className="col-span-2">
+                      <span className="text-muted">Tx Hash:</span>
+                      <a
+                        href={getTxExplorerUrl(txHash)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ml-1 text-accent break-all"
+                      >
+                        {txHash.slice(0, 16)}...
+                      </a>
                     </div>
                   )}
                 </div>
-              )
-            )}
-          </div>
-        </>
-      )}
+                <div className="flex gap-2 pt-2 border-t border-hi/30">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleToggleExpand(run.id);
+                    }}
+                    className="flex-1 py-2 px-3 text-xs font-semibold text-accent hover:text-accent/80 hover:bg-accent/10 rounded-lg transition-colors touch-manipulation min-h-[44px]"
+                  >
+                    {expandedRunId === run.id ? 'Hide Details' : 'Show Details'}
+                  </button>
+                  {hasFailedRecipients && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleRetry(run);
+                      }}
+                      disabled={isRetryingBatchId === run.batch_id}
+                      className="flex-1 py-2 px-3 text-xs font-semibold text-danger hover:text-danger/80 hover:bg-danger/10 rounded-lg transition-colors disabled:opacity-60 touch-manipulation min-h-[44px]"
+                    >
+                      {isRetryingBatchId === run.batch_id ? 'Retrying...' : 'Retry Failed'}
+                    </button>
+                  )}
+                </div>
+                {expandedRunId === run.id && summary && (
+                  <div className="pt-3 border-t border-hi/30 text-xs space-y-2">
+                    <div>
+                      <span className="text-muted">Successful:</span>
+                      <span className="ml-1 text-emerald-400 font-bold">
+                        {summary.items.filter((item) => item.status === 'completed').length}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted">Failed:</span>
+                      <span className="ml-1 text-red-400 font-bold">
+                        {summary.items.filter((item) => item.status === 'failed').length}
+                      </span>
+                    </div>
+                    {summary.items.filter((item) => item.status === 'failed').length > 0 && (
+                      <div className="mt-2">
+                        <div className="text-muted mb-1">Failed Recipients:</div>
+                        <div className="space-y-1">
+                          {summary.items
+                            .filter((item) => item.status === 'failed')
+                            .map((item) => (
+                              <div key={item.id} className="font-mono text-[10px] break-all">
+                                {getEmployeeName(item)}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          )}
+        </div>
+      </>
     </div>
   );
 }

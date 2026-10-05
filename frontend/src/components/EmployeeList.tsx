@@ -1,3 +1,4 @@
+import { TableSkeleton } from './TableSkeleton';
 import React, { useState } from 'react';
 import { Avatar } from './Avatar';
 import { CSVUploader } from './CSVUploader';
@@ -17,6 +18,7 @@ interface Employee {
 
 interface EmployeeListProps {
   employees: Employee[];
+  isLoading?: boolean;
   onEmployeeClick?: (employee: Employee) => void;
   onAddEmployee: (employee: Employee) => void;
   onEditEmployee?: (employee: Employee) => void;
@@ -25,6 +27,7 @@ interface EmployeeListProps {
 
 export const EmployeeList: React.FC<EmployeeListProps> = ({
   employees,
+  isLoading = false,
   onAddEmployee,
   onEditEmployee,
   onRemoveEmployee,
@@ -143,8 +146,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="payd-table-region hidden md:block overflow-x-auto">
+        <table className="payd-data-table w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-hi">
               <th
@@ -182,84 +185,98 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-(--border)">
-            {sortedEmployees.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-6 text-center text-(--muted)">
-                  No employees found
-                </td>
-              </tr>
+          <tbody
+            className="divide-y divide-(--border)"
+            aria-busy={isLoading && employees.length === 0}
+          >
+            {isLoading && employees.length === 0 ? (
+              <TableSkeleton
+                columns={6}
+                label="Loading employees"
+                cellClassName="p-6"
+                rowHeight={80}
+              />
             ) : (
-              sortedEmployees.map((employee) => (
-                <tr key={employee.id} className="cursor-pointer transition">
-                  <td className="p-6">
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        email={employee.email}
-                        name={employee.name}
-                        imageUrl={employee.imageUrl}
-                        size="sm"
-                      />
-                      <span className="text-xs text-muted">{employee.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-6 text-sm font-medium">{employee.position}</td>
-                  <td className="p-6 font-mono text-xs text-muted">
-                    {shortenWallet(employee.wallet || '')}
-                  </td>
-                  <td className="p-6">
-                    {/* Inline salary edit */}
-                    {onEditEmployee ? (
-                      <button
-                        className="text-blue-500 underline"
-                        onClick={() => {
-                          setEditSalary(employee.salary || 0);
-                          setShowEditModal({ open: true, employee });
-                        }}
-                      >
-                        {employee.salary ?? 0}
-                      </button>
-                    ) : (
-                      (employee.salary ?? 0)
-                    )}
-                  </td>
-                  <td className="p-6">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        employee.status === 'Active'
-                          ? 'bg-green-100 text-green-600 border-green-200'
-                          : 'bg-red-100 text-red-600 border-red-200'
-                      }`}
-                    >
-                      <div
-                        className={`w-1 h-1 rounded-full ${
-                          employee.status === 'Active' ? 'bg-green-600' : 'bg-red-600'
-                        }`}
-                      />
-                      {employee.status || '-'}
-                    </span>
-                  </td>
-                  <td className="p-6 flex gap-2">
-                    <button
-                      className="text-blue-500 hover:text-blue-700"
-                      title="Edit"
-                      onClick={() => {
-                        setEditSalary(employee.salary || 0);
-                        setShowEditModal({ open: true, employee });
-                      }}
-                    >
-                      <Pencil className="w-5 h-5" />
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      title="Remove"
-                      onClick={() => setShowDeleteConfirm({ open: true, id: employee.id })}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))
+              <>
+                {sortedEmployees.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-(--muted)">
+                      No employees found
+                    </td>
+                  </tr>
+                ) : (
+                  sortedEmployees.map((employee) => (
+                    <tr key={employee.id} className="cursor-pointer transition">
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <Avatar
+                            email={employee.email}
+                            name={employee.name}
+                            imageUrl={employee.imageUrl}
+                            size="sm"
+                          />
+                          <span className="text-xs text-muted">{employee.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-6 text-sm font-medium">{employee.position}</td>
+                      <td className="p-6 font-mono text-xs text-muted">
+                        {shortenWallet(employee.wallet || '')}
+                      </td>
+                      <td className="p-6">
+                        {/* Inline salary edit */}
+                        {onEditEmployee ? (
+                          <button
+                            className="text-blue-500 underline"
+                            onClick={() => {
+                              setEditSalary(employee.salary || 0);
+                              setShowEditModal({ open: true, employee });
+                            }}
+                          >
+                            {employee.salary ?? 0}
+                          </button>
+                        ) : (
+                          (employee.salary ?? 0)
+                        )}
+                      </td>
+                      <td className="p-6">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                            employee.status === 'Active'
+                              ? 'bg-green-100 text-green-600 border-green-200'
+                              : 'bg-red-100 text-red-600 border-red-200'
+                          }`}
+                        >
+                          <div
+                            className={`w-1 h-1 rounded-full ${
+                              employee.status === 'Active' ? 'bg-green-600' : 'bg-red-600'
+                            }`}
+                          />
+                          {employee.status || '-'}
+                        </span>
+                      </td>
+                      <td className="p-6 flex gap-2">
+                        <button
+                          className="text-blue-500 hover:text-blue-700"
+                          title="Edit"
+                          onClick={() => {
+                            setEditSalary(employee.salary || 0);
+                            setShowEditModal({ open: true, employee });
+                          }}
+                        >
+                          <Pencil className="w-5 h-5" />
+                        </button>
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          title="Remove"
+                          onClick={() => setShowDeleteConfirm({ open: true, id: employee.id })}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </table>
@@ -268,7 +285,9 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       {/* Mobile Card View */}
       <div className="md:hidden px-4 pb-4">
         {sortedEmployees.length === 0 ? (
-          <div className="text-center py-8 text-(--muted)">No employees found</div>
+          <div className="text-center py-8 text-(--muted)" role="status">
+            {isLoading ? 'Loading employees…' : 'No employees found'}
+          </div>
         ) : (
           <div className="space-y-4">
             {sortedEmployees.map((employee) => (
