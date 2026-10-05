@@ -113,7 +113,6 @@ resource "aws_secretsmanager_secret_version" "jwt_secret" {
 }
 
 resource "aws_secretsmanager_secret" "stellar_credentials" {
-  count       = var.stellar_secret_key != "" ? 1 : 0
   name        = "${local.name}/stellar-credentials"
   description = "Stellar credentials for PayD ${var.environment}"
   kms_key_id  = aws_kms_key.secrets_manager.arn
@@ -126,8 +125,8 @@ resource "aws_secretsmanager_secret" "stellar_credentials" {
 }
 
 resource "aws_secretsmanager_secret_version" "stellar_credentials" {
-  count   = var.stellar_secret_key != "" ? 1 : 0
-  secret_id = aws_secretsmanager_secret.stellar_credentials[0].id
+  count     = var.stellar_secret_key != "" ? 1 : 0
+  secret_id = aws_secretsmanager_secret.stellar_credentials.id
 
   secret_string = var.stellar_secret_key
 }
@@ -166,7 +165,7 @@ resource "aws_iam_policy" "secrets_read_policy" {
             aws_secretsmanager_secret.redis_credentials.arn,
             aws_secretsmanager_secret.jwt_secret.arn
           ],
-          aws_secretsmanager_secret.stellar_credentials[*].arn
+          [aws_secretsmanager_secret.stellar_credentials.arn]
         )
       },
       {
@@ -201,7 +200,7 @@ output "jwt_secret_arn" {
 
 output "stellar_credentials_secret_arn" {
   description = "ARN of Stellar credentials secret"
-  value       = length(aws_secretsmanager_secret.stellar_credentials) > 0 ? aws_secretsmanager_secret.stellar_credentials[0].arn : ""
+  value       = aws_secretsmanager_secret.stellar_credentials.arn
 }
 
 output "kms_key_arn" {
