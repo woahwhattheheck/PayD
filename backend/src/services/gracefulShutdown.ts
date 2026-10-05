@@ -22,11 +22,12 @@ async function drainHttpServer(
 ): Promise<void> {
   await new Promise<void>((resolve) => {
     let settled = false;
+    let timeout: NodeJS.Timeout | undefined;
 
     const finish = () => {
       if (settled) return;
       settled = true;
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
       resolve();
     };
 
@@ -37,11 +38,13 @@ async function drainHttpServer(
       finish();
     });
 
-    const timeout = setTimeout(() => {
-      logger.warn(`HTTP drain exceeded ${timeoutMs}ms; closing remaining connections`);
-      server.closeAllConnections();
-      finish();
-    }, timeoutMs);
+    if (!settled) {
+      timeout = setTimeout(() => {
+        logger.warn(`HTTP drain exceeded ${timeoutMs}ms; closing remaining connections`);
+        server.closeAllConnections();
+        finish();
+      }, timeoutMs);
+    }
   });
 }
 
