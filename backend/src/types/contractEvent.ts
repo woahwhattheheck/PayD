@@ -1,4 +1,3 @@
-// Modified 2026-10-05: accept native RPC event values and the legacy XDR wrapper.
 // Contract event domain types
 
 export interface ContractEvent {
@@ -51,8 +50,7 @@ export interface SorobanEvent {
   id: string;
   pagingToken: string;
   topic: string[];
-  // getEvents returns a base64 ScVal string; older callers may wrap it in xdr.
-  value: string | {
+  value: {
     xdr: string;
   };
   inSuccessfulContractCall: boolean;

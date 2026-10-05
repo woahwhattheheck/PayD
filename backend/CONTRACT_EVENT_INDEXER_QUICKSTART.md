@@ -1,7 +1,5 @@
 # Contract Event Indexer - Quick Start Guide
 
-<!-- Modified 2026-10-05: document cross-asset payment event indexing. -->
-
 ## Setup
 
 ### 1. Configure Environment Variables
@@ -14,21 +12,9 @@ SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 
 # Contract IDs to index (replace with your actual contract addresses)
 BULK_PAYMENT_CONTRACT_ID=CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CROSS_ASSET_PAYMENT_CONTRACT_ID=CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 VESTING_ESCROW_CONTRACT_ID=CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 REVENUE_SPLIT_CONTRACT_ID=CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
-
-`CROSS_ASSET_PAYMENT_CONTRACT_ID` is optional. Set it to the deployed cross-asset
-payment contract on the network served by `SOROBAN_RPC_URL` before starting or
-restarting the backend. The server-started `ContractEventIndexer` reads these
-addresses when its singleton is created; an unset cross-asset ID leaves that
-contract out of polling.
-
-For an existing indexer database, polling begins after the saved
-`last_indexed_ledger`. Adding a contract address does not backfill events at or
-before that ledger; retrieving earlier history requires a separate backfill
-process.
 
 ### 2. Run Database Migration
 
