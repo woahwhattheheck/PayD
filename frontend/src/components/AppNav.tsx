@@ -202,42 +202,45 @@ const AppNav: React.FC = () => {
   const displayName = user?.name || user?.email || user?.walletAddress || '';
   const displayDetail = user?.email || user?.walletAddress || '';
 
-  const userProfile = loading ? (
-    <div
-      aria-label="Loading account"
-      className="h-9 w-40 rounded-lg bg-(--surface-hi) animate-pulse"
-    />
-  ) : user ? (
-    <div className="flex items-center gap-2">
-      <div className="p-1 bg-(--surface-hi) rounded-lg flex items-center gap-2">
-        <Avatar
-          email={user.email || user.walletAddress || String(user.id)}
-          name={displayName}
-          size="sm"
-        />
-        <div className="hidden md:block flex-1 min-w-0">
-          <p className="text-[10px] font-semibold text-(--text) truncate">{displayName}</p>
-          <p className="text-[10px] text-(--muted) truncate">{displayDetail}</p>
+  const renderUserProfile = (showDetails: boolean) =>
+    loading ? (
+      <div
+        aria-label="Loading account"
+        className="h-9 w-40 rounded-lg bg-(--surface-hi) animate-pulse"
+      />
+    ) : user ? (
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="p-1 bg-(--surface-hi) rounded-lg flex items-center gap-2 min-w-0">
+          <Avatar
+            email={user.email || user.walletAddress || String(user.id)}
+            name={displayName}
+            size="sm"
+          />
+          <div
+            className={`${showDetails ? 'block' : 'hidden md:block'} flex-1 min-w-0`}
+          >
+            <p className="text-[10px] font-semibold text-(--text) truncate">{displayName}</p>
+            <p className="text-[10px] text-(--muted) truncate">{displayDetail}</p>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={logout}
+          aria-label="Sign out"
+          title="Sign out"
+          className="p-2 rounded-lg text-(--muted) hover:text-(--text) hover:bg-(--surface-hi) transition"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={logout}
-        aria-label="Sign out"
-        title="Sign out"
-        className="p-2 rounded-lg text-(--muted) hover:text-(--text) hover:bg-(--surface-hi) transition"
+    ) : (
+      <Link
+        to="/login"
+        className="px-3 py-1.5 rounded-lg text-[13px] font-semibold text-(--link) hover:text-(--accent) transition"
       >
-        <LogOut className="w-4 h-4" />
-      </button>
-    </div>
-  ) : (
-    <Link
-      to="/login"
-      className="px-3 py-1.5 rounded-lg text-[13px] font-semibold text-(--link) hover:text-(--accent) transition"
-    >
-      Sign in
-    </Link>
-  );
+        Sign in
+      </Link>
+    );
 
   return (
     <nav className="relative w-full">
@@ -257,7 +260,7 @@ const AppNav: React.FC = () => {
         </button>
 
         {/* User profile */}
-        <div className="ml-auto flex items-center gap-2">{userProfile}</div>
+        <div className="ml-auto flex items-center gap-2">{renderUserProfile(false)}</div>
       </div>
 
       {/* Mobile dropdown menu */}
@@ -298,7 +301,7 @@ const AppNav: React.FC = () => {
               </div>
 
               {/* Mobile menu footer with user info */}
-              <div className="p-4 border-t border-(--border)">{userProfile}</div>
+              <div className="p-4 border-t border-(--border)">{renderUserProfile(true)}</div>
             </div>
           </div>
         </>
