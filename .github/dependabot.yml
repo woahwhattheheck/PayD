@@ -17,7 +17,7 @@ updates:
       - dependency-name: "packages/fungible_allowlist_example"
       - dependency-name: "packages/nft_enumberable_example"
 
-- package-ecosystem: "npm"
+  - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
       interval: "weekly"
