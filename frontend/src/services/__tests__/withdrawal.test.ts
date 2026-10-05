@@ -12,7 +12,7 @@ vi.mock('axios', () => ({
 describe('withdrawalService', () => {
   it('propagates anchor discovery failures instead of returning fallback data', async () => {
     const failure = new Error('Network Error');
-    vi.mocked(axios.get).mockRejectedValueOnce(failure);
+    vi.spyOn(axios, 'get').mockRejectedValueOnce(failure);
 
     await expect(withdrawalService.getAvailableAnchors()).rejects.toBe(failure);
   });
