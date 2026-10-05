@@ -37,15 +37,15 @@ export async function claimKey(
   const expiresAt = new Date(Date.now() + ttlMs);
 
   try {
-    // Step 1: Try to insert a fresh in_progress row (skip expired rows
-    // via the WHERE clause so they fall through to the conflict path).
+    // Step 1: Atomically reserve a fresh key. The unique constraint is the
+    // concurrency primitive: concurrent inserts for the same tenant/key are
+    // serialized by PostgreSQL, and losers return rowCount 0 instead of
+    // surfacing a unique-violation that the middleware could fail open on.
     const insertResult = await query(
       `INSERT INTO idempotency_keys (organization_id, idempotency_key, status, expires_at)
-       SELECT $1, $2, 'in_progress', $3
-       WHERE NOT EXISTS (
-         SELECT 1 FROM idempotency_keys
-         WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()
-       )`,
+       VALUES ($1, $2, 'in_progress', $3)
+       ON CONFLICT (organization_id, idempotency_key) DO NOTHING
+       RETURNING id`,
       [organizationId, idempotencyKey, expiresAt]
     );
 
@@ -53,24 +53,25 @@ export async function claimKey(
       return null;
     }
 
-    // Step 2: Key already exists (or was just expired). Try to claim an
-    // in_progress row. This UPDATE succeeds only when no other request
-    // currently holds the lock — the WHERE status = 'in_progress' guard
-    // ensures we don't steal a row that another concurrent request already
-    // claimed via the same UPDATE.
+    // Step 2: Recycle an expired record atomically. Expiry applies to every
+    // terminal state, not only in_progress rows; otherwise an expired cached
+    // success/error can never be reused because the unique row remains.
     const updateResult = await query(
       `UPDATE idempotency_keys
-       SET status = 'in_progress', expires_at = $3
+       SET status = 'in_progress',
+           response_status = NULL,
+           response_body = NULL,
+           created_at = NOW(),
+           expires_at = $3
        WHERE organization_id = $1
          AND idempotency_key = $2
          AND expires_at <= NOW()
-         AND status = 'in_progress'
        RETURNING id, organization_id, idempotency_key, status, response_status, response_body, created_at, expires_at`,
       [organizationId, idempotencyKey, expiresAt]
     );
 
     if ((updateResult.rowCount ?? 0) > 0) {
-      // Successfully claimed an expired in_progress row — treat as a fresh claim.
+      // Successfully recycled an expired row — treat as a fresh claim.
       return null;
     }
 
@@ -141,7 +142,7 @@ export async function completeKey(
   await query(
     `UPDATE idempotency_keys
      SET status = 'completed', response_status = $3, response_body = $4
-     WHERE organization_id = $1 AND idempotency_key = $2`,
+     WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
     [organizationId, idempotencyKey, responseStatus, JSON.stringify(responseBody)]
   );
 }
@@ -158,7 +159,7 @@ export async function failKey(
   await query(
     `UPDATE idempotency_keys
      SET status = 'failed', response_status = $3, response_body = $4
-     WHERE organization_id = $1 AND idempotency_key = $2`,
+     WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
     [organizationId, idempotencyKey, responseStatus, JSON.stringify(responseBody)]
   );
 }
