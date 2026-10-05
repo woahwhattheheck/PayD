@@ -36,6 +36,7 @@ import { fileURLToPath } from 'url';
 
 import dotenv from 'dotenv';
 import pg from 'pg';
+import { assertMigrationOrder, findAppliedMigration } from './migrationOrder.js';
 
 const { Pool } = pg;
 type PoolClient = pg.PoolClient;
@@ -115,7 +116,8 @@ function readMigrationFiles(dir: string): MigrationFile[] {
     const files = fs
         .readdirSync(dir)
         .filter((f) => f.endsWith('.sql'))
-        .sort(); // lexicographic; '001_' < '012_' because '0' < '1'
+        .sort(); // Numeric prefixes are fixed-width and checked below.
+    assertMigrationOrder(files);
 
     return files.map((filename) => {
         const absolutePath = path.join(dir, filename);
@@ -169,6 +171,8 @@ interface RunResult {
 }
 
 async function runMigrations(isDryRun: boolean): Promise<RunResult> {
+    // Refuse duplicate/gapped prefixes before opening a database connection.
+    const files = readMigrationFiles(MIGRATIONS_DIR);
     const pool = new Pool({
         connectionString: DATABASE_URL,
         // Keep the pool minimal; the runner is a CLI tool, not a long-lived server.
@@ -192,8 +196,7 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
             console.log('[migrate] [dry-run] Would bootstrap schema_migrations table');
         }
 
-        // ── Step 2: Read migration files ──────────────────────────────────────
-        const files = readMigrationFiles(MIGRATIONS_DIR);
+        // ── Step 2: Report the validated migration files ──────────────────────
         console.log(`[migrate] Found ${files.length} migration file(s) in ${MIGRATIONS_DIR}`);
 
         if (files.length === 0) {
@@ -202,29 +205,38 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
         }
 
         // ── Step 3: Fetch already-applied set (O(m) time / space) ─────────────
-        const applied = isDryRun
-            ? new Map<string, AppliedMigration>()
-            : await fetchAppliedMigrations(client);
+        const applied = await fetchAppliedMigrations(client).catch((err: unknown) => {
+            // A dry run against a fresh database must not create the tracking table.
+            if (isDryRun && (err as { code?: string } | null)?.code === '42P01') {
+                return new Map<string, AppliedMigration>();
+            }
+            throw err;
+        });
+
+        // Preflight all current AND legacy records before running any pending SQL.
+        // A renumbered filename must never cause already-applied SQL to run again.
+        const recorded = new Map<string, AppliedMigration>();
+        for (const file of files) {
+            try {
+                const record = findAppliedMigration(file, applied);
+                if (record) recorded.set(file.filename, record);
+            } catch (err) {
+                console.error('[migrate]', err instanceof Error ? err.message : err);
+                result.driftDetected.push(file.filename);
+            }
+        }
+        if (result.driftDetected.length > 0) {
+            throw new Error(
+                `Content drift detected in ${result.driftDetected.length} migration(s): ` +
+                result.driftDetected.join(', '),
+            );
+        }
 
         // ── Step 4: Evaluate each migration ───────────────────────────────────
         for (const file of files) {
-            const record = applied.get(file.filename);
-
-            if (record !== undefined) {
-                // File already applied — check for content drift (tampering detection).
-                if (record.checksum !== file.checksum) {
-                    const msg =
-                        `[migrate] DRIFT DETECTED: "${file.filename}" was previously ` +
-                        `applied with checksum ${record.checksum} but the file now has ` +
-                        `checksum ${file.checksum}. ` +
-                        `Aborting to protect database integrity.`;
-                    console.error(msg);
-                    result.driftDetected.push(file.filename);
-                    // Accumulate all drifted files before throwing so the log is complete.
-                    continue;
-                }
-
-                console.log(`[migrate] ↷ Skipped  ${file.filename}  (already applied)`);
+            const record = recorded.get(file.filename);
+            if (record) {
+                console.log(`[migrate] ↷ Skipped  ${file.filename}  (recorded as ${record.filename})`);
                 result.skipped.push(file.filename);
                 continue;
             }
@@ -261,13 +273,6 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
             }
         }
 
-        // ── Step 6: Abort if drift was detected at any point ──────────────────
-        if (result.driftDetected.length > 0) {
-            throw new Error(
-                `Content drift detected in ${result.driftDetected.length} migration(s): ` +
-                result.driftDetected.join(', '),
-            );
-        }
     } finally {
         client.release();
         await pool.end();
