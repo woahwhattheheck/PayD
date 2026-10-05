@@ -23,17 +23,29 @@ export interface IdempotencyRecord {
   expiresAt: Date;
 }
 
+export interface IdempotencyLease {
+  kind: 'claimed';
+  expiresAt: Date;
+}
+
+export interface IdempotencyReplay {
+  kind: 'replay';
+  record: IdempotencyRecord;
+}
+
+export type IdempotencyClaimResult = IdempotencyLease | IdempotencyReplay;
+
 /**
  * Store an idempotency key with a lock (in_progress status).
- * Returns the existing record if the key already exists and is not expired.
- * Returns null if the key is newly created.
- * Throws IdempotencyConflictError if the key is in_progress (concurrent duplicate).
+ * Returns a lease when this request owns the key.
+ * Returns a replay record when a completed/failed key already exists.
+ * Throws IdempotencyConflictError if another request is in progress.
  */
 export async function claimKey(
   organizationId: number,
   idempotencyKey: string,
   ttlMs: number = DEFAULT_TTL_MS
-): Promise<IdempotencyRecord | null> {
+): Promise<IdempotencyClaimResult> {
   const expiresAt = new Date(Date.now() + ttlMs);
 
   try {
@@ -50,7 +62,7 @@ export async function claimKey(
     );
 
     if ((insertResult.rowCount ?? 0) > 0) {
-      return null;
+      return { kind: 'claimed', expiresAt };
     }
 
     // Step 2: Recycle an expired record atomically. Expiry applies to every
@@ -66,13 +78,12 @@ export async function claimKey(
        WHERE organization_id = $1
          AND idempotency_key = $2
          AND expires_at <= NOW()
-       RETURNING id, organization_id, idempotency_key, status, response_status, response_body, created_at, expires_at`,
+       RETURNING id`,
       [organizationId, idempotencyKey, expiresAt]
     );
 
     if ((updateResult.rowCount ?? 0) > 0) {
-      // Successfully recycled an expired row — treat as a fresh claim.
-      return null;
+      return { kind: 'claimed', expiresAt };
     }
 
     // Step 3: Key exists and is NOT expired. Fetch its current state to
@@ -103,7 +114,7 @@ export async function claimKey(
     };
 
     if (record.status === 'completed' || record.status === 'failed') {
-      return record;
+      return { kind: 'replay', record };
     }
 
     // status is in_progress — another request holds the lock.
@@ -131,37 +142,51 @@ export async function isInFlight(organizationId: number, idempotencyKey: string)
 }
 
 /**
- * Complete an idempotency key by storing the response.
+ * Complete an idempotency key by storing the response for the owning lease.
+ * Returns false when the lease expired or a newer request recycled the key.
  */
 export async function completeKey(
   organizationId: number,
   idempotencyKey: string,
+  leaseExpiresAt: Date,
   responseStatus: number,
   responseBody: unknown
-): Promise<void> {
-  await query(
+): Promise<boolean> {
+  const result = await query(
     `UPDATE idempotency_keys
-     SET status = 'completed', response_status = $3, response_body = $4
-     WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
-    [organizationId, idempotencyKey, responseStatus, JSON.stringify(responseBody)]
+     SET status = 'completed', response_status = $4, response_body = $5
+     WHERE organization_id = $1
+       AND idempotency_key = $2
+       AND status = 'in_progress'
+       AND expires_at = $3
+       AND expires_at > NOW()`,
+    [organizationId, idempotencyKey, leaseExpiresAt, responseStatus, JSON.stringify(responseBody)]
   );
+  return (result.rowCount ?? 0) > 0;
 }
 
 /**
- * Mark an idempotency key as failed (for error responses).
+ * Mark an idempotency key as failed for the owning lease.
+ * Returns false when the lease expired or a newer request recycled the key.
  */
 export async function failKey(
   organizationId: number,
   idempotencyKey: string,
+  leaseExpiresAt: Date,
   responseStatus: number,
   responseBody: unknown
-): Promise<void> {
-  await query(
+): Promise<boolean> {
+  const result = await query(
     `UPDATE idempotency_keys
-     SET status = 'failed', response_status = $3, response_body = $4
-     WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
-    [organizationId, idempotencyKey, responseStatus, JSON.stringify(responseBody)]
+     SET status = 'failed', response_status = $4, response_body = $5
+     WHERE organization_id = $1
+       AND idempotency_key = $2
+       AND status = 'in_progress'
+       AND expires_at = $3
+       AND expires_at > NOW()`,
+    [organizationId, idempotencyKey, leaseExpiresAt, responseStatus, JSON.stringify(responseBody)]
   );
+  return (result.rowCount ?? 0) > 0;
 }
 
 /**
