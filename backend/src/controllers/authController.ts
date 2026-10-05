@@ -320,6 +320,49 @@ export class AuthController {
   }
 
   /**
+   * GET /api/auth/session
+   * Returns the authenticated user's display identity and organization.
+   */
+  static async session(req: express.Request, res: express.Response) {
+    try {
+      const result = await query(
+        `SELECT
+           u.id,
+           u.email,
+           u.name,
+           u.wallet_address,
+           u.organization_id,
+           u.role,
+           o.name AS organization_name
+         FROM users u
+         LEFT JOIN organizations o ON o.id = u.organization_id
+         WHERE u.id = $1`,
+        [req.user!.id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const user = result.rows[0];
+      return res.json({
+        user: {
+          id: user.id,
+          email: user.email ?? null,
+          name: user.name ?? null,
+          walletAddress: user.wallet_address ?? null,
+          organizationId: user.organization_id ?? null,
+          organizationName: user.organization_name ?? null,
+          role: user.role,
+        },
+      });
+    } catch (error) {
+      console.error('Session lookup failed:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  /**
    * POST /api/auth/refresh
    * Refreshes access token using a valid refresh token.
    */
