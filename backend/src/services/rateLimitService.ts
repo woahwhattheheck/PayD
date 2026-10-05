@@ -261,3 +261,7 @@ export class RateLimitService {
 }
 
 export const rateLimitService = new RateLimitService();
+
+export async function closeRateLimitRedis(): Promise<void> {
+  await RedisClient.disconnect();
+}
