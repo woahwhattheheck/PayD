@@ -1,0 +1,21 @@
+name: PayD 553 bulk payment validation once
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  bulk-payment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: solglasswing/payd553-persistent-batches-20261005
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test bulk_payment
+        run: cargo test -p bulk_payment
