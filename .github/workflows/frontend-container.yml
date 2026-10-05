@@ -1,0 +1,58 @@
+name: Frontend container
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-container.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-container.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-container-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build frontend image
+        run: docker build --pull -t payd-frontend:ci -f frontend/Dockerfile frontend
+      - name: Check image size and nginx configuration
+        run: |
+          bytes=$(docker image inspect payd-frontend:ci --format '{{.Size}}')
+          echo "Frontend image size: ${bytes} bytes"
+          test "$bytes" -lt 50000000
+          docker run --rm payd-frontend:ci nginx -t
+      - name: Check static serving and SPA fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          container=$(docker run -d -p 127.0.0.1:8080:80 payd-frontend:ci)
+          trap 'docker rm -f "$container" >/dev/null' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/ -o /tmp/index.html; then break; fi
+            sleep 1
+          done
+          curl -fsS -D /tmp/index.headers http://127.0.0.1:8080/index.html -o /tmp/index.html
+          grep -qi '^Cache-Control: no-store' /tmp/index.headers
+          curl -fsS -D /tmp/route.headers http://127.0.0.1:8080/dashboard -o /tmp/route.html
+          cmp /tmp/index.html /tmp/route.html
+          grep -qi '^Cache-Control: no-store' /tmp/route.headers
+          asset=$(docker exec "$container" find /usr/share/nginx/html/assets -type f -name '*.js' | head -n 1)
+          test -n "$asset"
+          asset=${asset#/usr/share/nginx/html}
+          curl -fsS -D /tmp/asset.headers "http://127.0.0.1:8080${asset}" -o /dev/null
+          grep -qi '^Cache-Control: public, max-age=31536000, immutable' /tmp/asset.headers
+          status=$(curl -sS -D /tmp/missing.headers -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/assets/missing-container-smoke.js)
+          test "$status" = 404
+          ! grep -qi 'immutable' /tmp/missing.headers
