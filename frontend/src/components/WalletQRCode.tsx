@@ -85,12 +85,19 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-surface rounded-xl p-6 border border-hi">
+      <div className="bg-surface rounded-xl p-6 border border-border-hi">
         <h3 className="text-lg font-bold mb-4 text-text">Your Stellar Wallet Address</h3>
 
         <div className="flex flex-col md:flex-row gap-6 items-center">
-          <div className="bg-white p-4 rounded-lg">
-            <QRCodeSVG value={walletAddress} size={160} level="H" includeMargin={false} />
+          <div className="bg-qr-bg p-4 rounded-lg">
+            <QRCodeSVG
+              value={walletAddress}
+              size={160}
+              level="H"
+              includeMargin={false}
+              bgColor="var(--qr-bg)"
+              fgColor="var(--qr-fg)"
+            />
           </div>
 
           <div className="flex-1 space-y-3">
@@ -99,7 +106,7 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
                 Wallet Address
               </label>
               <div className="flex items-center gap-2 mt-1">
-                <code className="text-text bg-bg-secondary px-3 py-2 rounded-lg text-sm font-mono break-all">
+                <code className="text-text bg-surface-hi px-3 py-2 rounded-lg text-sm font-mono break-all">
                   {walletAddress}
                 </code>
               </div>
@@ -116,14 +123,14 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
 
             {secretKey && (
               <div className="mt-4">
-                <label className="text-sm text-yellow-500 font-mono uppercase tracking-wider flex items-center gap-2">
+                <label className="text-sm text-warning font-mono uppercase tracking-wider flex items-center gap-2">
                   <Key size={16} className="mr-2" />
                   Secret Key (Save Securely!)
                 </label>
-                <div className="mt-1 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                <div className="mt-1 p-3 bg-warning/10 border border-warning/30 rounded-lg">
                   {showSecret ? (
                     <div className="space-y-2">
-                      <code className="text-yellow-300 text-xs font-mono break-all block">
+                      <code className="text-warning text-xs font-mono break-all block">
                         {secretKey}
                       </code>
                       <Button
@@ -138,7 +145,7 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
                   ) : (
                     <button
                       onClick={() => setShowSecret(true)}
-                      className="text-yellow-400 hover:text-yellow-300 text-sm flex items-center gap-2"
+                      className="text-warning hover:text-text text-sm flex items-center gap-2"
                     >
                       <Eye size={16} className="mr-2" />
                       Click to reveal secret key
@@ -151,7 +158,7 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
         </div>
       </div>
 
-      <div className="bg-surface rounded-xl p-6 border border-hi">
+      <div className="bg-surface rounded-xl p-6 border border-border-hi">
         <h3 className="text-lg font-bold mb-4 text-text flex items-center gap-2">
           <BookOpen size={20} className="mr-2" />
           Trustline Setup Guide
@@ -163,10 +170,10 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
 
         <div className="space-y-3">
           {TRUSTLINE_STEPS.map((item) => (
-            <div key={item.step} className="border border-hi rounded-lg overflow-hidden">
+            <div key={item.step} className="border border-border-hi rounded-lg overflow-hidden">
               <button
                 onClick={() => setExpandedStep(expandedStep === item.step ? null : item.step)}
-                className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-bg-secondary transition-colors"
+                className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-surface-hi transition-colors"
               >
                 <span className="w-8 h-8 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center text-sm">
                   {item.step}
@@ -180,7 +187,7 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
                 />
               </button>
               {expandedStep === item.step && (
-                <div className="px-4 py-3 bg-bg-secondary text-muted text-sm">
+                <div className="px-4 py-3 bg-surface-hi text-muted text-sm">
                   {item.description}
                 </div>
               )}
@@ -189,18 +196,18 @@ export const WalletQRCode: React.FC<WalletQRCodeProps> = ({
         </div>
       </div>
 
-      <div className="bg-surface rounded-xl p-6 border border-hi">
+      <div className="bg-surface rounded-xl p-6 border border-border-hi">
         <h3 className="text-lg font-bold mb-4 text-text flex items-center gap-2">
           <Coins size={20} className="mr-2" />
           Supported Assets
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ASSET_INFO.map((asset) => (
-            <div key={asset.code} className="p-4 bg-bg-secondary rounded-lg border border-hi">
+            <div key={asset.code} className="p-4 bg-surface-hi rounded-lg border border-border-hi">
               <div className="font-bold text-accent text-lg mb-2">{asset.code}</div>
               <div className="text-xs text-muted font-mono">
                 <div className="mb-1">
-                  <span className="text-text-secondary">Issuer:</span>
+                  <span className="text-muted">Issuer:</span>
                 </div>
                 <div className="break-all">
                   {asset.issuer === 'Native' ? (
