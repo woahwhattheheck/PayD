@@ -115,6 +115,153 @@ fn test_vesting_flow() {
     assert_eq!(token_client.balance(&contract_id), 0);
 }
 
+#[test]
+fn test_vesting_lifecycle_returns_typed_errors() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let funder = Address::generate(&e);
+    let beneficiary = Address::generate(&e);
+    let clawback_admin = Address::generate(&e);
+    let upgrade_admin = Address::generate(&e);
+    let contract_id = e.register(VestingContract, ());
+    let client = VestingContractClient::new(&e, &contract_id);
+
+    let token_admin = Address::generate(&e);
+    let token_contract = e.register_stellar_asset_contract_v2(token_admin).address();
+    let token_client = token::Client::new(&e, &token_contract);
+    token::StellarAssetClient::new(&e, &token_contract).mint(&funder, &10_000);
+
+    assert_eq!(
+        client.try_get_config(),
+        Err(Ok(ContractError::NotInitialized))
+    );
+    assert_eq!(client.try_claim(), Err(Ok(ContractError::NotInitialized)));
+    assert_eq!(
+        client.try_clawback(),
+        Err(Ok(ContractError::NotInitialized))
+    );
+
+    let start_time = e.ledger().timestamp();
+    assert_eq!(
+        client.try_initialize(
+            &funder,
+            &beneficiary,
+            &token_contract,
+            &start_time,
+            &0,
+            &0,
+            &10_000,
+            &clawback_admin,
+            &upgrade_admin,
+        ),
+        Err(Ok(ContractError::InvalidDuration))
+    );
+    assert_eq!(
+        client.try_initialize(
+            &funder,
+            &beneficiary,
+            &token_contract,
+            &start_time,
+            &10,
+            &9,
+            &10_000,
+            &clawback_admin,
+            &upgrade_admin,
+        ),
+        Err(Ok(ContractError::InvalidDuration))
+    );
+    assert_eq!(
+        client.try_initialize(
+            &funder,
+            &beneficiary,
+            &token_contract,
+            &start_time,
+            &0,
+            &1_000,
+            &0,
+            &clawback_admin,
+            &upgrade_admin,
+        ),
+        Err(Ok(ContractError::InvalidAmount))
+    );
+    assert_eq!(
+        client.try_initialize(
+            &funder,
+            &beneficiary,
+            &token_contract,
+            &u64::MAX,
+            &1,
+            &2,
+            &10_000,
+            &clawback_admin,
+            &upgrade_admin,
+        ),
+        Err(Ok(ContractError::TimestampOverflow))
+    );
+    assert_eq!(token_client.balance(&funder), 10_000);
+
+    // Corrupt legacy state must report checked-arithmetic failure instead of
+    // trapping on the old checked_mul(...).unwrap() path.
+    e.as_contract(&contract_id, || {
+        e.storage().instance().set(
+            &DataKey::Config,
+            &VestingConfig {
+                beneficiary: beneficiary.clone(),
+                token: token_contract.clone(),
+                start_time: 0,
+                cliff_seconds: 0,
+                duration_seconds: 3,
+                total_amount: i128::MAX,
+                claimed_amount: 0,
+                clawback_admin: clawback_admin.clone(),
+                is_active: true,
+            },
+        );
+    });
+    e.ledger().set_timestamp(2);
+    assert_eq!(
+        client.try_get_vested_amount(),
+        Err(Ok(ContractError::ArithmeticOverflow))
+    );
+    e.as_contract(&contract_id, || {
+        e.storage().instance().remove(&DataKey::Config);
+    });
+    e.ledger().set_timestamp(start_time);
+
+    client.initialize(
+        &funder,
+        &beneficiary,
+        &token_contract,
+        &start_time,
+        &0,
+        &1_000,
+        &10_000,
+        &clawback_admin,
+        &upgrade_admin,
+    );
+    assert_eq!(
+        client.try_initialize(
+            &funder,
+            &beneficiary,
+            &token_contract,
+            &start_time,
+            &0,
+            &1_000,
+            &10_000,
+            &clawback_admin,
+            &upgrade_admin,
+        ),
+        Err(Ok(ContractError::AlreadyInitialized))
+    );
+
+    client.clawback();
+    assert_eq!(
+        client.try_clawback(),
+        Err(Ok(ContractError::VestingInactive))
+    );
+}
+
 // ── Upgradeability ────────────────────────────────────────────────────────────
 
 /// The contract the upgrade tests upgrade *to*. See
