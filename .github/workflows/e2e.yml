@@ -11,6 +11,7 @@ on:
       - "frontend/**"
       - ".github/workflows/e2e.yml"
 
+# Retention policy: Keep successful runs for 30 days, failed/cancelled for 7 days
 defaults:
   run:
     working-directory: frontend
