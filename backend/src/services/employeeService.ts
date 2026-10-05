@@ -47,8 +47,26 @@ export class EmployeeService {
   }
 
   async findAll(organization_id: number, params: EmployeeQueryInput) {
-    const { page = 1, limit = 10, search, status, department } = params;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      status,
+      department,
+      sort = 'created_at',
+      order = 'desc',
+    } = params;
     const offset = (page - 1) * limit;
+    const sortColumns = {
+      created_at: 'created_at',
+      first_name: 'first_name',
+      last_name: 'last_name',
+      email: 'email',
+      department: 'department',
+      status: 'status',
+    } as const;
+    const sortColumn = sortColumns[sort];
+    const sortDirection = order === 'asc' ? 'ASC' : 'DESC';
 
     let query = `
       SELECT *, count(*) OVER() as total_count
@@ -85,7 +103,7 @@ export class EmployeeService {
       paramIndex++;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    query += ` ORDER BY ${sortColumn} ${sortDirection} LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     values.push(limit, offset);
 
     const result = await pool.query(query, values);
