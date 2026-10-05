@@ -1,0 +1,70 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> payd-backend@1.0.0 test
+> jest --runInBand --runTestsByPath src/observability/__tests__/sentry.test.ts --json --outputFile=/tmp/payd721-sentry-red-results.json
+
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+(node:18) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/observability/__tests__/sentry.test.ts
+  Sentry backend observability
+    ✓ builds bounded request context with request, user and route identifiers (2 ms)
+    ✓ removes sensitive request payload, query, cookies and credential headers (1 ms)
+    ✕ removes query and fragment details from request and case-insensitive referrer URLs (3 ms)
+    ✕ sanitizes a real SDK event while preserving capture identifiers (129 ms)
+
+  ● Sentry backend observability › removes query and fragment details from request and case-insensitive referrer URLs
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Object {
+        "cookies": undefined,
+        "data": undefined,
+        "headers": Object {
+    -     "Referer": "https://payd.example.invalid/dashboard",
+    +     "Referer": "https://payd.example.invalid/dashboard?note=private#private-fragment",
+          "accept": "application/json",
+    -     "rEfErReR": "/dashboard",
+    +     "rEfErReR": "/dashboard?note=private#private-fragment",
+        },
+        "query_string": undefined,
+    -   "url": "https://payd.example.invalid/api/payroll",
+    +   "url": "https://payd.example.invalid/api/payroll?note=private#private-fragment",
+      }
+
+      65 |     };
+      66 |
+    > 67 |     expect(sanitizeSentryEvent(event).request).toEqual({
+         |                                                ^
+      68 |       url: 'https://payd.example.invalid/api/payroll',
+      69 |       data: undefined,
+      70 |       cookies: undefined,
+
+      at Object.<anonymous> (src/observability/__tests__/sentry.test.ts:67:48)
+
+  ● Sentry backend observability › sanitizes a real SDK event while preserving capture identifiers
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "https://payd.example.invalid/api/payroll/employees/42"
+    Received: "https://payd.example.invalid/api/payroll/employees/42?payrollNote=DUMMY_PRIVATE_QUERY&secretKey=[Filtered]"
+
+      120 |       expect(events).toHaveLength(1);
+      121 |       const event = events[0]!;
+    > 122 |       expect(event.request?.url).toBe('https://payd.example.invalid/api/payroll/employees/42');
+          |                                  ^
+      123 |       expect(event.request?.headers?.referer).toBe('https://payd.example.invalid/dashboard');
+      124 |       expect(event.request?.headers?.['x-request-id']).toBe('sdk-request-123');
+      125 |       expect(event.tags).toMatchObject({
+
+      at Object.<anonymous> (src/observability/__tests__/sentry.test.ts:122:34)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 passed, 4 total
+Snapshots:   0 total
+Time:        2.867 s, estimated 3 s
+Ran all test suites within paths "src/observability/__tests__/sentry.test.ts".
+Test results written to: ../../../../../tmp/payd721-sentry-red-results.json

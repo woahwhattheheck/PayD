@@ -1,0 +1,15 @@
+src/services/tenantConfigService.ts(207,3): error TS1434: Unexpected keyword or identifier.
+src/services/tenantConfigService.ts(207,45): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(207,54): error TS1005: ';' expected.
+src/services/tenantConfigService.ts(207,97): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(208,11): error TS1005: ':' expected.
+src/services/tenantConfigService.ts(208,77): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(209,12): error TS1005: ':' expected.
+src/services/tenantConfigService.ts(209,21): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(215,3): error TS1434: Unexpected keyword or identifier.
+src/services/tenantConfigService.ts(216,19): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(217,14): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(218,4): error TS1005: ';' expected.
+src/services/tenantConfigService.ts(219,12): error TS1005: ':' expected.
+src/services/tenantConfigService.ts(219,77): error TS1005: ',' expected.
+src/services/tenantConfigService.ts(221,1): error TS1128: Declaration or statement expected.

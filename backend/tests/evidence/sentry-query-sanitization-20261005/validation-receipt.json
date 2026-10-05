@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "operation": "PAYD721-SENTRY-EXACT-SOURCE-VALIDATION-20261005",
+  "pullRequest": "https://github.com/Protocol-Guild/PayD/pull/721",
+  "executedFrozenHead": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+  "sponsorBase": "171c74b454daba241bfb75f36d10a0a3a77a68e5",
+  "successorState": "Published source successor; independently verified same tested input blobs.",
+  "sourceAttribution": "Preserves the released GF-PAYD540 source and publication carrier. No replacement PR.",
+  "runtime": {
+    "node": "v24.19.0",
+    "packages": {
+      "@sentry/node": "10.76.0",
+      "@sentry/core": "10.76.0",
+      "@sentry/cli": "3.8.0",
+      "express": "5.2.1",
+      "jest": "30.2.0",
+      "ts-jest": "29.4.12",
+      "typescript": "5.9.3",
+      "eslint": "8.57.1"
+    },
+    "install": "npm ci --ignore-scripts --no-audit --no-fund",
+    "installedPackages": 848,
+    "dependenciesModified": false,
+    "sponsorLockDifference": {
+      "addedPackages": 29,
+      "existingVersionChanges": 0,
+      "removedPackages": 0
+    }
+  },
+  "trackedInputs": {
+    "backend/src/observability/sentry.ts": {
+      "sha256": "aa63eafcaaadd35359190c4f8e813abe736a29fc01bdf946913cb86a9908df94",
+      "gitBlob": "e2ef48f38b73f967df8cc45aa899050f96b26cb6"
+    },
+    "backend/src/observability/__tests__/sentry.test.ts": {
+      "sha256": "00a9d21768bc98ad11f1b751ba68b0772a2a3ed3b7e5e562376285045bdcd0e1",
+      "gitBlob": "fe3a7798d79ea8f54b1653a2439f9d270c1ad793"
+    },
+    "backend/package.json": {
+      "sha256": "5bc36e9a52ab6da35d7103760b1a1fafad120dfcca9f62557688a393c2cf103b",
+      "gitBlob": "0c24ea5495e9862b43eb628fcd4a6ef02b878b45"
+    },
+    "backend/package-lock.json": {
+      "sha256": "7bcfdfa5b60f71426c1c13aeb11f4e2ad5310287edbdbcd447e3bc3473469891",
+      "gitBlob": "f07cf367544a48422c03544cb5cbff929f3a8a4b"
+    }
+  },
+  "checks": {
+    "existingFocused": {
+      "passed": 2,
+      "failed": 0
+    },
+    "sameNewRegressionOnFrozenRuntime": {
+      "passed": 2,
+      "failed": 4,
+      "total": 6,
+      "runtimeWorktree": "Exact3e71b117 detached source with only final test file overlaid; production/dependency files unchanged.",
+      "failureReason": "Request/referrer query/fragment details and unexpected non-string URL/referrer values survive the frozen sanitizer."
+    },
+    "candidateFocused": {
+      "passed": 6,
+      "failed": 0,
+      "total": 6,
+      "includesRealSdkRecordingTransport": true
+    },
+    "candidateScopedStrictTypes": {
+      "exit": 0,
+      "command": "./node_modules/.bin/tsc --noEmit --strict --skipLibCheck --module NodeNext --moduleResolution NodeNext --target es2022 --esModuleInterop --types node,jest,passport src/instrument.ts src/observability/sentry.ts src/observability/__tests__/sentry.test.ts src/types/auth.ts"
+    },
+    "candidateScopedLint": {
+      "exit": 0,
+      "errors": 0,
+      "warnings": 7,
+      "command": "./node_modules/.bin/eslint --no-eslintrc --config .sentry-validation.eslintrc.cjs src/instrument.ts src/observability/sentry.ts src/observability/__tests__/sentry.test.ts src/app.ts src/index.ts",
+      "configuration": "Byte-identical existing .eslintrc.js copied to an untracked .cjs filename because existing CommonJS .js config fails under type:module; no rules altered."
+    },
+    "wholeBackendTypes": {
+      "exit": 2,
+      "errors": 15,
+      "cause": "Existing tenantConfigService.ts syntax errors",
+      "unchangedSponsorBaselineOutputByteIdentical": true,
+      "baselineDependencies": "Same locked installation; only the additive Sentry packages differ from sponsor main.",
+      "executionHead": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+      "finalCandidateWholeBackendNotClaimed": true
+    },
+    "diffWhitespace": {
+      "exit": 0
+    }
+  },
+  "sdkRecordingProof": {
+    "before": {
+      "sourceHead": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+      "sdkVersion": "10.76.0",
+      "recordingTransportOnly": true,
+      "realExpressExecution": false,
+      "actualSentryDelivery": false,
+      "eventCount": 1,
+      "tags": {
+        "request_id": "probe-request-123",
+        "route": "/api/payroll/employees/:employeeId",
+        "method": "GET",
+        "error_type": "Error"
+      },
+      "user": {
+        "id": "17"
+      },
+      "context": {
+        "requestId": "probe-request-123",
+        "route": "/api/payroll/employees/:employeeId",
+        "method": "GET"
+      },
+      "request": {
+        "headers": {
+          "host": "payd.example.invalid",
+          "referer": "https://payd.example.invalid/dashboard?payrollNote=DUMMY_REFERER_QUERY#DUMMY_FRAGMENT"
+        },
+        "method": "GET",
+        "url": "https://payd.example.invalid/api/payroll/employees/42?payrollNote=DUMMY_PRIVATE_QUERY&secretKey=[Filtered]"
+      },
+      "queryStringAbsent": true,
+      "requestBodyAbsent": true,
+      "credentialHeadersAbsent": true,
+      "privateQueryPresent": true,
+      "referrerQueryPresent": true,
+      "fragmentPresent": true,
+      "rawSecretKeyPresent": false,
+      "authPresent": false,
+      "bodyPresent": false
+    },
+    "candidate": {
+      "sourceBase": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+      "productionSourceSha256": "aa63eafcaaadd35359190c4f8e813abe736a29fc01bdf946913cb86a9908df94",
+      "sdkVersion": "10.76.0",
+      "recordingTransportOnly": true,
+      "realExpressExecution": false,
+      "actualSentryDelivery": false,
+      "eventCount": 1,
+      "tags": {
+        "request_id": "probe-request-123",
+        "route": "/api/payroll/employees/:employeeId",
+        "method": "GET",
+        "error_type": "Error"
+      },
+      "user": {
+        "id": "17"
+      },
+      "context": {
+        "requestId": "probe-request-123",
+        "route": "/api/payroll/employees/:employeeId",
+        "method": "GET"
+      },
+      "request": {
+        "headers": {
+          "host": "payd.example.invalid",
+          "referer": "https://payd.example.invalid/dashboard"
+        },
+        "method": "GET",
+        "url": "https://payd.example.invalid/api/payroll/employees/42"
+      },
+      "queryStringAbsent": true,
+      "requestBodyAbsent": true,
+      "credentialHeadersAbsent": true,
+      "privateQueryPresent": false,
+      "referrerQueryPresent": false,
+      "fragmentPresent": false,
+      "rawSecretKeyPresent": false,
+      "authPresent": false,
+      "bodyPresent": false
+    },
+    "frozenRawSecretKeyAlreadyFilteredBySdk": true
+  },
+  "limitations": [
+    "Recording-only transport; no live Sentry delivery, credentials or organization-side alert rule.",
+    "Controlled normalized request and real SDK capture function; no full Express route/server execution.",
+    "Unhandled-process handlers are source-reviewed default SDK integrations, not deliberately triggered.",
+    "No complete backend build/suite or hosted CI pass is claimed.",
+    "Fix scope is request URL and referrer URL query/fragment details; no universal telemetry PII claim."
+  ],
+  "logs": {
+    "/tmp/payd721-sentry-npm-ci.log": {
+      "sha256": "c7c686e8982e4a48170f1030f8c7a1a8c448cb1fd878614a3d754a71efa2c75a",
+      "bytes": 2665,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-npm-ci.log"
+    },
+    "/tmp/payd721-sentry-focused-tests.log": {
+      "sha256": "b63bddde4dcc47c64ee24c3ac921d92b653e76cbf2111ea27009f57691712dbe",
+      "bytes": 1755,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-focused-tests.log"
+    },
+    "/tmp/payd721-sentry-red-tests.log": {
+      "sha256": "7090fd10eed22d3130e7c953eb2c4d639d9ab1a0cbbd88450e8dddf09b3ab4db",
+      "bytes": 3687,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-red-tests.log"
+    },
+    "/tmp/payd721-sentry-red-results.json": {
+      "sha256": "b8e2e5b8d43fd513386b9b15ea27838a45c99481dd1d360874de623aee977a0a",
+      "bytes": 9457,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-red-results.json"
+    },
+    "/tmp/payd721-sentry-green-tests.log": {
+      "sha256": "ffbd3b54d089d6dc3c4ee14e536d28a1905da578a6b9a3b6c1ca07a76b6679c5",
+      "bytes": 1923,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-green-tests.log"
+    },
+    "/tmp/payd721-sentry-green-results.json": {
+      "sha256": "a03f7170f0a04e93256206eede027ad5f4c3992bf8fe3edf6d1cee18e4efcae7",
+      "bytes": 2526,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-green-results.json"
+    },
+    "/tmp/payd721-sentry-green-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-green-scoped-types.log"
+    },
+    "/tmp/payd721-sentry-green-scoped-lint.log": {
+      "sha256": "16533da22f8a99b96cb196fb4d137824014cb55ce435968eec3be78dee684132",
+      "bytes": 992,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-green-scoped-lint.log"
+    },
+    "/tmp/payd721-sentry-whole-types.log": {
+      "sha256": "e06cf14fb2774d9f6237b8db1d8c009e96516eef270071c33bc066c1cb5f7a4a",
+      "bytes": 1152,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-whole-types.log"
+    },
+    "/tmp/payd721-sentry-baseline-whole-types.log": {
+      "sha256": "e06cf14fb2774d9f6237b8db1d8c009e96516eef270071c33bc066c1cb5f7a4a",
+      "bytes": 1152,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-baseline-whole-types.log"
+    },
+    "/tmp/payd721-sentry-sdk-red-probe.json": {
+      "sha256": "8e2892a60134c25aed7e99ff63872812fdbf741b6b992c42452dddea7dc7d971",
+      "bytes": 1115,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-sdk-red-probe.json"
+    },
+    "/tmp/payd721-sentry-sdk-green-probe.json": {
+      "sha256": "10e95b5ab0564600da290c7b025542e336fe3d91cad0e751f86166d9b7a39569",
+      "bytes": 1114,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-sdk-green-probe.json"
+    },
+    "/tmp/payd721-sentry-successor.patch": {
+      "sha256": "c2a81c166d17cbde246df6fb994cbde46fec35cf91c7eb66a693ba81762e5f91",
+      "bytes": 6701,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-successor.patch"
+    },
+    "/tmp/payd721-sentry-final-red-tests.log": {
+      "sha256": "caaf3a8a4569c860c816cb6e5f63bacf2ef7af8ded58552561b063606b7f808b",
+      "bytes": 5633,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-final-red-tests.log"
+    },
+    "/tmp/payd721-sentry-final-red-results.json": {
+      "sha256": "212c7b7b7e824ee83c33a9b7dcf6c21fbaf85cda60c9a68514b6213ab4a32102",
+      "bytes": 16408,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-final-red-results.json"
+    },
+    "/tmp/payd721-sentry-final-green-tests.log": {
+      "sha256": "281a78272d6938a8720ae7f7cfebe02d595ac5e196e6d375d3372bebfb7f077d",
+      "bytes": 2124,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-final-green-tests.log"
+    },
+    "/tmp/payd721-sentry-final-green-results.json": {
+      "sha256": "5141a5a45cd33f10545c0bd86fac54f6e1b97d1616d1926a438d9e1b960def4e",
+      "bytes": 3404,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-final-green-results.json"
+    },
+    "/tmp/payd721-sentry-final-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-final-scoped-types.log"
+    },
+    "/tmp/payd721-sentry-final-scoped-lint.log": {
+      "sha256": "16533da22f8a99b96cb196fb4d137824014cb55ce435968eec3be78dee684132",
+      "bytes": 992,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-final-scoped-lint.log"
+    },
+    "/tmp/payd721-sentry-sdk-final-probe.json": {
+      "sha256": "3ce02e776a655e4bd765206e5650783d05efe52993a273d313610c734f8f80f9",
+      "bytes": 1114,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-sdk-final-probe.json"
+    },
+    "/tmp/payd721-sentry-sdk-final-probe.log": {
+      "sha256": "3ce02e776a655e4bd765206e5650783d05efe52993a273d313610c734f8f80f9",
+      "bytes": 1114,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-sdk-final-probe.log"
+    },
+    "/tmp/payd721-sentry-sdk-probe.mts": {
+      "sha256": "e13b01408d936d0115cb8ad63f726c59e7a07da3b49634afa5a1bd069c01ee07",
+      "bytes": 3321,
+      "retainedPath": "backend/tests/evidence/sentry-query-sanitization-20261005/payd721-sentry-sdk-probe.mts"
+    }
+  },
+  "repairScope": {
+    "requestUrl": "Remove literal query/fragment suffix, preserving origin/path; non-string becomes undefined.",
+    "referrerHeaders": "Same removal for case-insensitive Referer/Referrer; non-string becomes undefined.",
+    "preserved": "Method, route pattern, request/user/error identifiers, safe request headers, existing body/cookie/credential removal.",
+    "unexpanded": "No arbitrary context, breadcrumbs, error message, or universal PII sanitization claim."
+  },
+  "publication": {
+    "sourceCommit": "6102b3bc44775889785966bed058d9e98a4705bb",
+    "sourceTree": "251527e3eb4066714e560a8c386f06d03d9c4121",
+    "soleParent": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+    "sourceBranch": "sol56/payd540-backend-sentry-clean-20261005",
+    "sourceFilesChanged": 2,
+    "force": false,
+    "sourceReadback": "Native source bytes and two-file compare independently verified.",
+    "evidenceBranch": "validation/payd721-sentry-query-sanitization-20261005",
+    "evidenceRootPath": "backend/tests/evidence/sentry-query-sanitization-20261005",
+    "executionNote": "Final candidate file bytes were tested before publication; both match the published source blobs. No post-publication full build/hosted CI claim."
+  }
+}

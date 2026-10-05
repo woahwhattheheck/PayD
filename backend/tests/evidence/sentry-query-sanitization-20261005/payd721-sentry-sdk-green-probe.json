@@ -1,0 +1,40 @@
+{
+  "sourceBase": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+  "productionSourceSha256": "a6a6d08a8ada86b13d6e860d319a1d9b53bc67d74de94d663d784cad457dace0",
+  "sdkVersion": "10.76.0",
+  "recordingTransportOnly": true,
+  "realExpressExecution": false,
+  "actualSentryDelivery": false,
+  "eventCount": 1,
+  "tags": {
+    "request_id": "probe-request-123",
+    "route": "/api/payroll/employees/:employeeId",
+    "method": "GET",
+    "error_type": "Error"
+  },
+  "user": {
+    "id": "17"
+  },
+  "context": {
+    "requestId": "probe-request-123",
+    "route": "/api/payroll/employees/:employeeId",
+    "method": "GET"
+  },
+  "request": {
+    "headers": {
+      "host": "payd.example.invalid",
+      "referer": "https://payd.example.invalid/dashboard"
+    },
+    "method": "GET",
+    "url": "https://payd.example.invalid/api/payroll/employees/42"
+  },
+  "queryStringAbsent": true,
+  "requestBodyAbsent": true,
+  "credentialHeadersAbsent": true,
+  "privateQueryPresent": false,
+  "referrerQueryPresent": false,
+  "fragmentPresent": false,
+  "rawSecretKeyPresent": false,
+  "authPresent": false,
+  "bodyPresent": false
+}

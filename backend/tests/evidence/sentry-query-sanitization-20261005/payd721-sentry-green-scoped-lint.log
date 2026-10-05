@@ -1,0 +1,16 @@
+
+/workspace/scratch/ea8baa184658/payd721-sentry-validation/backend/src/app.ts
+   95:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  185:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  190:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  196:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/ea8baa184658/payd721-sentry-validation/backend/src/observability/__tests__/sentry.test.ts
+  28:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/scratch/ea8baa184658/payd721-sentry-validation/backend/src/observability/sentry.ts
+  46:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 7 problems (0 errors, 7 warnings)
+

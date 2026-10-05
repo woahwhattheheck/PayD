@@ -1,0 +1,156 @@
+diff --git a/backend/src/observability/__tests__/sentry.test.ts b/backend/src/observability/__tests__/sentry.test.ts
+index 27659d5..fe3a779 100644
+--- a/backend/src/observability/__tests__/sentry.test.ts
++++ b/backend/src/observability/__tests__/sentry.test.ts
+@@ -1,5 +1,7 @@
+ import type { Request } from 'express';
+-import { buildSentryRequestContext, sanitizeSentryEvent } from '../sentry.js';
++import * as Sentry from '@sentry/node';
++import { httpRequestToRequestData } from '@sentry/core';
++import { buildSentryRequestContext, captureRequestError, sanitizeSentryEvent } from '../sentry.js';
+ 
+ describe('Sentry backend observability', () => {
+   it('builds bounded request context with request, user and route identifiers', () => {
+@@ -49,4 +51,109 @@ describe('Sentry backend observability', () => {
+     expect(sanitized.request.headers['x-request-id']).toBe('req-123');
+     expect(sanitized.request.headers.accept).toBe('application/json');
+   });
++
++  it('removes query and fragment details from request and case-insensitive referrer URLs', () => {
++    const event = {
++      request: {
++        url: 'https://payd.example.invalid/api/payroll?note=private#private-fragment',
++        headers: {
++          Referer: 'https://payd.example.invalid/dashboard?note=private#private-fragment',
++          rEfErReR: '/dashboard?note=private#private-fragment',
++          accept: 'application/json',
++        },
++      },
++    };
++
++    expect(sanitizeSentryEvent(event).request).toEqual({
++      url: 'https://payd.example.invalid/api/payroll',
++      data: undefined,
++      cookies: undefined,
++      query_string: undefined,
++      headers: {
++        Referer: 'https://payd.example.invalid/dashboard',
++        rEfErReR: '/dashboard',
++        accept: 'application/json',
++      },
++    });
++  });
++
++  it.each([
++    { shape: 'array', value: ['https://payd.example.invalid/?note=private'] },
++    { shape: 'object', value: { url: 'https://payd.example.invalid/?note=private' } },
++  ])('drops unexpected $shape URL and referrer values without losing safe headers', ({ value }) => {
++    const event = {
++      request: {
++        url: value,
++        headers: { Referer: value, referrer: value, 'x-request-id': 'req-123' },
++      },
++    };
++
++    const sanitized = sanitizeSentryEvent(event);
++    expect(sanitized.request.url).toBeUndefined();
++    expect(sanitized.request.headers.Referer).toBeUndefined();
++    expect(sanitized.request.headers.referrer).toBeUndefined();
++    expect(sanitized.request.headers['x-request-id']).toBe('req-123');
++  });
++
++  it('sanitizes a real SDK event while preserving capture identifiers', async () => {
++    const events: Sentry.Event[] = [];
++    const req = {
++      requestId: 'sdk-request-123', method: 'GET', baseUrl: '/api/payroll',
++      route: { path: '/employees/:employeeId' }, path: '/employees/42',
++      url: '/api/payroll/employees/42?payrollNote=DUMMY_PRIVATE_QUERY&secretKey=DUMMY_SECRET_KEY',
++      protocol: 'https',
++      user: { id: 17, email: 'dummy-private@example.invalid' },
++      headers: {
++        host: 'payd.example.invalid', authorization: 'Bearer DUMMY_AUTH',
++        cookie: 'session=DUMMY_COOKIE', 'x-request-id': 'sdk-request-123',
++        referer: 'https://payd.example.invalid/dashboard?payrollNote=DUMMY_REFERER_QUERY#DUMMY_FRAGMENT',
++      },
++      body: { password: 'DUMMY_BODY_PASSWORD' },
++    } as unknown as Request;
++
++    // The real SDK processes the request and capture scope. Its transport only
++    // records events in memory; no Sentry service or Express server is contacted.
++    Sentry.init({
++      dsn: 'https://0123456789abcdef0123456789abcdef@sentry.example.invalid/1',
++      sendDefaultPii: false,
++      beforeSend: sanitizeSentryEvent,
++      transport: () => ({
++        send(envelope) {
++          for (const [header, item] of envelope[1]) {
++            if (header.type === 'event') events.push(item as Sentry.Event);
++          }
++          return Promise.resolve({ statusCode: 200 });
++        },
++        flush: async () => true,
++      }),
++    });
++
++    try {
++      Sentry.withIsolationScope((scope) => {
++        scope.setSDKProcessingMetadata({ normalizedRequest: httpRequestToRequestData(req) });
++        captureRequestError(new RangeError('controlled capture failure'), req);
++      });
++      await Sentry.flush(2000);
++
++      expect(events).toHaveLength(1);
++      const event = events[0]!;
++      expect(event.request?.url).toBe('https://payd.example.invalid/api/payroll/employees/42');
++      expect(event.request?.headers?.referer).toBe('https://payd.example.invalid/dashboard');
++      expect(event.request?.headers?.['x-request-id']).toBe('sdk-request-123');
++      expect(event.tags).toMatchObject({
++        request_id: 'sdk-request-123', route: '/api/payroll/employees/:employeeId',
++        method: 'GET', error_type: 'RangeError',
++      });
++      expect(event.user).toEqual({ id: '17' });
++      expect(event.contexts?.payd_request).toEqual({
++        requestId: 'sdk-request-123', route: '/api/payroll/employees/:employeeId', method: 'GET',
++      });
++      for (const marker of ['DUMMY_PRIVATE_QUERY', 'DUMMY_REFERER_QUERY', 'DUMMY_FRAGMENT',
++        'DUMMY_AUTH', 'DUMMY_COOKIE', 'DUMMY_BODY_PASSWORD', 'dummy-private@example.invalid']) {
++        expect(JSON.stringify(event)).not.toContain(marker);
++      }
++    } finally {
++      await Sentry.close(2000);
++    }
++  });
+ });
+diff --git a/backend/src/observability/sentry.ts b/backend/src/observability/sentry.ts
+index fa19b04..e2ef48f 100644
+--- a/backend/src/observability/sentry.ts
++++ b/backend/src/observability/sentry.ts
+@@ -32,6 +32,12 @@ export function buildSentryRequestContext(req: Request): SentryRequestContext {
+   };
+ }
+ 
++function stripUrlQueryAndFragment(value: unknown): unknown {
++  if (typeof value !== 'string') return undefined;
++  const detailsStart = value.search(/[?#]/);
++  return detailsStart === -1 ? value : value.slice(0, detailsStart);
++}
++
+ /**
+  * PayD handles payroll credentials and, historically, some payment endpoints
+  * accepted sensitive values in query strings. Keep those surfaces out of
+@@ -46,11 +52,14 @@ export function sanitizeSentryEvent(event: any): any {
+     if (normalized === 'authorization' || normalized === 'cookie' || normalized === 'set-cookie') {
+       continue;
+     }
+-    sanitizedHeaders[name] = value;
++    sanitizedHeaders[name] = normalized === 'referer' || normalized === 'referrer'
++      ? stripUrlQueryAndFragment(value)
++      : value;
+   }
+ 
+   event.request = {
+     ...event.request,
++    url: stripUrlQueryAndFragment(event.request.url),
+     data: undefined,
+     cookies: undefined,
+     query_string: undefined,

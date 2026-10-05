@@ -1,0 +1,39 @@
+{
+  "sourceHead": "3e71b117490ed0d381734d31be4ed4cc0a62e2eb",
+  "sdkVersion": "10.76.0",
+  "recordingTransportOnly": true,
+  "realExpressExecution": false,
+  "actualSentryDelivery": false,
+  "eventCount": 1,
+  "tags": {
+    "request_id": "probe-request-123",
+    "route": "/api/payroll/employees/:employeeId",
+    "method": "GET",
+    "error_type": "Error"
+  },
+  "user": {
+    "id": "17"
+  },
+  "context": {
+    "requestId": "probe-request-123",
+    "route": "/api/payroll/employees/:employeeId",
+    "method": "GET"
+  },
+  "request": {
+    "headers": {
+      "host": "payd.example.invalid",
+      "referer": "https://payd.example.invalid/dashboard?payrollNote=DUMMY_REFERER_QUERY#DUMMY_FRAGMENT"
+    },
+    "method": "GET",
+    "url": "https://payd.example.invalid/api/payroll/employees/42?payrollNote=DUMMY_PRIVATE_QUERY&secretKey=[Filtered]"
+  },
+  "queryStringAbsent": true,
+  "requestBodyAbsent": true,
+  "credentialHeadersAbsent": true,
+  "privateQueryPresent": true,
+  "referrerQueryPresent": true,
+  "fragmentPresent": true,
+  "rawSecretKeyPresent": false,
+  "authPresent": false,
+  "bodyPresent": false
+}
