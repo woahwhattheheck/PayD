@@ -28,9 +28,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Resolve the two test-only dependencies
+      - name: Resolve the hook test dependencies
         run: |
-          npm install --save-dev --save-exact --legacy-peer-deps --ignore-scripts --no-audit --no-fund @testing-library/react@16.3.0 jsdom@26.1.0
+          npm install --save-dev --save-exact --legacy-peer-deps --ignore-scripts --no-audit --no-fund @testing-library/react@16.3.0 @testing-library/dom@10.4.1 jsdom@26.1.0
           npm pkg set 'scripts.test:hooks=vitest run --config vitest.hooks.config.ts'
       - name: Preserve only the generated package manifest and lockfile
         run: |
