@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 
 export interface CSVRow {
@@ -23,6 +23,12 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
   const [parsedData, setParsedData] = useState<CSVRow[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const readGeneration = useRef(0);
+
+  // Modified 2026-10-05: prevent replaced or unmounted reads from publishing CSV data.
+  useEffect(() => () => {
+    readGeneration.current += 1;
+  }, []);
 
   const parseCSV = (content: string): CSVRow[] => {
     const lines = content.trim().split('\n');
@@ -77,6 +83,13 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
   };
 
   const handleFileParse = (file: File) => {
+    const generation = ++readGeneration.current;
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setParsedData([]);
+    setFileName(null);
+    onDataParsed([], '');
+    if (generation !== readGeneration.current) return;
+
     if (!file.name.endsWith('.csv')) {
       alert('Please upload a CSV file');
       return;
@@ -84,15 +97,32 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
 
     setFileName(file.name);
     const reader = new FileReader();
+    const handleReadError = () => {
+      if (generation === readGeneration.current) {
+        alert('Unable to read the CSV file. Please select it again.');
+      }
+    };
 
     reader.onload = (e) => {
-      const content = e.target?.result as string;
+      if (generation !== readGeneration.current) return;
+      const content = e.target?.result;
+      if (typeof content !== 'string') {
+        handleReadError();
+        return;
+      }
       const rows = parseCSV(content);
+      if (generation !== readGeneration.current) return;
       setParsedData(rows);
       onDataParsed(rows, content);
     };
+    reader.onerror = handleReadError;
+    reader.onabort = handleReadError;
 
-    reader.readAsText(file);
+    try {
+      reader.readAsText(file);
+    } catch {
+      handleReadError();
+    }
   };
 
   const handleDragEnter = (e: React.DragEvent) => {
