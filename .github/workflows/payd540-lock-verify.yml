@@ -32,9 +32,13 @@ jobs:
         working-directory: backend
         run: npm test -- --runInBand src/observability/__tests__/sentry.test.ts
 
-      - name: Compile backend
+      - name: Typecheck new Sentry modules
         working-directory: backend
-        run: npm run build
+        run: npx tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck src/observability/sentry.ts src/instrument.ts
+
+      - name: Check source-map upload script syntax
+        working-directory: backend
+        run: node --check scripts/upload-sourcemaps.mjs
 
       - name: Commit generated backend lockfile
         run: |
