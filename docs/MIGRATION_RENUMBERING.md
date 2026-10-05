@@ -28,6 +28,17 @@ pending migration SQL is executed.
 This is forward compatibility, not an automatic downgrade of migration history.
 Do not run the old filename-only runner against history written by the new runner.
 
+## Command modes
+
+Use no command arguments to apply pending migrations, or `--dry-run` to read
+history and report the plan. Other arguments, including the formerly reserved
+`--rollback`, exit with code 1 before opening a database connection. Rollback is
+not implemented; an unsupported option must not silently select the apply mode.
+The runner still requires its existing `DATABASE_URL` configuration.
+
+This command-mode correction was source-inspected only. It does not add or rerun
+the historical validation below, and no database migration was executed for it.
+
 ## Adding a migration
 
 Add `039_<description>.sql` next, then continue sequentially. Do not renumber an

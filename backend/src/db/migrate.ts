@@ -26,7 +26,7 @@
  * ─────
  *   ts-node src/db/migrate.ts              # run pending migrations
  *   ts-node src/db/migrate.ts --dry-run    # print plan only
- *   ts-node src/db/migrate.ts --rollback   # (reserved; not yet implemented)
+ *   Only --dry-run is supported; --rollback and unknown arguments are rejected.
  */
 
 import crypto from 'crypto';
@@ -284,7 +284,14 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-    const isDryRun = process.argv.includes('--dry-run');
+    const args = process.argv.slice(2);
+    if (args.some((arg) => arg !== '--dry-run')) {
+        console.error(
+            '[migrate] Unsupported argument. Use no arguments to apply migrations or --dry-run to plan; rollback is not implemented.',
+        );
+        process.exit(1);
+    }
+    const isDryRun = args.includes('--dry-run');
 
     console.log(
         `[migrate] Starting migration runner${isDryRun ? ' (DRY RUN)' : ''}`,
