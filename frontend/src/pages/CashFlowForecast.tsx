@@ -119,12 +119,13 @@ export default function CashFlowForecast() {
     ];
 
     forecast.projections
+      .slice()
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .forEach((proj) => {
         runningBalance -= proj.projectedAmount;
         data.push({
           date: new Date(proj.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          balance: Math.max(0, runningBalance),
+          balance: runningBalance,
         });
       });
 
