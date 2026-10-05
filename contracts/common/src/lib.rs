@@ -2,6 +2,8 @@
 
 use soroban_sdk::{contracterror, Address, Env, IntoVal, Val};
 
+pub mod sender_history;
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u32)]

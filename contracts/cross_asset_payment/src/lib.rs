@@ -2,7 +2,7 @@
 
 use soroban_sdk::{
     contract, contractimpl, contracttype, contracterror, contractevent,
-    symbol_short, Address, Env, String, Symbol, token,
+    symbol_short, Address, Env, String, Symbol, Vec, token,
 };
 use common::CommonError;
 
@@ -175,6 +175,7 @@ impl CrossAssetPaymentContract {
             PAYMENT_TTL_LEDGERS,
             PAYMENT_TTL_LEDGERS,
         );
+        common::sender_history::append(&env, &from, count);
 
         PaymentInitiatedEvent {
             payment_id: count,
@@ -260,6 +261,19 @@ impl CrossAssetPaymentContract {
         env.storage().instance().get(&DataKey::PaymentCount).unwrap_or(0)
     }
 
+    /// Zero-based payment history, newest first; limit is capped at 100.
+    /// Status changes and cancellations never reorder or remove history entries.
+    pub fn get_payments_by_sender(env: Env, sender: Address, page: u32, limit: u32) -> Vec<u64> {
+        common::sender_history::page(&env, &sender, page, limit)
+    }
+
+    /// Uniform history API shared with bulk_payment; returns payment IDs here.
+    pub fn get_batches_by_sender(env: Env, sender: Address, page: u32, limit: u32) -> Vec<u64> {
+        common::sender_history::page(&env, &sender, page, limit)
+    }
+
 }
 
 mod test;
+#[cfg(test)]
+mod history_test;

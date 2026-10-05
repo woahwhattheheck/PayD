@@ -149,6 +149,7 @@ impl BulkPaymentContract {
         }
 
         let batch_id = Self::next_batch_id(&env);
+        common::sender_history::append(&env, &sender, batch_id);
         env.storage().instance().set(&DataKey::Batch(batch_id), &BatchRecord {
             sender,
             token,
@@ -241,6 +242,7 @@ impl BulkPaymentContract {
         };
 
         let batch_id = Self::next_batch_id(&env);
+        common::sender_history::append(&env, &sender, batch_id);
         env.storage().instance().set(&DataKey::Batch(batch_id), &BatchRecord {
             sender,
             token,
@@ -269,6 +271,12 @@ impl BulkPaymentContract {
         env.storage().instance().get(&DataKey::BatchCount).unwrap_or(0)
     }
 
+    /// Zero-based sender history, newest first; limit is capped at 100.
+    /// Includes partial/all-skipped batch records, but never reverted calls.
+    pub fn get_batches_by_sender(env: Env, sender: Address, page: u32, limit: u32) -> Vec<u64> {
+        common::sender_history::page(&env, &sender, page, limit)
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     fn check_and_advance_sequence(env: &Env, expected: u64) -> Result<(), ContractError> {
@@ -294,3 +302,5 @@ impl BulkPaymentContract {
 
 #[cfg(test)]
 mod test;
+#[cfg(test)]
+mod history_test;

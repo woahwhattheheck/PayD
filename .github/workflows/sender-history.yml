@@ -1,0 +1,40 @@
+name: Sender history contracts
+
+on:
+  push:
+    paths:
+      - 'contracts/common/**'
+      - 'contracts/bulk_payment/**'
+      - 'contracts/cross_asset_payment/**'
+      - '.github/workflows/sender-history.yml'
+  pull_request:
+    paths:
+      - 'contracts/common/**'
+      - 'contracts/bulk_payment/**'
+      - 'contracts/cross_asset_payment/**'
+      - '.github/workflows/sender-history.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sender-history-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CARGO_TERM_COLOR: never
+      CARGO_BUILD_JOBS: 2
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Toolchain
+        run: rustc --version && cargo --version
+      - name: Test affected contract packages
+        run: cargo test --locked -p bulk_payment -p cross_asset_payment
