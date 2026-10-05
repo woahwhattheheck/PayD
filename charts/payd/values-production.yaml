@@ -1,11 +1,11 @@
 # Production values override for PayD Helm chart
-# Usage: helm install payd charts/payd -f charts/payd/values-production.yaml
+# Supply explicit image tags with --set-string; see docs/image-tags.md.
 
 backend:
   replicaCount: 3
   
   image:
-    tag: "stable"
+    # Inherit the explicitly supplied immutable tag; never override it here.
     pullPolicy: Always
   
   resources:
@@ -40,7 +40,7 @@ frontend:
   replicaCount: 3
   
   image:
-    tag: "stable"
+    # Inherit the explicitly supplied immutable tag; never override it here.
     pullPolicy: Always
   
   resources:

@@ -12,7 +12,9 @@ backend:
   
   image:
     repository: payd-backend
-    tag: "latest"
+    # Required: full commit SHA or a published, never-reused SemVer tag.
+    # Set with --set-string; see docs/image-tags.md.
+    tag: ""
     pullPolicy: IfNotPresent
   
   service:
@@ -79,7 +81,9 @@ frontend:
   
   image:
     repository: payd-frontend
-    tag: "latest"
+    # Required: full commit SHA or a published, never-reused SemVer tag.
+    # Set with --set-string; see docs/image-tags.md.
+    tag: ""
     pullPolicy: IfNotPresent
   
   service:

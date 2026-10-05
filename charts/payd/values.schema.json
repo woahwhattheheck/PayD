@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "backend",
+    "frontend"
+  ],
+  "properties": {
+    "backend": {
+      "$ref": "#/definitions/component"
+    },
+    "frontend": {
+      "$ref": "#/definitions/component"
+    }
+  },
+  "definitions": {
+    "immutableTag": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^([0-9a-f]{40}|v?(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?)$",
+      "not": {
+        "pattern": "[^0-9A-Za-z.-]"
+      },
+      "description": "Use a full lowercase commit SHA or a never-reused SemVer image tag (optional v prefix and prerelease, no + build metadata)."
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "if": {
+        "properties": {
+          "enabled": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "image"
+        ],
+        "properties": {
+          "image": {
+            "type": "object",
+            "required": [
+              "tag"
+            ],
+            "properties": {
+              "tag": {
+                "$ref": "#/definitions/immutableTag"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

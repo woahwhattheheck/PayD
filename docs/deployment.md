@@ -91,15 +91,16 @@ spec:
 ### 4. Build and Push Docker Images
 
 ```bash
+# Example only: publish 1.0.0 once; use a new tag for changed images.
 # Build backend
 cd backend
-docker build -t your-registry/payd-backend:latest .
-docker push your-registry/payd-backend:latest
+docker build -t your-registry/payd-backend:1.0.0 .
+docker push your-registry/payd-backend:1.0.0
 
 # Build frontend
-cd frontend
-docker build -t your-registry/payd-frontend:latest .
-docker push your-registry/payd-frontend:latest
+cd ../frontend
+docker build -t your-registry/payd-frontend:1.0.0 .
+docker push your-registry/payd-frontend:1.0.0
 ```
 
 ### 5. Update Image References
@@ -110,12 +111,12 @@ Edit the deployment files to use your registry:
 # k8s/base/backend-deployment.yaml
 containers:
   - name: backend
-    image: your-registry/payd-backend:latest
+    image: your-registry/payd-backend:1.0.0
 
 # k8s/base/frontend-deployment.yaml
 containers:
   - name: frontend
-    image: your-registry/payd-frontend:latest
+    image: your-registry/payd-frontend:1.0.0
 ```
 
 ### 6. Deploy
@@ -134,6 +135,12 @@ kubectl get ingress payd-ingress
 
 ## Option 2: Using Helm Chart
 
+Read [Reproducible Helm image tags](image-tags.md) first for the build/tag
+strategy, manual CI deployment, and rollback by selecting a previous tag.
+Every enabled component requires an explicit SHA or SemVer tag. The `1.0.0`
+examples below assume you have published that exact version and never reuse it.
+Keep real environment secrets out of version control.
+
 ### 1. Configure Values
 
 Create a custom values file or edit `charts/payd/values.yaml`:
@@ -145,7 +152,7 @@ global:
 
 backend:
   image:
-    tag: "latest"
+    tag: "1.0.0"
   secrets:
     DATABASE_URL: "postgresql://user:password@your-db-host:5432/payd_db"
     DB_USER: "your_db_user"
@@ -156,6 +163,8 @@ backend:
     SDS_API_KEY: "your_sds_api_key"
 
 frontend:
+  image:
+    tag: "1.0.0"
   config:
     VITE_API_URL: "https://api.payd.yourdomain.com"
 
@@ -193,10 +202,12 @@ helm install payd charts/payd \
   --create-namespace \
   -f my-values.yaml
 
-# Or use production values
+# Or use production values (IMAGE_TAG must identify already-published images)
 helm install payd charts/payd \
   --namespace payd \
   --create-namespace \
+  --set-string backend.image.tag="$IMAGE_TAG" \
+  --set-string frontend.image.tag="$IMAGE_TAG" \
   -f charts/payd/values-production.yaml
 ```
 
@@ -288,12 +299,18 @@ while true; do wget -q -O- http://payd-backend:3001/health; done
 
 ## Environment-Specific Deployments
 
+Set `IMAGE_TAG` to an already-published full commit SHA or SemVer tag before
+running either command. Add your environment values and secrets as described in
+[the image-tag guide](image-tags.md).
+
 ### Staging
 
 ```bash
 helm install payd-staging charts/payd \
   --namespace payd-staging \
   --create-namespace \
+  --set-string backend.image.tag="$IMAGE_TAG" \
+  --set-string frontend.image.tag="$IMAGE_TAG" \
   --set backend.config.NODE_ENV=staging \
   --set backend.replicaCount=1 \
   --set backend.autoscaling.enabled=false \
@@ -306,6 +323,8 @@ helm install payd-staging charts/payd \
 helm install payd charts/payd \
   --namespace payd \
   --create-namespace \
+  --set-string backend.image.tag="$IMAGE_TAG" \
+  --set-string frontend.image.tag="$IMAGE_TAG" \
   -f charts/payd/values-production.yaml
 ```
 

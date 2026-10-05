@@ -1,0 +1,72 @@
+name: Deploy immutable Helm images
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Configured deployment environment
+        type: environment
+        required: true
+      image_tag:
+        description: Already-published full commit SHA or SemVer tag (blank uses this workflow commit)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4.3.0
+        with:
+          version: v3.19.0
+      - name: Validate and select the image tag
+        shell: bash
+        env:
+          REQUESTED_IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE_TAG="${REQUESTED_IMAGE_TAG:-$GITHUB_SHA}"
+          # Validate through the chart schema, before creating any cluster files.
+          helm lint charts/payd \
+            --set-string backend.image.tag="$IMAGE_TAG" \
+            --set-string frontend.image.tag="$IMAGE_TAG"
+          printf 'IMAGE_TAG=%s\n' "$IMAGE_TAG" >> "$GITHUB_ENV"
+      - name: Deploy the selected existing images
+        shell: bash
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          HELM_RELEASE: ${{ vars.HELM_RELEASE || 'payd' }}
+          HELM_NAMESPACE: ${{ vars.HELM_NAMESPACE || 'payd' }}
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+          HELM_VALUES: ${{ secrets.HELM_VALUES }}
+        run: |
+          set -euo pipefail
+          : "${KUBE_CONFIG_DATA:?Configure the environment KUBE_CONFIG_DATA secret}"
+          : "${HELM_VALUES:?Configure the environment HELM_VALUES secret}"
+          umask 077
+          work_dir="$(mktemp -d "$RUNNER_TEMP/payd-helm.XXXXXX")"
+          trap 'rm -rf "$work_dir"' EXIT
+          export KUBECONFIG="$work_dir/kubeconfig"
+          printf '%s' "$KUBE_CONFIG_DATA" | base64 --decode > "$KUBECONFIG"
+          printf '%s' "$HELM_VALUES" > "$work_dir/values.yaml"
+          values_args=()
+          if [[ "$TARGET_ENVIRONMENT" == "production" ]]; then
+            values_args+=(-f charts/payd/values-production.yaml)
+          fi
+          # Environment settings and secrets override the profile, but cannot
+          # replace either tag: both --set-string overrides are applied last.
+          helm upgrade --install "$HELM_RELEASE" charts/payd \
+            --namespace "$HELM_NAMESPACE" --create-namespace \
+            "${values_args[@]}" -f "$work_dir/values.yaml" \
+            --set-string backend.image.tag="$IMAGE_TAG" \
+            --set-string frontend.image.tag="$IMAGE_TAG" \
+            --atomic --wait --timeout 5m
