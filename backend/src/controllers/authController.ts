@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import { pool, query } from '../config/database.js';
+import { sendInternalError } from '../utils/internalError.js';
 import {
   generateRefreshToken,
   generateToken,
@@ -23,13 +24,16 @@ import {
  * Translates a {@link TwoFactorError} into its HTTP response. Anything else is
  * reported as a generic 500 so internal details never reach the client.
  */
-function sendTwoFactorError(res: express.Response, error: unknown) {
+function sendTwoFactorError(
+  req: express.Request,
+  res: express.Response,
+  error: unknown
+) {
   if (error instanceof TwoFactorError) {
     return res.status(error.status).json({ error: error.message, code: error.code });
   }
 
-  console.error('2FA operation failed:', error);
-  return res.status(500).json({ error: 'Internal server error' });
+  return sendInternalError(res, req, error);
 }
 
 /** Issues an access/refresh pair and persists the refresh token. */
@@ -84,8 +88,7 @@ export class AuthController {
       // The raw token is only returned at creation time and is never stored.
       return res.status(201).json({ ...invitation.rows[0], token });
     } catch (error) {
-      console.error('Invitation creation failed:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      return sendInternalError(res, req, error);
     }
   }
 
@@ -125,8 +128,7 @@ export class AuthController {
       if (error?.code === '23505') {
         return res.status(409).json({ error: 'Wallet address is already registered' });
       }
-      console.error('Invitation registration failed:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      return sendInternalError(res, req, error);
     } finally {
       client.release();
     }
@@ -143,7 +145,7 @@ export class AuthController {
       const { secret, otpauthUrl, qrCode } = await startSetup(req.user!.id);
       return res.json({ qrCode, otpauthUrl, secret });
     } catch (error) {
-      return sendTwoFactorError(res, error);
+      return sendTwoFactorError(req, res, error);
     }
   }
 
@@ -170,7 +172,7 @@ export class AuthController {
         message: '2FA enabled. Store these recovery codes somewhere safe — they are shown once.',
       });
     } catch (error) {
-      return sendTwoFactorError(res, error);
+      return sendTwoFactorError(req, res, error);
     }
   }
 
@@ -191,7 +193,7 @@ export class AuthController {
       await disableTwoFactor(req.user!.id, submitted);
       return res.json({ success: true, enabled: false, message: '2FA disabled' });
     } catch (error) {
-      return sendTwoFactorError(res, error);
+      return sendTwoFactorError(req, res, error);
     }
   }
 
@@ -204,7 +206,7 @@ export class AuthController {
     try {
       return res.json(await getStatus(req.user!.id));
     } catch (error) {
-      return sendTwoFactorError(res, error);
+      return sendTwoFactorError(req, res, error);
     }
   }
 
@@ -251,7 +253,7 @@ export class AuthController {
         recoveryCodesRemaining: remaining.rows[0]?.count ?? 0,
       });
     } catch (error) {
-      return sendTwoFactorError(res, error);
+      return sendTwoFactorError(req, res, error);
     }
   }
 
@@ -287,9 +289,8 @@ export class AuthController {
       }
 
       return res.json(await issueSession(user));
-    } catch (error: any) {
-      console.error('Login failed:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+    } catch (error) {
+      return sendInternalError(res, req, error);
     }
   }
 
