@@ -438,3 +438,20 @@ fn test_vesting_continues_across_upgrade() {
     assert_eq!(token_client.balance(&f.contract_id), 10_000);
     assert_eq!(token_client.balance(&f.beneficiary), 0);
 }
+
+
+#[test]
+fn test_propose_upgrade_rejects_timestamp_overflow_without_pending_state() {
+    let f = setup_upgradeable();
+    let hash = new_wasm_hash(&f.e);
+
+    f.e
+        .ledger()
+        .set_timestamp(u64::MAX - UPGRADE_TIMELOCK_SECONDS + 1);
+
+    assert_eq!(
+        f.client.try_propose_upgrade(&hash),
+        Err(Ok(ContractError::TimestampOverflow))
+    );
+    assert_eq!(f.client.get_pending_upgrade(), None);
+}
