@@ -2,6 +2,7 @@ import {
   claimKey,
   completeKey,
   failKey,
+  waitForReplay,
   isInFlight,
   cleanupExpired,
   IdempotencyConflictError,
@@ -180,6 +181,45 @@ describe('idempotencyService', () => {
           IdempotencyConflictError
         );
       }
+    });
+  });
+
+  describe('waitForReplay', () => {
+    const inProgressRow = {
+      id: 11,
+      organization_id: 1,
+      idempotency_key: 'race-key',
+      status: 'in_progress',
+      response_status: null,
+      response_body: null,
+      created_at: new Date(),
+      expires_at: new Date(Date.now() + 60_000),
+    };
+
+    it('should return the first terminal cached response from an in-progress duplicate', async () => {
+      const completedRow = {
+        ...inProgressRow,
+        status: 'completed',
+        response_status: 201,
+        response_body: { id: 42 },
+      };
+      (query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [inProgressRow] })
+        .mockResolvedValueOnce({ rows: [completedRow] });
+
+      await expect(waitForReplay(1, 'race-key', 50, 0, 0)).resolves.toMatchObject({
+        status: 'completed',
+        responseStatus: 201,
+        responseBody: { id: 42 },
+      });
+      expect(query).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return null when the duplicate stays in progress past the bounded wait', async () => {
+      (query as jest.Mock).mockResolvedValue({ rows: [inProgressRow] });
+
+      await expect(waitForReplay(1, 'race-key', 0, 0, 0)).resolves.toBeNull();
+      expect(query).toHaveBeenCalledTimes(1);
     });
   });
 

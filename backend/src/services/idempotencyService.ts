@@ -2,6 +2,9 @@ import { query } from '../config/database.js';
 import logger from '../utils/logger.js';
 
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const DEFAULT_REPLAY_WAIT_MS = 5_000;
+const INITIAL_REPLAY_POLL_MS = 25;
+const MAX_REPLAY_POLL_MS = 100;
 
 export class IdempotencyConflictError extends Error {
   constructor(organizationId: number, idempotencyKey: string) {
@@ -123,6 +126,63 @@ export async function claimKey(
     if (error instanceof IdempotencyConflictError) throw error;
     logger.error('Failed to claim idempotency key', { organizationId, idempotencyKey, error });
     throw error;
+  }
+}
+
+/**
+ * Wait for another request holding the key to publish its terminal cached response.
+ *
+ * Returns the completed/failed record when it becomes available. Returns null
+ * when the key disappears/expires or remains in progress past the bounded wait.
+ * Polling backs off to keep duplicate bursts from hammering PostgreSQL.
+ */
+export async function waitForReplay(
+  organizationId: number,
+  idempotencyKey: string,
+  timeoutMs: number = DEFAULT_REPLAY_WAIT_MS,
+  initialPollMs: number = INITIAL_REPLAY_POLL_MS,
+  maxPollMs: number = MAX_REPLAY_POLL_MS
+): Promise<IdempotencyRecord | null> {
+  const deadline = Date.now() + Math.max(0, timeoutMs);
+  let pollMs = Math.max(0, initialPollMs);
+
+  while (true) {
+    const result = await query(
+      `SELECT id, organization_id, idempotency_key, status, response_status, response_body, created_at, expires_at
+       FROM idempotency_keys
+       WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
+      [organizationId, idempotencyKey]
+    );
+
+    const row = result.rows[0];
+    if (!row) return null;
+
+    if (row.status === 'completed' || row.status === 'failed') {
+      return {
+        id: row.id,
+        organizationId: row.organization_id,
+        idempotencyKey: row.idempotency_key,
+        status: row.status,
+        responseStatus: row.response_status,
+        responseBody: row.response_body,
+        createdAt: row.created_at,
+        expiresAt: row.expires_at,
+      };
+    }
+
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) return null;
+
+    const sleepMs = Math.min(pollMs, remainingMs);
+    if (sleepMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, sleepMs));
+    }
+
+    if (pollMs === 0) {
+      pollMs = 1;
+    } else {
+      pollMs = Math.min(pollMs * 2, Math.max(pollMs, maxPollMs));
+    }
   }
 }
 

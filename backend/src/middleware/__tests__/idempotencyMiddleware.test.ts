@@ -283,14 +283,41 @@ describe('idempotencyMiddleware', () => {
   });
 
   describe('error handling', () => {
-    it('should return 409 on a concurrent duplicate', async () => {
+    it('should wait for an in-progress duplicate and replay the first terminal response', async () => {
       mockRequest.headers = { 'idempotency-key': 'race-key' };
       (idempotencyService.claimKey as jest.Mock).mockRejectedValue(
         new IdempotencyConflictError(1, 'race-key')
       );
+      (idempotencyService.waitForReplay as jest.Mock).mockResolvedValue({
+        id: 7,
+        organizationId: 1,
+        idempotencyKey: 'race-key',
+        status: 'completed',
+        responseStatus: 202,
+        responseBody: { accepted: true },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 60_000),
+      });
 
       await idempotencyMiddleware()(mockRequest as Request, mockResponse as Response, nextFunction);
 
+      expect(idempotencyService.waitForReplay).toHaveBeenCalledWith(1, 'race-key');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Idempotency-Replayed', 'true');
+      expect(mockResponse.status).toHaveBeenCalledWith(202);
+      expect(mockResponse.json).toHaveBeenCalledWith({ accepted: true });
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+
+    it('should return 409 when a concurrent duplicate does not finish within the replay wait', async () => {
+      mockRequest.headers = { 'idempotency-key': 'race-key' };
+      (idempotencyService.claimKey as jest.Mock).mockRejectedValue(
+        new IdempotencyConflictError(1, 'race-key')
+      );
+      (idempotencyService.waitForReplay as jest.Mock).mockResolvedValue(null);
+
+      await idempotencyMiddleware()(mockRequest as Request, mockResponse as Response, nextFunction);
+
+      expect(idempotencyService.waitForReplay).toHaveBeenCalledWith(1, 'race-key');
       expect(mockResponse.status).toHaveBeenCalledWith(409);
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({ error: 'Conflict' })

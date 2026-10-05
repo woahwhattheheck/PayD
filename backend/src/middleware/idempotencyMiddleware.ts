@@ -22,7 +22,8 @@ export interface IdempotencyMiddlewareOptions {
  * Reads the `Idempotency-Key` header. On first request, stores the key in
  * in_progress state and proceeds. On replay (key exists with completed/failed
  * status), returns the cached response. On concurrent duplicate (key exists
- * in_progress from another request), returns 409 Conflict.
+ * in_progress from another request), waits briefly for the first request's
+ * terminal cached response and replays it; bounded timeout returns 409 Conflict.
  *
  * Must be applied AFTER authentication middleware (needs req.tenantId or
  * req.user.organizationId for tenant scoping).
@@ -139,7 +140,32 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
       next();
     } catch (error) {
       if (error instanceof IdempotencyConflictError) {
-        logger.warn('Concurrent duplicate detected', {
+        logger.info('Concurrent duplicate waiting for replay', {
+          organizationId,
+          idempotencyKey,
+        });
+
+        try {
+          const replay = await idempotencyService.waitForReplay(organizationId, idempotencyKey);
+          if (replay) {
+            logger.info('Concurrent duplicate replayed terminal response', {
+              organizationId,
+              idempotencyKey,
+              originalStatus: replay.responseStatus,
+            });
+            res.setHeader('Idempotency-Replayed', 'true');
+            res.status(replay.responseStatus ?? 200).json(replay.responseBody);
+            return;
+          }
+        } catch (waitError) {
+          logger.error('Failed while waiting for idempotency replay', {
+            organizationId,
+            idempotencyKey,
+            error: waitError,
+          });
+        }
+
+        logger.warn('Concurrent duplicate replay wait timed out', {
           organizationId,
           idempotencyKey,
         });
