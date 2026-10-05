@@ -1,9 +1,11 @@
 #![cfg(test)]
 
 use crate::{RevenueSplitContract, RevenueSplitContractClient, RecipientShare};
-use soroban_sdk::{testutils::{Address as _}, Address, Env, Vec};
-use soroban_sdk::token::Client as TokenClient;
-use soroban_sdk::token::StellarAssetClient;
+use soroban_sdk::{
+    testutils::{Address as _, Events},
+    token::{Client as TokenClient, StellarAssetClient},
+    Address, Env, FromVal, Symbol, Vec,
+};
 
 fn create_token_contract<'a>(e: &Env, admin: &Address) -> (Address, StellarAssetClient<'a>, TokenClient<'a>) {
     e.mock_all_auths();
@@ -239,4 +241,101 @@ fn test_update_recipients() {
     ]);
 
     client.update_recipients(&new_shares);
+}
+
+// ── Event emission ────────────────────────────────────────────────────────────
+
+fn count_named_events(env: &Env, contract_addr: &Address, event_name: &str) -> u32 {
+    let target_sym = Symbol::new(env, event_name);
+    let mut n = 0u32;
+    for (addr, topics, _data) in env.events().all().iter() {
+        if addr != *contract_addr {
+            continue;
+        }
+        if topics.iter().any(|t| Symbol::from_val(env, &t) == target_sym) {
+            n += 1;
+        }
+    }
+    n
+}
+
+#[test]
+fn test_distribute_emits_distribution_executed_event() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let token_admin = Address::generate(&env);
+    let (token_id, stellar_asset_client, token_client) = create_token_contract(&env, &token_admin);
+
+    let contract_id = env.register(RevenueSplitContract, ());
+    let client = RevenueSplitContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let recipient1 = Address::generate(&env);
+    let recipient2 = Address::generate(&env);
+
+    let shares = Vec::from_array(
+        &env,
+        [
+            RecipientShare {
+                destination: recipient1.clone(),
+                basis_points: 6000,
+            },
+            RecipientShare {
+                destination: recipient2.clone(),
+                basis_points: 4000,
+            },
+        ],
+    );
+    client.init(&admin, &shares);
+
+    let sender = Address::generate(&env);
+    stellar_asset_client.mint(&sender, &1000);
+
+    let assets = Vec::from_array(&env, [(token_id.clone(), 1000i128)]);
+    client.distribute(&sender, &assets);
+
+    // Check events before any further host reads (balance calls can clear the log).
+    let n = count_named_events(&env, &client.address, "distribution_executed_event");
+    assert_eq!(n, 1, "expected one DistributionExecutedEvent");
+
+    assert_eq!(token_client.balance(&recipient1), 600);
+    assert_eq!(token_client.balance(&recipient2), 400);
+}
+
+#[test]
+fn test_distribute_emits_one_event_per_asset() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let token_admin = Address::generate(&env);
+    let (token_id1, stellar_asset_client1, _) = create_token_contract(&env, &token_admin);
+    let (token_id2, stellar_asset_client2, _) = create_token_contract(&env, &token_admin);
+
+    let contract_id = env.register(RevenueSplitContract, ());
+    let client = RevenueSplitContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let recipient1 = Address::generate(&env);
+    let shares = Vec::from_array(
+        &env,
+        [RecipientShare {
+            destination: recipient1.clone(),
+            basis_points: 10000,
+        }],
+    );
+    client.init(&admin, &shares);
+
+    let sender = Address::generate(&env);
+    stellar_asset_client1.mint(&sender, &100);
+    stellar_asset_client2.mint(&sender, &200);
+
+    let assets = Vec::from_array(
+        &env,
+        [(token_id1.clone(), 100i128), (token_id2.clone(), 200i128)],
+    );
+    client.distribute(&sender, &assets);
+
+    let n = count_named_events(&env, &client.address, "distribution_executed_event");
+    assert_eq!(n, 2, "expected one DistributionExecutedEvent per asset");
 }
