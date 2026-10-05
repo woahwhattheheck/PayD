@@ -130,15 +130,15 @@ export default function CashFlowForecast() {
   const getTrendIcon = () => {
     if (!forecast) return null;
     const { direction } = forecast.trendAnalysis;
-    if (direction === 'increasing') return <TrendingUp className="w-5 h-5 text-emerald-400" />;
-    if (direction === 'decreasing') return <TrendingDown className="w-5 h-5 text-red-400" />;
+    if (direction === 'increasing') return <TrendingUp className="w-5 h-5 text-success" />;
+    if (direction === 'decreasing') return <TrendingDown className="w-5 h-5 text-danger" />;
     return <Minus className="w-5 h-5 text-(--muted)" />;
   };
 
   const getAlertIcon = (severity: BudgetAlert['severity']) => {
-    if (severity === 'critical') return <AlertCircle className="w-5 h-5 text-red-400" />;
-    if (severity === 'warning') return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
-    return <AlertCircle className="w-5 h-5 text-blue-400" />;
+    if (severity === 'critical') return <AlertCircle className="w-5 h-5 text-danger" />;
+    if (severity === 'warning') return <AlertTriangle className="w-5 h-5 text-warning" />;
+    return <AlertCircle className="w-5 h-5 text-info" />;
   };
 
   return (
@@ -156,14 +156,14 @@ export default function CashFlowForecast() {
             placeholder="Distribution Account"
             value={params.distributionAccount}
             onChange={(e) => setParams({ ...params, distributionAccount: e.target.value })}
-            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-link min-h-[44px]"
           />
           <input
             type="text"
             placeholder="Asset Issuer"
             value={params.assetIssuer}
             onChange={(e) => setParams({ ...params, assetIssuer: e.target.value })}
-            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-link min-h-[44px]"
           />
           <input
             type="number"
@@ -172,14 +172,14 @@ export default function CashFlowForecast() {
             onChange={(e) =>
               setParams({ ...params, forecastDays: parseInt(e.target.value, 10) || 90 })
             }
-            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24 min-h-[44px]"
+            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-link w-24 min-h-[44px]"
           />
           <button
             onClick={() => {
               void loadForecast();
             }}
             disabled={isLoading}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-(--text) rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px] touch-manipulation"
+            className="px-6 py-2 bg-accent hover:bg-accent-hover text-on-accent rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px] touch-manipulation"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             {isLoading ? 'Loading...' : 'Refresh'}
@@ -237,7 +237,7 @@ export default function CashFlowForecast() {
               </div>
               <p
                 className={`text-2xl font-bold ${
-                  forecast.projectedBalance < 0 ? 'text-red-400' : 'text-(--text)'
+                  forecast.projectedBalance < 0 ? 'text-danger' : 'text-(--text)'
                 }`}
               >
                 {forecast.projectedBalance.toLocaleString('en-US', {
@@ -267,7 +267,7 @@ export default function CashFlowForecast() {
           {alerts.length > 0 && (
             <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <h2 className="text-xl font-bold text-(--text) mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                <AlertTriangle className="w-5 h-5 text-warning" />
                 Budget Alerts ({alerts.length})
               </h2>
               <div className="space-y-3">
@@ -276,10 +276,10 @@ export default function CashFlowForecast() {
                     key={`${alert.type}-${alert.projectedDate}-${alert.severity}`}
                     className={`p-4 rounded-lg border ${
                       alert.severity === 'critical'
-                        ? 'bg-red-500/10 border-red-500/20'
+                        ? 'bg-danger/10 border-danger/20'
                         : alert.severity === 'warning'
-                          ? 'bg-yellow-500/10 border-yellow-500/20'
-                          : 'bg-blue-500/10 border-blue-500/20'
+                          ? 'bg-warning/10 border-warning/20'
+                          : 'bg-info/10 border-info/20'
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -289,10 +289,10 @@ export default function CashFlowForecast() {
                           <span
                             className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
                               alert.severity === 'critical'
-                                ? 'bg-red-500/20 text-red-400'
+                                ? 'bg-danger/20 text-danger'
                                 : alert.severity === 'warning'
-                                  ? 'bg-yellow-500/20 text-yellow-400'
-                                  : 'bg-blue-500/20 text-blue-400'
+                                  ? 'bg-warning/20 text-warning'
+                                  : 'bg-info/20 text-info'
                             }`}
                           >
                             {alert.severity}
@@ -303,7 +303,7 @@ export default function CashFlowForecast() {
                         </div>
                         <p className="text-sm text-(--text) mb-1">{alert.message}</p>
                         {alert.shortfall && (
-                          <p className="text-xs text-red-400 font-mono">
+                          <p className="text-xs text-danger font-mono">
                             Shortfall: {alert.shortfall.toFixed(2)} ORGUSD
                           </p>
                         )}
@@ -324,24 +324,25 @@ export default function CashFlowForecast() {
                 <AreaChart data={balanceProjectionData}>
                   <defs>
                     <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                      <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
-                  <YAxis stroke="#9ca3af" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hi)" />
+                  <XAxis dataKey="date" stroke="var(--muted)" fontSize={12} />
+                  <YAxis stroke="var(--muted)" fontSize={12} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#18181b',
-                      border: '1px solid #27272a',
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
                       borderRadius: '8px',
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="balance"
-                    stroke="#3b82f6"
+                    stroke="var(--chart-1)"
                     fillOpacity={1}
                     fill="url(#balanceGradient)"
                   />
@@ -354,19 +355,20 @@ export default function CashFlowForecast() {
               <h3 className="text-lg font-bold text-(--text) mb-4">Historical vs Projected</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
-                  <YAxis stroke="#9ca3af" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hi)" />
+                  <XAxis dataKey="date" stroke="var(--muted)" fontSize={12} />
+                  <YAxis stroke="var(--muted)" fontSize={12} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#18181b',
-                      border: '1px solid #27272a',
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
                       borderRadius: '8px',
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="historical" fill="#10b981" name="Historical" />
-                  <Bar dataKey="projected" fill="#3b82f6" name="Projected" />
+                  <Bar dataKey="historical" fill="var(--chart-2)" name="Historical" />
+                  <Bar dataKey="projected" fill="var(--chart-1)" name="Projected" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
