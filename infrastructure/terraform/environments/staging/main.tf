@@ -150,6 +150,8 @@ module "ecs" {
 
   stellar_network = "testnet"
   jwt_secret_arn  = module.secrets.jwt_secret_arn
+  stellar_credentials_secret_arn = module.secrets.stellar_credentials_secret_arn
+  secrets_read_policy_arn        = module.secrets.secrets_read_policy_arn
 
   tags = {}
 }
