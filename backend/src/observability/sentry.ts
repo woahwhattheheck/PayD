@@ -22,8 +22,10 @@ export function buildSentryRequestContext(req: Request): SentryRequestContext {
 
   const user = req.user as { id?: unknown } | undefined;
 
+  const requestId = (req as Request & { requestId?: string }).requestId;
+
   return {
-    requestId: req.requestId,
+    requestId,
     userId: normalizeUserId(user?.id),
     route: routePath || '/',
     method: req.method,
