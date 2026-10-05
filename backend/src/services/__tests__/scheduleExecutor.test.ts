@@ -3,6 +3,7 @@ import { StellarService } from '../stellarService';
 import { scheduleService } from '../scheduleService';
 import type { Schedule, ExecutionResult } from '../../types/schedule';
 import { Keypair } from '@stellar/stellar-sdk';
+import type { StellarSecretSource } from '../secretsManagerService';
 
 // Mock dependencies
 jest.mock('../../config/database.js', () => ({
@@ -33,10 +34,14 @@ describe('ScheduleExecutor', () => {
 
   const mockRelease = jest.fn();
   const mockClientQuery = jest.fn();
+  const mockSecretSource: jest.Mocked<StellarSecretSource> = {
+    getSecret: jest.fn(),
+  };
 
   beforeEach(() => {
-    executor = new ScheduleExecutor();
     jest.clearAllMocks();
+    mockSecretSource.getSecret.mockResolvedValue(Keypair.random().secret());
+    executor = new ScheduleExecutor(mockSecretSource);
 
     // Setup default mock client
     (mockPool.connect as jest.Mock).mockResolvedValue({
@@ -47,13 +52,11 @@ describe('ScheduleExecutor', () => {
     // Default: stale claims cleanup returns 0
     (mockPool.query as jest.Mock).mockResolvedValue({ rows: [], rowCount: 0 });
 
-    // Setup environment variables
-    process.env.STELLAR_SOURCE_SECRET = 'SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+    // Custom-asset tests still use the existing issuer configuration.
     process.env.STELLAR_ASSET_ISSUER = 'GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
   });
 
   afterEach(() => {
-    delete process.env.STELLAR_SOURCE_SECRET;
     delete process.env.STELLAR_ASSET_ISSUER;
   });
 
@@ -393,15 +396,6 @@ describe('ScheduleExecutor', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
       expect(result.error?.message).toBe('Insufficient balance');
-    });
-
-    it('should throw error if STELLAR_SOURCE_SECRET not set', async () => {
-      delete process.env.STELLAR_SOURCE_SECRET;
-
-      const result = await executor.executeSchedule(mockSchedule);
-
-      expect(result.success).toBe(false);
-      expect(result.error?.message).toContain('STELLAR_SOURCE_SECRET');
     });
 
     it('should handle invalid payment configuration', async () => {
