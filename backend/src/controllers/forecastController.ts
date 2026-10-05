@@ -1,3 +1,4 @@
+// Modified 2026-10-05: use the class-owned Redis client in unbound route handlers.
 import { Request, Response } from 'express';
 import { ForecastingService } from '../services/forecasting/forecastingService.js';
 import tenantConfigService from '../services/tenantConfigService.js';
@@ -44,9 +45,9 @@ export class ForecastController {
       const cacheKey = `cache:organization-settings:${organizationId}:liquidity-settings`;
       let settings: any | null = null;
 
-      if (this.redis) {
+      if (ForecastController.redis) {
         try {
-          const cached = await this.redis.get(cacheKey);
+          const cached = await ForecastController.redis.get(cacheKey);
           if (cached !== null) {
             logger.info('Cache hit', { cache: 'organization-settings', organizationId });
             settings = JSON.parse(cached);
@@ -66,9 +67,9 @@ export class ForecastController {
 
       if (settings === null) {
         settings = await tenantConfigService.getConfig(organizationId, 'liquidity_settings');
-        if (this.redis && settings !== null) {
+        if (ForecastController.redis && settings !== null) {
           try {
-            await this.redis.setex(cacheKey, 30 * 60, JSON.stringify(settings));
+            await ForecastController.redis.setex(cacheKey, 30 * 60, JSON.stringify(settings));
           } catch (error) {
             logger.warn('Organization settings cache write failed', { organizationId, error });
           }
@@ -122,9 +123,9 @@ export class ForecastController {
 
       await tenantConfigService.setConfig(organizationId, 'liquidity_settings', payload);
 
-      if (this.redis) {
+      if (ForecastController.redis) {
         try {
-          await this.redis.del(`cache:organization-settings:${organizationId}:liquidity-settings`);
+          await ForecastController.redis.del(`cache:organization-settings:${organizationId}:liquidity-settings`);
         } catch (error) {
           logger.warn('Organization settings cache invalidation failed', { organizationId, error });
         }
