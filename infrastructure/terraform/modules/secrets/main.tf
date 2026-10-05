@@ -160,12 +160,14 @@ resource "aws_iam_policy" "secrets_read_policy" {
           "secretsmanager:GetSecretValue",
           "secretsmanager:DescribeSecret"
         ]
-        Resource = [
-          aws_secretsmanager_secret.db_credentials.arn,
-          aws_secretsmanager_secret.redis_credentials.arn,
-          aws_secretsmanager_secret.jwt_secret.arn,
+        Resource = concat(
+          [
+            aws_secretsmanager_secret.db_credentials.arn,
+            aws_secretsmanager_secret.redis_credentials.arn,
+            aws_secretsmanager_secret.jwt_secret.arn
+          ],
           aws_secretsmanager_secret.stellar_credentials[*].arn
-        ]
+        )
       },
       {
         Effect = "Allow"
