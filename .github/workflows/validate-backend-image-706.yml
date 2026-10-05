@@ -1,0 +1,31 @@
+name: Validate PR706 backend image
+
+on:
+  push:
+    branches:
+      - validation/payd706-image-sol56-20261005
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build backend production image
+        run: docker build --pull -t payd-backend:pr706 -f backend/Dockerfile backend
+      - name: Check issue 529 container acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          bytes=$(docker image inspect payd-backend:pr706 --format '{{.Size}}')
+          user=$(docker image inspect payd-backend:pr706 --format '{{.Config.User}}')
+          health=$(docker image inspect payd-backend:pr706 --format '{{json .Config.Healthcheck}}')
+          printf 'IMAGE_BYTES=%s\nIMAGE_USER=%s\nHEALTHCHECK=%s\n' "$bytes" "$user" "$health"
+          test "$bytes" -lt 200000000
+          test "$user" = "node"
+          test "$health" != "null"
