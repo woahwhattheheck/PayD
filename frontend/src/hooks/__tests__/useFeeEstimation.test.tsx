@@ -46,16 +46,15 @@ describe('useFeeEstimation with the real fee service', () => {
   });
 
   it('polls again after ten seconds and stops when unmounted', async () => {
-    const { result, unmount } = mount();
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
     vi.useFakeTimers();
-    // A refetch reinstalls the observer's interval using the controlled clock.
-    await act(async () => { await result.current.refetch(); });
+    const { result, unmount } = mount();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    expect(result.current.isLoading).toBe(false);
+    expect(fetchMock).toHaveBeenCalledOnce();
     await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
-    expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(3);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     unmount();
-    const calls = fetchMock.mock.calls.length;
     await act(async () => { await vi.advanceTimersByTimeAsync(20_000); });
-    expect(fetchMock).toHaveBeenCalledTimes(calls);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
