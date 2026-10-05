@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { z } from 'zod';
 import { payrollQueryService } from '../services/payroll-query.service.js';
 import logger from '../utils/logger.js';
 import { authenticateJWT } from '../middlewares/auth.js';
@@ -16,6 +17,15 @@ function asString(value: unknown): string | undefined {
   if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
   return undefined;
 }
+
+const payrollTransactionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  sort: z.enum(['timestamp', 'amount', 'employeeId']).optional(),
+  order: z.enum(['asc', 'desc']).optional(),
+  sortBy: z.enum(['timestamp', 'amount', 'employeeId']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+});
 
 // Apply authentication to all payroll routes
 router.use(authenticateJWT);
@@ -40,9 +50,10 @@ router.use(isolateOrganization);
  * - startDate: Start date (ISO 8601)
  * - endDate: End date (ISO 8601)
  * - page: Page number (default: 1)
- * - limit: Records per page (default: 50, max: 500)
- * - sortBy: Sort field (timestamp, amount, employeeId)
- * - sortOrder: Sort order (asc, desc)
+ * - limit: Records per page (default: 20, max: 100)
+ * - sort: Sort field (timestamp, amount, employeeId)
+ * - order: Sort order (asc, desc)
+ * - sortBy/sortOrder: Backwards-compatible aliases for sort/order
  */
 router.get('/transactions', async (req: Request, res: Response) => {
   try {
@@ -56,6 +67,8 @@ router.get('/transactions', async (req: Request, res: Response) => {
       endDate,
       page,
       limit,
+      sort,
+      order,
       sortBy,
       sortOrder,
     } = req.query;
@@ -67,6 +80,24 @@ router.get('/transactions', async (req: Request, res: Response) => {
       });
     }
 
+    const paginationResult = payrollTransactionsQuerySchema.safeParse({
+      page: asString(page),
+      limit: asString(limit),
+      sort: asString(sort),
+      order: asString(order),
+      sortBy: asString(sortBy),
+      sortOrder: asString(sortOrder),
+    });
+    if (!paginationResult.success) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        details: paginationResult.error.issues,
+      });
+    }
+
+    const pagination = paginationResult.data;
+    const selectedSort = pagination.sort ?? pagination.sortBy ?? 'timestamp';
+    const selectedOrder = pagination.order ?? pagination.sortOrder ?? 'desc';
     const query = {
       organizationPublicKey: orgPublicKeyStr,
       employeeId: asString(employeeId),
@@ -77,15 +108,23 @@ router.get('/transactions', async (req: Request, res: Response) => {
       endDate: asString(endDate) ? new Date(asString(endDate)!) : undefined,
     };
 
-    const result = await payrollQueryService.queryPayroll(query, Number(page), Number(limit), {
-      enrichPayrollData: true,
-      sortBy: (sortBy as any) || 'timestamp',
-      sortOrder: (sortOrder as any) || 'desc',
-    });
+    const result = await payrollQueryService.queryPayroll(
+      query,
+      pagination.page,
+      pagination.limit,
+      {
+        enrichPayrollData: true,
+        sortBy: selectedSort,
+        sortOrder: selectedOrder,
+      }
+    );
 
     res.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        totalPages: result.pageCount,
+      },
     });
   } catch (error) {
     logger.error('GET /api/payroll/transactions failed', error);
