@@ -127,7 +127,7 @@ describe('Tenant Security Guard Middleware', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(403);
     });
 
-    it('should handle errors gracefully', async () => {
+    it('should fail closed when a security dependency errors', async () => {
       (tenantSecurityService.recordAccessPattern as jest.Mock).mockRejectedValue(
         new Error('Service error')
       );
@@ -136,8 +136,65 @@ describe('Tenant Security Guard Middleware', () => {
 
       await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
-      expect(nextFunction).toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith('Tenant security guard error', expect.any(Object));
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(503);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Tenant security guard dependency failure',
+        expect.objectContaining({
+          organizationId: 1,
+          userId: 'user-123',
+          path: '/api/employees',
+          method: 'GET',
+          ipAddress: '192.168.1.1',
+          consecutiveFailures: 1,
+        })
+      );
+    });
+
+    it('should deny access when the IP security lookup fails', async () => {
+      mockPool.query.mockRejectedValue(new Error('Database unavailable'));
+
+      const middleware = tenantSecurityGuardMiddleware();
+
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(503);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Tenant security guard dependency failure',
+        expect.objectContaining({
+          organizationId: 1,
+          ipAddress: '192.168.1.1',
+          consecutiveFailures: 1,
+        })
+      );
+    });
+
+    it('should open the circuit after three consecutive security dependency failures', async () => {
+      (tenantSecurityService.recordAccessPattern as jest.Mock).mockRejectedValue(
+        new Error('Service unavailable')
+      );
+
+      const middleware = tenantSecurityGuardMiddleware();
+
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+
+      (tenantSecurityService.recordAccessPattern as jest.Mock).mockResolvedValue(undefined);
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledTimes(4);
+      expect(mockResponse.status).toHaveBeenLastCalledWith(503);
+      expect(tenantSecurityService.recordAccessPattern).toHaveBeenCalledTimes(3);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Tenant security guard circuit open',
+        expect.objectContaining({
+          organizationId: 1,
+          consecutiveFailures: 3,
+        })
+      );
     });
   });
 
