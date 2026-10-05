@@ -54,6 +54,8 @@ pub struct UpgradeCancelledEvent {
 
 #[contractevent]
 pub struct VestingCreatedEvent {
+    /// Stable grant identity. Each vesting contract instance owns exactly one schedule.
+    pub schedule_id: Address,
     pub funder: Address,
     pub beneficiary: Address,
     pub token: Address,
@@ -65,6 +67,7 @@ pub struct VestingCreatedEvent {
 
 #[contractevent]
 pub struct VestingClaimedEvent {
+    pub schedule_id: Address,
     pub beneficiary: Address,
     pub amount: i128,
     pub claimed_amount: i128,
@@ -72,10 +75,21 @@ pub struct VestingClaimedEvent {
 
 #[contractevent]
 pub struct VestingClawedEvent {
+    pub schedule_id: Address,
     pub clawback_admin: Address,
     pub beneficiary: Address,
     pub amount: i128,
     pub vested_amount: i128,
+}
+
+#[contractevent]
+pub struct VestingCancelledEvent {
+    pub schedule_id: Address,
+    pub clawback_admin: Address,
+    pub beneficiary: Address,
+    /// Unvested amount returned when the grant is revoked.
+    pub amount: i128,
+    pub cancelled_at: u64,
 }
 
 // ── Storage types ─────────────────────────────────────────────────────────────
@@ -176,6 +190,7 @@ impl VestingContract {
         client.transfer(&funder, &e.current_contract_address(), &amount);
 
         VestingCreatedEvent {
+            schedule_id: e.current_contract_address(),
             funder,
             beneficiary,
             token,
@@ -209,6 +224,7 @@ impl VestingContract {
         client.transfer(&e.current_contract_address(), &config.beneficiary, &claimable);
 
         VestingClaimedEvent {
+            schedule_id: e.current_contract_address(),
             beneficiary: config.beneficiary.clone(),
             amount: claimable,
             claimed_amount: config.claimed_amount,
@@ -244,10 +260,22 @@ impl VestingContract {
         }
 
         VestingClawedEvent {
+            schedule_id: e.current_contract_address(),
             clawback_admin: config.clawback_admin.clone(),
             beneficiary: config.beneficiary.clone(),
             amount: unvested,
             vested_amount: vested,
+        }
+        .publish(&e);
+
+        // Clawback is the contract's grant-revocation transition. Emit the
+        // issue-defined cancellation event without inventing a second state path.
+        VestingCancelledEvent {
+            schedule_id: e.current_contract_address(),
+            clawback_admin: config.clawback_admin.clone(),
+            beneficiary: config.beneficiary.clone(),
+            amount: unvested,
+            cancelled_at: e.ledger().timestamp(),
         }
         .publish(&e);
     }
