@@ -429,7 +429,7 @@ Issues and questions:
 
 ## License
 
-MIT - See LICENSE file
+Apache-2.0 - See [../LICENSE](../LICENSE)
 
 ## Contributing
 
