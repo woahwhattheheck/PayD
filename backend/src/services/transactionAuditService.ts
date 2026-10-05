@@ -86,13 +86,30 @@ export class TransactionAuditService {
       employeeId?: string | undefined;
       asset?: string | undefined;
       type?: 'all' | 'transaction' | 'contract_event' | undefined;
+      sort?:
+        | 'created_at'
+        | 'stellar_created_at'
+        | 'source_account'
+        | 'fee_charged'
+        | 'operation_count'
+        | undefined;
+      order?: 'asc' | 'desc' | undefined;
     }
   ): Promise<{ data: AuditRecord[]; total: number }> {
     const offset = (page - 1) * limit;
+    const sortColumns = {
+      created_at: 'tal.created_at',
+      stellar_created_at: 'tal.stellar_created_at',
+      source_account: 'tal.source_account',
+      fee_charged: 'tal.fee_charged',
+      operation_count: 'tal.operation_count',
+    } as const;
+    const sortColumn = sortColumns[filters?.sort ?? 'created_at'];
+    const sortDirection = filters?.order === 'asc' ? 'ASC' : 'DESC';
     const values: (string | number)[] = [];
     let paramIdx = 1;
 
-    let whereClauses: string[] = [];
+    const whereClauses: string[] = [];
     if (sourceAccount) {
       whereClauses.push(`tal.source_account = $${paramIdx++}`);
       values.push(sourceAccount);
@@ -148,7 +165,7 @@ export class TransactionAuditService {
        ) pal ON tal.tx_hash = pal.tx_hash
        LEFT JOIN employees e ON pal.employee_id = e.id
        ${where}
-       ORDER BY tal.created_at DESC
+       ORDER BY ${sortColumn} ${sortDirection}
        LIMIT $${paramIdx++} OFFSET $${paramIdx++}`,
       values
     );
