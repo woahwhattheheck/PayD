@@ -66,10 +66,10 @@ const AuthCallback: React.FC = () => {
             value={code}
             onChange={(event) => setCode(event.target.value)}
             placeholder="123456"
-            className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text text-center font-mono tracking-[0.5em] outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
+            className="w-full bg-overlay-soft border border-hi rounded-xl p-4 text-text text-center font-mono tracking-[0.5em] outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
           />
 
-          {error ? <p className="text-sm text-red-400">{error}</p> : null}
+          {error ? <p className="text-sm text-danger">{error}</p> : null}
 
           <button
             type="submit"
