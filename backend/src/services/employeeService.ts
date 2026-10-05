@@ -182,11 +182,7 @@ export class EmployeeService {
       WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
     `;
     const result = await pool.query(query, [id, organization_id]);
-    const deleted = result.rows[0] || null;
-    if (deleted) {
-      await this.invalidateListCache(organization_id);
-    }
-    return deleted;
+    return result.rows[0] || null;
   }
 
   async update(id: number, organization_id: number, data: UpdateEmployeeInput) {
@@ -227,7 +223,11 @@ export class EmployeeService {
       RETURNING *;
     `;
     const result = await pool.query(query, [id, organization_id]);
-    return result.rows[0] || null;
+    const deleted = result.rows[0] || null;
+    if (deleted) {
+      await this.invalidateListCache(organization_id);
+    }
+    return deleted;
   }
 }
 
