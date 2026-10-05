@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   BarChart,
   Bar,
@@ -49,18 +49,22 @@ export default function CashFlowForecast() {
     forecastDays: 90,
   });
 
+  const { distributionAccount, assetIssuer, forecastDays } = params;
+
   const loadForecast = useCallback(async () => {
-    if (!params.distributionAccount || !params.assetIssuer) {
+    if (!distributionAccount || !assetIssuer) {
       notifyError('Please provide distribution account and asset issuer');
       return;
     }
 
+    const requestParams = { distributionAccount, assetIssuer, forecastDays };
+
     setIsLoading(true);
     try {
       const [forecastData, historicalData, alertsData] = await Promise.all([
-        getForecast(params),
+        getForecast(requestParams),
         getHistoricalData(6),
-        getAlerts(params),
+        getAlerts(requestParams),
       ]);
 
       setForecast(forecastData);
@@ -72,11 +76,7 @@ export default function CashFlowForecast() {
     } finally {
       setIsLoading(false);
     }
-  }, [params, notifyError, notifySuccess]);
-
-  useEffect(() => {
-    void loadForecast();
-  }, [loadForecast]);
+  }, [distributionAccount, assetIssuer, forecastDays, notifyError, notifySuccess]);
 
   const chartData = useMemo(() => {
     if (!forecast) return [];
