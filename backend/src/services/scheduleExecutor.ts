@@ -6,31 +6,79 @@ import { scheduleService } from './scheduleService.js';
 import type { Schedule, ExecutionResult, PaymentRecipient } from '../types/schedule.js';
 import { Operation, Asset, Memo, Keypair } from '@stellar/stellar-sdk';
 import os from 'node:os';
+import type { PoolClient } from 'pg';
+
+const LEADER_ELECTION_INTERVAL = '*/15 * * * * *';
+// Two int32 advisory-lock keys: ASCII-ish PAYD / SCHD namespaces.
+const SCHEDULER_LOCK_NAMESPACE = 0x50415944;
+const SCHEDULER_LOCK_KEY = 0x53434844;
 
 export class ScheduleExecutor {
   private cronJob: ScheduledTask | null = null;
   private readonly podId: string;
+  private runInProgress = false;
 
   constructor() {
     this.podId = `${os.hostname()}-${process.pid}`;
   }
 
   /**
-   * Initialize the cron job to run every minute
-   * Sets up node-cron job with error handling and logging
+   * Probe scheduler leadership every 15 seconds.
+   *
+   * The advisory lock is session-scoped, so PostgreSQL releases it automatically
+   * if the leader pod dies or loses its database connection. Keeping the lock on
+   * a dedicated client for the full scheduler pass guarantees that at most one
+   * pod enters processDueSchedules at a time.
    */
   initialize(): void {
-    // Cron expression: run every minute
-    this.cronJob = cron.schedule('* * * * *', async () => {
+    this.cronJob = cron.schedule(LEADER_ELECTION_INTERVAL, async () => {
+      if (this.runInProgress) {
+        return;
+      }
+
+      this.runInProgress = true;
+      let leaderClient: PoolClient | null = null;
+      let hasLeadership = false;
+      let destroyLeaderConnection = false;
+
       try {
-        console.log('[ScheduleExecutor] Running scheduled task check...');
+        leaderClient = await pool.connect();
+        const election = await leaderClient.query<{ acquired: boolean }>(
+          'SELECT pg_try_advisory_lock($1, $2) AS acquired',
+          [SCHEDULER_LOCK_NAMESPACE, SCHEDULER_LOCK_KEY]
+        );
+
+        hasLeadership = election.rows[0]?.acquired === true;
+        if (!hasLeadership) {
+          return;
+        }
+
         await this.processDueSchedules();
       } catch (error) {
-        console.error('[ScheduleExecutor] Error in cron job execution:', error);
+        console.error('[ScheduleExecutor] Error in leader scheduler execution:', error);
+      } finally {
+        if (leaderClient) {
+          if (hasLeadership) {
+            try {
+              const unlock = await leaderClient.query<{ unlocked: boolean }>(
+                'SELECT pg_advisory_unlock($1, $2) AS unlocked',
+                [SCHEDULER_LOCK_NAMESPACE, SCHEDULER_LOCK_KEY]
+              );
+              destroyLeaderConnection = unlock.rows[0]?.unlocked !== true;
+            } catch (error) {
+              destroyLeaderConnection = true;
+              console.error('[ScheduleExecutor] Failed to release scheduler leadership:', error);
+            }
+          }
+
+          leaderClient.release(destroyLeaderConnection);
+        }
+
+        this.runInProgress = false;
       }
     });
 
-    console.log('[ScheduleExecutor] Cron job initialized - running every minute');
+    console.log('[ScheduleExecutor] Cron job initialized - checking leadership every 15 seconds');
   }
 
   /**
