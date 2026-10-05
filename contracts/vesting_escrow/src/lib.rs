@@ -52,6 +52,32 @@ pub struct UpgradeCancelledEvent {
     pub cancelled_at: u64,
 }
 
+#[contractevent]
+pub struct VestingCreatedEvent {
+    pub funder: Address,
+    pub beneficiary: Address,
+    pub token: Address,
+    pub amount: i128,
+    pub start_time: u64,
+    pub cliff_seconds: u64,
+    pub duration_seconds: u64,
+}
+
+#[contractevent]
+pub struct VestingClaimedEvent {
+    pub beneficiary: Address,
+    pub amount: i128,
+    pub claimed_amount: i128,
+}
+
+#[contractevent]
+pub struct VestingClawedEvent {
+    pub clawback_admin: Address,
+    pub beneficiary: Address,
+    pub amount: i128,
+    pub vested_amount: i128,
+}
+
 // ── Storage types ─────────────────────────────────────────────────────────────
 
 #[contracttype]
@@ -148,6 +174,17 @@ impl VestingContract {
         // Transfer tokens from funder to contract
         let client = token::Client::new(&e, &token);
         client.transfer(&funder, &e.current_contract_address(), &amount);
+
+        VestingCreatedEvent {
+            funder,
+            beneficiary,
+            token,
+            amount,
+            start_time,
+            cliff_seconds,
+            duration_seconds,
+        }
+        .publish(&e);
     }
 
     pub fn claim(e: Env) {
@@ -170,6 +207,13 @@ impl VestingContract {
         // Transfer tokens
         let client = token::Client::new(&e, &config.token);
         client.transfer(&e.current_contract_address(), &config.beneficiary, &claimable);
+
+        VestingClaimedEvent {
+            beneficiary: config.beneficiary.clone(),
+            amount: claimable,
+            claimed_amount: config.claimed_amount,
+        }
+        .publish(&e);
     }
     
     pub fn clawback(e: Env) {
@@ -198,6 +242,14 @@ impl VestingContract {
             let client = token::Client::new(&e, &config.token);
             client.transfer(&e.current_contract_address(), &config.clawback_admin, &unvested);
         }
+
+        VestingClawedEvent {
+            clawback_admin: config.clawback_admin.clone(),
+            beneficiary: config.beneficiary.clone(),
+            amount: unvested,
+            vested_amount: vested,
+        }
+        .publish(&e);
     }
 
     pub fn get_vested_amount(e: Env) -> i128 {
