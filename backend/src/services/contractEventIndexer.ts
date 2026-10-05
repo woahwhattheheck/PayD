@@ -1,3 +1,4 @@
+// Modified 2026-10-05: include configured cross-asset payment events in polling.
 import { default as pool } from '../config/database.js';
 import type { SorobanEvent, GetEventsResponse } from '../types/contractEvent.js';
 import { PoolClient } from 'pg';
@@ -10,6 +11,7 @@ export class ContractEventIndexer {
   private readonly BATCH_SIZE = 100;
   private readonly CONTRACTS_TO_INDEX = [
     process.env.BULK_PAYMENT_CONTRACT_ID,
+    process.env.CROSS_ASSET_PAYMENT_CONTRACT_ID,
     process.env.VESTING_ESCROW_CONTRACT_ID,
     process.env.REVENUE_SPLIT_CONTRACT_ID,
   ].filter(Boolean) as string[];
