@@ -6,12 +6,13 @@ import { scheduleService } from './scheduleService.js';
 import type { Schedule, ExecutionResult, PaymentRecipient } from '../types/schedule.js';
 import { Operation, Asset, Memo, Keypair } from '@stellar/stellar-sdk';
 import os from 'node:os';
+import { stellarSecretProvider, type StellarSecretSource } from './secretsManagerService.js';
 
 export class ScheduleExecutor {
   private cronJob: ScheduledTask | null = null;
   private readonly podId: string;
 
-  constructor() {
+  constructor(private readonly secretSource: StellarSecretSource = stellarSecretProvider) {
     this.podId = `${os.hostname()}-${process.pid}`;
   }
 
@@ -217,13 +218,9 @@ export class ScheduleExecutor {
         throw new Error('Invalid payment configuration: no recipients found');
       }
 
-      // Get source keypair from environment
-      // In production, this should be securely managed (e.g., KMS, vault)
-      const sourceSecret = process.env.STELLAR_SOURCE_SECRET;
-      if (!sourceSecret) {
-        throw new Error('STELLAR_SOURCE_SECRET environment variable not set');
-      }
-
+      // Resolve the current signing credential through Secrets Manager. The provider
+      // refreshes AWSCURRENT before cache expiry and never stores this value in process.env.
+      const sourceSecret = await this.secretSource.getSecret();
       const sourceKeypair = Keypair.fromSecret(sourceSecret);
 
       // Build Stellar operations from recipients
