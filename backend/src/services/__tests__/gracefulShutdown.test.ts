@@ -1,0 +1,66 @@
+import type { Server } from 'node:http';
+import { createGracefulShutdown } from '../gracefulShutdown';
+
+describe('createGracefulShutdown', () => {
+  it('drains HTTP before dependency cleanup and exits cleanly', async () => {
+    let onClose: (() => void) | undefined;
+    const server = {
+      close: jest.fn((callback: () => void) => {
+        onClose = callback;
+        return server;
+      }),
+      closeAllConnections: jest.fn(),
+    } as unknown as Server;
+    const stopBackgroundWork = jest.fn();
+    const closeDependencies = jest.fn().mockResolvedValue(undefined);
+    const exit = jest.fn();
+    const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+
+    const shutdown = createGracefulShutdown({
+      server,
+      logger,
+      stopBackgroundWork,
+      closeDependencies,
+      exit,
+    });
+
+    const pending = shutdown('SIGTERM');
+    expect(server.close).toHaveBeenCalledTimes(1);
+    expect(stopBackgroundWork).toHaveBeenCalledTimes(1);
+    expect(closeDependencies).not.toHaveBeenCalled();
+
+    onClose?.();
+    await pending;
+
+    expect(closeDependencies).toHaveBeenCalledTimes(1);
+    expect(exit).toHaveBeenCalledWith(0);
+  });
+
+  it('uses the 30 second drain bound before cleanup', async () => {
+    jest.useFakeTimers();
+    const server = {
+      close: jest.fn(() => server),
+      closeAllConnections: jest.fn(),
+    } as unknown as Server;
+    const closeDependencies = jest.fn().mockResolvedValue(undefined);
+    const exit = jest.fn();
+    const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+
+    const pending = createGracefulShutdown({
+      server,
+      logger,
+      stopBackgroundWork: jest.fn(),
+      closeDependencies,
+      exit,
+    })('SIGINT');
+
+    await Promise.resolve();
+    jest.advanceTimersByTime(30_000);
+    await pending;
+
+    expect(server.closeAllConnections).toHaveBeenCalledTimes(1);
+    expect(closeDependencies).toHaveBeenCalledTimes(1);
+    expect(exit).toHaveBeenCalledWith(0);
+    jest.useRealTimers();
+  });
+});
