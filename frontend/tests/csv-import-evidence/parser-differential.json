@@ -1,0 +1,1808 @@
+{
+  "sourceSha": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+  "node": "v24.19.0",
+  "fastCsvVersion": "5.0.5",
+  "backendOptions": {
+    "headers": true
+  },
+  "compareScope": "Real backend parseStream versus actual preview parser; no employee/database writes or live calls. Backend validation is not executed in this parser differential.",
+  "cases": [
+    {
+      "name": "ordinary-lf",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/ordinary-lf.csv",
+      "rawSha256": "8ccf5ba173f7db33cf097a4b80300b68dbe95522bcaea83fa70d8ccffa4a3de6",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\nGrace,Hopper,grace@example.com\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "ordinary-crlf",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/ordinary-crlf.csv",
+      "rawSha256": "7d6ebd774e44f6623c7cc9f93006387144f0a5879fadab28cff9b9a84a02ade3",
+      "rawBytes": 90,
+      "contentJSON": "\"first_name,last_name,email\\r\\nAda,Lovelace,ada@example.com\\r\\nGrace,Hopper,grace@example.com\\r\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "ordinary-cr",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/ordinary-cr.csv",
+      "rawSha256": "b2fd0e9013a8fc63c525d3124d2abfdc4b1eb59b3861297f9b6893943284d78f",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\rAda,Lovelace,ada@example.com\\rGrace,Hopper,grace@example.com\\r\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quoted-bom-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quoted-bom-header.csv",
+      "rawSha256": "6036ca1f3812870710d02059d85e7da1a736542444df005a297d8a27d529bde3",
+      "rawBytes": 82,
+      "contentJSON": "\"﻿\\\"first_name\\\",\\\"last_name\\\",\\\"email\\\"\\r\\n\\\"Ada, Augusta\\\",\\\"Love\\\"\\\"lace\\\",ada@example.com\\r\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada, Augusta",
+              "last_name": "Love\"lace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada, Augusta",
+              "last_name": "Love\"lace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "multiline-lf",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/multiline-lf.csv",
+      "rawSha256": "293356b3e4e1826951818a769d86fc107f14cb3f5d00b91d1fbfa1541ee4ce72",
+      "rawBytes": 123,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,\\\"Lead,\\nResearcher\\\"\\nGrace,Hopper,grace@example.com,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\nResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\nResearcher"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "multiline-crlf",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/multiline-crlf.csv",
+      "rawSha256": "a1a32bf7fd3ff8c14986502eacd6d8c7c1659cbaccc74044d55913d6674efd00",
+      "rawBytes": 126,
+      "contentJSON": "\"first_name,last_name,email,position\\r\\nAda,Lovelace,ada@example.com,\\\"Lead,\\r\\nResearcher\\\"\\r\\nGrace,Hopper,grace@example.com,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\r\nResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\r\nResearcher"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "multiline-cr",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/multiline-cr.csv",
+      "rawSha256": "1268d88a8fc8a2efe5af83feeb3b71f5a2deeea76670f8964c7443352d4016fd",
+      "rawBytes": 123,
+      "contentJSON": "\"first_name,last_name,email,position\\rAda,Lovelace,ada@example.com,\\\"Lead,\\rResearcher\\\"\\rGrace,Hopper,grace@example.com,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\rResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\rResearcher"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "unquoted-whitespace",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/unquoted-whitespace.csv",
+      "rawSha256": "4436f262409d6ce1189e6b63b1d5fddfad77e6ee1b93e809dda7f9750f0fa52c",
+      "rawBytes": 61,
+      "contentJSON": "\"first_name,last_name,email\\n Grace , Hopper ,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": " Grace ",
+              "last_name": " Hopper ",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": " Grace ",
+              "last_name": " Hopper ",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quoted-whitespace",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quoted-whitespace.csv",
+      "rawSha256": "ebb6fac8d0af9744a9284294c6d2fbdb7526239b9a59713d87a7e0ccf661f416",
+      "rawBytes": 73,
+      "contentJSON": "\"first_name,last_name,email,position\\n  \\\"Ada\\\"  ,Lovelace,ada@example.com,\\\"\\\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": ""
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": ""
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quoted-tabs",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quoted-tabs.csv",
+      "rawSha256": "137b5a73c5881dfd6557958e9d5a61d708a375b400f95e06aacc8dd019ba4b7d",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\t\\\"Ada\\\"\\t,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quoted-nbsp",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quoted-nbsp.csv",
+      "rawSha256": "b34239c26dc32f3b86c9b309fecd1eb2631e05f9f6916234fc16a08d40d01fd4",
+      "rawBytes": 61,
+      "contentJSON": "\"first_name,last_name,email\\n \\\"Ada\\\" ,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quoted-formfeed",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quoted-formfeed.csv",
+      "rawSha256": "373a993aea7e60316256a1e96d5d1c5ed024a48465908bb7f2fd44a778bee5b2",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\f\\\"Ada\\\"\\f,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "blank-middle",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/blank-middle.csv",
+      "rawSha256": "956f885f5a7842f0303384334303667f7ed84a05936ab2ff2a2ba6a9af1c1904",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n\\nGrace,Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: first_name",
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          },
+          {
+            "rowNumber": 4,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 3,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            }
+          },
+          {
+            "rowNumber": 4,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "whitespace-only-middle",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/whitespace-only-middle.csv",
+      "rawSha256": "1215f1d1f34b5c815e81551ff7ef0791bdbd5cd992acecdd049f780ff47dd852",
+      "rawBytes": 90,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n  \\t\\nGrace,Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "  \t",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          },
+          {
+            "rowNumber": 4,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 3,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            }
+          },
+          {
+            "rowNumber": 4,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-records"
+    },
+    {
+      "name": "blank-only-row",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/blank-only-row.csv",
+      "rawSha256": "f077670f9532c2922b5b4a6218a08609bc3f660c88d9312f392a48030b4fecff",
+      "rawBytes": 28,
+      "contentJSON": "\"first_name,last_name,email\\n\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: first_name",
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "empty-fields-row",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/empty-fields-row.csv",
+      "rawSha256": "2f235a24b65ce3f5f2bc958db267a08d98c0558c25716fa5379fd877c70ee26f",
+      "rawBytes": 29,
+      "contentJSON": "\"first_name,last_name,email\\n,,\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: first_name",
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "short-row",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/short-row.csv",
+      "rawSha256": "d468b6aa96740b0fff9446765c612c0b8615a280996244849513904c26a1c384",
+      "rawBytes": 39,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: email"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": ""
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "empty",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/empty.csv",
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawBytes": 0,
+      "contentJSON": "\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 0,
+        "rows": []
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "bom-only",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/bom-only.csv",
+      "rawSha256": "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5",
+      "rawBytes": 3,
+      "contentJSON": "\"﻿\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 0,
+        "rows": []
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "header-only",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/header-only.csv",
+      "rawSha256": "0bbfcf726f71c0c3addcd490359eda9b8a6a51c4a2647aac27e799da5b111a3a",
+      "rawBytes": 26,
+      "contentJSON": "\"first_name,last_name,email\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 0,
+        "rows": []
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "header-terminator",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/header-terminator.csv",
+      "rawSha256": "09575b322cdcd890d13f6e9fda37ed6e88f20606d29b1c06f963c4727f41477a",
+      "rawBytes": 27,
+      "contentJSON": "\"first_name,last_name,email\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 0,
+        "rows": []
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "leading-blank",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/leading-blank.csv",
+      "rawSha256": "d50449e0ca0e164defb9f7d4e5ee7e9be99fc1963fb59f09eee1b4b737cf6958",
+      "rawBytes": 56,
+      "contentJSON": "\"\\nfirst_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name, last_name, email"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 0 columns got: 3",
+        "rowsBeforeError": []
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "leading-whitespace-blank",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/leading-whitespace-blank.csv",
+      "rawSha256": "26a9f59ea0ed00c5e904680e972bc8c8cd6086d56a35403c0720b6dd4baef3cf",
+      "rawBytes": 59,
+      "contentJSON": "\"  \\t\\nfirst_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name, last_name, email"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 0 columns got: 3",
+        "rowsBeforeError": []
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "missing-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/missing-header.csv",
+      "rawSha256": "11bcbfcb3959377b9274253d7fa710f8fcc4d35bfa3412b7a9e69101548561c6",
+      "rawBytes": 30,
+      "contentJSON": "\"name,email\\nAda,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name, last_name"
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "name": "Ada",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-acceptance"
+    },
+    {
+      "name": "whitespace-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/whitespace-header.csv",
+      "rawSha256": "f58a10ecedca894e83fa00d74d7f247fddbd62d220ab29e6c8e8581caa7bcba9",
+      "rawBytes": 56,
+      "contentJSON": "\" first_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name"
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              " first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-acceptance"
+    },
+    {
+      "name": "duplicate-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/duplicate-header.csv",
+      "rawSha256": "af02e80c54456df6648c648ec406ab22290b5f98c7f7f251a7a2433610352959",
+      "rawBytes": 79,
+      "contentJSON": "\"first_name,last_name,email,email\\nAda,Lovelace,ada@example.com,other@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: duplicate column headers"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Duplicate headers found [\"email\"]",
+        "rowsBeforeError": []
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "empty-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/empty-header.csv",
+      "rawSha256": "c93e604fbb1386a65cc5bcf8d271296de7d5ef933af74dd9e2e2440be11ce9f9",
+      "rawBytes": 64,
+      "contentJSON": "\"first_name,last_name,email,\\nAda,Lovelace,ada@example.com,ignored\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "": "ignored"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "": "ignored"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "duplicate-empty-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/duplicate-empty-header.csv",
+      "rawSha256": "ae9432e3e91c237a752392097a040d712d686c058a194a4dde7379d40ba687cf",
+      "rawBytes": 77,
+      "contentJSON": "\"first_name,last_name,email,,\\nAda,Lovelace,ada@example.com,ignored,alsoignored\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: duplicate column headers"
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "": "alsoignored"
+            }
+          }
+        ]
+      },
+      "comparison": "different-acceptance"
+    },
+    {
+      "name": "excess-row",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/excess-row.csv",
+      "rawSha256": "b63eea9d670358cbefd1107001235c07cda936a25174aafc44341016204fda8e",
+      "rawBytes": 62,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com,excess\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: too many columns in row 2"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 3 columns got: 4",
+        "rowsBeforeError": []
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "excess-after-valid-prefix",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/excess-after-valid-prefix.csv",
+      "rawSha256": "a0f4907248d03490a67608dc8e8af183e51234bcd014727c2d9e0ac8fc4953d5",
+      "rawBytes": 93,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\nGrace,Hopper,grace@example.com,excess\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: too many columns in row 3"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 3 columns got: 4",
+        "rowsBeforeError": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "unclosed-quote",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/unclosed-quote.csv",
+      "rawSha256": "256e7be79ec247df9899aae389fbc21a910113768ac01bbfca23a18a99d7d18c",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"Ada,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unclosed quoted field in row 2"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Parse Error: missing closing: '\"' in line: at '\"Ada,Lovelace,ada@example.com'",
+        "rowsBeforeError": []
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "unclosed-after-valid-prefix",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/unclosed-after-valid-prefix.csv",
+      "rawSha256": "4153a6e51e30f4be4d214020316545572a8b806989d29a34fb22fe280e6f15b4",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n\\\"Grace,Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unclosed quoted field in row 3"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Parse Error: missing closing: '\"' in line: at '\"Grace,Hopper,grace@example.com'",
+        "rowsBeforeError": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "suffix-after-quote",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/suffix-after-quote.csv",
+      "rawSha256": "14d625a09b865df99050cb3dfaee55407ee9b1a4eb928422f19d661214817002",
+      "rawBytes": 58,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"Ada\\\"x,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected character after closing quote in row 2"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Parse Error: expected: ',' OR new line got: 'x'. at 'x,Lovelace'",
+        "rowsBeforeError": []
+      },
+      "comparison": "same-acceptance"
+    },
+    {
+      "name": "quote-inside-unquoted",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quote-inside-unquoted.csv",
+      "rawSha256": "346549283993702725efabf4e597b2dba48a8903988ad74c395143736f725941",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\nA\\\"da,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected quote in row 2"
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "A\"da",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-acceptance"
+    },
+    {
+      "name": "quote-after-unquoted-space",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quote-after-unquoted-space.csv",
+      "rawSha256": "a1f8ff9c0a19eb349db23e72badb318f1349ba274f847f8c086af7283d6957cb",
+      "rawBytes": 58,
+      "contentJSON": "\"first_name,last_name,email\\nA \\\"da\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected quote in row 2"
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "A \"da\"",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-acceptance"
+    },
+    {
+      "name": "unquoted-trailing-quote",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/unquoted-trailing-quote.csv",
+      "rawSha256": "7f1af8d10268f0b95bab6acb25b5c21de862c7d06d64749f5c5b18ef1c8607d0",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\nAda\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected quote in row 2"
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada\"",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-acceptance"
+    },
+    {
+      "name": "escaped-quotes",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/escaped-quotes.csv",
+      "rawSha256": "c5acb8c8e2eba74ce73dae51707d9327a213768465af7a589aa7a23be6f03bbb",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"A\\\"\\\"da\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "A\"da",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "A\"da",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "triple-close-quote",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/triple-close-quote.csv",
+      "rawSha256": "e3353c4fdd027dbfb380943d2ba92be2c82f02e6d8116248d89f7407b9c5dce9",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"Ada\\\"\\\"\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada\"",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada\"",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quote-after-newline",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quote-after-newline.csv",
+      "rawSha256": "d5d8e81edf0d6c8539a3a5c7ee63721940bd560b685736842fc79cc966169e26",
+      "rawBytes": 88,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n\\\"Grace\\\",Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "crlf-inside-multiline-logical-index",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/crlf-inside-multiline-logical-index.csv",
+      "rawSha256": "9101d7fb33a5edd75138a657f1249db62c9c0669d55292e9dda47cae172ca843",
+      "rawBytes": 88,
+      "contentJSON": "\"first_name,last_name,email,position\\r\\nAda,Lovelace,ada@example.com,\\\"A\\r\\nB\\\"\\r\\nGrace,,invalid\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "A\r\nB"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "",
+              "email": "invalid",
+              "position": ""
+            },
+            "errors": [
+              "Missing required field: last_name",
+              "Invalid email address"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 2,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "A\r\nB"
+            }
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "",
+              "email": "invalid",
+              "position": ""
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "empty-final-quoted",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/empty-final-quoted.csv",
+      "rawSha256": "1991adc717a1866a80cfba159b3615cd17b3b437c07ab8687f485d78a92d20c7",
+      "rawBytes": 67,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,\\\"\\\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": ""
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": ""
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "quoted-linebreak-last-field",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/quoted-linebreak-last-field.csv",
+      "rawSha256": "65f0d5dbe441bbbd4f3b92e9720a6a204cd5b22919dc4e6bf4808d96ba0c784e",
+      "rawBytes": 68,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,\\\"\\n\\\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "\n"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "\n"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "proto-header",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/proto-header.csv",
+      "rawSha256": "101b73e7f38b9d8ffb4bec76e4d7a939bb3d647e96590309df295434fe55c8a5",
+      "rawBytes": 71,
+      "contentJSON": "\"first_name,last_name,email,__proto__\\nAda,Lovelace,ada@example.com,value\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "__proto__": "value"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            }
+          }
+        ]
+      },
+      "comparison": "different-records"
+    },
+    {
+      "name": "salary-decimal",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/salary-decimal.csv",
+      "rawSha256": "1ecd489cdae8a7012fe6133351178bb0ca5bfe2ebba0febe7baf3f4cbe11342d",
+      "rawBytes": 74,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,123.50\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "123.50"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "123.50"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "salary-junk-suffix",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/salary-junk-suffix.csv",
+      "rawSha256": "4c6efa17c64f46371cfe6498f511185af24877633151768d594f4f6198c6ebc2",
+      "rawBytes": 74,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,123abc\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "123abc"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "123abc"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "salary-hex",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/salary-hex.csv",
+      "rawSha256": "b5ad44f60058628d1c59071b8803073939412ef25f8c5aedabb10b844d03439b",
+      "rawBytes": 72,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,0x10\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0x10"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0x10"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "salary-infinity",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/salary-infinity.csv",
+      "rawSha256": "11611ac30178fe4c2455c60d5c0b9af596f8a27b2bd7c114bc81e11e6f97e35b",
+      "rawBytes": 76,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,Infinity\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "Infinity"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "Infinity"
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    },
+    {
+      "name": "salary-whitespace",
+      "file": "/workspace/scratch/ea8baa184658/payd685-csv-differential-runtime/results/salary-whitespace.csv",
+      "rawSha256": "5d452474e97ccd0f738bd1361011221890c08606bc696615b7ad9c833b0f4684",
+      "rawBytes": 70,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,  \"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "  "
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "parserRowCount": 1,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "  "
+            }
+          }
+        ]
+      },
+      "comparison": "same-records"
+    }
+  ]
+}

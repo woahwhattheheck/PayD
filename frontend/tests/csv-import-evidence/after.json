@@ -1,0 +1,25 @@
+{
+  "sourceBase": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+  "employeeEntrySha256": "dd5291a794c13505b114a69c3bbcb7c94d8a649b0ec919b6aee331b3a8c98434",
+  "runtime": "v24.19.0",
+  "browser": "151.0.7922.34",
+  "transport": "Loopback HTTP fixture; no live database or credentials",
+  "previewRows": 20,
+  "totalRows": 25,
+  "rawCsvExact": true,
+  "oneAuthenticatedRequest": true,
+  "listReads": 6,
+  "resultVisible": true,
+  "pageErrors": [],
+  "cases": [
+    "file-picker quoted/multiline preview20-of25",
+    "byte-exact authenticated request",
+    "success survives awaited GET",
+    "partial summary survives awaited GET",
+    "rejected POST preserves retryable preview",
+    "replacement suppresses stale result",
+    "closed preview retains progress",
+    "mobile real FileReader drag/drop"
+  ],
+  "importRequests": 5
+}

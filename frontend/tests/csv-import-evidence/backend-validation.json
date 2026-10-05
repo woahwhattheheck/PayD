@@ -1,0 +1,3374 @@
+{
+  "sourceSha": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+  "node": "v24.19.0",
+  "dependencies": {
+    "fastCsv": "5.0.5",
+    "zod": "4.3.6",
+    "stellarSdk": "12.3.0",
+    "typescript": "5.9.3"
+  },
+  "sourceFiles": {
+    "frontend/src/utils/csvPreview.ts": "ebdd33268fceeb2c821bcf7cb33cb3c0c86b7b59d276194db4ed5b67982f8e80",
+    "backend/src/services/csvPayrollImportService.ts": "71c74e1ed2b2d4dfdb22afa4ea4c09bd040fcae41260a459d3dc7d6f05d444ef",
+    "backend/src/schemas/employeeSchema.ts": "97d1f5e6bacf6fb86cb2cf94c7f54e6328956c9d2c11a50ac32ca18f4835be4b"
+  },
+  "method": "Actual backend processCsv and actual employee schema; only employeeService, database pool and logger replaced with in-memory recording stubs. Actual frontend preview and EmployeeList validators. No network requests, database writes, source mutations, or product dependency changes.",
+  "cases": [
+    {
+      "name": "ordinary-lf",
+      "rawSha256": "8ccf5ba173f7db33cf097a4b80300b68dbe95522bcaea83fa70d8ccffa4a3de6",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\nGrace,Hopper,grace@example.com\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "ordinary-crlf",
+      "rawSha256": "7d6ebd774e44f6623c7cc9f93006387144f0a5879fadab28cff9b9a84a02ade3",
+      "rawBytes": 90,
+      "contentJSON": "\"first_name,last_name,email\\r\\nAda,Lovelace,ada@example.com\\r\\nGrace,Hopper,grace@example.com\\r\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "ordinary-cr",
+      "rawSha256": "b2fd0e9013a8fc63c525d3124d2abfdc4b1eb59b3861297f9b6893943284d78f",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\rAda,Lovelace,ada@example.com\\rGrace,Hopper,grace@example.com\\r\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quoted-bom-header",
+      "rawSha256": "6036ca1f3812870710d02059d85e7da1a736542444df005a297d8a27d529bde3",
+      "rawBytes": 82,
+      "contentJSON": "\"﻿\\\"first_name\\\",\\\"last_name\\\",\\\"email\\\"\\r\\n\\\"Ada, Augusta\\\",\\\"Love\\\"\\\"lace\\\",ada@example.com\\r\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada, Augusta",
+              "last_name": "Love\"lace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada, Augusta",
+          "last_name": "Love\"lace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "multiline-lf",
+      "rawSha256": "293356b3e4e1826951818a769d86fc107f14cb3f5d00b91d1fbfa1541ee4ce72",
+      "rawBytes": 123,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,\\\"Lead,\\nResearcher\\\"\\nGrace,Hopper,grace@example.com,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\nResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "Lead,\nResearcher",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "position": "Engineer",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "multiline-crlf",
+      "rawSha256": "a1a32bf7fd3ff8c14986502eacd6d8c7c1659cbaccc74044d55913d6674efd00",
+      "rawBytes": 126,
+      "contentJSON": "\"first_name,last_name,email,position\\r\\nAda,Lovelace,ada@example.com,\\\"Lead,\\r\\nResearcher\\\"\\r\\nGrace,Hopper,grace@example.com,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\r\nResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "Lead,\r\nResearcher",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "position": "Engineer",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "multiline-cr",
+      "rawSha256": "1268d88a8fc8a2efe5af83feeb3b71f5a2deeea76670f8964c7443352d4016fd",
+      "rawBytes": 123,
+      "contentJSON": "\"first_name,last_name,email,position\\rAda,Lovelace,ada@example.com,\\\"Lead,\\rResearcher\\\"\\rGrace,Hopper,grace@example.com,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead,\rResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "position": "Engineer"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "Lead,\rResearcher",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "position": "Engineer",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "unquoted-whitespace",
+      "rawSha256": "4436f262409d6ce1189e6b63b1d5fddfad77e6ee1b93e809dda7f9750f0fa52c",
+      "rawBytes": 61,
+      "contentJSON": "\"first_name,last_name,email\\n Grace , Hopper ,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": " Grace ",
+              "last_name": " Hopper ",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": " Grace ",
+          "last_name": " Hopper ",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quoted-whitespace",
+      "rawSha256": "ebb6fac8d0af9744a9284294c6d2fbdb7526239b9a59713d87a7e0ccf661f416",
+      "rawBytes": 73,
+      "contentJSON": "\"first_name,last_name,email,position\\n  \\\"Ada\\\"  ,Lovelace,ada@example.com,\\\"\\\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": ""
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quoted-tabs",
+      "rawSha256": "137b5a73c5881dfd6557958e9d5a61d708a375b400f95e06aacc8dd019ba4b7d",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\t\\\"Ada\\\"\\t,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quoted-nbsp",
+      "rawSha256": "b34239c26dc32f3b86c9b309fecd1eb2631e05f9f6916234fc16a08d40d01fd4",
+      "rawBytes": 61,
+      "contentJSON": "\"first_name,last_name,email\\n \\\"Ada\\\" ,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quoted-formfeed",
+      "rawSha256": "373a993aea7e60316256a1e96d5d1c5ed024a48465908bb7f2fd44a778bee5b2",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\f\\\"Ada\\\"\\f,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "blank-middle",
+      "rawSha256": "956f885f5a7842f0303384334303667f7ed84a05936ab2ff2a2ba6a9af1c1904",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n\\nGrace,Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: first_name",
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          },
+          {
+            "rowNumber": 4,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 3,
+          "successCount": 2,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 3,
+              "email": "N/A",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"First name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Last name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "whitespace-only-middle",
+      "rawSha256": "1215f1d1f34b5c815e81551ff7ef0791bdbd5cd992acecdd049f780ff47dd852",
+      "rawBytes": 90,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n  \\t\\nGrace,Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "  \t",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          },
+          {
+            "rowNumber": 4,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 3,
+          "successCount": 2,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 3,
+              "email": "N/A",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"First name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Last name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "blank-only-row",
+      "rawSha256": "f077670f9532c2922b5b4a6218a08609bc3f660c88d9312f392a48030b4fecff",
+      "rawBytes": 28,
+      "contentJSON": "\"first_name,last_name,email\\n\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: first_name",
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "N/A",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"First name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Last name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "empty-fields-row",
+      "rawSha256": "2f235a24b65ce3f5f2bc958db267a08d98c0558c25716fa5379fd877c70ee26f",
+      "rawBytes": 29,
+      "contentJSON": "\"first_name,last_name,email\\n,,\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "",
+              "last_name": "",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: first_name",
+              "Missing required field: last_name",
+              "Missing required field: email"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "N/A",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"First name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Last name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "short-row",
+      "rawSha256": "d468b6aa96740b0fff9446765c612c0b8615a280996244849513904c26a1c384",
+      "rawBytes": 39,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": ""
+            },
+            "errors": [
+              "Missing required field: email"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "N/A",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "empty",
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawBytes": 0,
+      "contentJSON": "\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 0,
+          "successCount": 0,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "bom-only",
+      "rawSha256": "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5",
+      "rawBytes": 3,
+      "contentJSON": "\"﻿\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 0,
+          "successCount": 0,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "header-only",
+      "rawSha256": "0bbfcf726f71c0c3addcd490359eda9b8a6a51c4a2647aac27e799da5b111a3a",
+      "rawBytes": 26,
+      "contentJSON": "\"first_name,last_name,email\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 0,
+          "successCount": 0,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "header-terminator",
+      "rawSha256": "09575b322cdcd890d13f6e9fda37ed6e88f20606d29b1c06f963c4727f41477a",
+      "rawBytes": 27,
+      "contentJSON": "\"first_name,last_name,email\\n\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 0,
+          "successCount": 0,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "leading-blank",
+      "rawSha256": "d50449e0ca0e164defb9f7d4e5ee7e9be99fc1963fb59f09eee1b4b737cf6958",
+      "rawBytes": 56,
+      "contentJSON": "\"\\nfirst_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name, last_name, email"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 0 columns got: 3"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "leading-whitespace-blank",
+      "rawSha256": "26a9f59ea0ed00c5e904680e972bc8c8cd6086d56a35403c0720b6dd4baef3cf",
+      "rawBytes": 59,
+      "contentJSON": "\"  \\t\\nfirst_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name, last_name, email"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 0 columns got: 3"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "missing-header",
+      "rawSha256": "11bcbfcb3959377b9274253d7fa710f8fcc4d35bfa3412b7a9e69101548561c6",
+      "rawBytes": 30,
+      "contentJSON": "\"name,email\\nAda,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name, last_name"
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  },\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "whitespace-header",
+      "rawSha256": "f58a10ecedca894e83fa00d74d7f247fddbd62d220ab29e6c8e8581caa7bcba9",
+      "rawBytes": 56,
+      "contentJSON": "\" first_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Missing required columns: first_name"
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "duplicate-header",
+      "rawSha256": "af02e80c54456df6648c648ec406ab22290b5f98c7f7f251a7a2433610352959",
+      "rawBytes": 79,
+      "contentJSON": "\"first_name,last_name,email,email\\nAda,Lovelace,ada@example.com,other@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: duplicate column headers"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Duplicate headers found [\"email\"]"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "empty-header",
+      "rawSha256": "c93e604fbb1386a65cc5bcf8d271296de7d5ef933af74dd9e2e2440be11ce9f9",
+      "rawBytes": 64,
+      "contentJSON": "\"first_name,last_name,email,\\nAda,Lovelace,ada@example.com,ignored\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "": "ignored"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "duplicate-empty-header",
+      "rawSha256": "ae9432e3e91c237a752392097a040d712d686c058a194a4dde7379d40ba687cf",
+      "rawBytes": 77,
+      "contentJSON": "\"first_name,last_name,email,,\\nAda,Lovelace,ada@example.com,ignored,alsoignored\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: duplicate column headers"
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "excess-row",
+      "rawSha256": "b63eea9d670358cbefd1107001235c07cda936a25174aafc44341016204fda8e",
+      "rawBytes": 62,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com,excess\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: too many columns in row 2"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 3 columns got: 4"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "excess-after-valid-prefix",
+      "rawSha256": "a0f4907248d03490a67608dc8e8af183e51234bcd014727c2d9e0ac8fc4953d5",
+      "rawBytes": 93,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\nGrace,Hopper,grace@example.com,excess\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: too many columns in row 3"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Unexpected Error: column header mismatch expected: 3 columns got: 4"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "unclosed-quote",
+      "rawSha256": "256e7be79ec247df9899aae389fbc21a910113768ac01bbfca23a18a99d7d18c",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"Ada,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unclosed quoted field in row 2"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Parse Error: missing closing: '\"' in line: at '\"Ada,Lovelace,ada@example.com'"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "unclosed-after-valid-prefix",
+      "rawSha256": "4153a6e51e30f4be4d214020316545572a8b806989d29a34fb22fe280e6f15b4",
+      "rawBytes": 87,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n\\\"Grace,Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unclosed quoted field in row 3"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Parse Error: missing closing: '\"' in line: at '\"Grace,Hopper,grace@example.com'"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "suffix-after-quote",
+      "rawSha256": "14d625a09b865df99050cb3dfaee55407ee9b1a4eb928422f19d661214817002",
+      "rawBytes": 58,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"Ada\\\"x,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected character after closing quote in row 2"
+      },
+      "backend": {
+        "accepted": false,
+        "error": "Parse Error: expected: ',' OR new line got: 'x'. at 'x,Lovelace'"
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quote-inside-unquoted",
+      "rawSha256": "346549283993702725efabf4e597b2dba48a8903988ad74c395143736f725941",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\nA\\\"da,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected quote in row 2"
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "A\"da",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quote-after-unquoted-space",
+      "rawSha256": "a1f8ff9c0a19eb349db23e72badb318f1349ba274f847f8c086af7283d6957cb",
+      "rawBytes": 58,
+      "contentJSON": "\"first_name,last_name,email\\nA \\\"da\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected quote in row 2"
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "A \"da\"",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "unquoted-trailing-quote",
+      "rawSha256": "7f1af8d10268f0b95bab6acb25b5c21de862c7d06d64749f5c5b18ef1c8607d0",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\nAda\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": false,
+        "error": "Invalid CSV: unexpected quote in row 2"
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada\"",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "escaped-quotes",
+      "rawSha256": "c5acb8c8e2eba74ce73dae51707d9327a213768465af7a589aa7a23be6f03bbb",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"A\\\"\\\"da\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "A\"da",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "A\"da",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "triple-close-quote",
+      "rawSha256": "e3353c4fdd027dbfb380943d2ba92be2c82f02e6d8116248d89f7407b9c5dce9",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\n\\\"Ada\\\"\\\"\\\",Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada\"",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada\"",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quote-after-newline",
+      "rawSha256": "d5d8e81edf0d6c8539a3a5c7ee63721940bd560b685736842fc79cc966169e26",
+      "rawBytes": 88,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\\n\\\"Grace\\\",Hopper,grace@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 2,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        },
+        {
+          "organization_id": 1,
+          "first_name": "Grace",
+          "last_name": "Hopper",
+          "email": "grace@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "crlf-inside-multiline-logical-index",
+      "rawSha256": "9101d7fb33a5edd75138a657f1249db62c9c0669d55292e9dda47cae172ca843",
+      "rawBytes": 88,
+      "contentJSON": "\"first_name,last_name,email,position\\r\\nAda,Lovelace,ada@example.com,\\\"A\\r\\nB\\\"\\r\\nGrace,,invalid\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "A\r\nB"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "",
+              "email": "invalid",
+              "position": ""
+            },
+            "errors": [
+              "Missing required field: last_name",
+              "Invalid email address"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 1,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 3,
+              "email": "invalid",
+              "errors": [
+                "Missing required fields: first_name, last_name, and email are mandatory",
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"inclusive\": true,\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Last name is required\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "A\r\nB",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "empty-final-quoted",
+      "rawSha256": "1991adc717a1866a80cfba159b3615cd17b3b437c07ab8687f485d78a92d20c7",
+      "rawBytes": 67,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,\\\"\\\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": ""
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "quoted-linebreak-last-field",
+      "rawSha256": "65f0d5dbe441bbbd4f3b92e9720a6a204cd5b22919dc4e6bf4808d96ba0c784e",
+      "rawBytes": 68,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,\\\"\\n\\\"\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "\n"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "\n",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "proto-header",
+      "rawSha256": "101b73e7f38b9d8ffb4bec76e4d7a939bb3d647e96590309df295434fe55c8a5",
+      "rawBytes": 71,
+      "contentJSON": "\"first_name,last_name,email,__proto__\\nAda,Lovelace,ada@example.com,value\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "__proto__": "value"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-decimal",
+      "rawSha256": "1ecd489cdae8a7012fe6133351178bb0ca5bfe2ebba0febe7baf3f4cbe11342d",
+      "rawBytes": 74,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,123.50\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "123.50"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 123.5,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-junk-suffix",
+      "rawSha256": "4c6efa17c64f46371cfe6498f511185af24877633151768d594f4f6198c6ebc2",
+      "rawBytes": 74,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,123abc\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "123abc"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 123,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "salary-hex",
+      "rawSha256": "b5ad44f60058628d1c59071b8803073939412ef25f8c5aedabb10b844d03439b",
+      "rawBytes": 72,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,0x10\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0x10"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-infinity",
+      "rawSha256": "11611ac30178fe4c2455c60d5c0b9af596f8a27b2bd7c114bc81e11e6f97e35b",
+      "rawBytes": 76,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,Infinity\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "Infinity"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"received\": \"Infinity\",\n    \"path\": [\n      \"base_salary\"\n    ],\n    \"message\": \"Invalid input: expected number, received number\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-whitespace",
+      "rawSha256": "5d452474e97ccd0f738bd1361011221890c08606bc696615b7ad9c833b0f4684",
+      "rawBytes": 70,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,  \"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "  "
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Invalid salary format: must be a number",
+                "[\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"received\": \"NaN\",\n    \"path\": [\n      \"base_salary\"\n    ],\n    \"message\": \"Invalid input: expected number, received NaN\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "valid-wallet",
+      "rawSha256": "e66f1414453149fcf19d44585592e7785fa3366ea0b22f04caa2142887f5df9d",
+      "rawBytes": 127,
+      "contentJSON": "\"first_name,last_name,email,wallet_address\\nAda,Lovelace,ada@example.com,GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "wallet_address": "GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "wallet_address": "GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "invalid-wallet",
+      "rawSha256": "0299caebab0af520f57c063a3db205b7138a7a8a2defd13d9e983e6c8077cc40",
+      "rawBytes": 78,
+      "contentJSON": "\"first_name,last_name,email,wallet_address\\nAda,Lovelace,ada@example.com,INVALID\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "wallet_address": "INVALID"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Invalid Stellar wallet address"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "overlong-first_name",
+      "rawSha256": "7c735e56dbf61057ac75aea91ac3e0592218554ab762c57d23e045f6b1590b44",
+      "rawBytes": 153,
+      "contentJSON": "\"first_name,last_name,email\\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 100,\n    \"inclusive\": true,\n    \"path\": [\n      \"first_name\"\n    ],\n    \"message\": \"Too big: expected string to have <=100 characters\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "overlong-last_name",
+      "rawSha256": "86bf489beffddda8300169ce442fdd6fcaa47502ec6ded8f6f2f272739c766c8",
+      "rawBytes": 148,
+      "contentJSON": "\"first_name,last_name,email\\nAda,LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 100,\n    \"inclusive\": true,\n    \"path\": [\n      \"last_name\"\n    ],\n    \"message\": \"Too big: expected string to have <=100 characters\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "overlong-position",
+      "rawSha256": "c84a9b4a26ee80ee3ed0654288843ce963714fcb6f3d967a4fba88bcbef44831",
+      "rawBytes": 166,
+      "contentJSON": "\"first_name,last_name,email,position\\nAda,Lovelace,ada@example.com,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 100,\n    \"inclusive\": true,\n    \"path\": [\n      \"position\"\n    ],\n    \"message\": \"Too big: expected string to have <=100 characters\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "overlong-department",
+      "rawSha256": "923d6d994991d55ac862b05d7ede2fedacca988273b35f03574b9d1f0477b93f",
+      "rawBytes": 168,
+      "contentJSON": "\"first_name,last_name,email,department\\nAda,Lovelace,ada@example.com,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "department": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 100,\n    \"inclusive\": true,\n    \"path\": [\n      \"department\"\n    ],\n    \"message\": \"Too big: expected string to have <=100 characters\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "overlong-currency",
+      "rawSha256": "fb14fc477099175eb86dae5e31c0dcdba84f81c2c04b55091ff4819880339497",
+      "rawBytes": 83,
+      "contentJSON": "\"first_name,last_name,email,base_currency\\nAda,Lovelace,ada@example.com,AAAAAAAAAAAAA\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_currency": "AAAAAAAAAAAAA"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 12,\n    \"inclusive\": true,\n    \"path\": [\n      \"base_currency\"\n    ],\n    \"message\": \"Too big: expected string to have <=12 characters\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "email-validation-0",
+      "rawSha256": "8c684007ff12e8139f852a66496e9e1b3d0beff66b28622fd0baccbb6b572a02",
+      "rawBytes": 45,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,a@b.c\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "a@b.c"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "a@b.c",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "email-validation-1",
+      "rawSha256": "637f66316c99da4c94151f52440a9bef2016bb07eac5c392a6c2742d874910b8",
+      "rawBytes": 54,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,.a@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": ".a@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": ".a@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "email-validation-2",
+      "rawSha256": "a7582bfc836e7802ee0123f8d072cef0be07bf53ae52461601ab7ac5466d93c1",
+      "rawBytes": 56,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,a..b@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "a..b@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "a..b@example.com",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "email-validation-3",
+      "rawSha256": "9e071c80793170109a0f3c4515d356fc27b12c8b29aede5fd8d43f5dfad8160b",
+      "rawBytes": 55,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "email-validation-4",
+      "rawSha256": "ccbf940ea61daa22387d0354c8764ca75f567804b0de8a705fa5f15cf7778a18",
+      "rawBytes": 59,
+      "contentJSON": "\"first_name,last_name,email\\nAda,Lovelace,ada+pay@example.com\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada+pay@example.com"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada+pay@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-0",
+      "rawSha256": "16301dc422ec9e0fd2841a00aa0b88f0301f734184c3b33d8bdf3676f4b0fb2e",
+      "rawBytes": 69,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com, \"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": " "
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Invalid salary format: must be a number",
+                "[\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"received\": \"NaN\",\n    \"path\": [\n      \"base_salary\"\n    ],\n    \"message\": \"Invalid input: expected number, received NaN\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "salary-validation-1",
+      "rawSha256": "b5ad44f60058628d1c59071b8803073939412ef25f8c5aedabb10b844d03439b",
+      "rawBytes": 72,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,0x10\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0x10"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-2",
+      "rawSha256": "4d8eac733fec71c326fb3ecb9d973fb84d30c5e1882b8123f622d2d1ee0942fb",
+      "rawBytes": 75,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,1000USD\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "1000USD"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 1000,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "salary-validation-3",
+      "rawSha256": "11611ac30178fe4c2455c60d5c0b9af596f8a27b2bd7c114bc81e11e6f97e35b",
+      "rawBytes": 76,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,Infinity\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "Infinity"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "[\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"received\": \"Infinity\",\n    \"path\": [\n      \"base_salary\"\n    ],\n    \"message\": \"Invalid input: expected number, received number\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-4",
+      "rawSha256": "beea541dfd9da96d505abb13daa10d93b8e6d6ff3140e9482f152c5202641d0b",
+      "rawBytes": 71,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,NaN\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "NaN"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Invalid salary format: must be a number",
+                "[\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"received\": \"NaN\",\n    \"path\": [\n      \"base_salary\"\n    ],\n    \"message\": \"Invalid input: expected number, received NaN\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-5",
+      "rawSha256": "415995cd90f80e441a757c1a35285b81282d7d5cf0992765dc55b1598cb54340",
+      "rawBytes": 70,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,-1\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "-1"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 0,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 2,
+              "email": "ada@example.com",
+              "errors": [
+                "Salary cannot be negative",
+                "[\n  {\n    \"origin\": \"number\",\n    \"code\": \"too_small\",\n    \"minimum\": 0,\n    \"inclusive\": true,\n    \"path\": [\n      \"base_salary\"\n    ],\n    \"message\": \"Too small: expected number to be >=0\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [],
+      "recordedDatabaseCommands": [],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-6",
+      "rawSha256": "58dcefb340ae318c7582a9a6ea6d3ca560c1e2d8c4d3c0f84ac5e07d13134c09",
+      "rawBytes": 69,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,0\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-7",
+      "rawSha256": "bc613e87f3b881ea4c9381c419a2afc93bf4617956ff816a58d8da3079bd0611",
+      "rawBytes": 72,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,0.25\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0.25"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0.25,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-8",
+      "rawSha256": "aae0527b7e0bfc650533c4ecd0baacbc5b3996a717e7b3de6a8ef167f895bfed",
+      "rawBytes": 71,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,1e3\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "1e3"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 1000,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "salary-validation-9",
+      "rawSha256": "ee8308cf02c1723fc19a4cd608e8b6b6efdb668a9c68dfa14e852be16dbe40ac",
+      "rawBytes": 73,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,1_000\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "1_000"
+            },
+            "errors": [
+              "base_salary must be a non-negative number"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 0
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 1,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "salary-validation-10",
+      "rawSha256": "2cc15bab87d1d466bc7d6890dbeebd60a70032a9b4bc2f9c97d99d9c85c833a4",
+      "rawBytes": 72,
+      "contentJSON": "\"first_name,last_name,email,base_salary\\nAda,Lovelace,ada@example.com,0b10\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "base_salary": "0b10"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 1,
+          "successCount": 1,
+          "errorCount": 0,
+          "errors": []
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    },
+    {
+      "name": "mixed-valid-and-invalid-wallet",
+      "rawSha256": "315a9afdfacf87bcc604bed0386f678611765a08a91596eb24708008a13777bc",
+      "rawBytes": 166,
+      "contentJSON": "\"first_name,last_name,email,wallet_address\\nAda,Lovelace,ada@example.com,GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR\\nGrace,Hopper,grace@example.com,INVALID\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "wallet_address": "GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "grace@example.com",
+              "wallet_address": "INVALID"
+            },
+            "errors": [],
+            "isValid": true
+          }
+        ],
+        "validCount": 2
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 1,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 3,
+              "email": "grace@example.com",
+              "errors": [
+                "Invalid Stellar wallet address"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "wallet_address": "GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": true
+    },
+    {
+      "name": "multiline-first-then-invalid-email",
+      "rawSha256": "218bfd2d0a4407f55558bae92a1132167802db6ed3de1b5c588d06ef4de8253e",
+      "rawBytes": 115,
+      "contentJSON": "\"first_name,last_name,email,position\\r\\nAda,Lovelace,ada@example.com,\\\"Lead\\r\\nResearcher\\\"\\r\\nGrace,Hopper,invalid,Engineer\"",
+      "frontend": {
+        "accepted": true,
+        "rows": [
+          {
+            "rowNumber": 2,
+            "data": {
+              "first_name": "Ada",
+              "last_name": "Lovelace",
+              "email": "ada@example.com",
+              "position": "Lead\r\nResearcher"
+            },
+            "errors": [],
+            "isValid": true
+          },
+          {
+            "rowNumber": 3,
+            "data": {
+              "first_name": "Grace",
+              "last_name": "Hopper",
+              "email": "invalid",
+              "position": "Engineer"
+            },
+            "errors": [
+              "Invalid email address"
+            ],
+            "isValid": false
+          }
+        ],
+        "validCount": 1
+      },
+      "backend": {
+        "accepted": true,
+        "result": {
+          "totalRows": 2,
+          "successCount": 1,
+          "errorCount": 1,
+          "errors": [
+            {
+              "row": 3,
+              "email": "invalid",
+              "errors": [
+                "[\n  {\n    \"origin\": \"string\",\n    \"code\": \"invalid_format\",\n    \"format\": \"email\",\n    \"pattern\": \"/^(?!\\\\.)(?!.*\\\\.\\\\.)([A-Za-z0-9_'+\\\\-\\\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\\\-]*\\\\.)+[A-Za-z]{2,}$/\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Invalid email address\"\n  }\n]"
+              ]
+            }
+          ]
+        }
+      },
+      "recordedEmployees": [
+        {
+          "organization_id": 1,
+          "first_name": "Ada",
+          "last_name": "Lovelace",
+          "email": "ada@example.com",
+          "position": "Lead\r\nResearcher",
+          "status": "active",
+          "base_salary": 0,
+          "base_currency": "USDC"
+        }
+      ],
+      "recordedDatabaseCommands": [
+        "BEGIN",
+        "COMMIT"
+      ],
+      "logs": [],
+      "countMismatch": false
+    }
+  ]
+}

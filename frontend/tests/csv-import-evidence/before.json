@@ -1,0 +1,14 @@
+{
+  "sourceBase": "bec05631342cd795b2bed626f2449a3b3006f7c0",
+  "employeeEntrySha256": "79d86b0f424ce57a6166ff99cf56bbb66ad20f62a32b8773e1e35aae3aa9c00a",
+  "runtime": "v24.19.0",
+  "browser": "151.0.7922.34",
+  "transport": "Loopback HTTP fixture; no live database or credentials",
+  "previewRows": 20,
+  "totalRows": 25,
+  "rawCsvExact": true,
+  "oneAuthenticatedRequest": true,
+  "listReads": 3,
+  "resultVisible": false,
+  "pageErrors": []
+}
