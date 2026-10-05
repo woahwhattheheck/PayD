@@ -669,7 +669,7 @@ const EmployeePortal: React.FC = () => {
         >
           <span className={styles.statLabel}>{t('employeePortal.history.date')}</span>
           <span className={styles.statLabel}>{t('employeePortal.history.description')}</span>
-          <span className={styles.statLabel}>Amount</span>
+          <span className={styles.statLabel}>{t('employeePortal.common.amount')}</span>
           <span className={`${styles.statLabel} hidden md:block`}>{t('employeePortal.history.status')}</span>
           <span className={`${styles.statLabel} hidden md:block`}>{t('employeePortal.history.hash')}</span>
           <span className={styles.statLabel}>{t('employeePortal.history.verify')}</span>
