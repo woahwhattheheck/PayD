@@ -59,17 +59,17 @@ export const OnboardingTour: React.FC<{
       callback={handleJoyrideCallback}
       styles={{
         options: {
-          primaryColor: '#4AF0B8',
-          textColor: '#fff',
-          backgroundColor: '#111827',
-          arrowColor: '#111827',
+          primaryColor: 'var(--accent2)',
+          textColor: 'var(--text)',
+          backgroundColor: 'var(--surface)',
+          arrowColor: 'var(--surface)',
           zIndex: 10000,
         },
         tooltip: {
           borderRadius: '12px',
           padding: '20px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-lg)',
         },
         tooltipContent: {
           padding: '10px 0',
@@ -77,23 +77,23 @@ export const OnboardingTour: React.FC<{
           lineHeight: '1.5',
         },
         buttonNext: {
-          backgroundColor: '#4AF0B8',
-          color: '#000',
+          backgroundColor: 'var(--accent2)',
+          color: 'var(--on-accent)',
           fontWeight: '800',
           borderRadius: '8px',
           padding: '10px 20px',
         },
         buttonBack: {
-          color: '#9CA3AF',
+          color: 'var(--muted)',
           fontWeight: '600',
           marginRight: '10px',
         },
         buttonSkip: {
-          color: '#9CA3AF',
+          color: 'var(--muted)',
           fontSize: '13px',
         },
         overlay: {
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backgroundColor: 'var(--backdrop)',
           backdropFilter: 'blur(3px)',
         },
       }}

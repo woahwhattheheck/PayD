@@ -168,8 +168,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-red-500 bg-red-500/10'
-              : 'text-red-400 hover:bg-red-500/20 hover:text-red-500'
+              ? 'text-danger bg-danger/10'
+              : 'text-danger hover:bg-danger/20 hover:text-danger'
           }`
         }
       >
@@ -241,7 +241,7 @@ const AppNav: React.FC = () => {
         <>
           {/* Backdrop overlay */}
           <div
-            className="lg:hidden fixed inset-0 bg-black/50 z-30"
+            className="lg:hidden fixed inset-0 bg-backdrop z-30"
             onClick={() => setMobileOpen(false)}
           />
 

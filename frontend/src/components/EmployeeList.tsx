@@ -211,7 +211,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     {/* Inline salary edit */}
                     {onEditEmployee ? (
                       <button
-                        className="text-blue-500 underline"
+                        className="text-info underline"
                         onClick={() => {
                           setEditSalary(employee.salary || 0);
                           setShowEditModal({ open: true, employee });
@@ -227,13 +227,13 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                         employee.status === 'Active'
-                          ? 'bg-green-100 text-green-600 border-green-200'
-                          : 'bg-red-100 text-red-600 border-red-200'
+                          ? 'bg-success/10 text-success border-success/20'
+                          : 'bg-danger/10 text-danger border-danger/20'
                       }`}
                     >
                       <div
                         className={`w-1 h-1 rounded-full ${
-                          employee.status === 'Active' ? 'bg-green-600' : 'bg-red-600'
+                          employee.status === 'Active' ? 'bg-success' : 'bg-danger'
                         }`}
                       />
                       {employee.status || '-'}
@@ -241,7 +241,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                   </td>
                   <td className="p-6 flex gap-2">
                     <button
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-info hover:text-link"
                       title="Edit"
                       onClick={() => {
                         setEditSalary(employee.salary || 0);
@@ -251,7 +251,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                       <Pencil className="w-5 h-5" />
                     </button>
                     <button
-                      className="text-red-500 hover:text-red-700"
+                      className="text-danger hover:text-danger"
                       title="Remove"
                       onClick={() => setShowDeleteConfirm({ open: true, id: employee.id })}
                     >
@@ -293,13 +293,13 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                   <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                       employee.status === 'Active'
-                        ? 'bg-green-100 text-green-600 border-green-200'
-                        : 'bg-red-100 text-red-600 border-red-200'
+                        ? 'bg-success/10 text-success border-success/20'
+                        : 'bg-danger/10 text-danger border-danger/20'
                     }`}
                   >
                     <div
                       className={`w-1 h-1 rounded-full ${
-                        employee.status === 'Active' ? 'bg-green-600' : 'bg-red-600'
+                        employee.status === 'Active' ? 'bg-success' : 'bg-danger'
                       }`}
                     />
                     {employee.status || '-'}
@@ -318,7 +318,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     <span className="text-muted">Salary:</span>
                     {onEditEmployee ? (
                       <button
-                        className="text-blue-500 underline text-sm"
+                        className="text-info underline text-sm"
                         onClick={() => {
                           setEditSalary(employee.salary || 0);
                           setShowEditModal({ open: true, employee });
@@ -335,7 +335,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 {/* Action Buttons */}
                 <div className="flex gap-2 mt-4 pt-3 border-t border-(--border)">
                   <button
-                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition touch-manipulation"
+                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-info/10 text-info rounded-lg hover:bg-info/20 transition touch-manipulation"
                     style={{ minHeight: '44px' }}
                     onClick={() => {
                       setEditSalary(employee.salary || 0);
@@ -346,7 +346,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     Edit
                   </button>
                   <button
-                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition touch-manipulation"
+                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-danger/10 text-danger rounded-lg hover:bg-danger/20 transition touch-manipulation"
                     style={{ minHeight: '44px' }}
                     onClick={() => setShowDeleteConfirm({ open: true, id: employee.id })}
                   >
@@ -360,7 +360,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
         )}
       </div>
       {/* CSV Import */}
-      <div className="p-4 md:p-6 w-full flex flex-col items-center justify-center text-center bg-black/10">
+      <div className="p-4 md:p-6 w-full flex flex-col items-center justify-center text-center bg-overlay-subtle">
         <p className="text-muted mb-4 font-medium">Need to migrate your legacy payroll system?</p>
         {!showCSVUploader && (
           <button
@@ -380,7 +380,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
             <div className="flex gap-2 justify-center mt-4">
               <button
                 onClick={handleAddEmployees}
-                className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation"
+                className="px-4 py-2 bg-info text-on-accent rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
                 disabled={csvData.length === 0}
               >
@@ -403,8 +403,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-backdrop z-50 p-4">
+          <div className="bg-surface rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">Add Employee</h2>
             <input
               type="text"
@@ -461,7 +461,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               </button>
               <button
                 onClick={handleAddModalSubmit}
-                className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation"
+                className="px-4 py-2 bg-info text-on-accent rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Add
@@ -472,8 +472,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       )}
       {/* Edit Modal */}
       {showEditModal.open && showEditModal.employee && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-backdrop z-50 p-4">
+          <div className="bg-surface rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">Edit Salary</h2>
             <div className="mb-4">
               <span className="font-semibold">{showEditModal.employee.name}</span>
@@ -495,7 +495,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               </button>
               <button
                 onClick={handleEditModalSubmit}
-                className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation"
+                className="px-4 py-2 bg-info text-on-accent rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Save
@@ -506,8 +506,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       )}
       {/* Delete Confirm */}
       {showDeleteConfirm.open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-backdrop z-50 p-4">
+          <div className="bg-surface rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">Confirm Removal</h2>
             <p className="mb-4">Are you sure you want to remove this employee?</p>
             <div className="flex justify-end gap-2">
@@ -520,7 +520,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 bg-red-500 text-white rounded touch-manipulation"
+                className="px-4 py-2 bg-danger text-on-accent rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Remove

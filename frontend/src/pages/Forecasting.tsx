@@ -45,9 +45,9 @@ function normalizeLiquidityAlertPayload(payload: unknown): LiquidityAlertPayload
 }
 
 function statusClasses(status: 'green' | 'yellow' | 'red'): string {
-  if (status === 'green') return 'bg-green-500/15 text-green-300 border-green-500/30';
-  if (status === 'yellow') return 'bg-yellow-500/15 text-yellow-200 border-yellow-500/30';
-  return 'bg-red-500/15 text-red-300 border-red-500/30';
+  if (status === 'green') return 'bg-success/15 text-success border-success/30';
+  if (status === 'yellow') return 'bg-warning/15 text-warning border-warning/30';
+  return 'bg-danger/15 text-danger border-danger/30';
 }
 
 export default function Forecasting() {

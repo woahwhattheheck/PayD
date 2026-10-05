@@ -417,8 +417,8 @@ const EmployeePortal: React.FC = () => {
           <div
             className={styles.statIcon}
             style={{
-              background: 'rgba(255, 123, 114, 0.1)',
-              border: '1px solid rgba(255, 123, 114, 0.2)',
+              background: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--danger) 20%, transparent)',
             }}
           >
             <ArrowDownRight className="w-4 h-4 text-[var(--danger)]" />
@@ -451,11 +451,11 @@ const EmployeePortal: React.FC = () => {
           <div
             className={styles.statIcon}
             style={{
-              background: 'rgba(255, 213, 0, 0.1)',
-              border: '1px solid rgba(255, 213, 0, 0.2)',
+              background: 'color-mix(in srgb, var(--warning) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--warning) 20%, transparent)',
             }}
           >
-            <Clock className="w-4 h-4 text-[#ffd500]" />
+            <Clock className="w-4 h-4 text-warning" />
           </div>
           <div className={styles.statValue}>{pendingCount}</div>
           <div className={styles.statLabel}>Pending</div>
@@ -465,8 +465,8 @@ const EmployeePortal: React.FC = () => {
           <div
             className={styles.statIcon}
             style={{
-              background: 'rgba(63, 185, 80, 0.1)',
-              border: '1px solid rgba(63, 185, 80, 0.2)',
+              background: 'color-mix(in srgb, var(--success) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--success) 20%, transparent)',
             }}
           >
             <CheckCircle2 className="w-4 h-4 text-[var(--success)]" />
@@ -485,12 +485,12 @@ const EmployeePortal: React.FC = () => {
 
       {/* ── Missing Trustlines ────────── */}
       {missingTrustlines.length > 0 && (
-        <div className="w-full card glass noise p-6 border-orange-500/20 bg-orange-500/5">
+        <div className="w-full card glass noise p-6 border-warning/20 bg-warning/5">
           <div className="flex items-center gap-3 mb-4">
-            <AlertCircle className="w-5 h-5 text-orange-500" />
-            <h2 className="text-lg font-bold text-orange-100">Setup Required</h2>
+            <AlertCircle className="w-5 h-5 text-warning" />
+            <h2 className="text-lg font-bold text-warning">Setup Required</h2>
           </div>
-          <p className="text-sm text-orange-100/70 mb-6">
+          <p className="text-sm text-warning/70 mb-6">
             To receive payments in certain assets, you must first establish a trustline with the
             issuer. This is a standard Stellar security feature.
           </p>
@@ -498,7 +498,7 @@ const EmployeePortal: React.FC = () => {
             {missingTrustlines.map((code: string) => (
               <div
                 key={code}
-                className="flex flex-col gap-3 p-4 rounded-xl bg-black/40 border border-hi min-w-[200px]"
+                className="flex flex-col gap-3 p-4 rounded-xl bg-overlay-strong border border-hi min-w-[200px]"
               >
                 <div className="text-sm font-bold">{code}</div>
                 <div className="text-xs text-[var(--muted)] mb-1">Stellar Asset Trustline</div>
@@ -524,7 +524,7 @@ const EmployeePortal: React.FC = () => {
 
       {/* ── Error Banner ─────────────── */}
       {error && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(255,123,114,0.08)] border border-[rgba(255,123,114,0.2)]">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-danger/10 border border-danger/20">
           <AlertCircle className="w-5 h-5 text-[var(--danger)]" />
           <span className="text-sm text-[var(--danger)]">{error}</span>
         </div>
@@ -554,7 +554,7 @@ const EmployeePortal: React.FC = () => {
                     })();
                   }
                 }}
-                className="px-3 py-1.5 rounded-lg bg-black/20 hover:bg-black/40 border border-hi text-xs font-semibold"
+                className="px-3 py-1.5 rounded-lg bg-overlay-soft hover:bg-overlay-strong border border-hi text-xs font-semibold"
                 disabled={!address}
               >
                 Refresh
@@ -574,7 +574,7 @@ const EmployeePortal: React.FC = () => {
               {pendingClaims.map((c: PendingClaimRecord) => (
                 <div
                   key={c.id}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 p-3 rounded-xl bg-black/20 border border-hi"
+                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 p-3 rounded-xl bg-overlay-soft border border-hi"
                 >
                   <div className="flex flex-col">
                     <div className="text-sm font-semibold">
@@ -592,7 +592,7 @@ const EmployeePortal: React.FC = () => {
                       void handleClaim(c.id);
                     }}
                     disabled={isClaiming === c.id}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-success to-accent2 text-on-accent text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
                   >
                     {isClaiming === c.id ? (
                       <RefreshCw className="w-3 h-3 animate-spin" />

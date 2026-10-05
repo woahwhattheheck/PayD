@@ -131,7 +131,7 @@ export default function WebhookSettings() {
               value={url}
               onChange={(event) => setUrl(event.target.value)}
               placeholder={t('webhooks.urlPlaceholder')}
-              className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
+              className="w-full bg-overlay-soft border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function WebhookSettings() {
               value={secret}
               onChange={(event) => setSecret(event.target.value)}
               placeholder={t('webhooks.secretPlaceholder')}
-              className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
+              className="w-full bg-overlay-soft border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all"
             />
           </div>
 
@@ -165,7 +165,7 @@ export default function WebhookSettings() {
                     className={`px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
                       isSelected
                         ? 'bg-accent/10 border-accent/50 text-accent'
-                        : 'bg-black/20 border-hi text-muted hover:text-text'
+                        : 'bg-overlay-soft border-hi text-muted hover:text-text'
                     }`}
                   >
                     {eventName}
@@ -175,7 +175,7 @@ export default function WebhookSettings() {
             </div>
           </div>
 
-          {formError ? <p className="text-sm text-red-400">{formError}</p> : null}
+          {formError ? <p className="text-sm text-danger">{formError}</p> : null}
 
           <button
             type="submit"
@@ -198,7 +198,7 @@ export default function WebhookSettings() {
           {t('webhooks.listTitle')}
         </h2>
 
-        {error ? <p className="text-sm text-red-400 mb-4">{error}</p> : null}
+        {error ? <p className="text-sm text-danger mb-4">{error}</p> : null}
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12 text-muted">
@@ -219,7 +219,7 @@ export default function WebhookSettings() {
             {subscriptions.map((subscription) => (
               <li
                 key={subscription.id}
-                className="flex items-center justify-between gap-4 bg-black/20 border border-hi rounded-xl p-4"
+                className="flex items-center justify-between gap-4 bg-overlay-soft border border-hi rounded-xl p-4"
               >
                 <div className="min-w-0">
                   <p className="font-mono text-sm truncate">{subscription.url}</p>
@@ -239,7 +239,7 @@ export default function WebhookSettings() {
                   onClick={() => void handleDelete(subscription.id)}
                   disabled={deletingId === subscription.id}
                   aria-label={t('webhooks.deleteButton')}
-                  className="shrink-0 p-3 rounded-xl border border-hi text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all disabled:opacity-50"
+                  className="shrink-0 p-3 rounded-xl border border-hi text-danger hover:bg-danger/10 hover:border-danger/30 transition-all disabled:opacity-50"
                 >
                   {deletingId === subscription.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

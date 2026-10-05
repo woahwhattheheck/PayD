@@ -110,7 +110,7 @@ const CustomReportBuilder = () => {
                   <label className="block text-sm font-medium text-(--text) mb-1">Start Date</label>
                   <input
                     type="date"
-                    className="w-full border-(--border-hi) rounded-md shadow-sm p-2 bg-white text-(--text)"
+                    className="w-full border-(--border-hi) rounded-md shadow-sm p-2 bg-surface text-(--text)"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                   />
@@ -119,7 +119,7 @@ const CustomReportBuilder = () => {
                   <label className="block text-sm font-medium text-(--text) mb-1">End Date</label>
                   <input
                     type="date"
-                    className="w-full border-(--border-hi) rounded-md shadow-sm p-2 bg-white text-(--text)"
+                    className="w-full border-(--border-hi) rounded-md shadow-sm p-2 bg-surface text-(--text)"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                   />
@@ -136,7 +136,7 @@ const CustomReportBuilder = () => {
                   <label key={col.id} className="flex items-center space-x-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="form-checkbox h-4 w-4 text-blue-600 rounded border-(--border-hi)"
+                      className="form-checkbox h-4 w-4 text-info rounded border-(--border-hi)"
                       checked={selectedColumns.includes(col.id)}
                       onChange={() => toggleColumn(col.id)}
                     />
@@ -184,7 +184,7 @@ const CustomReportBuilder = () => {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-(--border)">
+                    <tbody className="bg-surface divide-y divide-(--border)">
                       {filteredData.map((row) => (
                         <tr key={row.worker_id} className="hover:bg-(--surface-hi)">
                           {activeColumns.map((col) => (

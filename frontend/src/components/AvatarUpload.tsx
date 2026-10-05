@@ -54,11 +54,11 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isLoading}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+        className="px-4 py-2 bg-info text-on-accent rounded hover:bg-accent disabled:opacity-50"
       >
         {isLoading ? 'Uploading...' : 'Upload Avatar'}
       </button>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-danger text-sm">{error}</p>}
     </div>
   );
 };

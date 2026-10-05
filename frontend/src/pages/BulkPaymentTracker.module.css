@@ -259,24 +259,24 @@
 }
 
 .statusConfirmed {
-  background: rgba(63, 185, 80, 0.12);
-  color: #3fb950;
-  border: 1px solid rgba(63, 185, 80, 0.25);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
 }
 
 .statusDotConfirmed {
-  background: #3fb950;
-  box-shadow: 0 0 6px rgba(63, 185, 80, 0.7);
+  background: var(--success);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--success) 70%, transparent);
 }
 
 .statusPending {
-  background: rgba(255, 213, 0, 0.1);
-  color: #e3b800;
-  border: 1px solid rgba(255, 213, 0, 0.3);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
 }
 
 .statusDotPending {
-  background: #ffd500;
+  background: var(--warning);
   animation: pulsePending 1.4s ease-in-out infinite;
 }
 
@@ -291,13 +291,13 @@
 }
 
 .statusFailed {
-  background: rgba(255, 123, 114, 0.1);
-  color: #ff7b72;
-  border: 1px solid rgba(255, 123, 114, 0.25);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
 }
 
 .statusDotFailed {
-  background: #ff7b72;
+  background: var(--danger);
 }
 
 /* Confirmations counter */
@@ -311,7 +311,7 @@
 }
 
 .confirmBadgeActive {
-  color: #3fb950;
+  color: var(--success);
 }
 
 /* Expand toggle */
@@ -340,9 +340,9 @@
   gap: 5px;
   padding: 5px 11px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 123, 114, 0.35);
-  background: rgba(255, 123, 114, 0.07);
-  color: #ff7b72;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 7%, transparent);
+  color: var(--danger);
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
@@ -350,8 +350,8 @@
 }
 
 .retryBtn:hover {
-  background: rgba(255, 123, 114, 0.15);
-  border-color: rgba(255, 123, 114, 0.6);
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 60%, transparent);
 }
 
 .retryBtn:disabled {
@@ -419,7 +419,7 @@
 }
 
 .recipientRowFailed {
-  background: rgba(255, 123, 114, 0.03);
+  background: color-mix(in srgb, var(--danger) 3%, transparent);
 }
 
 .recipientName {
@@ -439,7 +439,7 @@
 
 .recipientError {
   font-size: 0.7rem;
-  color: #ff7b72;
+  color: var(--danger);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -553,7 +553,7 @@
   gap: 6px;
   font-size: 0.7rem;
   font-weight: 700;
-  color: #3fb950;
+  color: var(--success);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -562,7 +562,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #3fb950;
+  background: var(--success);
   animation: pulsePending 1.2s ease-in-out infinite;
 }
 
@@ -601,9 +601,9 @@
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: rgba(255, 123, 114, 0.07);
-  border: 1px solid rgba(255, 123, 114, 0.25);
+  background: color-mix(in srgb, var(--danger) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
   border-radius: 12px;
   font-size: 0.82rem;
-  color: #ff7b72;
+  color: var(--danger);
 }

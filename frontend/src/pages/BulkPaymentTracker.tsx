@@ -363,7 +363,10 @@ export default function BulkPaymentTracker() {
         <div className={styles.statChip}>
           <div
             className={styles.statChipIcon}
-            style={{ background: 'rgba(63,185,80,0.1)', border: '1px solid rgba(63,185,80,0.2)' }}
+            style={{
+              background: 'color-mix(in srgb, var(--success) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--success) 20%, transparent)',
+            }}
           >
             <CheckCircle2 size={16} color="var(--success)" />
           </div>
@@ -376,9 +379,12 @@ export default function BulkPaymentTracker() {
         <div className={styles.statChip}>
           <div
             className={styles.statChipIcon}
-            style={{ background: 'rgba(255,213,0,0.1)', border: '1px solid rgba(255,213,0,0.2)' }}
+            style={{
+              background: 'color-mix(in srgb, var(--warning) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--warning) 20%, transparent)',
+            }}
           >
-            <Clock size={16} color="#ffd500" />
+            <Clock size={16} color="var(--warning)" />
           </div>
           <div>
             <div className={styles.statChipValue}>{pendingCount}</div>
@@ -390,8 +396,8 @@ export default function BulkPaymentTracker() {
           <div
             className={styles.statChipIcon}
             style={{
-              background: 'rgba(255,123,114,0.1)',
-              border: '1px solid rgba(255,123,114,0.2)',
+              background: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--danger) 20%, transparent)',
             }}
           >
             <AlertTriangle size={16} color="var(--danger)" />
