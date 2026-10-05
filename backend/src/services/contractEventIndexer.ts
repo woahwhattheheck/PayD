@@ -6,6 +6,7 @@ import * as StellarSdk from '@stellar/stellar-sdk';
 export class ContractEventIndexer {
   private isRunning = false;
   private isPolling = false;
+  private lifecycleGeneration = 0;
   private intervalId: NodeJS.Timeout | null = null;
   private readonly POLL_INTERVAL_MS = 10000; // Poll every 10 seconds
   private readonly BATCH_SIZE = 100;
@@ -41,9 +42,13 @@ export class ContractEventIndexer {
     console.log(`[ContractEventIndexer] Monitoring contracts: ${this.CONTRACTS_TO_INDEX.join(', ')}`);
     
     this.isRunning = true;
+    const generation = ++this.lifecycleGeneration;
     
     // Run immediately on startup
     await this.pollAndIndexEvents();
+
+    // A stop or restart during the first poll retires this initialization.
+    if (!this.isRunning || generation !== this.lifecycleGeneration) return;
     
     // Then poll at regular intervals
     this.intervalId = setInterval(async () => {
@@ -62,6 +67,7 @@ export class ContractEventIndexer {
       this.intervalId = null;
     }
     this.isRunning = false;
+    this.lifecycleGeneration++;
     console.log('[ContractEventIndexer] Stopped');
   }
 
@@ -84,7 +90,7 @@ export class ContractEventIndexer {
       console.log(`[ContractEventIndexer] Last indexed ledger: ${lastIndexedLedger}`);
 
       try {
-        // Preserve the removed service's combined batch and shared checkpoint.
+        // The state row is shared, so every contract must complete the same scan.
         await this.indexContractEvents(this.CONTRACTS_TO_INDEX, lastIndexedLedger);
       } catch (error) {
         console.error('[ContractEventIndexer] Error indexing contracts:', error);
@@ -98,7 +104,7 @@ export class ContractEventIndexer {
   }
 
   /**
-   * Fetch and index configured contracts as one batch with a shared checkpoint
+   * Fetch and index all configured contracts before advancing their shared state
    */
   private async indexContractEvents(contractIds: string[], fromLedger: number): Promise<void> {
     const events = await this.fetchEventsFromRPC(contractIds, fromLedger);
@@ -144,46 +150,78 @@ export class ContractEventIndexer {
   }
 
   /**
-   * Fetch events from Soroban RPC
+   * Drain one RPC cursor through the first response's ledger snapshot
    */
   private async fetchEventsFromRPC(contractIds: string[], startLedger: number): Promise<SorobanEvent[]> {
+    const events: SorobanEvent[] = [];
+    const seenCursors = new Set<string>();
+    let cursor: string | undefined;
+    let targetLedger: number | undefined;
+
     try {
-      const response = await fetch(this.RPC_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getEvents',
-          params: {
-            startLedger: startLedger + 1,
-            filters: [
-              {
-                type: 'contract',
-                contractIds,
-              },
-            ],
-            pagination: {
-              limit: this.BATCH_SIZE,
-            },
+      while (true) {
+        const response = await fetch(this.RPC_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getEvents',
+            params: {
+              // RPC cursor requests must omit both startLedger and endLedger.
+              ...(cursor === undefined ? { startLedger: startLedger + 1 } : {}),
+              filters: [
+                {
+                  type: 'contract',
+                  contractIds,
+                },
+              ],
+              pagination: {
+                limit: this.BATCH_SIZE,
+                ...(cursor === undefined ? {} : { cursor }),
+              },
+            },
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const data = (await response.json()) as { error?: { message?: string }; result?: GetEventsResponse };
+
+        if (data.error) {
+          throw new Error(`RPC error: ${data.error.message || 'Unknown RPC error'}`);
+        }
+
+        if (!data.result || !Array.isArray(data.result.events)) {
+          throw new Error('RPC response is missing a valid events page');
+        }
+        const result = data.result;
+        if (targetLedger === undefined) {
+          if (!Number.isSafeInteger(result.latestLedger) || result.latestLedger < 0) {
+            throw new Error('RPC response is missing a valid latestLedger');
+          }
+          targetLedger = result.latestLedger;
+        }
+
+        const page = result.events;
+        for (const event of page) {
+          // Events are ledger ordered. Leave later arrivals for the next poll.
+          if (event.ledger > targetLedger) return events;
+          events.push(event);
+        }
+        if (page.length < this.BATCH_SIZE) return events;
+
+        const nextCursor = result.cursor;
+        if (typeof nextCursor !== 'string' || nextCursor.length === 0 || seenCursors.has(nextCursor)) {
+          throw new Error('RPC pagination cursor is missing or did not advance');
+        }
+        seenCursors.add(nextCursor);
+        cursor = nextCursor;
       }
-
-      const data = (await response.json()) as { error?: { message?: string }; result?: GetEventsResponse };
-
-      if (data.error) {
-        throw new Error(`RPC error: ${data.error.message || 'Unknown RPC error'}`);
-      }
-
-      const result: GetEventsResponse = (data.result || {}) as GetEventsResponse;
-      return result.events || [];
     } catch (error) {
       console.error(`[ContractEventIndexer] Error fetching events from RPC:`, error);
       throw error;
@@ -275,7 +313,8 @@ export class ContractEventIndexer {
           .filter((topic): topic is string => typeof topic === 'string')
           .map((topic) => this.decodeSorobanTopic(topic))
       : null;
-    const decodedValue = event.value?.xdr ? this.decodeSorobanScVal(event.value.xdr) : null;
+    const valueXdr = typeof event.value === 'string' ? event.value : event.value?.xdr;
+    const decodedValue = valueXdr ? this.decodeSorobanScVal(valueXdr) : null;
 
     return {
       type: event.type,
@@ -349,7 +388,7 @@ export class ContractEventIndexer {
     `;
 
     const result = await pool.query(query);
-    // Preserve numeric ledger arithmetic when pg returns BIGINT as a string.
+    // PostgreSQL BIGINT values arrive as strings with the default pg parser.
     const ledger = Number(result.rows[0]?.last_indexed_ledger ?? 0);
     if (!Number.isSafeInteger(ledger) || ledger < 0) {
       throw new Error('Invalid contract event indexer ledger');

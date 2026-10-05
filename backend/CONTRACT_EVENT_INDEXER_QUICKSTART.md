@@ -124,6 +124,36 @@ You should see logs like:
 [ContractEventIndexer] Indexed 5 events, skipped 0 duplicates
 ```
 
+## RPC Event Data
+
+The indexer reads the default XDR response from Stellar
+[`getEvents`](https://developers.stellar.org/docs/data/apis/rpc/api-reference/methods/getEvents).
+Its `value` field is a base64 ScVal string. The indexer decodes this raw string
+and also accepts the existing `{ "xdr": "..." }` wrapper used by older fixtures.
+Both forms retain their original value in `payload.value`; the decoded data is
+stored under `payload.decoded.value`. Integer values decoded as bigint remain
+decimal strings, including distribution amounts.
+
+This applies to newly indexed events. Existing stored rows are not rewritten.
+
+## Polling and Checkpoints
+
+All configured contracts are read through one shared RPC stream. The indexer
+follows 100-event pages through the response cursor, including events that share
+the last ledger on a full page. Each scan stops at the first response's latest
+ledger; newer arrivals are collected by the next poll.
+
+The complete scan is fetched before opening the database transaction. Its events
+and shared checkpoint are committed together. A failed or malformed page, or a
+missing or repeated continuation cursor, leaves the previous ledger in place for
+retry. PostgreSQL `BIGINT` checkpoint strings are converted to numbers before
+calculating the next ledger, and overlapping polls on one indexer instance are
+skipped while the current poll finishes.
+
+These protections apply to subsequent polls. Events skipped before an upgrade
+require historical reindexing within the RPC provider's retention period; the
+stored checkpoint is not automatically rewound.
+
 ## Query Events
 
 ### Get Events for a Specific Contract
