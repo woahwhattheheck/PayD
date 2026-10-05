@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { pool } from '../config/database.js';
 import { RedisClient } from './rateLimitService.js';
 import logger from '../utils/logger.js';
@@ -10,7 +11,26 @@ import {
 export class EmployeeService {
   private readonly redis = RedisClient.getInstance();
 
-  private listCacheKey(organizationId: number, params: EmployeeQueryInput): string {
+  private listGenerationKey(organizationId: number): string {
+    return `cache:employees:${organizationId}:generation`;
+  }
+
+  private async listCacheKey(
+    organizationId: number,
+    params: EmployeeQueryInput
+  ): Promise<string | null> {
+    if (!this.redis) return null;
+
+    const generationKey = this.listGenerationKey(organizationId);
+    let generation = await this.redis.get(generationKey);
+    if (generation === null) {
+      const candidate = randomUUID();
+      const created = await this.redis.set(generationKey, candidate, 'NX');
+      generation = created === 'OK' ? candidate : await this.redis.get(generationKey);
+    }
+    // A missing/evicted marker must never resurrect an older cached generation.
+    if (generation === null) return null;
+
     const { page = 1, limit = 10, search, status, department } = params;
     const fingerprint = JSON.stringify([
       page,
@@ -19,23 +39,16 @@ export class EmployeeService {
       status ?? '',
       department ?? '',
     ]);
-    return `cache:employees:${organizationId}:${Buffer.from(fingerprint).toString('base64url')}`;
+    return `cache:employees:${organizationId}:${generation}:${Buffer.from(fingerprint).toString('base64url')}`;
   }
 
   async invalidateListCache(organizationId: number): Promise<void> {
     if (!this.redis) return;
 
-    const pattern = `cache:employees:${organizationId}:*`;
     try {
-      let cursor = '0';
-      do {
-        const [nextCursor, keys] = await this.redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
-        cursor = nextCursor;
-        const firstKey = keys[0];
-        if (firstKey) {
-          await this.redis.del(firstKey, ...keys.slice(1));
-        }
-      } while (cursor !== '0');
+      // One write invalidates every page/filter; in-flight fills retain the old
+      // generation and expire under the existing five-minute data TTL.
+      await this.redis.set(this.listGenerationKey(organizationId), randomUUID());
     } catch (error) {
       logger.warn('Employee cache invalidation failed', { organizationId, error });
     }
@@ -86,17 +99,19 @@ export class EmployeeService {
 
   async findAll(organization_id: number, params: EmployeeQueryInput) {
     const { page = 1, limit = 10, search, status, department } = params;
-    const cacheKey = this.listCacheKey(organization_id, params);
+    let cacheKey: string | null = null;
 
     if (this.redis) {
       try {
-        const cached = await this.redis.get(cacheKey);
+        cacheKey = await this.listCacheKey(organization_id, params);
+        const cached = cacheKey === null ? null : await this.redis.get(cacheKey);
         if (cached !== null) {
           logger.info('Cache hit', { cache: 'employee-list', organizationId: organization_id });
           return JSON.parse(cached);
         }
         logger.info('Cache miss', { cache: 'employee-list', organizationId: organization_id });
       } catch (error) {
+        cacheKey = null;
         logger.warn('Employee cache read failed', { organizationId: organization_id, error });
       }
     } else {
@@ -165,7 +180,7 @@ export class EmployeeService {
       },
     };
 
-    if (this.redis) {
+    if (this.redis && cacheKey !== null) {
       try {
         await this.redis.setex(cacheKey, 5 * 60, JSON.stringify(response));
       } catch (error) {
