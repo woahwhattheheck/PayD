@@ -1,0 +1,9 @@
+-- Roll back 013_create_audit_logs.sql
+DROP VIEW IF EXISTS recent_security_events;
+DROP FUNCTION IF EXISTS log_audit_event(
+  INTEGER, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, INET,
+  JSONB, JSONB, JSONB, VARCHAR
+);
+DROP TABLE IF EXISTS audit_logs CASCADE;
+DROP TABLE IF EXISTS audit_log_actions CASCADE;
+DROP TABLE IF EXISTS audit_log_entity_types CASCADE;

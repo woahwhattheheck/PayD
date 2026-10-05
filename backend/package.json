@@ -14,7 +14,10 @@
         "db:migrate": "ts-node src/db/migrate.ts",
         "db:migrate:dry-run": "ts-node src/db/migrate.ts --dry-run",
         "db:verify-schema": "ts-node src/db/verify-schema.ts",
-        "db:verify-schedules": "ts-node src/db/verify-schedules-schema.ts"
+        "db:verify-schedules": "ts-node src/db/verify-schedules-schema.ts",
+        "db:migrate:rollback": "ts-node src/db/migrate.ts --rollback",
+        "db:migrate:rollback:dry-run": "ts-node src/db/migrate.ts --rollback --dry-run",
+        "db:migrate:verify-rollbacks": "ts-node src/db/verify-rollbacks.ts"
     },
     "keywords": [],
     "author": "",
