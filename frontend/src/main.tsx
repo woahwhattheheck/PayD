@@ -8,6 +8,7 @@ import { WalletProvider } from './providers/WalletProvider.tsx';
 import { NotificationProvider } from './providers/NotificationProvider.tsx';
 import { SocketProvider } from './providers/SocketProvider.tsx';
 import { ThemeProvider } from './providers/ThemeProvider.tsx';
+import { AuthProvider } from './providers/AuthProvider.tsx';
 import * as Sentry from '@sentry/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorFallback from './components/ErrorFallback';
@@ -35,9 +36,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <SocketProvider>
             <WalletProvider>
               <BrowserRouter>
-                <ErrorBoundary fallback={<ErrorFallback onReset={() => {}} />}>
-                  <App />
-                </ErrorBoundary>
+                <AuthProvider>
+                  <ErrorBoundary fallback={<ErrorFallback onReset={() => {}} />}>
+                    <App />
+                  </ErrorBoundary>
+                </AuthProvider>
               </BrowserRouter>
             </WalletProvider>
           </SocketProvider>
