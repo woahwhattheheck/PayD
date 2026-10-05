@@ -66,7 +66,7 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
-  background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+  background: linear-gradient(135deg, var(--surface) 40%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -95,7 +95,7 @@
 }
 
 .currencySelect {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-subtle);
   border: 1px solid var(--border-hi);
   color: var(--text);
   font-family: var(--font-mono);
@@ -208,7 +208,7 @@
 }
 
 .filterSelect {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-subtle);
   border: 1px solid var(--border);
   color: var(--text);
   font-size: 12px;
@@ -228,7 +228,7 @@
 }
 
 .searchInput {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-subtle);
   border: 1px solid var(--border);
   color: var(--text);
   font-size: 12px;
@@ -255,13 +255,13 @@
   grid-template-columns: 1fr 2fr 1fr 1fr 1fr auto;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--overlay-subtle);
   transition: background 0.15s ease;
   gap: 12px;
 }
 
 .txRow:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--overlay-subtle);
 }
 
 .txRow:last-child {
@@ -316,7 +316,7 @@
 }
 
 .txMemoTypeReimbursement {
-  background: rgba(255, 123, 114, 0.1);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
   color: var(--danger);
 }
 
@@ -347,17 +347,17 @@
 }
 
 .statusCompleted {
-  background: rgba(63, 185, 80, 0.12);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
   color: var(--success);
 }
 
 .statusPending {
-  background: rgba(255, 213, 0, 0.12);
-  color: #ffd500;
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  color: var(--warning);
 }
 
 .statusFailed {
-  background: rgba(255, 123, 114, 0.12);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
   color: var(--danger);
 }
 
@@ -373,8 +373,8 @@
 }
 
 .statusDotPending {
-  background: #ffd500;
-  box-shadow: 0 0 6px #ffd500;
+  background: var(--warning);
+  box-shadow: 0 0 6px var(--warning);
 }
 
 .statusDotFailed {
@@ -499,7 +499,7 @@
   background: linear-gradient(
     90deg,
     var(--surface-hi) 25%,
-    rgba(255, 255, 255, 0.05) 50%,
+    var(--overlay-subtle) 50%,
     var(--surface-hi) 75%
   );
   background-size: 200% 100%;
