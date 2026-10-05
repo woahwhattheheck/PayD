@@ -1,5 +1,8 @@
+// Modified 2026-10-05: invalidate cached liquidity settings after service writes.
 import { Pool } from 'pg';
 import { pool } from '../config/database.js';
+import { RedisClient } from './rateLimitService.js';
+import logger from '../utils/logger.js';
 
 export interface TenantConfig {
   id: number;
@@ -77,6 +80,21 @@ export class TenantConfigService {
     return configs;
   }
 
+  private async invalidateConfigCache(organizationId: number, configKey: string): Promise<void> {
+    // This is the only tenant configuration currently cached by ForecastController.
+    if (configKey !== 'liquidity_settings') return;
+
+    try {
+      const redis = RedisClient.getInstance();
+      if (redis) {
+        await redis.del(`cache:organization-settings:${organizationId}:liquidity-settings`);
+      }
+    } catch (error) {
+      // The database write has already succeeded; cache failure must not undo its result.
+      logger.warn('Organization settings cache invalidation failed', { organizationId, error });
+    }
+  }
+
   /**
    * Set or update a configuration
    */
@@ -104,6 +122,7 @@ export class TenantConfigService {
       description,
     ]);
 
+    await this.invalidateConfigCache(organizationId, configKey);
     return result.rows[0];
   }
 
@@ -118,6 +137,7 @@ export class TenantConfigService {
     `;
 
     const result = await this.pool.query(query, [organizationId, configKey]);
+    await this.invalidateConfigCache(organizationId, configKey);
     return result.rowCount !== null && result.rowCount > 0;
   }
 
@@ -196,7 +216,6 @@ export class TenantConfigService {
     const updated = { ...current, ...settings };
     return this.setConfig(organizationId, 'branding', updated);
   }
-}
 
   // ─── Rate limit overrides (Part 49) ─────────────────────────────────────────
 

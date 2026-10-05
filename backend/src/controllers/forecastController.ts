@@ -1,4 +1,4 @@
-// Modified 2026-10-05: use the class-owned Redis client in unbound route handlers.
+// Modified 2026-10-05: keep unbound handlers safe; invalidate cache at the service write boundary.
 import { Request, Response } from 'express';
 import { ForecastingService } from '../services/forecasting/forecastingService.js';
 import tenantConfigService from '../services/tenantConfigService.js';
@@ -122,14 +122,6 @@ export class ForecastController {
       };
 
       await tenantConfigService.setConfig(organizationId, 'liquidity_settings', payload);
-
-      if (ForecastController.redis) {
-        try {
-          await ForecastController.redis.del(`cache:organization-settings:${organizationId}:liquidity-settings`);
-        } catch (error) {
-          logger.warn('Organization settings cache invalidation failed', { organizationId, error });
-        }
-      }
 
       res.status(200).json({ success: true, data: payload });
     } catch (error: any) {
