@@ -134,7 +134,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
         onDrop={handleDrop}
         className={`relative border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer ${
           isDragging
-            ? 'border-blue-500 bg-blue-50'
+            ? 'border-info bg-info/10'
             : 'border-(--border-hi) bg-(--surface-hi) hover:border-(--muted)'
         }`}
       >
@@ -162,12 +162,12 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
           <p className="font-semibold">File: {fileName}</p>
           <div className="mt-2 flex gap-4 text-sm">
             <span className="flex items-center gap-1">
-              <CheckCircle className="w-4 h-4 text-green-100" />
+              <CheckCircle className="w-4 h-4 text-success" />
               {validRowsCount} valid rows
             </span>
             {invalidRowsCount > 0 && (
               <span className="flex items-center gap-1">
-                <AlertCircle className="w-4 h-4 text-red-500" />
+                <AlertCircle className="w-4 h-4 text-danger" />
                 {invalidRowsCount} rows with errors
               </span>
             )}
@@ -198,15 +198,15 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                   <tr
                     key={row.rowNumber}
                     className={`border-b transition ${
-                      row.isValid ? 'bg-transparent' : 'bg-red-50'
+                      row.isValid ? 'bg-transparent' : 'bg-danger/10'
                     }`}
                   >
                     <td className="px-4 py-3 font-mono text-(--text)">{row.rowNumber}</td>
                     <td className="px-4 py-3">
                       {row.isValid ? (
-                        <CheckCircle className="w-5 h-5 text-green-100" />
+                        <CheckCircle className="w-5 h-5 text-success" />
                       ) : (
-                        <AlertCircle className="w-5 h-5 text-red-100" />
+                        <AlertCircle className="w-5 h-5 text-danger" />
                       )}
                     </td>
 
@@ -219,7 +219,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                       </td>
                     ))}
 
-                    <td className="px-4 py-3 text-red-600 text-xs">
+                    <td className="px-4 py-3 text-danger text-xs">
                       {row.errors.length > 0 ? (
                         <ul className="space-y-1">
                           {row.errors.map((error) => (
@@ -227,7 +227,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                           ))}
                         </ul>
                       ) : (
-                        <span className="text-green-600">OK</span>
+                        <span className="text-success">OK</span>
                       )}
                     </td>
                   </tr>
