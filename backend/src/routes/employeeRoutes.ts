@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { employeeController } from '../controllers/employeeController.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { authorizeRoles, isolateOrganization } from '../middlewares/rbac.js';
@@ -10,6 +11,20 @@ import {
   validateActiveTenant,
   logTenantAccess,
 } from '../middleware/enhancedTenantIsolation.js';
+import { validateRequest } from '../middleware/validateRequest.js';
+import {
+  createEmployeeSchema,
+  employeeQuerySchema,
+  updateEmployeeSchema,
+} from '../schemas/employeeSchema.js';
+import { bulkImportController } from '../controllers/bulkImportController.js';
+
+const employeeIdParamsSchema = z.object({ id: z.coerce.number().int().positive() });
+const createEmployeeBodySchema = createEmployeeSchema.omit({ organization_id: true });
+const bulkImportBodySchema = z.object({
+  organization_id: z.number().int().positive(),
+  csv: z.string().min(1, 'csv is required'),
+});
 
 async function enforceEmployeeQuota(req: Request, res: Response, next: NextFunction): Promise<void> {
   const orgId = req.tenantId ?? req.user?.organizationId;
@@ -38,78 +53,56 @@ function enhancedIsolation(): any[] {
 
 const router = Router();
 
-// Apply authentication to all employee routes
 router.use(authenticateJWT);
-
-// Enhanced tenant isolation — runs after auth (req.user is available)
 router.use(...enhancedIsolation());
 
-/**
- * @route POST /api/employees
- * @desc Create a new employee
- */
 router.post(
   '/',
   authorizeRoles('EMPLOYER'),
   isolateOrganization,
+  validateRequest({ body: createEmployeeBodySchema }),
   enforceEmployeeQuota,
   employeeController.create.bind(employeeController)
 );
 
-/**
- * @route GET /api/employees
- * @desc Get all employees with pagination and filtering
- */
 router.get(
   '/',
   authorizeRoles('EMPLOYER'),
   isolateOrganization,
+  validateRequest({ query: employeeQuerySchema }),
   employeeController.getAll.bind(employeeController)
 );
 
-/**
- * @route GET /api/employees/:id
- * @desc Get a single employee by ID
- */
 router.get(
   '/:id',
   authorizeRoles('EMPLOYER', 'EMPLOYEE'),
   isolateOrganization,
+  validateRequest({ params: employeeIdParamsSchema }),
   employeeController.getOne.bind(employeeController)
 );
 
-/**
- * @route PATCH /api/employees/:id
- * @desc Update an employee
- */
 router.patch(
   '/:id',
   authorizeRoles('EMPLOYER'),
   isolateOrganization,
+  validateRequest({ params: employeeIdParamsSchema, body: updateEmployeeSchema }),
   employeeController.update.bind(employeeController)
 );
 
-/**
- * @route DELETE /api/employees/:id
- * @desc Soft delete an employee (sensitive operation — fully audited)
- */
 router.delete(
   '/:id',
   authorizeRoles('EMPLOYER'),
   isolateOrganization,
+  validateRequest({ params: employeeIdParamsSchema }),
   auditSensitiveOperation('employee_delete'),
   employeeController.delete.bind(employeeController)
 );
 
-/**
- * @route POST /api/employees/bulk-import
- * @desc Bulk import employees from CSV
- */
-import { bulkImportController } from '../controllers/bulkImportController.js';
 router.post(
   '/bulk-import',
   authorizeRoles('EMPLOYER'),
   isolateOrganization,
+  validateRequest({ body: bulkImportBodySchema }),
   bulkImportController.import.bind(bulkImportController)
 );
 
