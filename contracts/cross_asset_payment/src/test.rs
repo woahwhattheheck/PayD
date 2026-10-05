@@ -187,7 +187,7 @@ fn test_cancel_refunds_net_amount() {
     let s = setup(200); // 2 %
     let tc = TokenClient::new(&s.env, &s.token);
 
-    let id = initiate(s, 10_000);
+    let id = initiate(&s, 10_000);
     // fee = 200, so net_amount = 9_800 held in contract
     let before = tc.balance(&s.sender);
 
