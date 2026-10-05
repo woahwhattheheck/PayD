@@ -142,7 +142,7 @@ export async function completeKey(
   await query(
     `UPDATE idempotency_keys
      SET status = 'completed', response_status = $3, response_body = $4
-     WHERE organization_id = $1 AND idempotency_key = $2`,
+     WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
     [organizationId, idempotencyKey, responseStatus, JSON.stringify(responseBody)]
   );
 }
@@ -159,7 +159,7 @@ export async function failKey(
   await query(
     `UPDATE idempotency_keys
      SET status = 'failed', response_status = $3, response_body = $4
-     WHERE organization_id = $1 AND idempotency_key = $2`,
+     WHERE organization_id = $1 AND idempotency_key = $2 AND expires_at > NOW()`,
     [organizationId, idempotencyKey, responseStatus, JSON.stringify(responseBody)]
   );
 }
