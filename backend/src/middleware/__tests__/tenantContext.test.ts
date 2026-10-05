@@ -37,8 +37,12 @@ describe('Tenant Context Middleware', () => {
   });
 
   describe('extractTenantId', () => {
-    it('should extract tenant ID from URL params', () => {
-      mockRequest.params = { organizationId: '123' };
+    it('derives tenant ID from the authenticated user', () => {
+      mockRequest.user = {
+        id: 1,
+        organizationId: 123,
+        role: 'EMPLOYER',
+      };
 
       extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -48,57 +52,75 @@ describe('Tenant Context Middleware', () => {
       expect(statusMock).not.toHaveBeenCalled();
     });
 
-    it('should extract tenant ID from headers', () => {
-      mockRequest.headers = { 'x-organization-id': '456' };
-
-      extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
-
-      expect(mockRequest.tenantId).toBe(456);
-      expect(mockRequest.organizationId).toBe(456);
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it('should prioritize URL params over headers', () => {
-      mockRequest.params = { organizationId: '123' };
+    it('ignores the legacy organization header', () => {
+      mockRequest.user = {
+        id: 1,
+        organizationId: 123,
+        role: 'EMPLOYER',
+      };
       mockRequest.headers = { 'x-organization-id': '456' };
 
       extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(mockRequest.tenantId).toBe(123);
+      expect(mockRequest.organizationId).toBe(123);
       expect(mockNext).toHaveBeenCalled();
+      expect(statusMock).not.toHaveBeenCalled();
     });
 
-    it('should return 400 if tenant ID is missing', () => {
+    it('allows a route organization ID that matches the authenticated user', () => {
+      mockRequest.user = {
+        id: 1,
+        organizationId: 123,
+        role: 'EMPLOYER',
+      };
+      mockRequest.params = { organizationId: '123' };
+
       extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(mockRequest.tenantId).toBe(123);
+      expect(mockNext).toHaveBeenCalled();
+      expect(statusMock).not.toHaveBeenCalled();
+    });
+
+    it('rejects a route organization ID outside the authenticated organization', () => {
+      mockRequest.user = {
+        id: 1,
+        organizationId: 123,
+        role: 'EMPLOYER',
+      };
+      mockRequest.params = { organizationId: '456' };
+
+      extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(statusMock).toHaveBeenCalledWith(403);
       expect(jsonMock).toHaveBeenCalledWith({
-        error: 'Invalid or missing organization ID',
-        message: 'A valid organization ID must be provided in the URL or headers',
+        error: 'Access denied',
+        message: 'Cannot access resources outside your organization',
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should return 400 if tenant ID is invalid', () => {
+    it('rejects requests without an authenticated organization', () => {
+      mockRequest.user = undefined;
+
+      extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: 'Access denied',
+        message: 'Authenticated user is not associated with a valid organization',
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 for an invalid route organization ID', () => {
+      mockRequest.user = {
+        id: 1,
+        organizationId: 123,
+        role: 'EMPLOYER',
+      };
       mockRequest.params = { organizationId: 'invalid' };
-
-      extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(mockNext).not.toHaveBeenCalled();
-    });
-
-    it('should return 400 if tenant ID is negative', () => {
-      mockRequest.params = { organizationId: '-1' };
-
-      extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(mockNext).not.toHaveBeenCalled();
-    });
-
-    it('should return 400 if tenant ID is zero', () => {
-      mockRequest.params = { organizationId: '0' };
 
       extractTenantId(mockRequest as Request, mockResponse as Response, mockNext);
 
