@@ -4,8 +4,6 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import config from './config/index.js';
-import logger from './utils/logger.js';
 import passport from './config/passport.js';
 import { apiVersionMiddleware } from './middlewares/apiVersionMiddleware.js';
 import { requestIdMiddleware } from './middleware/requestId.js';
@@ -33,6 +31,7 @@ import contractEventRoutes from './routes/contractEventRoutes.js';
 import certificateRoutes from './routes/certificateRoutes.js';
 import cashFlowForecastRoutes from './routes/cashFlowForecastRoutes.js';
 import { HealthController } from './controllers/healthController.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 // Part 49 — admin, audit integrity, per-tenant rate limits, quotas
 import adminRoutes from './routes/adminRoutes.js';
@@ -176,23 +175,8 @@ app.use('/api/audit-analytics', auditAnalyticsRoutes);
 app.use('/api/smart-rate-limit', smartRateLimitRoutes);
 app.use('/api/tenant-security', tenantSecurityRoutes);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    path: req.path,
-    requestId: (req as any).requestId,
-  });
-});
-
-// Error handler
-app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error('Unhandled error', { err, requestId: (req as any).requestId });
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: config.nodeEnv === 'development' ? err.message : 'An error occurred',
-    requestId: (req as any).requestId,
-  });
-});
+// 404 + global error handler (typed AppError responses)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
