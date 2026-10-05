@@ -58,6 +58,30 @@ fn initiate(s: &Setup, amount: i128) -> u64 {
 // ── init ──────────────────────────────────────────────────────────────────────
 
 #[test]
+#[should_panic]
+fn test_init_requires_admin_auth() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(CrossAssetPaymentContract, ());
+    let client = CrossAssetPaymentContractClient::new(&env, &contract_id);
+
+    client.init(&admin, &0);
+}
+
+#[test]
+fn test_init_with_admin_auth_succeeds() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let contract_id = env.register(CrossAssetPaymentContract, ());
+    let client = CrossAssetPaymentContractClient::new(&env, &contract_id);
+
+    client.init(&admin, &0);
+    assert_eq!(client.get_payment_count(), 0);
+}
+
+#[test]
 #[should_panic(expected = "Error(Contract, #1)")]
 fn test_double_init_panics() {
     let s = setup(0);
@@ -163,7 +187,7 @@ fn test_cancel_refunds_net_amount() {
     let s = setup(200); // 2 %
     let tc = TokenClient::new(&s.env, &s.token);
 
-    let id = initiate(&s, 10_000);
+    let id = initiate(s, 10_000);
     // fee = 200, so net_amount = 9_800 held in contract
     let before = tc.balance(&s.sender);
 
