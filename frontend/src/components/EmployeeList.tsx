@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from './Avatar';
 import { CSVUploader } from './CSVUploader';
 import type { CSVRow } from './CSVUploader';
@@ -60,8 +60,21 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   });
   const [sortKey, setSortKey] = useState<keyof Employee>('name');
   const [sortAsc, setSortAsc] = useState(true);
+  const selectionGeneration = useRef(0);
+  const importPending = useRef(false);
+  const mounted = useRef(true);
+
+  // Modified 2026-10-05: bind import feedback to its selection, not a later preview.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      selectionGeneration.current += 1;
+    };
+  }, []);
 
   const handleDataParsed = (data: CSVRow[], rawCsv: string) => {
+    selectionGeneration.current += 1;
     setCsvData(data);
     setCsvContent(rawCsv);
     setImportResult(null);
@@ -69,18 +82,25 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   };
 
   const handleAddEmployees = async () => {
-    if (!onBulkImport || !csvContent || !csvData.some((row) => row.isValid)) return;
+    if (importPending.current || !onBulkImport || !csvContent || !csvData.some((row) => row.isValid)) return;
 
+    const generation = selectionGeneration.current;
+    importPending.current = true;
     setIsImporting(true);
     setImportError(null);
     setImportResult(null);
     try {
       const result = await onBulkImport(csvContent);
-      setImportResult(result);
+      if (mounted.current && generation === selectionGeneration.current) {
+        setImportResult(result);
+      }
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Employee import failed');
+      if (mounted.current && generation === selectionGeneration.current) {
+        setImportError(error instanceof Error ? error.message : 'Employee import failed');
+      }
     } finally {
-      setIsImporting(false);
+      importPending.current = false;
+      if (mounted.current) setIsImporting(false);
     }
   };
 
@@ -430,15 +450,12 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               <button
                 onClick={() => {
                   setShowCSVUploader(false);
-                  setCsvData([]);
-                  setCsvContent('');
-                  setImportResult(null);
-                  setImportError(null);
+                  handleDataParsed([], '');
                 }}
                 className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Cancel
+                {isImporting ? 'Close preview' : 'Cancel'}
               </button>
             </div>
 
@@ -447,7 +464,9 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 <div className="h-2 w-full overflow-hidden rounded bg-(--surface-hi)">
                   <div className="h-full w-2/3 animate-pulse rounded bg-blue-500" />
                 </div>
-                <p className="mt-2 text-sm text-(--muted)">Importing validated CSV rows…</p>
+                <p className="mt-2 text-sm text-(--muted)">
+                  Import in progress. Closing or changing this preview does not cancel submitted rows.
+                </p>
               </div>
             )}
 
