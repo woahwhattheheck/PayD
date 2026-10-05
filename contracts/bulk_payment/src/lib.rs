@@ -330,6 +330,11 @@ impl BulkPaymentContract {
         env.storage()
             .persistent()
             .extend_ttl(&key, BATCH_TTL_LEDGERS, BATCH_TTL_LEDGERS);
+        // Keep the bounded admin/sequence/count state at least as live as every
+        // new batch record so a late-created record cannot outlive its index.
+        env.storage()
+            .instance()
+            .extend_ttl(BATCH_TTL_LEDGERS, BATCH_TTL_LEDGERS);
     }
 
     fn check_and_advance_sequence(env: &Env, expected: u64) -> Result<(), ContractError> {
