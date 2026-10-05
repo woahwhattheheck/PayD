@@ -110,7 +110,7 @@ export function CertificateDownloadButton({
         void handleDownload();
       }}
       disabled={isDisabled}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info/10 hover:bg-info/20 text-info text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       title="Download Proof of Payment Certificate"
     >
       {isDownloading || isLoadingInfo ? (
