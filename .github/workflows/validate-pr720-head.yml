@@ -1,0 +1,31 @@
+name: Validate PR 720 exact head
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  backend-idempotency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 7851774688f0ab4520b2bac2068dc5939c59a100
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Run focused idempotency tests
+        run: npm test -- --runInBand src/services/__tests__/idempotencyService.test.ts src/middleware/__tests__/idempotencyMiddleware.test.ts
+      - name: Build backend
+        run: npm run build
