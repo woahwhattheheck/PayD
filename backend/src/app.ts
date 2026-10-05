@@ -188,8 +188,12 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Unhandled error', { err, requestId: (req as any).requestId });
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
   res.status(500).json({
     error: 'Internal Server Error',
     message: config.nodeEnv === 'development' ? err.message : 'An error occurred',
