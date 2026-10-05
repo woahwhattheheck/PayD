@@ -146,9 +146,12 @@ async function fetchAppliedMigrations(
 
 async function fetchLatestAppliedMigration(
     client: PoolClient,
+    lockForUpdate = false,
 ): Promise<AppliedMigration | null> {
+    const lockClause = lockForUpdate ? ' FOR UPDATE' : '';
     const { rows } = await client.query<AppliedMigration>(
-        'SELECT filename, checksum FROM schema_migrations ORDER BY id DESC LIMIT 1',
+        'SELECT filename, checksum FROM schema_migrations ORDER BY id DESC LIMIT 1' +
+            lockClause,
     );
     return rows[0] ?? null;
 }
@@ -295,46 +298,72 @@ async function runRollback(isDryRun: boolean): Promise<RollbackResult> {
                 console.log('[migrate] [dry-run] No schema_migrations table; nothing to roll back.');
                 return { rolledBack: null };
             }
-        } else {
-            await client.query(BOOTSTRAP_SQL);
-        }
 
-        const latest = await fetchLatestAppliedMigration(client);
-        if (!latest) {
-            console.log('[migrate] No applied migrations to roll back.');
-            return { rolledBack: null };
-        }
+            const latest = await fetchLatestAppliedMigration(client);
+            if (!latest) {
+                console.log('[migrate] No applied migrations to roll back.');
+                return { rolledBack: null };
+            }
 
-        const forwardPath = path.join(MIGRATIONS_DIR, latest.filename);
-        if (!fs.existsSync(forwardPath)) {
-            throw new Error(
-                'Applied migration file is missing from the repository: ' + latest.filename,
-            );
-        }
+            const forwardPath = path.join(MIGRATIONS_DIR, latest.filename);
+            if (!fs.existsSync(forwardPath)) {
+                throw new Error(
+                    'Applied migration file is missing from the repository: ' + latest.filename,
+                );
+            }
 
-        const currentForward = fs.readFileSync(forwardPath, 'utf8');
-        const currentChecksum = sha256(currentForward);
-        if (currentChecksum !== latest.checksum) {
-            throw new Error(
-                'Refusing rollback because forward migration drifted: ' +
-                    latest.filename +
-                    ' expected ' +
-                    latest.checksum +
-                    ' but current file is ' +
-                    currentChecksum,
-            );
-        }
+            const currentChecksum = sha256(fs.readFileSync(forwardPath, 'utf8'));
+            if (currentChecksum !== latest.checksum) {
+                throw new Error(
+                    'Refusing rollback because forward migration drifted: ' +
+                        latest.filename +
+                        ' expected ' +
+                        latest.checksum +
+                        ' but current file is ' +
+                        currentChecksum,
+                );
+            }
 
-        const rollbackSql = readRollbackSql(latest.filename);
-
-        if (isDryRun) {
+            readRollbackSql(latest.filename);
             console.log('[migrate] [dry-run] Would roll back: ' + latest.filename);
             return { rolledBack: latest.filename };
         }
 
+        await client.query(BOOTSTRAP_SQL);
         await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
+
         try {
+            // Lock the exact tracking row before choosing the rollback target so
+            // two rollback runners cannot both act on the same migration.
+            const latest = await fetchLatestAppliedMigration(client, true);
+            if (!latest) {
+                await client.query('COMMIT');
+                console.log('[migrate] No applied migrations to roll back.');
+                return { rolledBack: null };
+            }
+
+            const forwardPath = path.join(MIGRATIONS_DIR, latest.filename);
+            if (!fs.existsSync(forwardPath)) {
+                throw new Error(
+                    'Applied migration file is missing from the repository: ' + latest.filename,
+                );
+            }
+
+            const currentChecksum = sha256(fs.readFileSync(forwardPath, 'utf8'));
+            if (currentChecksum !== latest.checksum) {
+                throw new Error(
+                    'Refusing rollback because forward migration drifted: ' +
+                        latest.filename +
+                        ' expected ' +
+                        latest.checksum +
+                        ' but current file is ' +
+                        currentChecksum,
+                );
+            }
+
+            const rollbackSql = readRollbackSql(latest.filename);
             await client.query(rollbackSql);
+
             const deleted = await client.query(
                 'DELETE FROM schema_migrations WHERE filename = $1 AND checksum = $2',
                 [latest.filename, latest.checksum],
@@ -351,7 +380,7 @@ async function runRollback(isDryRun: boolean): Promise<RollbackResult> {
             return { rolledBack: latest.filename };
         } catch (error) {
             await client.query('ROLLBACK');
-            console.error('[migrate] ✗ Rollback failed for ' + latest.filename);
+            console.error('[migrate] ✗ Rollback failed');
             throw error;
         }
     } finally {
