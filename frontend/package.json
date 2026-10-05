@@ -12,7 +12,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "test:hooks": "vitest run --config vitest.hooks.config.ts"
   },
   "workspaces": [
     "packages/*"
@@ -59,6 +60,8 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.61.1",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.0",
     "@types/crypto-js": "^4.2.2",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.21",
@@ -78,6 +81,7 @@
     "glob": "^13.0.0",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
+    "jsdom": "26.1.0",
     "lint-staged": "^16.2.7",
     "prettier": "3.6.2",
     "typescript": "~5.9.3",
