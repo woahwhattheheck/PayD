@@ -81,9 +81,9 @@ export const FeeEstimationPanel: React.FC = () => {
   };
 
   const capacityBarColor = (usage: number) => {
-    if (usage < 0.25) return '#10b981';
-    if (usage < 0.75) return '#f59e0b';
-    return '#ef4444';
+    if (usage < 0.25) return 'var(--success)';
+    if (usage < 0.75) return 'var(--warning)';
+    return 'var(--danger)';
   };
 
   // ---- Render ----
