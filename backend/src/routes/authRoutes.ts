@@ -10,6 +10,7 @@ const router = Router();
 router.post('/login', AuthController.login);
 router.post('/register', AuthController.register);
 router.post('/refresh', AuthController.refresh);
+router.get('/session', authenticateJWT, AuthController.session);
 
 router.post(
   '/invitations',
