@@ -299,7 +299,7 @@ impl BulkPaymentContract {
             .get(&DataKey::BatchCount)
             .unwrap_or(0);
         let start_batch_id = core::cmp::max(1, start_batch_id);
-        let scan_limit = core::cmp::min(limit, MAX_STORAGE_USAGE_SCAN);
+        let scan_limit = core::cmp::max(1, core::cmp::min(limit, MAX_STORAGE_USAGE_SCAN));
 
         let mut batch_id = start_batch_id;
         let mut scanned_batches: u32 = 0;
