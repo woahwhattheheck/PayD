@@ -1,0 +1,27 @@
+name: PayD 466 auth navigation validation once
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/payd466-auth-nav-20261005
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
