@@ -3,6 +3,10 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
+# The wallet dependency tree includes node-usb, which builds from source on musl.
+# These tools and headers remain in the build stage, not the nginx image.
+RUN apk add --no-cache python3 make g++ pkgconf eudev-dev linux-headers
+
 # Copy the workspace sources before npm ci so local packages are available too.
 COPY . .
 RUN npm ci --legacy-peer-deps
