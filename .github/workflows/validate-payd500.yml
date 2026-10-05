@@ -1,0 +1,23 @@
+name: PAYD 500 focused validation
+
+on:
+  push:
+    branches:
+      - validation/payd-500
+
+jobs:
+  idempotency:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm test -- --runInBand src/services/__tests__/idempotencyService.test.ts
+      - run: npm run build
