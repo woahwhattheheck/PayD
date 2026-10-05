@@ -1,10 +1,37 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { BenefitsController } from '../controllers/benefitsController.js';
 import { authenticateJWT } from '../middlewares/auth.js';
 import { authorizeRoles, isolateOrganization } from '../middlewares/rbac.js';
 import { setTenantContext } from '../middleware/tenantContext.js';
+import { validateRequest } from '../middleware/validateRequest.js';
+import {
+  benefitPlanSchema,
+  updateBenefitPlanSchema,
+  employeeBenefitEnrollmentSchema,
+  deductionRuleSchema,
+  updateDeductionRuleSchema,
+  draftPayslipSchema,
+} from '../schemas/benefitsSchema.js';
 
 const router = Router();
+
+const organizationParamsSchema = z.object({
+  organizationId: z.coerce.number().int().positive(),
+}).passthrough();
+const resourceParamsSchema = organizationParamsSchema.extend({
+  id: z.coerce.number().int().positive(),
+});
+const employeeParamsSchema = organizationParamsSchema.extend({
+  employeeId: z.coerce.number().int().positive(),
+});
+const includeInactiveQuerySchema = z.object({
+  includeInactive: z.enum(['true', 'false']).optional(),
+});
+const benefitPlanBodySchema = benefitPlanSchema.omit({ organization_id: true });
+const enrollmentBodySchema = employeeBenefitEnrollmentSchema.omit({ organization_id: true });
+const deductionRuleBodySchema = deductionRuleSchema.omit({ organization_id: true });
+const draftPayslipBodySchema = draftPayslipSchema.omit({ organization_id: true });
 
 router.use(authenticateJWT);
 router.use(isolateOrganization);
@@ -23,6 +50,7 @@ router.post(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: organizationParamsSchema, body: benefitPlanBodySchema }),
   BenefitsController.createBenefitPlan
 );
 
@@ -31,6 +59,7 @@ router.get(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: organizationParamsSchema, query: includeInactiveQuerySchema }),
   BenefitsController.listBenefitPlans
 );
 
@@ -39,6 +68,7 @@ router.put(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: resourceParamsSchema, body: updateBenefitPlanSchema }),
   BenefitsController.updateBenefitPlan
 );
 
@@ -47,6 +77,7 @@ router.delete(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: resourceParamsSchema }),
   BenefitsController.deleteBenefitPlan
 );
 
@@ -56,6 +87,7 @@ router.post(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: organizationParamsSchema, body: enrollmentBodySchema }),
   BenefitsController.upsertEmployeeEnrollment
 );
 
@@ -64,6 +96,7 @@ router.get(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: employeeParamsSchema }),
   BenefitsController.listEmployeeEnrollments
 );
 
@@ -73,6 +106,7 @@ router.post(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: organizationParamsSchema, body: deductionRuleBodySchema }),
   BenefitsController.createDeductionRule
 );
 
@@ -81,6 +115,7 @@ router.get(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: organizationParamsSchema, query: includeInactiveQuerySchema }),
   BenefitsController.listDeductionRules
 );
 
@@ -89,6 +124,7 @@ router.put(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: resourceParamsSchema, body: updateDeductionRuleSchema }),
   BenefitsController.updateDeductionRule
 );
 
@@ -97,6 +133,7 @@ router.delete(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: resourceParamsSchema }),
   BenefitsController.deleteDeductionRule
 );
 
@@ -106,6 +143,7 @@ router.post(
   authorizeRoles('EMPLOYER'),
   setTenantFromJwt,
   setTenantContext,
+  validateRequest({ params: organizationParamsSchema, body: draftPayslipBodySchema }),
   BenefitsController.generateDraftPayslip
 );
 
