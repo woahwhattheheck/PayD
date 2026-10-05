@@ -67,9 +67,9 @@ export default function EmployeeEntry() {
   );
   const { t } = useTranslation();
 
-  const fetchEmployees = useCallback(async () => {
+  const fetchEmployees = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const response = await api.get<{ data: BackendEmployee[] }>('/employees');
       const employeeRows = Array.isArray(response.data?.data) ? response.data.data : [];
       const mapped: EmployeeItem[] = employeeRows.map((emp: BackendEmployee) => ({
@@ -84,7 +84,7 @@ export default function EmployeeEntry() {
     } catch (err) {
       console.error('Failed to fetch employees:', err);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, []);
 
@@ -97,7 +97,8 @@ export default function EmployeeEntry() {
       csv: csvContent,
     });
 
-    await fetchEmployees();
+    // Keep the uploader mounted so its selection-bound import result survives.
+    await fetchEmployees(false);
 
     const { successCount, errorCount } = response.data.summary;
     notifySuccess(
