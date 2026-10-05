@@ -67,3 +67,4 @@ jobs:
           echo "- URL: ${{ steps.storacha.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
 
 # Workflow run retention settings
+retention-days: 30
