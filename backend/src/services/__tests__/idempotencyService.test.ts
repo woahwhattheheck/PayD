@@ -17,13 +17,12 @@ describe('idempotencyService', () => {
   });
 
   describe('claimKey', () => {
-    it('should insert a new key with in_progress status', async () => {
-      // INSERT succeeds (rowCount 1) — no follow-up queries needed.
-      (query as jest.Mock).mockResolvedValueOnce({ rowCount: 1, rows: [] });
+    it('should insert a new key and return its lease', async () => {
+      (query as jest.Mock).mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1 }] });
 
       const result = await claimKey(1, 'key-1');
 
-      expect(result).toBeNull();
+      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date) });
       expect(query).toHaveBeenCalledTimes(1);
       expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO idempotency_keys'), [
         1,
@@ -37,9 +36,8 @@ describe('idempotencyService', () => {
       expect(claimSql).not.toContain('WHERE NOT EXISTS');
     });
 
-    it('should return existing completed record for replay', async () => {
+    it('should return an existing completed record for replay', async () => {
       const storedResponse = { success: true };
-      // INSERT misses (row exists, not expired). UPDATE misses (not expired). SELECT returns completed.
       (query as jest.Mock)
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
@@ -60,13 +58,15 @@ describe('idempotencyService', () => {
 
       const result = await claimKey(1, 'replay-key');
 
-      expect(result).not.toBeNull();
-      expect(result!.status).toBe('completed');
-      expect(result!.responseStatus).toBe(201);
-      expect(result!.responseBody).toEqual(storedResponse);
+      expect(result.kind).toBe('replay');
+      if (result.kind === 'replay') {
+        expect(result.record.status).toBe('completed');
+        expect(result.record.responseStatus).toBe(201);
+        expect(result.record.responseBody).toEqual(storedResponse);
+      }
     });
 
-    it('should return existing failed record for replay', async () => {
+    it('should return an existing failed record for replay', async () => {
       (query as jest.Mock)
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
@@ -87,20 +87,20 @@ describe('idempotencyService', () => {
 
       const result = await claimKey(1, 'fail-key');
 
-      expect(result).not.toBeNull();
-      expect(result!.status).toBe('failed');
+      expect(result.kind).toBe('replay');
+      if (result.kind === 'replay') {
+        expect(result.record.status).toBe('failed');
+      }
     });
 
-    it('should recycle expired cached keys and clear the previous response', async () => {
-      // INSERT loses to the existing unique row. UPDATE atomically recycles it
-      // regardless of whether its previous state was completed/failed/in_progress.
+    it('should recycle expired cached keys and return a new lease', async () => {
       (query as jest.Mock)
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
-        .mockResolvedValueOnce({ rowCount: 1, rows: [] });
+        .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 3 }] });
 
       const result = await claimKey(1, 'expired-key');
 
-      expect(result).toBeNull();
+      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date) });
       expect(query).toHaveBeenCalledTimes(2);
       const recycleSql = (query as jest.Mock).mock.calls[1][0] as string;
       expect(recycleSql).toContain("SET status = 'in_progress'");
@@ -111,7 +111,6 @@ describe('idempotencyService', () => {
     });
 
     it('should throw IdempotencyConflictError for concurrent duplicate', async () => {
-      // INSERT misses (row exists). UPDATE misses (not expired). SELECT returns in_progress.
       (query as jest.Mock)
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
@@ -172,7 +171,10 @@ describe('idempotencyService', () => {
 
       expect(fulfilled).toHaveLength(1);
       expect(rejected).toHaveLength(99);
-      expect((fulfilled[0] as PromiseFulfilledResult<unknown>).value).toBeNull();
+      expect((fulfilled[0] as PromiseFulfilledResult<unknown>).value).toEqual({
+        kind: 'claimed',
+        expiresAt: expect.any(Date),
+      });
       for (const result of rejected) {
         expect((result as PromiseRejectedResult).reason).toBeInstanceOf(
           IdempotencyConflictError
@@ -183,61 +185,72 @@ describe('idempotencyService', () => {
 
   describe('isInFlight', () => {
     it('should return true when key is in_progress', async () => {
-      (query as jest.Mock).mockResolvedValue({
-        rows: [{ status: 'in_progress' }],
-      });
-
-      const result = await isInFlight(1, 'flight-key');
-      expect(result).toBe(true);
+      (query as jest.Mock).mockResolvedValue({ rows: [{ status: 'in_progress' }] });
+      await expect(isInFlight(1, 'flight-key')).resolves.toBe(true);
     });
 
     it('should return false when key is completed', async () => {
-      (query as jest.Mock).mockResolvedValue({
-        rows: [{ status: 'completed' }],
-      });
-
-      const result = await isInFlight(1, 'done-key');
-      expect(result).toBe(false);
+      (query as jest.Mock).mockResolvedValue({ rows: [{ status: 'completed' }] });
+      await expect(isInFlight(1, 'done-key')).resolves.toBe(false);
     });
 
     it('should return false when key does not exist', async () => {
       (query as jest.Mock).mockResolvedValue({ rows: [] });
-
-      const result = await isInFlight(1, 'missing-key');
-      expect(result).toBe(false);
+      await expect(isInFlight(1, 'missing-key')).resolves.toBe(false);
     });
   });
 
-  describe('completeKey', () => {
-    it('should update status to completed with response', async () => {
+  describe('lease-owned completion', () => {
+    const leaseExpiresAt = new Date('2026-10-06T12:00:00.000Z');
+
+    it('should complete only the matching in-progress lease', async () => {
       (query as jest.Mock).mockResolvedValue({ rowCount: 1 });
 
-      await completeKey(1, 'done-key', 201, { id: 42 });
+      await expect(
+        completeKey(1, 'done-key', leaseExpiresAt, 201, { id: 42 })
+      ).resolves.toBe(true);
 
       expect(query).toHaveBeenCalledWith(expect.stringContaining("SET status = 'completed'"), [
         1,
         'done-key',
+        leaseExpiresAt,
         201,
         '{"id":42}',
       ]);
       const completionSql = (query as jest.Mock).mock.calls[0][0] as string;
+      expect(completionSql).toContain("status = 'in_progress'");
+      expect(completionSql).toContain('expires_at = $3');
       expect(completionSql).toContain('expires_at > NOW()');
     });
-  });
 
-  describe('failKey', () => {
-    it('should update status to failed with response', async () => {
+    it('should report a stale completion without overwriting the recycled lease', async () => {
+      (query as jest.Mock).mockResolvedValue({ rowCount: 0 });
+      const staleLease = new Date('2026-10-05T12:00:00.000Z');
+
+      await expect(
+        completeKey(1, 'recycled-key', staleLease, 201, { id: 'stale' })
+      ).resolves.toBe(false);
+
+      expect((query as jest.Mock).mock.calls[0][1][2]).toBe(staleLease);
+    });
+
+    it('should fail only the matching in-progress lease', async () => {
       (query as jest.Mock).mockResolvedValue({ rowCount: 1 });
 
-      await failKey(1, 'err-key', 400, { error: 'Bad Request' });
+      await expect(
+        failKey(1, 'err-key', leaseExpiresAt, 500, { error: 'Server Error' })
+      ).resolves.toBe(true);
 
       expect(query).toHaveBeenCalledWith(expect.stringContaining("SET status = 'failed'"), [
         1,
         'err-key',
-        400,
-        '{"error":"Bad Request"}',
+        leaseExpiresAt,
+        500,
+        '{"error":"Server Error"}',
       ]);
       const failureSql = (query as jest.Mock).mock.calls[0][0] as string;
+      expect(failureSql).toContain("status = 'in_progress'");
+      expect(failureSql).toContain('expires_at = $3');
       expect(failureSql).toContain('expires_at > NOW()');
     });
   });
@@ -245,20 +258,15 @@ describe('idempotencyService', () => {
   describe('cleanupExpired', () => {
     it('should delete expired keys', async () => {
       (query as jest.Mock).mockResolvedValue({ rowCount: 5 });
-
-      const deleted = await cleanupExpired();
-
-      expect(deleted).toBe(5);
+      await expect(cleanupExpired()).resolves.toBe(5);
       expect(query).toHaveBeenCalledWith(
         expect.stringContaining('DELETE FROM idempotency_keys WHERE expires_at')
       );
     });
 
-    it('should return 0 when nothing to clean', async () => {
+    it('should return 0 when nothing is expired', async () => {
       (query as jest.Mock).mockResolvedValue({ rowCount: 0 });
-
-      const deleted = await cleanupExpired();
-      expect(deleted).toBe(0);
+      await expect(cleanupExpired()).resolves.toBe(0);
     });
   });
 });
