@@ -19,3 +19,5 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Test bulk_payment
         run: cargo test -p bulk_payment
+
+# One-shot rerun receipt: validate the post-audit instance-TTL head.
