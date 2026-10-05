@@ -96,11 +96,11 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 -- Create a helper function to set tenant configuration
-CREATE OR REPLACE FUNCTION set_tenant_config(key VARCHAR, value JSONB, desc TEXT DEFAULT NULL)
+CREATE OR REPLACE FUNCTION set_tenant_config(key VARCHAR, value JSONB, description_value TEXT DEFAULT NULL)
 RETURNS VOID AS $$
 BEGIN
   INSERT INTO tenant_configurations (organization_id, config_key, config_value, description)
-  VALUES (current_tenant_id(), key, value, desc)
+  VALUES (current_tenant_id(), key, value, description_value)
   ON CONFLICT (organization_id, config_key)
   DO UPDATE SET 
     config_value = EXCLUDED.config_value,
