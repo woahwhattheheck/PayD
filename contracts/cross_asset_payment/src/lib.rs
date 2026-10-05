@@ -90,6 +90,7 @@ pub struct CrossAssetPaymentContract;
 #[contractimpl]
 impl CrossAssetPaymentContract {
     pub fn init(env: Env, admin: Address, fee_rate_bps: u32) -> Result<(), ContractError> {
+        admin.require_auth();
         if env.storage().instance().has(&DataKey::Admin) {
             return Err(ContractError::AlreadyInitialized);
         }
