@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import pg from 'pg';
 import { Redis } from 'ioredis';
 import { config } from '../config/env.js';
+import { pool } from '../config/database.js';
+import logger from '../utils/logger.js';
 import { StellarService } from '../services/stellarService.js';
-
-const pool = new pg.Pool({ connectionString: config.DATABASE_URL });
 
 export const redis: Redis | null = config.REDIS_URL
   ? new Redis(config.REDIS_URL, {
@@ -39,6 +38,19 @@ export interface LivenessReport {
   environment: string;
 }
 
+export interface DatabasePoolHealthReport {
+  status: 'ok' | 'warning' | 'exhausted';
+  timestamp: string;
+  pool: {
+    active: number;
+    idle: number;
+    waiting: number;
+    total: number;
+    max: number;
+    utilization: number;
+  };
+}
+
 export const healthConfig = {
   timeoutMs: 5000,
 };
@@ -59,6 +71,41 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: st
 }
 
 export class HealthController {
+  static getDatabaseHealth(req: Request, res: Response): void {
+    const total = pool.totalCount;
+    const idle = pool.idleCount;
+    const waiting = pool.waitingCount;
+    const active = Math.max(0, total - idle);
+    const max = pool.options.max ?? 10;
+    const utilization = max > 0 ? (active / max) * 100 : 0;
+    const exhausted = active >= max || (waiting > 0 && total >= max);
+
+    const report: DatabasePoolHealthReport = {
+      status: exhausted ? 'exhausted' : utilization > 80 ? 'warning' : 'ok',
+      timestamp: new Date().toISOString(),
+      pool: {
+        active,
+        idle,
+        waiting,
+        total,
+        max,
+        utilization: Number(utilization.toFixed(1)),
+      },
+    };
+
+    if (exhausted) {
+      logger.error('Database connection pool exhausted', report.pool);
+      res.status(503).json(report);
+      return;
+    }
+
+    if (utilization > 80) {
+      logger.warn('Database connection pool utilization above 80%', report.pool);
+    }
+
+    res.status(200).json(report);
+  }
+
   static getLiveness(req: Request, res: Response): void {
     const timestamp = new Date().toISOString();
     const uptime = process.uptime();
