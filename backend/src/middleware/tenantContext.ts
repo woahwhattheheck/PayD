@@ -12,46 +12,44 @@ declare global {
 }
 
 /**
- * Middleware to extract and validate tenant ID from request
- * Supports multiple extraction methods:
- * 1. URL parameter (:organizationId)
- * 2. Request header (X-Organization-Id)
- * 3. JWT token (future implementation)
+ * Middleware to derive tenant context from the authenticated user.
+ *
+ * Authentication middleware must run before this middleware. Client-controlled
+ * headers are never used as tenant identity. When a route contains an
+ * organizationId parameter, it is treated only as an authorization boundary
+ * and must match the organization in the verified user principal.
  */
 export const extractTenantId = (req: Request, res: Response, next: NextFunction) => {
-  let tenantId: number | undefined;
+  const tenantId = req.user?.organizationId;
 
-  // Method 1: Extract from URL parameters
-  if (req.params.organizationId) {
-    tenantId = parseInt(req.params.organizationId as string, 10);
-  }
-
-  // Method 2: Extract from headers (useful for non-RESTful endpoints)
-  if (!tenantId && req.headers['x-organization-id']) {
-    const headerValue = req.headers['x-organization-id'];
-    const headerValStr = Array.isArray(headerValue) ? headerValue[0] : headerValue;
-    if (headerValStr) {
-      tenantId = parseInt(headerValStr as string, 10);
-    }
-  }
-
-
-  // Method 3: Extract from JWT token (placeholder for future auth implementation)
-  // if (!tenantId && req.user?.organizationId) {
-  //   tenantId = req.user.organizationId;
-  // }
-
-  // Validate tenant ID
-  if (!tenantId || isNaN(tenantId) || tenantId <= 0) {
-    return res.status(400).json({
-      error: 'Invalid or missing organization ID',
-      message: 'A valid organization ID must be provided in the URL or headers',
+  if (typeof tenantId !== 'number' || !Number.isInteger(tenantId) || tenantId <= 0) {
+    return res.status(403).json({
+      error: 'Access denied',
+      message: 'Authenticated user is not associated with a valid organization',
     });
   }
 
-  // Attach to request object
+  const requestedOrganizationId = req.params.organizationId;
+  if (requestedOrganizationId !== undefined) {
+    const requestedTenantId = Number(requestedOrganizationId);
+
+    if (!Number.isInteger(requestedTenantId) || requestedTenantId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid organization ID',
+        message: 'Organization ID must be a positive integer',
+      });
+    }
+
+    if (requestedTenantId !== tenantId) {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Cannot access resources outside your organization',
+      });
+    }
+  }
+
   req.tenantId = tenantId;
-  req.organizationId = tenantId; // Alias for backward compatibility
+  req.organizationId = tenantId;
 
   next();
 };
