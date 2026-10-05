@@ -1,12 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
+import { parseCSVPreview } from '../utils/csvPreview';
+import type { CSVRow } from '../utils/csvPreview';
 
-export interface CSVRow {
-  rowNumber: number;
-  data: Record<string, string>;
-  errors: string[];
-  isValid: boolean;
-}
+export type { CSVRow } from '../utils/csvPreview';
 
 interface CSVUploaderProps {
   requiredColumns: string[];
@@ -29,58 +26,6 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
   useEffect(() => () => {
     readGeneration.current += 1;
   }, []);
-
-  const parseCSV = (content: string): CSVRow[] => {
-    const lines = content.trim().split('\n');
-    if (lines.length < 2) return [];
-
-    const headers = lines[0].split(',').map((h) => h.trim());
-
-    // Validate headers
-    const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
-    if (missingColumns.length > 0) {
-      alert(`Missing required columns: ${missingColumns.join(', ')}`);
-      return [];
-    }
-
-    const rows: CSVRow[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map((v) => v.trim());
-      const row: Record<string, string> = {};
-      const errors: string[] = [];
-
-      headers.forEach((header, idx) => {
-        row[header] = values[idx] || '';
-      });
-
-      // Validate each field
-      requiredColumns.forEach((col) => {
-        if (!row[col]) {
-          errors.push(`Missing required field: ${col}`);
-        }
-      });
-
-      // Run custom validators
-      Object.entries(validators).forEach(([field, validator]) => {
-        if (row[field]) {
-          const error = validator(row[field]);
-          if (error) {
-            errors.push(error);
-          }
-        }
-      });
-
-      rows.push({
-        rowNumber: i + 1,
-        data: row,
-        errors,
-        isValid: errors.length === 0,
-      });
-    }
-
-    return rows;
-  };
 
   const handleFileParse = (file: File) => {
     const generation = ++readGeneration.current;
@@ -110,7 +55,13 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
         handleReadError();
         return;
       }
-      const rows = parseCSV(content);
+      let rows: CSVRow[];
+      try {
+        rows = parseCSVPreview(content, requiredColumns, validators);
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Unable to parse the CSV file');
+        return;
+      }
       if (generation !== readGeneration.current) return;
       setParsedData(rows);
       onDataParsed(rows, content);
