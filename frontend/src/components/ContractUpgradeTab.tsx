@@ -54,7 +54,7 @@ interface ContractUpgradeTabProps {
 /** Compact hash display: first 8 + last 6 chars with monospace styling */
 function HashBadge({ hash, full = false }: { hash: string; full?: boolean }) {
   return (
-    <code className="font-mono text-xs bg-black/30 px-2 py-0.5 rounded text-accent" title={hash}>
+    <code className="font-mono text-xs bg-overlay-strong px-2 py-0.5 rounded text-accent" title={hash}>
       {full ? hash : `${hash.slice(0, 8)}…${hash.slice(-6)}`}
     </code>
   );
@@ -67,8 +67,8 @@ function NetworkBadge({ network }: { network: string }) {
     <span
       className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-widest rounded border ${
         isMainnet
-          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
-          : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+          ? 'bg-success/10 text-success border-success/30'
+          : 'bg-info/10 text-info border-info/30'
       }`}
     >
       {network}
@@ -79,12 +79,12 @@ function NetworkBadge({ network }: { network: string }) {
 /** Upgrade log status badge */
 function StatusBadge({ status }: { status: UpgradeLog['status'] }) {
   const colorMap: Record<UpgradeLog['status'], string> = {
-    pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-    simulated: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    pending: 'bg-warning/10 text-warning border-warning/30',
+    simulated: 'bg-info/10 text-info border-info/30',
     confirmed: 'bg-accent/10 text-accent border-accent/30',
     executing: 'bg-accent/10 text-accent border-accent/30',
-    completed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30',
-    failed: 'bg-red-500/10 text-red-500 border-red-500/30',
+    completed: 'bg-success/10 text-success border-success/30',
+    failed: 'bg-danger/10 text-danger border-danger/30',
     cancelled: 'bg-muted/10 text-muted border-muted/30',
   };
   return (
@@ -128,7 +128,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
   }
 
   return (
-    <div className="border border-hi rounded-2xl bg-black/10 backdrop-blur-sm overflow-hidden">
+    <div className="border border-hi rounded-2xl bg-overlay-subtle backdrop-blur-sm overflow-hidden">
       {/* Card header */}
       <div className="p-5 flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -144,7 +144,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
 
         <button
           onClick={() => onUpgrade(contract)}
-          className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-accent/15 text-accent border border-accent/30 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-accent/15 text-accent border border-accent/30 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent hover:text-on-accent transition-all"
         >
           <ArrowUpCircle className="w-3.5 h-3.5" />
           Upgrade
@@ -182,7 +182,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
 
         {contract.last_upgraded_at && (
           <div className="flex items-center gap-1.5 text-xs text-muted">
-            <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="w-3 h-3 text-success shrink-0" />
             <span>
               Last upgraded:{' '}
               <span className="text-text">
@@ -321,7 +321,7 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
         <button
           onClick={() => void loadContracts()}
           disabled={loading}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-black/20 border border-hi rounded hover:bg-black/40 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-overlay-soft border border-hi rounded hover:bg-overlay-strong disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Loading…' : 'Refresh'}
@@ -336,9 +336,9 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
 
       {/* No admin address warning */}
       {!adminAddress && (
-        <div className="flex items-start gap-3 p-4 bg-yellow-500/5 border border-yellow-500/30 rounded-xl">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-yellow-400">
+        <div className="flex items-start gap-3 p-4 bg-warning/5 border border-warning/30 rounded-xl">
+          <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+          <p className="text-sm text-warning">
             Connect your admin wallet to initiate contract upgrades.
           </p>
         </div>
@@ -350,7 +350,7 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="border border-hi rounded-2xl bg-black/10 p-5 animate-pulse"
+              className="border border-hi rounded-2xl bg-overlay-subtle p-5 animate-pulse"
               style={{ animationDelay: `${i * 100}ms` }}
             >
               <div className="h-5 bg-(--surface-hi) rounded w-1/3 mb-3" />
@@ -359,7 +359,7 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
           ))}
         </div>
       ) : contracts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 border border-hi rounded-2xl bg-black/10">
+        <div className="flex flex-col items-center justify-center py-16 border border-hi rounded-2xl bg-overlay-subtle">
           <Code2 className="w-10 h-10 text-muted mb-3" />
           <p className="text-muted">No contracts found in registry.</p>
           <p className="text-xs text-muted/60 mt-1">
