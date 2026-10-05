@@ -223,7 +223,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
               disabled={
                 !state.amount || parseFloat(state.amount) <= 0 || parseFloat(state.amount) > balance
               }
-              className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--on-accent)] font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Continue
             </button>
@@ -269,7 +269,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
             <button
               onClick={() => void handleConfirmWithdrawal()}
               disabled={state.isLoading}
-              className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90 disabled:opacity-50"
+              className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--on-accent)] font-medium hover:opacity-90 disabled:opacity-50"
             >
               {state.isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -341,7 +341,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
 
             <button
               onClick={onClose}
-              className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90"
+              className="w-full p-3 rounded-lg bg-[var(--accent)] text-[var(--on-accent)] font-medium hover:opacity-90"
             >
               Done
             </button>
@@ -369,7 +369,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 p-3 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-medium hover:opacity-90"
+                className="flex-1 p-3 rounded-lg bg-[var(--accent)] text-[var(--on-accent)] font-medium hover:opacity-90"
               >
                 Close
               </button>
@@ -383,7 +383,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-backdrop flex items-center justify-center z-50 p-4">
       <div className="bg-[var(--bg)] rounded-2xl border border-[var(--border)] max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           {/* Header */}
@@ -399,7 +399,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
 
           {/* Error Banner */}
           {state.error && state.step !== 'failed' && (
-            <div className="mb-4 p-3 rounded-lg bg-[rgba(255,123,114,0.1)] border border-[rgba(255,123,114,0.2)]">
+            <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20">
               <div className="flex items-center gap-2 text-[var(--danger)] text-sm">
                 <AlertCircle className="w-4 h-4" />
                 {state.error}
