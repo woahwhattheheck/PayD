@@ -32,6 +32,12 @@ export function buildSentryRequestContext(req: Request): SentryRequestContext {
   };
 }
 
+function stripUrlQueryAndFragment(value: unknown): unknown {
+  if (typeof value !== 'string') return undefined;
+  const detailsStart = value.search(/[?#]/);
+  return detailsStart === -1 ? value : value.slice(0, detailsStart);
+}
+
 /**
  * PayD handles payroll credentials and, historically, some payment endpoints
  * accepted sensitive values in query strings. Keep those surfaces out of
@@ -46,11 +52,14 @@ export function sanitizeSentryEvent(event: any): any {
     if (normalized === 'authorization' || normalized === 'cookie' || normalized === 'set-cookie') {
       continue;
     }
-    sanitizedHeaders[name] = value;
+    sanitizedHeaders[name] = normalized === 'referer' || normalized === 'referrer'
+      ? stripUrlQueryAndFragment(value)
+      : value;
   }
 
   event.request = {
     ...event.request,
+    url: stripUrlQueryAndFragment(event.request.url),
     data: undefined,
     cookies: undefined,
     query_string: undefined,
