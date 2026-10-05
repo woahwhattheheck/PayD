@@ -135,7 +135,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
         className={`relative border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer ${
           isDragging
             ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-gray-50 hover:border-gray-400'
+            : 'border-(--border-hi) bg-(--surface-hi) hover:border-(--muted)'
         }`}
       >
         <input
@@ -147,10 +147,10 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
         />
 
         <button onClick={() => fileInputRef.current?.click()} className="w-full">
-          <Upload className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-          <p className="text-lg font-semibold text-gray-700">Drag and drop your CSV file</p>
-          <p className="text-sm text-gray-500 mt-1">or click to browse</p>
-          <p className="text-xs text-gray-400 mt-2">
+          <Upload className="w-12 h-12 mx-auto mb-2 text-(--muted)" />
+          <p className="text-lg font-semibold text-(--text)">Drag and drop your CSV file</p>
+          <p className="text-sm text-(--muted) mt-1">or click to browse</p>
+          <p className="text-xs text-(--muted) mt-2">
             Required columns: {requiredColumns.join(', ')}
           </p>
         </button>
@@ -193,7 +193,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                   <th className="px-4 py-2 text-left font-semibold">Errors</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-(--border)">
                 {parsedData.map((row) => (
                   <tr
                     key={row.rowNumber}
@@ -201,7 +201,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                       row.isValid ? 'bg-transparent' : 'bg-red-50'
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-gray-100">{row.rowNumber}</td>
+                    <td className="px-4 py-3 font-mono text-(--text)">{row.rowNumber}</td>
                     <td className="px-4 py-3">
                       {row.isValid ? (
                         <CheckCircle className="w-5 h-5 text-green-100" />
@@ -213,7 +213,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                     {Object.entries(row.data).map(([col, value]) => (
                       <td
                         key={`${row.rowNumber}-${col}`}
-                        className="px-4 py-3 text-gray-100 truncate"
+                        className="px-4 py-3 text-(--text) truncate"
                       >
                         {value}
                       </td>

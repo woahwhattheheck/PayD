@@ -332,7 +332,7 @@ export default function EmployeeEntry() {
         <button
           id="tour-add-employee"
           onClick={() => setIsAdding(true)}
-          className="px-5 py-2.5 bg-accent text-bg font-bold rounded-lg hover:bg-accent/90 transition-all flex items-center gap-2 text-sm shadow-lg shadow-accent/10"
+          className="px-5 py-2.5 bg-accent text-on-accent font-bold rounded-full hover:bg-accent-hover transition-all flex items-center gap-2 text-sm shadow-(--shadow-sm)"
         >
           <Icon.Plus size="sm" />
           {t('employees.addEmployee')}

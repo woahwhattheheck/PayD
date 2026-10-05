@@ -33,8 +33,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -50,8 +50,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -67,8 +67,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
       >
@@ -83,8 +83,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -100,8 +100,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -117,8 +117,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -134,8 +134,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
       >
@@ -150,8 +150,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
             isActive
-              ? 'text-(--accent) bg-white/5'
-              : 'text-(--muted) hover:bg-white/10 hover:text-white'
+              ? 'text-(--accent) bg-(--accent)/8'
+              : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -182,8 +182,8 @@ const AppNav: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-mono tracking-wide border transition ${
             isActive
-              ? 'text-(--accent2) bg-[rgba(124,111,247,0.06)] border-[rgba(124,111,247,0.25)]'
-              : 'text-(--accent2) bg-[rgba(124,111,247,0.06)] border-[rgba(124,111,247,0.25)] hover:bg-[rgba(124,111,247,0.12)]'
+              ? 'text-(--accent2) bg-(--accent2)/6 border-(--accent2)/25'
+              : 'text-(--accent2) bg-(--accent2)/6 border-(--accent2)/25 hover:bg-(--accent2)/12'
           }`
         }
         onClick={() => setMobileOpen(false)}
@@ -195,7 +195,7 @@ const AppNav: React.FC = () => {
       <Link
         to="/help"
         onClick={() => setMobileOpen(false)}
-        className="text-blue-500 text-xs underline"
+        className="text-(--link) text-[13px] font-semibold hover:text-(--accent) transition"
       >
         Help
       </Link>
@@ -213,7 +213,7 @@ const AppNav: React.FC = () => {
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden p-3 rounded-md hover:bg-white/5 transition touch-manipulation"
+          className="lg:hidden p-3 rounded-md hover:bg-(--surface-hi) transition touch-manipulation"
           style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly size
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -221,7 +221,7 @@ const AppNav: React.FC = () => {
 
         {/* User profile */}
         <div className="ml-auto flex items-center gap-2">
-          <div className="p-1 bg-gray-50 rounded-lg flex items-center gap-2">
+          <div className="p-1 bg-(--surface-hi) rounded-lg flex items-center gap-2">
             <Avatar
               email={currentUser.email}
               name={currentUser.name}
@@ -229,8 +229,8 @@ const AppNav: React.FC = () => {
               size="sm"
             />
             <div className="hidden md:block flex-1 min-w-0">
-              <p className="text-[10px] font-semibold text-gray-800 truncate">{currentUser.name}</p>
-              <p className="text-[10px] text-gray-500 truncate">{currentUser.email}</p>
+              <p className="text-[10px] font-semibold text-(--text) truncate">{currentUser.name}</p>
+              <p className="text-[10px] text-(--muted) truncate">{currentUser.email}</p>
             </div>
           </div>
         </div>
@@ -246,12 +246,12 @@ const AppNav: React.FC = () => {
           />
 
           {/* Mobile menu panel */}
-          <div className="lg:hidden fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-xl z-40 transform transition-transform duration-300 ease-in-out">
+          <div className="lg:hidden fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-(--surface) shadow-(--shadow-lg) z-40 transform transition-transform duration-300 ease-in-out">
             <div className="flex flex-col h-full">
               {/* Mobile menu header */}
-              <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center justify-between p-4 border-b border-(--border)">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-black text-sm tracking-tight shadow-[0_0_20px_rgba(74,240,184,0.3)] bg-linear-to-br from-(--accent) to-(--accent2)">
+                  <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-(--on-accent) text-sm tracking-tight shadow-(--shadow-sm) bg-linear-to-br from-(--accent) to-(--accent2)">
                     P
                   </div>
                   <span className="text-lg font-extrabold tracking-tight">
@@ -261,7 +261,7 @@ const AppNav: React.FC = () => {
                 <button
                   aria-label="Close menu"
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-md hover:bg-gray-100 transition touch-manipulation"
+                  className="p-2 rounded-md hover:bg-(--surface-hi) transition touch-manipulation"
                   style={{ minHeight: '44px', minWidth: '44px' }}
                 >
                   <X className="w-5 h-5" />
@@ -274,8 +274,8 @@ const AppNav: React.FC = () => {
               </div>
 
               {/* Mobile menu footer with user info */}
-              <div className="p-4 border-t">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="p-4 border-t border-(--border)">
+                <div className="flex items-center gap-3 p-3 bg-(--surface-hi) rounded-lg">
                   <Avatar
                     email={currentUser.email}
                     name={currentUser.name}
@@ -283,10 +283,10 @@ const AppNav: React.FC = () => {
                     size="sm"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 truncate">
+                    <p className="text-sm font-semibold text-(--text) truncate">
                       {currentUser.name}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
+                    <p className="text-xs text-(--muted) truncate">{currentUser.email}</p>
                   </div>
                 </div>
               </div>

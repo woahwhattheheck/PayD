@@ -1,75 +1,90 @@
 import { Icon } from '@stellar/design-system';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import ArrowLink from '../components/ArrowLink';
 
 export default function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const features = [
+    {
+      icon: <Icon.CreditCard01 size="lg" />,
+      tint: 'bg-accent/10 text-accent',
+      title: t('home.card1Title'),
+      body: t('home.card1Body'),
+      to: '/payroll',
+    },
+    {
+      icon: <Icon.Users01 size="lg" />,
+      tint: 'bg-accent2/10 text-accent2',
+      title: t('home.card2Title'),
+      body: t('home.card2Body'),
+      to: '/employee',
+    },
+    {
+      icon: <Icon.ShieldTick size="lg" />,
+      tint: 'bg-link/10 text-link',
+      title: t('home.card3Title'),
+      body: t('home.card3Body'),
+      to: '/transactions',
+    },
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 py-12">
-      <div id="tour-welcome" className="mb-10 p-8 glass glow-mint rounded-full relative">
-        <Icon.Rocket01 size="xl" className="text-accent relative z-20" />
-        <div className="absolute inset-0 bg-accent opacity-5 blur-2xl rounded-full" />
-      </div>
+    <div className="flex flex-col items-center w-full">
+      {/* Hero */}
+      <section
+        id="tour-welcome"
+        className="flex flex-col items-center text-center max-w-4xl px-6 pt-12 pb-20 md:pt-20 md:pb-28"
+      >
+        <span className="eyebrow mb-6">{t('home.eyebrow')}</span>
 
-      <h1 className="text-6xl font-black mb-6 tracking-tighter leading-none">
-        {t('home.titleLine1Prefix')}{' '}
-        <span className="text-accent">{t('home.titleLine1Highlight')}</span>
-        <br />
-        {t('home.titleLine2Prefix')}{' '}
-        <span className="text-accent2">{t('home.titleLine2Highlight')}</span>
-        {t('home.titleLine2Suffix')}
-      </h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-[1.08]">
+          {t('home.titleLine1Prefix')}{' '}
+          <span className="text-accent">{t('home.titleLine1Highlight')}</span>
+          <br />
+          {t('home.titleLine2Prefix')}{' '}
+          <span className="text-accent2">{t('home.titleLine2Highlight')}</span>
+          {t('home.titleLine2Suffix')}
+        </h1>
 
-      <p className="text-xl text-muted max-w-2xl mb-12 leading-relaxed font-medium">
-        {t('home.tagline')}
-      </p>
+        <p className="text-lg md:text-xl text-muted max-w-2xl mb-10 leading-relaxed">
+          {t('home.tagline')}
+        </p>
 
-      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
-        <button
-          className="px-8 py-4 bg-accent text-bg font-bold rounded-xl hover:scale-105 transition-transform shadow-lg shadow-accent/20"
-          onClick={() => {
-            void navigate('/payroll');
-          }}
-        >
-          {t('home.ctaManagePayroll')}
-        </button>
-        <button
-          className="px-8 py-4 glass border-hi text-text font-bold rounded-xl hover:bg-white/5 transition-all outline-none"
-          onClick={() => {
-            void navigate('/employee');
-          }}
-        >
-          {t('home.ctaViewEmployees')}
-        </button>
-      </div>
-
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-6xl w-full">
-        <div className="card glass noise">
-          <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-6 border border-accent/20">
-            <Icon.CreditCard01 size="lg" className="text-accent" />
-          </div>
-          <h3 className="text-xl font-bold mb-3">{t('home.card1Title')}</h3>
-          <p className="text-muted text-sm leading-relaxed">{t('home.card1Body')}</p>
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
+          <button
+            className="btn-primary"
+            onClick={() => {
+              void navigate('/payroll');
+            }}
+          >
+            {t('home.ctaManagePayroll')}
+          </button>
+          <ArrowLink to="/employee">{t('home.ctaViewEmployees')}</ArrowLink>
         </div>
+      </section>
 
-        <div className="card glass noise">
-          <div className="w-12 h-12 rounded-lg bg-accent2/10 flex items-center justify-center mb-6 border border-accent2/20">
-            <Icon.Users01 size="lg" className="text-accent2" />
-          </div>
-          <h3 className="text-xl font-bold mb-3">{t('home.card2Title')}</h3>
-          <p className="text-muted text-sm leading-relaxed">{t('home.card2Body')}</p>
+      {/* Features */}
+      <section className="w-full bg-surface-hi rounded-3xl px-6 py-16 md:px-12 md:py-20 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-left">
+          {features.map((f) => (
+            <div key={f.to} className="card flex flex-col">
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${f.tint}`}
+              >
+                {f.icon}
+              </div>
+              <h3 className="text-xl font-bold mb-3">{f.title}</h3>
+              <p className="text-muted text-sm leading-relaxed mb-6 flex-1">{f.body}</p>
+              <ArrowLink to={f.to} className="text-sm self-start">
+                {t('home.learnMore')}
+              </ArrowLink>
+            </div>
+          ))}
         </div>
-
-        <div className="card glass noise">
-          <div className="w-12 h-12 rounded-lg bg-danger/10 flex items-center justify-center mb-6 border border-danger/20">
-            <Icon.ShieldTick size="lg" className="text-danger" />
-          </div>
-          <h3 className="text-xl font-bold mb-3">{t('home.card3Title')}</h3>
-          <p className="text-muted text-sm leading-relaxed">{t('home.card3Body')}</p>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

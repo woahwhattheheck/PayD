@@ -48,13 +48,13 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--text) 50%, transparent);
 }
 
 .errorCode {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--surface-hi);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   color: #f87171;
@@ -72,12 +72,12 @@
 .message {
   font-size: 1rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
+  color: color-mix(in srgb, var(--text) 90%, transparent);
   font-weight: 500;
 }
 
 .actionSection {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface-hi);
   border-radius: 8px;
   padding: 0.875rem;
   margin-bottom: 1rem;
@@ -100,7 +100,7 @@
 
 .actionText {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in srgb, var(--text) 70%, transparent);
   line-height: 1.4;
 }
 
@@ -118,7 +118,7 @@
 .rawLabel {
   font-size: 0.7rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--text) 40%, transparent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -127,9 +127,9 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  color: color-mix(in srgb, var(--text) 60%, transparent);
   padding: 0.25rem 0.625rem;
   border-radius: 4px;
   font-size: 0.7rem;
@@ -139,7 +139,7 @@
 }
 
 .copyButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
   color: white;
 }
 
@@ -149,9 +149,9 @@
   border-radius: 6px;
   font-family: ui-monospace, Consolas, monospace;
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   word-break: break-all;
   max-height: 100px;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
 }

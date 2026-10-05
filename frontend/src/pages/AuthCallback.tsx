@@ -53,7 +53,7 @@ const AuthCallback: React.FC = () => {
           onSubmit={(event) => {
             void handleSubmit(event);
           }}
-          className="glass noise p-10 rounded-3xl max-w-md w-full border border-white/10 shadow-2xl flex flex-col gap-4"
+          className="glass noise p-10 rounded-3xl max-w-md w-full border border-(--border) shadow-2xl flex flex-col gap-4"
         >
           <h1 className="text-3xl font-black tracking-tight">{t('twoFactor.loginTitle')}</h1>
           <p className="text-sm text-muted">{t('twoFactor.loginDescription')}</p>
@@ -74,7 +74,7 @@ const AuthCallback: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting || code.trim().length === 0}
-            className="w-full py-3 px-4 bg-accent text-black font-bold rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
+            className="w-full py-3 px-4 bg-accent text-on-accent font-bold rounded-full hover:bg-accent-hover transition-all disabled:opacity-50"
           >
             {t('twoFactor.loginButton')}
           </button>

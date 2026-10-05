@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@100..900&display=swap');
 
 @import 'tailwindcss';
 
@@ -8,43 +8,82 @@
   box-sizing: border-box;
 }
 
+/*
+ * Design language: deep-blue primary on white, teal + bright-blue accents,
+ * generous whitespace, solid rounded CTAs and arrow-icon secondary links.
+ *
+ * --accent      primary brand blue (solid CTAs, active states)
+ * --accent2     teal (secondary highlights, positive/data accents)
+ * --link        bright blue (inline + arrow links, focus rings)
+ * --on-accent   text/icon color placed on top of --accent
+ */
 :root,
-[data-theme='dark'] {
-  --bg: #080b10;
-  --surface: #0d1117;
-  --surface-hi: #161b22;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-hi: rgba(255, 255, 255, 0.14);
-  --text: #e8eaf0;
-  --muted: #8b949e;
-  --accent: #4af0b8;
-  --accent2: #7c6ff7;
-  --danger: #ff7b72;
-  --success: #3fb950;
-  --header-h: 64px;
-  --font-head: 'Syne', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  color-scheme: dark;
-}
-
 [data-theme='light'] {
-  --bg: #f6f8fa;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-hi: #f0f2f5;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hi: rgba(0, 0, 0, 0.15);
-  --text: #1f2328;
-  --muted: #656d76;
-  --accent: #0d9668;
-  --accent2: #6c5ce7;
-  --danger: #d1242f;
-  --success: #1a7f37;
-  --header-h: 64px;
-  --font-head: 'Syne', sans-serif;
+  --surface-hi: #f3f6fc;
+  --border: rgba(10, 37, 94, 0.08);
+  --border-hi: rgba(10, 37, 94, 0.16);
+  --text: #0a1f44;
+  --muted: #5b6b86;
+  --accent: #0b3d91;
+  --accent-hover: #082e6f;
+  --accent2: #00857f;
+  --link: #1665f0;
+  --on-accent: #ffffff;
+  --danger: #d92d20;
+  --success: #12a150;
+  --shadow-sm: 0 1px 2px rgba(10, 31, 68, 0.06);
+  --shadow-md: 0 8px 24px -8px rgba(10, 31, 68, 0.12);
+  --shadow-lg: 0 20px 48px -16px rgba(10, 31, 68, 0.18);
+  --radius: 16px;
+  --header-h: 72px;
+  --font-head: 'Plus Jakarta Sans', 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'DM Mono', monospace;
   color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #07142b;
+  --surface: #0c1d3a;
+  --surface-hi: #13294f;
+  --border: rgba(170, 196, 255, 0.1);
+  --border-hi: rgba(170, 196, 255, 0.2);
+  --text: #eaf1ff;
+  --muted: #9aabc8;
+  --accent: #3b82f6;
+  --accent-hover: #2f6fe0;
+  --accent2: #2dd4bf;
+  --link: #6aa8ff;
+  --on-accent: #ffffff;
+  --danger: #ff7b72;
+  --success: #3fb950;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px -16px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+/* Expose tokens to Tailwind so `bg-accent`, `text-muted`, `border-border-hi`, etc. resolve. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-hi: var(--surface-hi);
+  --color-border: var(--border);
+  --color-border-hi: var(--border-hi);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent2: var(--accent2);
+  --color-link: var(--link);
+  --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --font-head: var(--font-head);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
 html,
@@ -55,6 +94,7 @@ body,
   color: var(--text);
   font-family: var(--font-body);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -64,7 +104,14 @@ h4,
 h5,
 h6 {
   font-family: var(--font-head);
-  font-variation-settings: 'wght' 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 /* ── Scrollbar ── */
@@ -81,54 +128,132 @@ h6 {
   border-radius: 10px;
 }
 
-/* ── Global Utilities ── */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
+@layer components {
+  /* ── Global Utilities ── */
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
 
-[data-theme='light'] .glass {
-  background: rgba(255, 255, 255, 0.7);
-}
+  /* Legacy decorative helpers: kept as no-ops/soft shadows so existing markup stays valid. */
+  .noise {
+    position: relative;
+  }
 
-.noise {
-  position: relative;
-}
+  .glow-mint,
+  .glow-purple {
+    box-shadow: var(--shadow-md);
+  }
 
-.noise::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  opacity: 0.4;
-  z-index: 10;
-}
+  /* ── Common Card Style ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
 
-.glow-mint {
-  box-shadow: 0 0 20px rgba(74, 240, 184, 0.15);
-}
+  .card:hover {
+    border-color: var(--border-hi);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
 
-.glow-purple {
-  box-shadow: 0 0 20px rgba(124, 111, 247, 0.15);
-}
+  /* ── Buttons & links ── */
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
 
-/* ── Common Card Style ── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
-}
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    border: 1px solid var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
 
-.card:hover {
-  border-color: var(--border-hi);
-  transform: translateY(-2px);
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+  }
+
+  [data-theme='dark'] .btn-secondary {
+    color: var(--text);
+    border-color: var(--border-hi);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+
+  .btn-primary:disabled,
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Secondary text link with a trailing arrow that nudges forward on hover. */
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 600;
+    color: var(--link);
+    transition: color 0.15s ease;
+  }
+
+  .link-arrow svg {
+    transition: transform 0.2s ease;
+  }
+
+  .link-arrow:hover {
+    color: var(--accent);
+  }
+
+  [data-theme='dark'] .link-arrow:hover {
+    color: var(--text);
+  }
+
+  .link-arrow:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* Small uppercase label above section headings. */
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+  }
 }
 
 /* Animations */

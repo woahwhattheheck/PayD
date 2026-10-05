@@ -347,7 +347,10 @@ export default function BulkPaymentTracker() {
         <div className={styles.statChip}>
           <div
             className={styles.statChipIcon}
-            style={{ background: 'rgba(74,240,184,0.1)', border: '1px solid rgba(74,240,184,0.2)' }}
+            style={{
+              background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
+            }}
           >
             <Layers size={16} color="var(--accent)" />
           </div>
@@ -403,8 +406,8 @@ export default function BulkPaymentTracker() {
           <div
             className={styles.statChipIcon}
             style={{
-              background: 'rgba(124,111,247,0.1)',
-              border: '1px solid rgba(124,111,247,0.2)',
+              background: 'color-mix(in srgb, var(--accent2) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--accent2) 20%, transparent)',
             }}
           >
             <Users size={16} color="var(--accent2)" />
@@ -421,8 +424,8 @@ export default function BulkPaymentTracker() {
           <div
             className={styles.statChipIcon}
             style={{
-              background: 'rgba(74,240,184,0.06)',
-              border: '1px solid rgba(74,240,184,0.15)',
+              background: 'color-mix(in srgb, var(--accent) 6%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--accent) 15%, transparent)',
             }}
           >
             <DollarSign size={16} color="var(--accent)" />

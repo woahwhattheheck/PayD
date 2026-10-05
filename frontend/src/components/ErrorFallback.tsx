@@ -27,14 +27,14 @@ export default function ErrorFallback({ title, description, onReset }: ErrorFall
             <button
               type="button"
               onClick={onReset}
-              className="px-4 py-2 rounded-lg bg-accent text-bg font-semibold text-sm hover:scale-105 transition-transform"
+              className="px-4 py-2 rounded-full bg-accent text-on-accent font-semibold text-sm hover:bg-accent-hover transition-colors"
             >
               {t('errorFallback.tryAgain')}
             </button>
           )}
           <Link
             to="/"
-            className="px-4 py-2 rounded-lg border border-hi text-sm font-medium text-text hover:bg-white/5 transition-colors"
+            className="px-4 py-2 rounded-lg border border-hi text-sm font-medium text-text hover:bg-(--surface-hi) transition-colors"
           >
             {t('errorFallback.goHome')}
           </Link>

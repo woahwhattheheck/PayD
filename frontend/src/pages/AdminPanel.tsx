@@ -426,14 +426,14 @@ export default function AdminPanel() {
               <button
                 disabled={accountLoading}
                 onClick={() => void handleAccountAction('freeze')}
-                className="flex-1 py-3 sm:py-4 bg-red-500/20 text-red-500 border border-red-500/50 font-black rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
+                className="flex-1 py-3 sm:py-4 bg-red-500/20 text-red-500 border border-red-500/50 font-black rounded-xl hover:bg-red-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
                 {accountLoading ? 'Processing...' : 'Freeze Account'}
               </button>
               <button
                 disabled={accountLoading}
                 onClick={() => void handleAccountAction('unfreeze')}
-                className="flex-1 py-3 sm:py-4 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 font-black rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
+                className="flex-1 py-3 sm:py-4 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 font-black rounded-xl hover:bg-emerald-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
                 {accountLoading ? 'Processing...' : 'Unfreeze Account'}
               </button>
@@ -494,14 +494,14 @@ export default function AdminPanel() {
               <button
                 disabled={globalLoading}
                 onClick={() => void handleGlobalAction('freeze')}
-                className="flex-1 py-3 sm:py-4 bg-red-600/30 text-red-400 border border-red-500/50 font-black rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
+                className="flex-1 py-3 sm:py-4 bg-red-600/30 text-red-400 border border-red-500/50 font-black rounded-xl hover:bg-red-600 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
                 {globalLoading ? 'Processing...' : 'Engage Global Freeze'}
               </button>
               <button
                 disabled={globalLoading}
                 onClick={() => void handleGlobalAction('unfreeze')}
-                className="flex-1 py-3 sm:py-4 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 font-black rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
+                className="flex-1 py-3 sm:py-4 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 font-black rounded-xl hover:bg-emerald-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
                 {globalLoading ? 'Processing...' : 'Lift Global Freeze'}
               </button>
@@ -667,7 +667,7 @@ export default function AdminPanel() {
                     logs.map((log: FreezeLog) => (
                       <tr
                         key={log.id}
-                        className="border-b border-hi/50 hover:bg-white/5 transition-colors"
+                        className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
                       >
                         <td className="p-3 text-xs font-mono">
                           {new Date(log.created_at).toLocaleString()}
@@ -854,7 +854,7 @@ export default function AdminPanel() {
                 id="clawback-submit-btn"
                 disabled={clawbackLoading}
                 onClick={() => void handleClawback()}
-                className="w-full sm:w-auto py-3 sm:py-4 px-8 bg-orange-500/20 text-orange-400 border border-orange-500/50 font-black rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
+                className="w-full sm:w-auto py-3 sm:py-4 px-8 bg-orange-500/20 text-orange-400 border border-orange-500/50 font-black rounded-xl hover:bg-orange-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
                 {clawbackLoading ? 'Submitting…' : 'Execute Clawback'}
               </button>
@@ -908,7 +908,7 @@ export default function AdminPanel() {
                       clawbackLogs.map((log: ClawbackLog) => (
                         <tr
                           key={log.id}
-                          className="border-b border-hi/50 hover:bg-white/5 transition-colors"
+                          className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
                         >
                           <td className="p-3 text-xs font-mono">
                             {new Date(log.created_at).toLocaleString()}

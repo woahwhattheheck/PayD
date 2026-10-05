@@ -471,7 +471,7 @@ const TaxComplianceWizard: React.FC = () => {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleExportCSV}
-                className="flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-accent text-bg font-bold hover:brightness-110 transition-all"
+                className="flex items-center justify-center gap-2 py-4 px-6 rounded-full bg-accent text-on-accent font-bold hover:bg-accent-hover transition-all"
               >
                 <Download className="w-5 h-5" />
                 Download CSV Report
@@ -504,7 +504,7 @@ const TaxComplianceWizard: React.FC = () => {
           <div className="flex gap-2">
             {step === 2 && (
               <button
-                className="py-2 px-6 rounded-lg bg-accent text-bg font-bold text-sm tracking-wide hover:brightness-110 shadow-lg shadow-accent/20 transition-all"
+                className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={handleValidateConfig}
               >
                 Validate & Continue
@@ -512,7 +512,7 @@ const TaxComplianceWizard: React.FC = () => {
             )}
             {step === 3 && (
               <button
-                className="py-2 px-6 rounded-lg bg-accent text-bg font-bold text-sm tracking-wide hover:brightness-110 shadow-lg shadow-accent/20 transition-all"
+                className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={() => {
                   void handleCalculatePreview();
                 }}
@@ -523,7 +523,7 @@ const TaxComplianceWizard: React.FC = () => {
             )}
             {step === 4 && (
               <button
-                className="py-2 px-6 rounded-lg bg-accent text-bg font-bold text-sm tracking-wide hover:brightness-110 shadow-lg shadow-accent/20 transition-all"
+                className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={handleGenerateReport}
               >
                 Generate Report
@@ -531,7 +531,7 @@ const TaxComplianceWizard: React.FC = () => {
             )}
             {step < 5 && step > 3 && (
               <button
-                className="py-2 px-6 rounded-lg bg-accent text-bg font-bold text-sm tracking-wide hover:brightness-110 shadow-lg shadow-accent/20 transition-all"
+                className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
                 onClick={handleNext}
               >
                 Continue <ChevronRight className="w-4 h-4 inline" />

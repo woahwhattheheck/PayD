@@ -190,12 +190,12 @@ export default function RevenueSplitDashboard() {
 
   return (
     <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-12 max-w-7xl mx-auto w-full">
-      <div className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-zinc-800 pb-4 md:pb-6">
+      <div className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-(--border) pb-4 md:pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight">
             Revenue Split <span className="text-accent">Dashboard</span>
           </h1>
-          <p className="text-zinc-500 font-mono text-xs md:text-sm tracking-wider uppercase mt-2">
+          <p className="text-(--muted) font-mono text-xs md:text-sm tracking-wider uppercase mt-2">
             Contract-backed allocations and distribution history
           </p>
         </div>
@@ -205,20 +205,20 @@ export default function RevenueSplitDashboard() {
             onClick={() => {
               void connect();
             }}
-            className="px-4 py-2 rounded-lg font-bold bg-accent text-black touch-manipulation"
+            className="px-4 py-2 rounded-full font-bold bg-accent text-on-accent touch-manipulation"
             style={{ minHeight: '44px' }}
           >
             Connect Wallet
           </button>
         ) : (
-          <span className="text-xs text-zinc-400 font-mono">
+          <span className="text-xs text-(--muted) font-mono">
             Connected: {address.slice(0, 6)}...{address.slice(-4)}
           </span>
         )}
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-zinc-400 mb-6">Loading revenue split dashboard...</p>
+        <p className="text-sm text-(--muted) mb-6">Loading revenue split dashboard...</p>
       ) : null}
       {error ? <p className="text-sm text-red-400 mb-6">{error}</p> : null}
 
@@ -227,18 +227,18 @@ export default function RevenueSplitDashboard() {
           <h2 className="text-base md:text-lg font-bold mb-4">Current Allocation Splits</h2>
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
             <div
-              className="w-32 h-32 md:w-44 md:h-44 rounded-full border border-zinc-700 flex-shrink-0"
+              className="w-32 h-32 md:w-44 md:h-44 rounded-full border border-(--border-hi) flex-shrink-0"
               style={{ background: buildConicGradient(allocations) }}
             />
             <div className="space-y-2 w-full md:w-auto">
               {allocations.length === 0 ? (
-                <p className="text-sm text-zinc-400">No allocation data loaded.</p>
+                <p className="text-sm text-(--muted)">No allocation data loaded.</p>
               ) : (
                 allocations.map((entry, idx) => (
                   // eslint-disable-next-line react-x/no-array-index-key
-                  <p key={`${entry.recipient}-${idx}`} className="text-xs text-zinc-300">
+                  <p key={`${entry.recipient}-${idx}`} className="text-xs text-(--text)">
                     {entry.recipient.slice(0, 6)}...{entry.recipient.slice(-4)} -{' '}
-                    <span className="font-bold text-white">{entry.percentage.toFixed(2)}%</span>
+                    <span className="font-bold text-(--text)">{entry.percentage.toFixed(2)}%</span>
                   </p>
                 ))
               )}
@@ -257,7 +257,7 @@ export default function RevenueSplitDashboard() {
             <button
               type="button"
               onClick={addRecipient}
-              className="px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold touch-manipulation"
+              className="px-3 py-1.5 rounded-md bg-(--surface-hi) hover:bg-(--border) text-xs font-semibold touch-manipulation"
               style={{ minHeight: '44px' }}
             >
               Add Recipient
@@ -276,7 +276,7 @@ export default function RevenueSplitDashboard() {
                   value={entry.recipient}
                   onChange={(event) => setAllocationField(idx, 'recipient', event.target.value)}
                   placeholder="Recipient Stellar Address"
-                  className="md:col-span-8 bg-[#0a0a0c] border border-zinc-800 rounded-lg px-3 py-2 text-xs"
+                  className="md:col-span-8 bg-[#0a0a0c] border border-(--border) rounded-lg px-3 py-2 text-xs"
                   style={{ minHeight: '44px' }}
                 />
                 <input
@@ -287,7 +287,7 @@ export default function RevenueSplitDashboard() {
                   max={100}
                   step={0.01}
                   placeholder="%"
-                  className="md:col-span-3 bg-[#0a0a0c] border border-zinc-800 rounded-lg px-3 py-2 text-xs"
+                  className="md:col-span-3 bg-[#0a0a0c] border border-(--border) rounded-lg px-3 py-2 text-xs"
                   style={{ minHeight: '44px' }}
                 />
                 <button
@@ -303,14 +303,14 @@ export default function RevenueSplitDashboard() {
           </div>
 
           <div className="mt-5 flex items-center justify-between">
-            <p className="text-xs text-zinc-400">Total allocation must be exactly 100%.</p>
+            <p className="text-xs text-(--muted)">Total allocation must be exactly 100%.</p>
             <button
               type="button"
               onClick={() => {
                 void handleSaveAllocations();
               }}
               disabled={isSaving}
-              className="px-4 py-2 rounded-lg bg-accent text-black font-bold disabled:opacity-70 touch-manipulation"
+              className="px-4 py-2 rounded-full bg-accent text-on-accent font-bold disabled:opacity-70 touch-manipulation"
               style={{ minHeight: '44px' }}
             >
               {isSaving ? 'Submitting...' : 'Submit On-Chain Update'}
@@ -323,25 +323,25 @@ export default function RevenueSplitDashboard() {
         <section className="card glass noise lg:col-span-1">
           <h2 className="text-base md:text-lg font-bold mb-4">Live Recipient Balances</h2>
           {recipientBalances.length === 0 ? (
-            <p className="text-sm text-zinc-400">No recipient distributions available yet.</p>
+            <p className="text-sm text-(--muted)">No recipient distributions available yet.</p>
           ) : (
             <div className="space-y-2">
               {recipientBalances.map((row) => (
                 <div
                   key={row.recipient}
-                  className="flex items-center justify-between border-b border-zinc-800 pb-2"
+                  className="flex items-center justify-between border-b border-(--border) pb-2"
                 >
-                  <span className="text-xs text-zinc-300 truncate max-w-[120px] md:max-w-[180px]">
+                  <span className="text-xs text-(--text) truncate max-w-[120px] md:max-w-[180px]">
                     {row.recipient}
                   </span>
-                  <span className="text-xs font-bold text-white">
+                  <span className="text-xs font-bold text-(--text)">
                     {formatAmount(row.amount, preferredStablecoin)}
                   </span>
                 </div>
               ))}
             </div>
           )}
-          <p className="mt-4 text-sm text-zinc-200">
+          <p className="mt-4 text-sm text-(--text)">
             Total Distributed:{' '}
             <span className="font-bold">{formatAmount(totalDistributed, preferredStablecoin)}</span>
           </p>
@@ -350,13 +350,13 @@ export default function RevenueSplitDashboard() {
         <section className="card glass noise lg:col-span-2">
           <h2 className="text-base md:text-lg font-bold mb-4">Historical Distribution Events</h2>
           {events.length === 0 ? (
-            <p className="text-sm text-zinc-400">No backend indexed distribution events found.</p>
+            <p className="text-sm text-(--muted)">No backend indexed distribution events found.</p>
           ) : (
             <>
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-left text-zinc-500 border-b border-zinc-800">
+                  <thead className="text-left text-(--muted) border-b border-(--border)">
                     <tr>
                       <th className="py-2 pr-4">Date</th>
                       <th className="py-2 pr-4">Recipient</th>
@@ -367,7 +367,7 @@ export default function RevenueSplitDashboard() {
                   </thead>
                   <tbody>
                     {events.map((event) => (
-                      <tr key={event.id} className="border-b border-zinc-800/50">
+                      <tr key={event.id} className="border-b border-(--border)">
                         <td className="py-2 pr-4 text-xs">
                           {new Date(event.createdAt).toLocaleString()}
                         </td>
@@ -387,7 +387,7 @@ export default function RevenueSplitDashboard() {
                               {event.txHash.slice(0, 10)}...
                             </a>
                           ) : (
-                            <span className="text-zinc-500">N/A</span>
+                            <span className="text-(--muted)">N/A</span>
                           )}
                         </td>
                       </tr>
@@ -399,25 +399,28 @@ export default function RevenueSplitDashboard() {
               {/* Mobile Card View */}
               <div className="md:hidden space-y-3">
                 {events.map((event) => (
-                  <div key={event.id} className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div
+                    key={event.id}
+                    className="bg-(--surface-hi) rounded-lg p-3 border border-(--border)"
+                  >
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-(--muted)">
                         {new Date(event.createdAt).toLocaleDateString()}
                       </span>
-                      <span className="text-xs font-semibold text-white px-2 py-1 bg-zinc-800 rounded">
+                      <span className="text-xs font-semibold text-(--text) px-2 py-1 bg-(--surface-hi) rounded">
                         {event.action}
                       </span>
                     </div>
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-zinc-400">Recipient:</span>
-                        <span className="text-zinc-300 truncate max-w-[150px]">
+                        <span className="text-(--muted)">Recipient:</span>
+                        <span className="text-(--text) truncate max-w-[150px]">
                           {event.recipientLabel}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-zinc-400">Amount:</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-(--muted)">Amount:</span>
+                        <span className="text-(--text) font-semibold">
                           {formatAmount(event.amount, event.assetCode || preferredStablecoin)}
                         </span>
                       </div>

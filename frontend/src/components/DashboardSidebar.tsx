@@ -45,7 +45,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   return (
     <aside className="h-full w-64 border-r border-(--border) bg-(--surface) flex flex-col">
       <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-black text-sm tracking-tight shadow-[0_0_20px_rgba(74,240,184,0.3)] bg-linear-to-br from-(--accent) to-(--accent2)">
+        <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-(--on-accent) text-sm tracking-tight shadow-(--shadow-sm) bg-linear-to-br from-(--accent) to-(--accent2)">
           P
         </div>
         <span className="text-xl font-extrabold tracking-tight">
@@ -63,7 +63,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? 'bg-(--accent)/10 text-(--accent)'
-                  : 'text-(--muted) hover:bg-white/5 hover:text-(--text)'
+                  : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
               }`
             }
           >
@@ -80,8 +80,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
               isActive
-                ? 'bg-white/5 text-(--text)'
-                : 'text-(--muted) hover:bg-white/5 hover:text-(--text)'
+                ? 'bg-(--surface-hi) text-(--text)'
+                : 'text-(--muted) hover:bg-(--surface-hi) hover:text-(--text)'
             }`
           }
         >
@@ -89,12 +89,12 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           <span className="font-medium text-sm">Help Center</span>
         </NavLink>
 
-        <div className="mt-4 p-4 border border-(--border) rounded-2xl bg-white/5">
+        <div className="mt-4 p-4 border border-(--border) rounded-2xl bg-(--surface-hi)">
           <p className="text-[10px] text-(--muted) uppercase font-bold tracking-widest mb-2">
             Network
           </p>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-(--accent) animate-pulse shadow-[0_0_8px_var(--accent)]" />
+            <div className="w-2 h-2 rounded-full bg-(--accent) animate-pulse" />
             <span className="text-xs font-mono font-medium">Stellar Testnet</span>
           </div>
         </div>

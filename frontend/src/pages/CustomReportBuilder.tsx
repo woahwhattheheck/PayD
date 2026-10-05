@@ -93,8 +93,8 @@ const CustomReportBuilder = () => {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Custom Report Builder</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-(--text) mb-2">Custom Report Builder</h1>
+        <p className="text-(--muted)">
           Select columns and date ranges to preview and export custom payroll data.
         </p>
       </div>
@@ -107,19 +107,19 @@ const CustomReportBuilder = () => {
               <h3 className="font-semibold text-lg border-b pb-2">Date Range</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                  <label className="block text-sm font-medium text-(--text) mb-1">Start Date</label>
                   <input
                     type="date"
-                    className="w-full border-gray-300 rounded-md shadow-sm p-2 bg-white text-gray-800"
+                    className="w-full border-(--border-hi) rounded-md shadow-sm p-2 bg-white text-(--text)"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                  <label className="block text-sm font-medium text-(--text) mb-1">End Date</label>
                   <input
                     type="date"
-                    className="w-full border-gray-300 rounded-md shadow-sm p-2 bg-white text-gray-800"
+                    className="w-full border-(--border-hi) rounded-md shadow-sm p-2 bg-white text-(--text)"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                   />
@@ -136,11 +136,11 @@ const CustomReportBuilder = () => {
                   <label key={col.id} className="flex items-center space-x-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300"
+                      className="form-checkbox h-4 w-4 text-blue-600 rounded border-(--border-hi)"
                       checked={selectedColumns.includes(col.id)}
                       onChange={() => toggleColumn(col.id)}
                     />
-                    <span className="text-gray-700 text-sm">{col.label}</span>
+                    <span className="text-(--text) text-sm">{col.label}</span>
                   </label>
                 ))}
               </div>
@@ -164,33 +164,33 @@ const CustomReportBuilder = () => {
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold text-xl">Live Preview</h3>
-                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                <span className="text-sm text-(--muted) bg-(--surface-hi) px-3 py-1 rounded-full">
                   {filteredData.length} records found
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 {activeColumns.length > 0 ? (
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-(--border)">
+                    <thead className="bg-(--surface-hi)">
                       <tr>
                         {activeColumns.map((col) => (
                           <th
                             key={col.id}
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            className="px-6 py-3 text-left text-xs font-medium text-(--muted) uppercase tracking-wider"
                           >
                             {col.label}
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-(--border)">
                       {filteredData.map((row) => (
-                        <tr key={row.worker_id} className="hover:bg-gray-50">
+                        <tr key={row.worker_id} className="hover:bg-(--surface-hi)">
                           {activeColumns.map((col) => (
                             <td
                               key={col.id}
-                              className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                              className="px-6 py-4 whitespace-nowrap text-sm text-(--text)"
                             >
                               {row[col.id as keyof typeof row]}
                             </td>
@@ -201,7 +201,7 @@ const CustomReportBuilder = () => {
                         <tr>
                           <td
                             colSpan={activeColumns.length}
-                            className="px-6 py-8 text-center text-gray-500"
+                            className="px-6 py-8 text-center text-(--muted)"
                           >
                             No data found for the selected date range.
                           </td>
@@ -210,7 +210,7 @@ const CustomReportBuilder = () => {
                     </tbody>
                   </table>
                 ) : (
-                  <div className="py-12 text-center text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div className="py-12 text-center text-(--muted) border-2 border-dashed border-(--border-hi) rounded-lg">
                     Please select at least one column to preview data.
                   </div>
                 )}

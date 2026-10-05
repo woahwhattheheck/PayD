@@ -10,9 +10,9 @@ export const AutosaveIndicator = ({ saving, lastSaved }: AutosaveIndicatorProps)
 
   if (saving) {
     return (
-      <div className="flex items-center text-sm text-gray-500 font-medium">
+      <div className="flex items-center text-sm text-(--muted) font-medium">
         <svg
-          className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500"
+          className="animate-spin -ml-1 mr-2 h-4 w-4 text-(--muted)"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

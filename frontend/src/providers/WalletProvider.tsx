@@ -178,7 +178,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         {isInitialized ? (
           children
         ) : (
-          <div className="w-full px-4 py-3 text-xs text-zinc-400">Restoring wallet session...</div>
+          <div className="w-full px-4 py-3 text-xs text-(--muted)">Restoring wallet session...</div>
         )}
       </WalletContext>
     </>

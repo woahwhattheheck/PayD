@@ -418,7 +418,7 @@ export default function UpgradeConfirmModal({
           {!['executing', 'simulating'].includes(modal.step) && (
             <button
               onClick={() => void handleCancel()}
-              className="p-2 md:p-1.5 rounded-lg hover:bg-white/5 text-muted hover:text-text transition-colors touch-manipulation"
+              className="p-2 md:p-1.5 rounded-lg hover:bg-(--surface-hi) text-muted hover:text-text transition-colors touch-manipulation"
               style={{ minHeight: '44px', minWidth: '44px' }}
               aria-label="Close"
             >
@@ -632,7 +632,7 @@ export default function UpgradeConfirmModal({
               <div className="flex gap-3 mt-2">
                 <button
                   onClick={() => void handleCancel()}
-                  className="flex-1 py-3 border border-hi rounded-xl text-sm font-bold text-muted hover:text-text hover:bg-white/5 transition-all uppercase tracking-widest touch-manipulation"
+                  className="flex-1 py-3 border border-hi rounded-xl text-sm font-bold text-muted hover:text-text hover:bg-(--surface-hi) transition-all uppercase tracking-widest touch-manipulation"
                   style={{ minHeight: '44px' }}
                 >
                   Cancel
@@ -710,7 +710,7 @@ export default function UpgradeConfirmModal({
               <div className="flex gap-3 mt-2">
                 <button
                   onClick={() => void handleCancel()}
-                  className="flex-1 py-3 border border-hi rounded-xl text-sm font-bold text-muted hover:text-text hover:bg-white/5 transition-all uppercase tracking-widest touch-manipulation"
+                  className="flex-1 py-3 border border-hi rounded-xl text-sm font-bold text-muted hover:text-text hover:bg-(--surface-hi) transition-all uppercase tracking-widest touch-manipulation"
                   style={{ minHeight: '44px' }}
                 >
                   Cancel
@@ -718,7 +718,7 @@ export default function UpgradeConfirmModal({
                 <button
                   onClick={() => void handleExecute()}
                   disabled={!modal.adminSecret.trim()}
-                  className="flex-1 py-3 bg-red-500/20 text-red-400 border border-red-500/40 rounded-xl text-sm font-black hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                  className="flex-1 py-3 bg-red-500/20 text-red-400 border border-red-500/40 rounded-xl text-sm font-black hover:bg-red-500 hover:text-(--text) transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                   style={{ minHeight: '44px' }}
                 >
                   Execute Upgrade
@@ -740,7 +740,7 @@ export default function UpgradeConfirmModal({
                     </code>
                     <button
                       onClick={() => copyToClipboard(modal.txHash!)}
-                      className="p-2 hover:bg-white/5 rounded text-muted hover:text-text transition-colors shrink-0 touch-manipulation"
+                      className="p-2 hover:bg-(--surface-hi) rounded text-muted hover:text-text transition-colors shrink-0 touch-manipulation"
                       style={{ minHeight: '44px', minWidth: '44px' }}
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -809,7 +809,7 @@ export default function UpgradeConfirmModal({
                   <code className="flex-1 font-mono text-xs break-all">{modal.txHash}</code>
                   <button
                     onClick={() => copyToClipboard(modal.txHash)}
-                    className="p-2 hover:bg-white/5 rounded text-muted hover:text-text transition-colors shrink-0 touch-manipulation"
+                    className="p-2 hover:bg-(--surface-hi) rounded text-muted hover:text-text transition-colors shrink-0 touch-manipulation"
                     style={{ minHeight: '44px', minWidth: '44px' }}
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -844,7 +844,7 @@ export default function UpgradeConfirmModal({
               <div className="flex gap-3 w-full">
                 <button
                   onClick={onClose}
-                  className="flex-1 py-3 border border-hi rounded-xl text-sm font-bold text-muted hover:text-text hover:bg-white/5 transition-all uppercase tracking-widest touch-manipulation"
+                  className="flex-1 py-3 border border-hi rounded-xl text-sm font-bold text-muted hover:text-text hover:bg-(--surface-hi) transition-all uppercase tracking-widest touch-manipulation"
                   style={{ minHeight: '44px' }}
                 >
                   Close
@@ -858,7 +858,7 @@ export default function UpgradeConfirmModal({
                       validationError: null,
                     })
                   }
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-black/20 border border-hi rounded-xl text-sm font-bold hover:bg-white/5 transition-all uppercase tracking-widest touch-manipulation"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-black/20 border border-hi rounded-xl text-sm font-bold hover:bg-(--surface-hi) transition-all uppercase tracking-widest touch-manipulation"
                   style={{ minHeight: '44px' }}
                 >
                   <RefreshCw className="w-4 h-4" /> Try Again

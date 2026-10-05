@@ -19,7 +19,9 @@
     "card2Title": "Global Workforce",
     "card2Body": "Onboard anyone, anywhere. Pay in USDC, XLM, or local stablecoins.",
     "card3Title": "On-Chain Audit",
-    "card3Body": "Full transparency. Every transaction is immutable and verifiable on-ledger."
+    "card3Body": "Full transparency. Every transaction is immutable and verifiable on-ledger.",
+    "eyebrow": "Payroll on Stellar",
+    "learnMore": "Learn more"
   },
   "footer": {
     "licensePrefix": "© {{year}} PayD — Licensed under the",

@@ -55,13 +55,13 @@ export default function Debugger() {
           <div className="card glass noise h-fit">
             <h3 className="text-lg font-bold mb-4">{t('debugger.availableToolsTitle')}</h3>
             <div className="flex flex-col gap-2">
-              <button className="text-left p-3 rounded-lg hover:bg-white/5 transition-all text-sm font-medium border border-transparent hover:border-border-hi">
+              <button className="text-left p-3 rounded-lg hover:bg-(--surface-hi) transition-all text-sm font-medium border border-transparent hover:border-border-hi">
                 {t('debugger.toolXdrInspector')}
               </button>
-              <button className="text-left p-3 rounded-lg hover:bg-white/5 transition-all text-sm font-medium border border-transparent hover:border-border-hi">
+              <button className="text-left p-3 rounded-lg hover:bg-(--surface-hi) transition-all text-sm font-medium border border-transparent hover:border-border-hi">
                 {t('debugger.toolAuthSimulator')}
               </button>
-              <button className="text-left p-3 rounded-lg hover:bg-white/5 transition-all text-sm font-medium border border-transparent hover:border-border-hi">
+              <button className="text-left p-3 rounded-lg hover:bg-(--surface-hi) transition-all text-sm font-medium border border-transparent hover:border-border-hi">
                 {t('debugger.toolEventStream')}
               </button>
             </div>
@@ -88,7 +88,7 @@ export default function Debugger() {
             </div>
             <h2 className="text-2xl font-bold mb-3">{t('debugger.noActiveTraceTitle')}</h2>
             <p className="text-muted max-w-md">{t('debugger.noActiveTraceBody')}</p>
-            <button className="mt-8 px-6 py-3 bg-accent2 text-bg font-bold rounded-xl hover:scale-105 transition-transform">
+            <button className="mt-8 px-6 py-3 bg-accent2 text-on-accent font-bold rounded-full hover:bg-accent2/90 transition-colors">
               {t('debugger.connectContract')}
             </button>
           </div>

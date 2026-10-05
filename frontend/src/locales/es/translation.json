@@ -19,7 +19,9 @@
     "card2Title": "Plantilla global",
     "card2Body": "Incorpora a cualquier persona, en cualquier lugar. Paga en USDC, XLM o stablecoins locales.",
     "card3Title": "Auditoría en cadena",
-    "card3Body": "Transparencia total. Cada transacción es inmutable y verificable en el ledger."
+    "card3Body": "Transparencia total. Cada transacción es inmutable y verificable en el ledger.",
+    "eyebrow": "Nómina en Stellar",
+    "learnMore": "Más información"
   },
   "footer": {
     "licensePrefix": "© {{year}} PayD — Licenciado bajo la",

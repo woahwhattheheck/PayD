@@ -379,7 +379,7 @@ export default function PayrollScheduler() {
           <AutosaveIndicator saving={saving} lastSaved={lastSaved} />
           <button
             onClick={() => setIsWizardOpen(true)}
-            className="p-2.5 rounded-lg hover:bg-white/5 transition-colors touch-manipulation"
+            className="p-2.5 rounded-lg hover:bg-(--surface-hi) transition-colors touch-manipulation"
             style={{ minHeight: '44px', minWidth: '44px' }}
             aria-label="Open scheduling wizard"
           >

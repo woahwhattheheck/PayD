@@ -204,7 +204,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
         <button
           onClick={() => void loadHistory()}
           disabled={logsLoading}
-          className="w-full flex items-center justify-between px-5 py-3 text-xs text-muted hover:text-text hover:bg-white/3 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-3 text-xs text-muted hover:text-text hover:bg-(--surface-hi) transition-colors"
         >
           <span className="flex items-center gap-1.5 font-bold uppercase tracking-widest">
             <Clock className="w-3.5 h-3.5" />
@@ -232,7 +232,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
                     {logs.map((log) => (
                       <tr
                         key={log.id}
-                        className="border-b border-hi/40 hover:bg-white/3 transition-colors"
+                        className="border-b border-hi/40 hover:bg-(--surface-hi) transition-colors"
                       >
                         <td className="py-2 pr-3 font-mono text-muted">
                           {new Date(log.created_at).toLocaleDateString()}
@@ -353,8 +353,8 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
               className="border border-hi rounded-2xl bg-black/10 p-5 animate-pulse"
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className="h-5 bg-white/5 rounded w-1/3 mb-3" />
-              <div className="h-3 bg-white/5 rounded w-2/3" />
+              <div className="h-5 bg-(--surface-hi) rounded w-1/3 mb-3" />
+              <div className="h-3 bg-(--surface-hi) rounded w-2/3" />
             </div>
           ))}
         </div>

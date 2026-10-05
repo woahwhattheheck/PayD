@@ -23,13 +23,13 @@ const AppLayout: React.FC = () => {
       <header
         className="fixed top-0 left-0 right-0 z-50 h-(--header-h) items-center px-4 md:px-8 lg:px-16 flex justify-between backdrop-blur-[20px] backdrop-saturate-180 border-b"
         style={{
-          background: 'color-mix(in srgb, var(--bg) 85%, transparent)',
-          borderColor: 'var(--border-hi)',
+          background: 'color-mix(in srgb, var(--bg) 90%, transparent)',
+          borderColor: 'var(--border)',
         }}
       >
         {/* Logo */}
         <NavLink className="flex items-center gap-2.5" to="/">
-          <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-black text-sm tracking-tight shadow-[0_0_20px_rgba(74,240,184,0.3)] bg-linear-to-br from-(--accent) to-(--accent2)">
+          <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-(--on-accent) text-sm tracking-tight shadow-(--shadow-sm) bg-linear-to-br from-(--accent) to-(--accent2)">
             P
           </div>
           <span className="text-lg font-extrabold tracking-tight">
@@ -54,7 +54,10 @@ const AppLayout: React.FC = () => {
       {/* Main */}
       <main className="flex flex-col flex-1 pt-(--header-h)">
         <PageWrapper>
-          <div key={location.pathname} className="flex flex-col flex-1 px-4 md:px-6 py-6 md:py-8">
+          <div
+            key={location.pathname}
+            className="flex flex-col flex-1 px-4 md:px-8 lg:px-16 py-8 md:py-12"
+          >
             <Outlet />
           </div>
         </PageWrapper>
@@ -63,7 +66,7 @@ const AppLayout: React.FC = () => {
       {/* Footer */}
       <footer
         className="flex flex-wrap justify-between items-center gap-2 px-4 md:px-6 py-4 md:py-5 border-t text-xs font-mono text-(--muted)"
-        style={{ borderColor: 'var(--border-hi)' }}
+        style={{ borderColor: 'var(--border)' }}
       >
         <span>
           © {new Date().getFullYear()} PayD — Licensed under the{' '}
@@ -71,13 +74,13 @@ const AppLayout: React.FC = () => {
             href="http://www.apache.org/licenses/LICENSE-2.0"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-(--accent) hover:underline"
+            className="text-(--link) hover:underline"
           >
             Apache License 2.0
           </a>
         </span>
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-(--accent) shadow-[0_0_6px_var(--accent)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-(--accent2)" />
           STELLAR NETWORK · MAINNET
         </div>
       </footer>

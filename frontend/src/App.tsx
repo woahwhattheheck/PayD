@@ -1,31 +1,35 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import Home from './pages/Home';
-import Debugger from './pages/Debugger';
-import PayrollScheduler from './pages/PayrollScheduler';
-import EmployeeEntry from './pages/EmployeeEntry';
+import { lazy, Suspense, useEffect } from 'react';
+
 import EmployerLayout from './components/EmployerLayout';
-import HelpCenter from './pages/HelpCenter';
+
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorFallback from './components/ErrorFallback';
-import Settings from './pages/Settings';
-import WebhookSettings from './pages/WebhookSettings';
-import TwoFactorSettings from './pages/TwoFactorSettings';
-import CustomReportBuilder from './pages/CustomReportBuilder';
-import CrossAssetPayment from './pages/CrossAssetPayment';
-import TransactionHistory from './pages/TransactionHistory';
-import BulkPaymentTracker from './pages/BulkPaymentTracker';
-import AdminPanel from './pages/AdminPanel';
 
-import EmployeePortal from './pages/EmployeePortal';
-import Login from './pages/Login';
-import AuthCallback from './pages/AuthCallback';
 import { useTranslation } from 'react-i18next';
 import { contractService } from './services/contracts';
-import TaxComplianceWizard from './pages/TaxComplianceWizard';
+
+const Home = lazy(() => import('./pages/Home'));
+const Debugger = lazy(() => import('./pages/Debugger'));
+const PayrollScheduler = lazy(() => import('./pages/PayrollScheduler'));
+const EmployeeEntry = lazy(() => import('./pages/EmployeeEntry'));
+const HelpCenter = lazy(() => import('./pages/HelpCenter'));
+const Settings = lazy(() => import('./pages/Settings'));
+const WebhookSettings = lazy(() => import('./pages/WebhookSettings'));
+const TwoFactorSettings = lazy(() => import('./pages/TwoFactorSettings'));
+const CustomReportBuilder = lazy(() => import('./pages/CustomReportBuilder'));
+const CrossAssetPayment = lazy(() => import('./pages/CrossAssetPayment'));
+const TransactionHistory = lazy(() => import('./pages/TransactionHistory'));
+const BulkPaymentTracker = lazy(() => import('./pages/BulkPaymentTracker'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const EmployeePortal = lazy(() => import('./pages/EmployeePortal'));
+const Login = lazy(() => import('./pages/Login'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const TaxComplianceWizard = lazy(() => import('./pages/TaxComplianceWizard'));
 
 function App() {
   const { t } = useTranslation();
+  const routeFallback = <div role="status">Loading…</div>;
 
   // Initialize contract service on app startup
   useEffect(() => {
@@ -36,7 +40,13 @@ function App() {
 
   return (
     <Routes>
-      <Route element={<EmployerLayout />}>
+      <Route
+        element={
+          <Suspense fallback={routeFallback}>
+            <EmployerLayout />
+          </Suspense>
+        }
+      >
         <Route
           path="/"
           element={
@@ -208,8 +218,22 @@ function App() {
           }
         />
       </Route>
-      <Route path="/login" element={<Login />} />
-      <Route path="/auth-callback" element={<AuthCallback />} />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={routeFallback}>
+            <Login />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/auth-callback"
+        element={
+          <Suspense fallback={routeFallback}>
+            <AuthCallback />
+          </Suspense>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

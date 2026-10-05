@@ -403,8 +403,8 @@ const EmployeePortal: React.FC = () => {
           <div
             className={styles.statIcon}
             style={{
-              background: 'rgba(74, 240, 184, 0.1)',
-              border: '1px solid rgba(74, 240, 184, 0.2)',
+              background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
             }}
           >
             <Wallet className="w-4 h-4 text-[var(--accent)]" />
@@ -437,8 +437,8 @@ const EmployeePortal: React.FC = () => {
           <div
             className={styles.statIcon}
             style={{
-              background: 'rgba(124, 111, 247, 0.1)',
-              border: '1px solid rgba(124, 111, 247, 0.2)',
+              background: 'color-mix(in srgb, var(--accent2) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--accent2) 20%, transparent)',
             }}
           >
             <TrendingUp className="w-4 h-4 text-[var(--accent2)]" />
@@ -507,7 +507,7 @@ const EmployeePortal: React.FC = () => {
                     void handleEstablishTrustline(code);
                   }}
                   disabled={isEstablishing === code}
-                  className="w-full px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 rounded-full bg-accent text-on-accent text-xs font-bold hover:bg-accent-hover transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isEstablishing === code ? (
                     <RefreshCw className="w-3 h-3 animate-spin" />

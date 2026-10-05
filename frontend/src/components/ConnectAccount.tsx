@@ -22,7 +22,7 @@ const ConnectAccount: React.FC = () => {
             <span className="text-[9px] uppercase tracking-tighter text-accent font-black leading-none mb-1 opacity-70">
               Social Active
             </span>
-            <span className="text-[11px] text-white/90 font-bold leading-none">Session Active</span>
+            <span className="text-[11px] text-text font-bold leading-none">Session Active</span>
           </div>
         )}
         {address && (
@@ -40,7 +40,7 @@ const ConnectAccount: React.FC = () => {
             if (address) void disconnect();
             if (token) handleSocialLogout();
           }}
-          className="px-4 py-2 glass border-hi text-[10px] font-black rounded-lg hover:bg-danger/10 hover:border-danger/30 hover:text-danger transition-all uppercase tracking-widest"
+          className="px-4 py-2 rounded-full border border-border-hi text-xs font-semibold text-text hover:bg-danger/10 hover:border-danger/30 hover:text-danger transition-colors"
         >
           Exit
         </button>
@@ -54,7 +54,7 @@ const ConnectAccount: React.FC = () => {
         onClick={() => {
           void navigate('/login');
         }}
-        className="px-4 py-2.5 glass border-hi text-white font-bold rounded-xl hover:bg-white/5 transition-all text-xs uppercase tracking-wider"
+        className="px-3 py-2 text-sm font-semibold text-text hover:text-accent transition-colors"
       >
         Sign In
       </button>
@@ -64,11 +64,11 @@ const ConnectAccount: React.FC = () => {
           void connect();
         }}
         disabled={isConnecting}
-        className="px-6 py-2.5 bg-accent text-bg font-bold rounded-xl hover:scale-105 transition-transform shadow-lg shadow-accent/20 text-[11px] uppercase tracking-widest disabled:opacity-50"
+        className="btn-primary px-5 py-2.5 text-sm"
       >
         {isConnecting ? (
           <span className="flex items-center gap-2">
-            <span className="w-3 h-3 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+            <span className="w-3 h-3 border-2 border-on-accent/30 border-t-on-accent rounded-full animate-spin" />
             {t('connectAccount.connecting') || 'Connecting...'}
           </span>
         ) : (

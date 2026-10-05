@@ -174,7 +174,7 @@ export default function TwoFactorSettings() {
           <button
             type="button"
             onClick={() => void handleCopyCodes()}
-            className="px-6 py-3 rounded-xl font-bold bg-accent text-black hover:opacity-90 transition-all flex items-center gap-2"
+            className="px-6 py-3 rounded-full font-bold bg-accent text-on-accent hover:bg-accent-hover transition-all flex items-center gap-2"
           >
             {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             {hasCopied ? t('twoFactor.copiedButton') : t('twoFactor.copyButton')}
@@ -213,7 +213,7 @@ export default function TwoFactorSettings() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="self-start px-6 py-3 rounded-xl font-bold bg-accent text-black hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
+                className="self-start px-6 py-3 rounded-full font-bold bg-accent text-on-accent hover:bg-accent-hover transition-all disabled:opacity-50 flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -231,7 +231,7 @@ export default function TwoFactorSettings() {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => void handleStartSetup()}
-                className="self-start px-6 py-3 rounded-xl font-bold bg-accent text-black hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
+                className="self-start px-6 py-3 rounded-full font-bold bg-accent text-on-accent hover:bg-accent-hover transition-all disabled:opacity-50 flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

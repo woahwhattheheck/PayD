@@ -132,7 +132,7 @@ export default function CashFlowForecast() {
     const { direction } = forecast.trendAnalysis;
     if (direction === 'increasing') return <TrendingUp className="w-5 h-5 text-emerald-400" />;
     if (direction === 'decreasing') return <TrendingDown className="w-5 h-5 text-red-400" />;
-    return <Minus className="w-5 h-5 text-zinc-400" />;
+    return <Minus className="w-5 h-5 text-(--muted)" />;
   };
 
   const getAlertIcon = (severity: BudgetAlert['severity']) => {
@@ -145,8 +145,8 @@ export default function CashFlowForecast() {
     <div className="p-4 sm:p-6 lg:p-12 space-y-6">
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Cash Flow Forecast</h1>
-          <p className="text-sm text-zinc-400">
+          <h1 className="text-2xl sm:text-3xl font-bold text-(--text) mb-2">Cash Flow Forecast</h1>
+          <p className="text-sm text-(--muted)">
             Analyze historical payroll data and project future cash flow requirements
           </p>
         </div>
@@ -156,14 +156,14 @@ export default function CashFlowForecast() {
             placeholder="Distribution Account"
             value={params.distributionAccount}
             onChange={(e) => setParams({ ...params, distributionAccount: e.target.value })}
-            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
           />
           <input
             type="text"
             placeholder="Asset Issuer"
             value={params.assetIssuer}
             onChange={(e) => setParams({ ...params, assetIssuer: e.target.value })}
-            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
           />
           <input
             type="number"
@@ -172,14 +172,14 @@ export default function CashFlowForecast() {
             onChange={(e) =>
               setParams({ ...params, forecastDays: parseInt(e.target.value, 10) || 90 })
             }
-            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24 min-h-[44px]"
+            className="px-4 py-2 bg-(--surface) border border-(--border) rounded-lg text-(--text) text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24 min-h-[44px]"
           />
           <button
             onClick={() => {
               void loadForecast();
             }}
             disabled={isLoading}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px] touch-manipulation"
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-(--text) rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px] touch-manipulation"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             {isLoading ? 'Loading...' : 'Refresh'}
@@ -192,7 +192,7 @@ export default function CashFlowForecast() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="animate-pulse bg-zinc-900 border border-zinc-800 rounded-xl p-6 h-64"
+              className="animate-pulse bg-(--surface) border border-(--border) rounded-xl p-6 h-64"
             />
           ))}
         </div>
@@ -200,44 +200,44 @@ export default function CashFlowForecast() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-400">Current Balance</span>
-                <DollarSign className="w-5 h-5 text-zinc-500" />
+                <span className="text-sm text-(--muted)">Current Balance</span>
+                <DollarSign className="w-5 h-5 text-(--muted)" />
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-(--text)">
                 {parseFloat(forecast.currentBalance).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">ORGUSD</p>
+              <p className="text-xs text-(--muted) mt-1">ORGUSD</p>
             </div>
 
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-400">Projected Outflow</span>
-                <Calendar className="w-5 h-5 text-zinc-500" />
+                <span className="text-sm text-(--muted)">Projected Outflow</span>
+                <Calendar className="w-5 h-5 text-(--muted)" />
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-(--text)">
                 {forecast.totalProjectedOutflow.toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-(--muted) mt-1">
                 {forecast.projections.length} scheduled payments
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-400">Projected Balance</span>
-                <TrendingDown className="w-5 h-5 text-zinc-500" />
+                <span className="text-sm text-(--muted)">Projected Balance</span>
+                <TrendingDown className="w-5 h-5 text-(--muted)" />
               </div>
               <p
                 className={`text-2xl font-bold ${
-                  forecast.projectedBalance < 0 ? 'text-red-400' : 'text-white'
+                  forecast.projectedBalance < 0 ? 'text-red-400' : 'text-(--text)'
                 }`}
               >
                 {forecast.projectedBalance.toLocaleString('en-US', {
@@ -245,18 +245,18 @@ export default function CashFlowForecast() {
                   maximumFractionDigits: 2,
                 })}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">After all projections</p>
+              <p className="text-xs text-(--muted) mt-1">After all projections</p>
             </div>
 
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-400">Trend</span>
+                <span className="text-sm text-(--muted)">Trend</span>
                 {getTrendIcon()}
               </div>
-              <p className="text-2xl font-bold text-white capitalize">
+              <p className="text-2xl font-bold text-(--text) capitalize">
                 {forecast.trendAnalysis.direction}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-(--muted) mt-1">
                 {forecast.trendAnalysis.changePercent > 0 ? '+' : ''}
                 {forecast.trendAnalysis.changePercent.toFixed(1)}% vs historical
               </p>
@@ -265,8 +265,8 @@ export default function CashFlowForecast() {
 
           {/* Budget Alerts */}
           {alerts.length > 0 && (
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
+              <h2 className="text-xl font-bold text-(--text) mb-4 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-400" />
                 Budget Alerts ({alerts.length})
               </h2>
@@ -297,11 +297,11 @@ export default function CashFlowForecast() {
                           >
                             {alert.severity}
                           </span>
-                          <span className="text-xs text-zinc-400">
+                          <span className="text-xs text-(--muted)">
                             {new Date(alert.projectedDate).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-sm text-white mb-1">{alert.message}</p>
+                        <p className="text-sm text-(--text) mb-1">{alert.message}</p>
                         {alert.shortfall && (
                           <p className="text-xs text-red-400 font-mono">
                             Shortfall: {alert.shortfall.toFixed(2)} ORGUSD
@@ -318,8 +318,8 @@ export default function CashFlowForecast() {
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Cash Flow Projection Chart */}
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Cash Flow Projection</h3>
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
+              <h3 className="text-lg font-bold text-(--text) mb-4">Cash Flow Projection</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={balanceProjectionData}>
                   <defs>
@@ -350,8 +350,8 @@ export default function CashFlowForecast() {
             </div>
 
             {/* Historical vs Projected Chart */}
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Historical vs Projected</h3>
+            <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
+              <h3 className="text-lg font-bold text-(--text) mb-4">Historical vs Projected</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -373,30 +373,30 @@ export default function CashFlowForecast() {
           </div>
 
           {/* Historical Averages */}
-          <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-4">Historical Averages</h3>
+          <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-6">
+            <h3 className="text-lg font-bold text-(--text) mb-4">Historical Averages</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                <p className="text-sm text-zinc-400 mb-1">Weekly Average</p>
-                <p className="text-2xl font-bold text-white">
+              <div className="p-4 bg-(--surface) rounded-lg border border-(--border)">
+                <p className="text-sm text-(--muted) mb-1">Weekly Average</p>
+                <p className="text-2xl font-bold text-(--text)">
                   {forecast.historicalAverage.weekly.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </p>
               </div>
-              <div className="p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                <p className="text-sm text-zinc-400 mb-1">Biweekly Average</p>
-                <p className="text-2xl font-bold text-white">
+              <div className="p-4 bg-(--surface) rounded-lg border border-(--border)">
+                <p className="text-sm text-(--muted) mb-1">Biweekly Average</p>
+                <p className="text-2xl font-bold text-(--text)">
                   {forecast.historicalAverage.biweekly.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </p>
               </div>
-              <div className="p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                <p className="text-sm text-zinc-400 mb-1">Monthly Average</p>
-                <p className="text-2xl font-bold text-white">
+              <div className="p-4 bg-(--surface) rounded-lg border border-(--border)">
+                <p className="text-sm text-(--muted) mb-1">Monthly Average</p>
+                <p className="text-2xl font-bold text-(--text)">
                   {forecast.historicalAverage.monthly.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -407,8 +407,8 @@ export default function CashFlowForecast() {
           </div>
         </>
       ) : (
-        <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-xl p-12 text-center">
-          <p className="text-zinc-400">
+        <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-xl p-12 text-center">
+          <p className="text-(--muted)">
             Enter distribution account and asset issuer to load forecast
           </p>
         </div>

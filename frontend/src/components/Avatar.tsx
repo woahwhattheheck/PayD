@@ -36,7 +36,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div
-      className={`${sizeClasses[size]} ${className} rounded-full overflow-hidden bg-gray-300 flex items-center justify-center shrink-0`}
+      className={`${sizeClasses[size]} ${className} rounded-full overflow-hidden bg-(--border-hi) flex items-center justify-center shrink-0`}
       title={name}
     >
       <img

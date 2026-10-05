@@ -180,7 +180,7 @@ export default function WebhookSettings() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="self-start px-6 py-3 rounded-xl font-bold bg-accent text-black hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
+            className="self-start px-6 py-3 rounded-full font-bold bg-accent text-on-accent hover:bg-accent-hover transition-all disabled:opacity-50 flex items-center gap-2"
           >
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 animate-spin" />

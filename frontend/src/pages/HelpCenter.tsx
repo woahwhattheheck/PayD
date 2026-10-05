@@ -88,7 +88,7 @@ export default function HelpCenter() {
             placeholder="Search documentation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-5 py-3 rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-(--accent) text-sm transition"
+            className="w-full px-5 py-3 rounded-xl bg-(--surface-hi) border border-(--border) focus:outline-none focus:ring-2 focus:ring-(--accent) text-sm transition"
           />
         </div>
 
@@ -113,11 +113,11 @@ export default function HelpCenter() {
                   return (
                     <div
                       key={id}
-                      className="border border-white/10 rounded-xl bg-white/5 overflow-hidden"
+                      className="border border-(--border) rounded-xl bg-(--surface-hi) overflow-hidden"
                     >
                       <button
                         onClick={() => toggleItem(id)}
-                        className="w-full flex items-center justify-between px-5 py-4 text-left font-medium hover:bg-white/10 transition"
+                        className="w-full flex items-center justify-between px-5 py-4 text-left font-medium hover:bg-(--surface-hi) transition"
                       >
                         <span>{item.question}</span>
                         <ChevronDown

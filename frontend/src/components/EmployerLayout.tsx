@@ -39,7 +39,7 @@ export const EmployerLayout: React.FC = () => {
         {/* Mobile Top Bar */}
         <header className="lg:hidden h-16 px-6 border-b border-(--border) bg-(--bg)/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-black text-sm tracking-tight shadow-[0_0_20px_rgba(74,240,184,0.3)] bg-linear-to-br from-(--accent) to-(--accent2)">
+            <div className="w-8 h-8 rounded-lg grid place-items-center font-extrabold text-(--on-accent) text-sm tracking-tight shadow-(--shadow-sm) bg-linear-to-br from-(--accent) to-(--accent2)">
               P
             </div>
             <span className="text-xl font-extrabold tracking-tight">
@@ -66,7 +66,7 @@ export const EmployerLayout: React.FC = () => {
         <footer className="p-8 border-t border-(--border) text-(--muted) text-xs flex flex-wrap justify-between items-center gap-4">
           <p>© {new Date().getFullYear()} PayD — Licensed under Apache 2.0</p>
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-(--accent) shadow-[0_0_8px_var(--accent)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-(--accent)" />
             <span className="uppercase tracking-widest font-mono text-[10px]">
               Stellar Testnet Node · V22.1.0
             </span>

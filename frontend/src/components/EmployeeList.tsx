@@ -182,10 +182,10 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-(--border)">
             {sortedEmployees.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-gray-500">
+                <td colSpan={6} className="p-6 text-center text-(--muted)">
                   No employees found
                 </td>
               </tr>
@@ -268,11 +268,14 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       {/* Mobile Card View */}
       <div className="md:hidden px-4 pb-4">
         {sortedEmployees.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No employees found</div>
+          <div className="text-center py-8 text-(--muted)">No employees found</div>
         ) : (
           <div className="space-y-4">
             {sortedEmployees.map((employee) => (
-              <div key={employee.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div
+                key={employee.id}
+                className="bg-(--surface-hi) rounded-lg p-4 border border-(--border)"
+              >
                 {/* Employee Header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -330,7 +333,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 mt-4 pt-3 border-t border-white/10">
+                <div className="flex gap-2 mt-4 pt-3 border-t border-(--border)">
                   <button
                     className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500/20 transition touch-manipulation"
                     style={{ minHeight: '44px' }}
@@ -388,7 +391,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                   setShowCSVUploader(false);
                   setCsvData([]);
                 }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded touch-manipulation"
+                className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Cancel
@@ -451,7 +454,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded touch-manipulation"
+                className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Cancel
@@ -485,7 +488,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowEditModal({ open: false })}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded touch-manipulation"
+                className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Cancel
@@ -510,7 +513,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowDeleteConfirm({ open: false })}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded touch-manipulation"
+                className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
                 Cancel

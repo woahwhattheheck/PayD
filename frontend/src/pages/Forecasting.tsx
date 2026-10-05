@@ -218,7 +218,7 @@ export default function Forecasting() {
               <Line
                 type="monotone"
                 dataKey="projectedTotalLiability"
-                stroke="#4af0b8"
+                stroke="var(--accent)"
                 strokeWidth={2}
                 dot={false}
               />
