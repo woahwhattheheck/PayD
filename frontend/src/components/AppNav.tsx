@@ -15,8 +15,10 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Avatar } from './Avatar';
+import { useTranslation } from 'react-i18next';
 
 const AppNav: React.FC = () => {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Mock user data - replace with actual user context
@@ -42,7 +44,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <Wallet className="w-4 h-4" />
         </span>
-        <span className="hidden sm:inline">Payroll</span>
+        <span className="hidden sm:inline">{t('nav.payroll')}</span>
       </NavLink>
 
       <NavLink
@@ -59,7 +61,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <User className="w-4 h-4" />
         </span>
-        <span className="hidden sm:inline">Employees</span>
+        <span className="hidden sm:inline">{t('nav.employees')}</span>
       </NavLink>
 
       <NavLink
@@ -75,7 +77,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <LayoutDashboard className="w-4 h-4" />
         </span>
-        My Portal
+        {t('nav.myPortal')}
       </NavLink>
 
       <NavLink
@@ -92,7 +94,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <FileText className="w-4 h-4" />
         </span>
-        <span className="hidden sm:inline">Reports</span>
+        <span className="hidden sm:inline">{t('nav.reports')}</span>
       </NavLink>
 
       <NavLink
@@ -109,7 +111,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <TrendingUp className="w-4 h-4" />
         </span>
-        <span className="hidden sm:inline">Cash Flow</span>
+        <span className="hidden sm:inline">{t('nav.cashFlow')}</span>
       </NavLink>
 
       <NavLink
@@ -126,7 +128,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <Globe className="w-4 h-4" />
         </span>
-        <span className="hidden sm:inline">Cross-Asset</span>
+        <span className="hidden sm:inline">{t('nav.crossAsset')}</span>
       </NavLink>
 
       <NavLink
@@ -142,7 +144,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <Activity className="w-4 h-4" />
         </span>
-        History
+        {t('nav.history')}
       </NavLink>
 
       <NavLink
@@ -159,7 +161,7 @@ const AppNav: React.FC = () => {
         <span className="opacity-70">
           <BarChart2 className="w-4 h-4" />
         </span>
-        <span className="hidden sm:inline">Bulk Payments</span>
+        <span className="hidden sm:inline">{t('nav.bulkPayments')}</span>
       </NavLink>
 
       <div className="w-px h-5 bg-(--border-hi) mx-2" />
@@ -174,7 +176,7 @@ const AppNav: React.FC = () => {
         }
       >
         <ShieldAlert className="w-4 h-4" />
-        Admin
+        {t('nav.admin')}
       </NavLink>
 
       <NavLink
@@ -189,7 +191,7 @@ const AppNav: React.FC = () => {
         onClick={() => setMobileOpen(false)}
       >
         <Code className="w-4 h-4" />
-        <span className="hidden sm:inline">debugger</span>
+        <span className="hidden sm:inline">{t('nav.debugger')}</span>
       </NavLink>
 
       <Link
@@ -197,7 +199,7 @@ const AppNav: React.FC = () => {
         onClick={() => setMobileOpen(false)}
         className="text-(--link) text-[13px] font-semibold hover:text-(--accent) transition"
       >
-        Help
+        {t('nav.help')}
       </Link>
     </>
   );
@@ -210,7 +212,7 @@ const AppNav: React.FC = () => {
 
         {/* Mobile menu button */}
         <button
-          aria-label="Toggle menu"
+          aria-label={t('nav.toggleMenu')}
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(!mobileOpen)}
           className="lg:hidden p-3 rounded-md hover:bg-(--surface-hi) transition touch-manipulation"
@@ -259,7 +261,7 @@ const AppNav: React.FC = () => {
                   </span>
                 </div>
                 <button
-                  aria-label="Close menu"
+                  aria-label={t('nav.closeMenu')}
                   onClick={() => setMobileOpen(false)}
                   className="p-2 rounded-md hover:bg-(--surface-hi) transition touch-manipulation"
                   style={{ minHeight: '44px', minWidth: '44px' }}
