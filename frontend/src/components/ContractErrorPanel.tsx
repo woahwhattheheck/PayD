@@ -22,6 +22,12 @@ export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) =
   };
 
   const isUnknown = error.code === 'UNKNOWN_FORMAT' || error.code === 'UNPARSEABLE_XDR';
+  const message = error.messageKey
+    ? t(error.messageKey, { ...error.translationValues, defaultValue: error.message })
+    : error.message;
+  const action = error.actionKey
+    ? t(error.actionKey, { ...error.translationValues, defaultValue: error.action })
+    : error.action;
 
   return (
     <div className={`${styles.panel} ${className} ${isExpanded ? styles.expanded : ''}`}>
@@ -39,7 +45,7 @@ export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) =
       {isExpanded && (
         <div className={styles.content}>
           <div className={styles.messageSection}>
-            <p className={styles.message}>{error.message}</p>
+            <p className={styles.message}>{message}</p>
           </div>
 
           <div className={styles.actionSection}>
@@ -47,7 +53,7 @@ export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) =
               <Info size={14} className={styles.infoIcon} />
               <span className={styles.actionLabel}>{t('contractError.suggestedAction')}</span>
             </div>
-            <p className={styles.actionText}>{error.action}</p>
+            <p className={styles.actionText}>{action}</p>
           </div>
 
           {(isUnknown || error.rawXdr) && (

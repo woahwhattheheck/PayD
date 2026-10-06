@@ -508,7 +508,89 @@
     "rawTransactionResult": "Resultado bruto de la transacción (XDR)",
     "copyXdr": "Copiar XDR",
     "copy": "Copiar",
-    "notAvailable": "N/D"
+    "notAvailable": "N/D",
+    "details": {
+      "1": {
+        "message": "No autorizado: La cuenta que realiza la llamada no tiene permiso para esta acción.",
+        "action": "Comprueba que estás firmando con la cuenta correcta del administrador o empleado."
+      },
+      "2": {
+        "message": "Estado no válido: El contrato no está en el estado esperado (por ejemplo, ya se ha reclamado).",
+        "action": "Actualiza la página para consultar el estado más reciente de esta asignación."
+      },
+      "3": {
+        "message": "Fondos insuficientes: El contrato o la cuenta de origen no tiene el saldo necesario.",
+        "action": "Asegúrate de que la cuenta de origen tenga fondos suficientes e inténtalo de nuevo."
+      },
+      "4": {
+        "message": "Plazo vencido: La ventana de tiempo para esta operación se ha cerrado.",
+        "action": "Comprueba las fechas de inicio del desbloqueo y de finalización de este calendario de adquisición."
+      },
+      "5": {
+        "message": "Ya inicializado: Este contrato ya se ha configurado.",
+        "action": "Si necesitas cambiar la configuración, puede que debas desplegar un contrato nuevo."
+      },
+      "6": {
+        "message": "Periodo de bloqueo no finalizado: Los tokens siguen bloqueados y aún no se pueden reclamar.",
+        "action": "Espera a que termine el periodo de bloqueo antes de intentar reclamarlos."
+      },
+      "Contract": {
+        "message": "Error de lógica del contrato: El código del contrato ha generado un error personalizado.",
+        "action": "Revisa el código de error del contrato o ponte en contacto con su desarrollador."
+      },
+      "WasmConfig": {
+        "message": "Error de configuración de WASM: La ejecución del contrato ha fallado debido a una configuración de WASM no válida.",
+        "action": "Esto suele indicar un fallo en el binario del contrato o en la configuración del entorno de ejecución."
+      },
+      "Context": {
+        "message": "Error de contexto de ejecución: No se ha podido configurar el entorno interno del contrato.",
+        "action": "Comprueba que hayas proporcionado todos los datos y parámetros necesarios del contrato."
+      },
+      "Storage": {
+        "message": "Error de almacenamiento: No se ha podido acceder al almacenamiento persistente del contrato.",
+        "action": "Comprueba que el estado del contrato exista en la cadena y no se haya archivado."
+      },
+      "Object": {
+        "message": "Error de objeto del entorno: Referencia de objeto no válida o tipos incompatibles.",
+        "action": "Asegúrate de que todos los argumentos de la llamada al contrato tengan el formato ScVal correcto."
+      },
+      "Crypto": {
+        "message": "Fallo criptográfico: No se ha podido verificar una firma o un hash dentro del contrato.",
+        "action": "Asegúrate de que todas las firmas de autorización sean válidas y cubran los datos correctos de la transacción."
+      },
+      "Events": {
+        "message": "Fallo al emitir eventos: El contrato ha superado el límite de eventos permitidos.",
+        "action": "Intenta reducir la cantidad de datos procesados en una sola llamada."
+      },
+      "Budget": {
+        "message": "Presupuesto de recursos superado: La operación ha superado los límites de CPU o memoria.",
+        "action": "Aumenta los límites de recursos de la transacción (CPU o memoria) e inténtalo de nuevo."
+      },
+      "Auth": {
+        "message": "Error de autenticación del contrato: No se han cumplido los requisitos de autorización de Soroban.",
+        "action": "Comprueba que todos los firmantes necesarios hayan aprobado esta invocación concreta del contrato."
+      },
+      "UnknownContract": {
+        "message": "Código de error personalizado del contrato: {{code}}",
+        "action": "Consulta la documentación del contrato para este código de error concreto."
+      },
+      "UnknownHost": {
+        "message": "Error del entorno de ejecución: {{code}}",
+        "action": "Se ha producido un error interno de la red Stellar durante la ejecución."
+      },
+      "NO_XDR": {
+        "message": "No se ha proporcionado un resultado XDR para analizar.",
+        "action": "Consulta los registros de red para obtener más información."
+      },
+      "UNKNOWN_FORMAT": {
+        "message": "La transacción ha fallado, pero el resultado XDR no se ha podido interpretar como un error estándar.",
+        "action": "Consulta el XDR bruto para obtener más información o ponte en contacto con soporte."
+      },
+      "UNPARSEABLE_XDR": {
+        "message": "No se ha podido decodificar el resultado XDR de la transacción.",
+        "action": "Puede que el resultado no sea un objeto de error de Soroban válido."
+      }
+    }
   },
   "schedulingWizard": {
     "steps": {

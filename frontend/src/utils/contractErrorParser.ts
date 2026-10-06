@@ -5,6 +5,9 @@ export interface ContractErrorDetails {
   message: string;
   action: string;
   rawXdr?: string;
+  messageKey?: string;
+  actionKey?: string;
+  translationValues?: { code: string };
 }
 
 const ERROR_MAPPINGS: Record<string, { message: string; action: string }> = {
@@ -80,6 +83,8 @@ export function parseContractError(resultXdr: string): ContractErrorDetails {
   if (!resultXdr) {
     return {
       code: 'NO_XDR',
+      messageKey: 'contractError.details.NO_XDR.message',
+      actionKey: 'contractError.details.NO_XDR.action',
       message: 'No result XDR provided for parsing.',
       action: 'Check network logs for more details.',
     };
@@ -105,6 +110,9 @@ export function parseContractError(resultXdr: string): ContractErrorDetails {
 
         return {
           code: `ContractError(${value})`,
+          messageKey: `contractError.details.${mapping ? value : 'UnknownContract'}.message`,
+          actionKey: `contractError.details.${mapping ? value : 'UnknownContract'}.action`,
+          translationValues: { code: value },
           message: mapping?.message || `Custom contract error code: ${value}`,
           action:
             mapping?.action || 'Refer to contract documentation for this specific error code.',
@@ -119,6 +127,9 @@ export function parseContractError(resultXdr: string): ContractErrorDetails {
 
       return {
         code: typeName,
+        messageKey: `contractError.details.${mapping ? typeName : 'UnknownHost'}.message`,
+        actionKey: `contractError.details.${mapping ? typeName : 'UnknownHost'}.action`,
+        translationValues: { code: typeName },
         message: mapping?.message || `Host error: ${typeName}`,
         action: mapping?.action || 'An internal Stellar network error occurred during execution.',
         rawXdr: resultXdr,
@@ -128,6 +139,8 @@ export function parseContractError(resultXdr: string): ContractErrorDetails {
     // 2. Fallback for non-error ScVal (shouldn't happen on failure)
     return {
       code: 'UNKNOWN_FORMAT',
+      messageKey: 'contractError.details.UNKNOWN_FORMAT.message',
+      actionKey: 'contractError.details.UNKNOWN_FORMAT.action',
       message: 'The transaction failed but the result XDR could not be parsed as a standard error.',
       action: 'Check the raw XDR for more details or contact support.',
       rawXdr: resultXdr,
@@ -136,6 +149,8 @@ export function parseContractError(resultXdr: string): ContractErrorDetails {
     // 3. Fallback for unparseable XDR
     return {
       code: 'UNPARSEABLE_XDR',
+      messageKey: 'contractError.details.UNPARSEABLE_XDR.message',
+      actionKey: 'contractError.details.UNPARSEABLE_XDR.action',
       message: 'Failed to decode the transaction result XDR.',
       action: 'The result may not be a valid Soroban error object.',
       rawXdr: resultXdr,

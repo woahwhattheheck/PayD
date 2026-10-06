@@ -508,7 +508,89 @@
     "rawTransactionResult": "Raw Transaction Result (XDR)",
     "copyXdr": "Copy XDR",
     "copy": "Copy",
-    "notAvailable": "N/A"
+    "notAvailable": "N/A",
+    "details": {
+      "1": {
+        "message": "Unauthorized: The caller does not have permission for this action.",
+        "action": "Verify you are signing with the correct administrator or employee account."
+      },
+      "2": {
+        "message": "Invalid State: The contract is not in the expected state (e.g., already claimed).",
+        "action": "Refresh the page to see the latest status of this grant."
+      },
+      "3": {
+        "message": "Insufficient Funds: The contract or source account lacks required balance.",
+        "action": "Ensure the source account has enough funds and try again."
+      },
+      "4": {
+        "message": "Deadline Passed: The time-locked window for this operation has closed.",
+        "action": "Check the cliff and end dates for this vesting schedule."
+      },
+      "5": {
+        "message": "Already Initialized: This contract has already been configured.",
+        "action": "If you need to change settings, you may need a new contract deployment."
+      },
+      "6": {
+        "message": "Cliff Not Reached: Tokens are still in the cliff period and cannot be claimed.",
+        "action": "Wait until the cliff date has passed before attempting to claim."
+      },
+      "Contract": {
+        "message": "Contract Logic Error: A custom error was thrown by the contract code.",
+        "action": "Review the contract error code or contact the contract developer."
+      },
+      "WasmConfig": {
+        "message": "WASM Config Error: The contract execution failed due to invalid WASM configuration.",
+        "action": "This usually indicates a bug in the contract binary or host configuration."
+      },
+      "Context": {
+        "message": "Execution Context Error: Failed to setup the internal contract environment.",
+        "action": "Check if you have provided all required contract data and parameters."
+      },
+      "Storage": {
+        "message": "Resource Storage Error: Error accessing contract persistent storage.",
+        "action": "Verify the contract state exists on-chain and has not been archived."
+      },
+      "Object": {
+        "message": "Host Object Error: Invalid host object handle or type mismatch.",
+        "action": "Ensure all arguments passed to the contract call are correctly formatted ScVal types."
+      },
+      "Crypto": {
+        "message": "Cryptographic Failure: Failed to verify signature or hash inside the contract.",
+        "action": "Ensure all auth signatures are valid and cover the correct transaction footprint."
+      },
+      "Events": {
+        "message": "Event Emission Failure: Contract exceeded the limit of allowed events.",
+        "action": "Try to reduce the amount of data being processed in a single call."
+      },
+      "Budget": {
+        "message": "Resource Budget Exceeded: The operation exceeded CPU or Memory limits.",
+        "action": "Increase the transaction resource limits (CPU/Memory) and retry."
+      },
+      "Auth": {
+        "message": "Contract Authentication Error: Failed to satisfy Soroban authorization requirements.",
+        "action": "Verify that all required signers have approved the specific contract invocation."
+      },
+      "UnknownContract": {
+        "message": "Custom contract error code: {{code}}",
+        "action": "Refer to contract documentation for this specific error code."
+      },
+      "UnknownHost": {
+        "message": "Host error: {{code}}",
+        "action": "An internal Stellar network error occurred during execution."
+      },
+      "NO_XDR": {
+        "message": "No result XDR provided for parsing.",
+        "action": "Check network logs for more details."
+      },
+      "UNKNOWN_FORMAT": {
+        "message": "The transaction failed but the result XDR could not be parsed as a standard error.",
+        "action": "Check the raw XDR for more details or contact support."
+      },
+      "UNPARSEABLE_XDR": {
+        "message": "Failed to decode the transaction result XDR.",
+        "action": "The result may not be a valid Soroban error object."
+      }
+    }
   },
   "schedulingWizard": {
     "steps": {
