@@ -3,12 +3,20 @@ import passport from 'passport';
 import { AuthController } from '../controllers/authController.js';
 import { authenticateJWT } from '../middlewares/auth.js';
 import { authorizeRoles } from '../middlewares/rbac.js';
-import { loginRateLimit } from '../middlewares/rateLimitMiddleware.js';
+import {
+  loginRateLimit,
+  loginSourceRateLimit,
+} from '../middlewares/rateLimitMiddleware.js';
 import { TWO_FACTOR_ROLES } from '../services/twoFactorService.js';
 
 const router = Router();
 
-router.post('/login', loginRateLimit(), AuthController.login);
+router.post(
+  '/login',
+  loginSourceRateLimit(),
+  loginRateLimit(),
+  AuthController.login
+);
 router.post('/register', AuthController.register);
 router.post('/refresh', AuthController.refresh);
 
