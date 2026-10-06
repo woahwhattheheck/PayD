@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { z } from 'zod';
 import { payrollQueryService } from '../services/payroll-query.service.js';
 import logger from '../utils/logger.js';
 import { authenticateJWT } from '../middlewares/auth.js';
@@ -8,8 +9,11 @@ import {
   validateActiveTenant,
   logTenantAccess,
 } from '../middleware/enhancedTenantIsolation.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = Router();
+
+const emptyBodySchema = z.object({}).strict().optional();
 
 function asString(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
@@ -390,7 +394,7 @@ router.get('/status/health', async (req: Request, res: Response) => {
  * Clear cache (admin endpoint)
  * POST /api/payroll/cache/clear
  */
-router.post('/cache/clear', (req: Request, res: Response) => {
+router.post('/cache/clear', validateRequest({ body: emptyBodySchema }), (req: Request, res: Response) => {
   try {
     payrollQueryService.clearCache();
 
