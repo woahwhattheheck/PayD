@@ -83,6 +83,35 @@ describe('MailerService failure logging', () => {
     loadSpy.mockRestore();
   });
 
+  it('logs transport initialization failures with recipient and mail type context', async () => {
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_USER = 'mailer@example.com';
+    process.env.SMTP_PASS = 'test-pass';
+
+    const transportFailure = new Error('transport init failed');
+    const nodemailer = (await import('nodemailer')).default as any;
+    nodemailer.createTransport.mockImplementationOnce(() => {
+      throw transportFailure;
+    });
+
+    await expect(
+      MailerService.sendMail({
+        to: ['employee@example.com'],
+        subject: 'password-reset',
+        text: 'body',
+      }),
+    ).rejects.toThrow('transport init failed');
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      'Mailer failed to send email.',
+      {
+        recipients: ['employee@example.com'],
+        mailType: 'password-reset',
+        error: 'transport init failed',
+      },
+    );
+  });
+
   it('logs send failures with recipient and mail type context, then preserves the failure', async () => {
     process.env.SMTP_HOST = 'smtp.example.com';
     process.env.SMTP_USER = 'mailer@example.com';
