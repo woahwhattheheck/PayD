@@ -631,5 +631,30 @@
   "themeToggle": {
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode"
+  },
+  "appLayout": {
+    "beta": "BETA"
+  },
+  "certificate": {
+    "missingInformation": "Missing Information",
+    "transactionHashRequired": "Transaction hash is required",
+    "identityUnavailable": "Unable to determine employee and organization. Please provide employeeId and organizationId.",
+    "downloadedTitle": "Certificate Downloaded",
+    "downloadedBody": "Payment certificate has been downloaded successfully",
+    "downloadFailed": "Download Failed",
+    "downloadFailedBody": "Failed to download certificate",
+    "downloadTitle": "Download Proof of Payment Certificate",
+    "generating": "Generating...",
+    "loading": "Loading...",
+    "label": "Certificate"
+  },
+  "dashboardTopBar": {
+    "organization": "Organization",
+    "availableBalance": "Available Balance"
+  },
+  "employerLayout": {
+    "toggleSidebar": "Toggle Sidebar",
+    "license": "© {{year}} PayD — Licensed under Apache 2.0",
+    "networkStatus": "Stellar Testnet Node · {{version}}"
   }
 }
