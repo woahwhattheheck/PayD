@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contracterror, contractevent, contractimpl, contracttype, Address, Env, Vec, token};
+use soroban_sdk::{contract, contracterror, contractevent, contractimpl, contracttype, Address, Env, Vec, token, Symbol};
 use common::CommonError;
 
 #[cfg(test)]
@@ -145,6 +145,10 @@ impl RevenueSplitContract {
             for share in shares.iter() {
                 split_percentages.push_back(share.basis_points);
             }
+
+            // Preserve the legacy event surface for existing off-chain consumers.
+            env.events()
+                .publish((Symbol::new(&env, "distribute"), token.clone()), amount);
 
             DistributionExecutedEvent {
                 asset: token.clone(),
