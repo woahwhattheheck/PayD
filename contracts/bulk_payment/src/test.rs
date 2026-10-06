@@ -1,4 +1,5 @@
 #![cfg(test)]
+extern crate std;
 use super::*;
 use soroban_sdk::{
     testutils::{Address as _, Events},
@@ -306,7 +307,7 @@ fn benchmark_issue_527_resource_profile() {
         let batch = payments(&env, count, 100);
         client.execute_batch(&sender, &token, &batch, &0);
         let budget = env.cost_estimate().budget();
-        println!(
+        std::println!(
             "PAYD527 execute_batch count={} cpu={} mem={}",
             count,
             budget.cpu_instruction_cost(),
@@ -323,7 +324,7 @@ fn benchmark_issue_527_resource_profile() {
         let batch = payments(&env, count, 100);
         client.execute_batch_partial(&sender, &token, &batch, &0);
         let budget = env.cost_estimate().budget();
-        println!(
+        std::println!(
             "PAYD527 execute_batch_partial count={} cpu={} mem={}",
             count,
             budget.cpu_instruction_cost(),
