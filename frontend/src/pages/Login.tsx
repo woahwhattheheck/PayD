@@ -1,11 +1,26 @@
 import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import {
+  hasActiveAccessToken,
+  normalizeAuthReturnPath,
+  readAuthReturnPath,
+  rememberAuthReturnPath,
+} from '../utils/authSession';
 
 const Login: React.FC = () => {
+  const location = useLocation();
+  const state = location.state as { from?: unknown } | null;
+  const returnTo = normalizeAuthReturnPath(state?.from ?? readAuthReturnPath());
   const backendUrl = (import.meta.env.VITE_BACKEND_URL as string) || 'http://localhost:4000';
 
   const handleLogin = (provider: 'google' | 'github') => {
+    rememberAuthReturnPath(returnTo);
     window.location.href = `${backendUrl}/auth/${provider}`;
   };
+
+  if (hasActiveAccessToken()) {
+    return <Navigate to={returnTo} replace />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
