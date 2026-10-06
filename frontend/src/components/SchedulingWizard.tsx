@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchEmployees, Employee } from '../services/auditApi';
+import { useTranslation } from 'react-i18next';
 
 interface EmployeePreference {
   id: string;
@@ -24,6 +25,7 @@ export const SchedulingWizard = ({
   onComplete: (config: SchedulingConfig) => void;
   onCancel: () => void;
 }) => {
+  const { t, i18n } = useTranslation();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [config, setConfig] = useState<SchedulingConfig>({
@@ -55,6 +57,8 @@ export const SchedulingWizard = ({
     };
     void loadEmployees();
   }, []);
+
+  const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
 
   const handleNext = () => setStep((s: number) => Math.min(s + 1, 3));
   const handleBack = () => setStep((s: number) => Math.max(s - 1, 1));
@@ -88,9 +92,9 @@ export const SchedulingWizard = ({
       {/* Wizard Header */}
       <div className="flex justify-between items-center border-b border-hi pb-4">
         <h2 className="text-xl font-black">
-          {step === 1 && 'Step 1: Set Schedule'}
-          {step === 2 && 'Step 2: Currency Preferences'}
-          {step === 3 && 'Step 3: Preview & Confirm'}
+          {step === 1 && t('schedulingWizard.steps.schedule')}
+          {step === 2 && t('schedulingWizard.steps.currencyPreferences')}
+          {step === 3 && t('schedulingWizard.steps.previewConfirm')}
         </h2>
         <div className="flex gap-2">
           {[1, 2, 3].map((i) => (
@@ -119,28 +123,28 @@ export const SchedulingWizard = ({
             </svg>
           </div>
           <p className="text-muted font-mono text-sm tracking-widest uppercase">
-            Loading Organizational Data...
+            {t('schedulingWizard.loading')}
           </p>
         </div>
       ) : step === 2 ? (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-muted mb-2">
-            Set default currency payout outputs for each employee.
+            {t('schedulingWizard.currencyIntro')}
           </p>
           <div className="overflow-x-auto border border-hi rounded-xl">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface/50 text-xs uppercase text-muted tracking-wider border-b border-hi">
                 <tr>
-                  <th className="px-4 py-3">Employee</th>
-                  <th className="px-4 py-3">Scheduled Amount</th>
-                  <th className="px-4 py-3">Receive In</th>
+                  <th className="px-4 py-3">{t('schedulingWizard.table.employee')}</th>
+                  <th className="px-4 py-3">{t('schedulingWizard.table.scheduledAmount')}</th>
+                  <th className="px-4 py-3">{t('schedulingWizard.table.receiveIn')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hi">
                 {config.preferences.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="px-4 py-8 text-center text-muted">
-                      No employees found in organization.
+                      {t('schedulingWizard.table.noEmployees')}
                     </td>
                   </tr>
                 ) : (
@@ -172,9 +176,9 @@ export const SchedulingWizard = ({
                           }}
                           className="bg-transparent border border-hi rounded p-1 text-text focus:border-accent outline-none"
                         >
-                          <option value="USDC">USDC (Stellar)</option>
-                          <option value="XLM">XLM</option>
-                          <option value="EURC">EURC</option>
+                          <option value="USDC">{t('schedulingWizard.currencies.usdcStellar')}</option>
+                          <option value="XLM">{t('schedulingWizard.currencies.xlm')}</option>
+                          <option value="EURC">{t('schedulingWizard.currencies.eurc')}</option>
                         </select>
                       </td>
                     </tr>
@@ -191,7 +195,7 @@ export const SchedulingWizard = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-3 ml-1">
-              Frequency
+              {t('schedulingWizard.frequencyLabel')}
             </label>
             <div className="flex gap-4">
               {['weekly', 'biweekly', 'monthly'].map((freq) => (
@@ -210,7 +214,7 @@ export const SchedulingWizard = ({
                       : 'border-hi text-muted hover:border-accent/40'
                   }`}
                 >
-                  {freq}
+                  {t(`schedulingWizard.frequency.${freq}`)}
                 </button>
               ))}
             </div>
@@ -219,7 +223,7 @@ export const SchedulingWizard = ({
           {(config.frequency === 'weekly' || config.frequency === 'biweekly') && (
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-3 ml-1">
-                Day of Week
+                {t('schedulingWizard.dayOfWeek')}
               </label>
               <select
                 value={config.dayOfWeek || 1}
@@ -231,10 +235,9 @@ export const SchedulingWizard = ({
                 }
                 className="w-full bg-black/20 border border-hi rounded-xl p-4 text-text outline-none focus:border-accent/50 focus:bg-accent/5 transition-all cursor-pointer"
               >
-                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(
-                  (day, i) => (
+                {weekdays.map((day, i) => (
                     <option key={day} value={i} className="bg-surface">
-                      {day}
+                      {t(`schedulingWizard.weekdays.${day}`)}
                     </option>
                   )
                 )}
@@ -245,7 +248,7 @@ export const SchedulingWizard = ({
           {config.frequency === 'monthly' && (
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-3 ml-1">
-                Day of Month
+                {t('schedulingWizard.dayOfMonth')}
               </label>
               <input
                 type="number"
@@ -265,7 +268,7 @@ export const SchedulingWizard = ({
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-muted mb-3 ml-1">
-              Run Time
+              {t('schedulingWizard.runTime')}
             </label>
             <input
               type="time"
@@ -297,15 +300,15 @@ export const SchedulingWizard = ({
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              Schedule Overview
+              {t('schedulingWizard.scheduleOverview')}
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-muted block text-xs uppercase tracking-wider">Frequency</span>
-                <span className="font-bold capitalize">{config.frequency}</span>
+                <span className="text-muted block text-xs uppercase tracking-wider">{t('schedulingWizard.frequencyLabel')}</span>
+                <span className="font-bold capitalize">{t(`schedulingWizard.frequency.${config.frequency}`)}</span>
               </div>
               <div>
-                <span className="text-muted block text-xs uppercase tracking-wider">Time</span>
+                <span className="text-muted block text-xs uppercase tracking-wider">{t('schedulingWizard.time')}</span>
                 <span className="font-mono">{config.timeOfDay}</span>
               </div>
             </div>
@@ -313,7 +316,7 @@ export const SchedulingWizard = ({
 
           <div>
             <h4 className="text-sm font-bold uppercase tracking-widest text-muted mb-3">
-              Upcoming Runs
+              {t('schedulingWizard.upcomingRuns')}
             </h4>
             <ul className="flex flex-col gap-3">
               {generatePreviewDates().map((date, i) => (
@@ -324,7 +327,7 @@ export const SchedulingWizard = ({
                   <span className="shrink-0 w-8 h-8 rounded-full bg-surface flex items-center justify-center font-bold text-muted text-xs">
                     {i + 1}
                   </span>
-                  <span className="font-mono">{date.toLocaleString()}</span>
+                  <span className="font-mono">{date.toLocaleString(i18n.language)}</span>
                 </li>
               ))}
             </ul>
@@ -338,7 +341,7 @@ export const SchedulingWizard = ({
           className={`py-2 px-6 rounded-lg font-bold text-sm tracking-wide transition-colors ${step === 1 ? 'text-muted hover:text-text' : 'bg-surface hover:bg-hi/50 text-text'}`}
           onClick={step === 1 ? onCancel : handleBack}
         >
-          {step === 1 ? 'Cancel' : 'Back'}
+          {step === 1 ? t('schedulingWizard.cancel') : t('schedulingWizard.back')}
         </button>
 
         {step < 3 ? (
@@ -346,14 +349,14 @@ export const SchedulingWizard = ({
             className="py-2 px-6 rounded-full bg-accent text-on-accent font-bold text-sm tracking-wide hover:bg-accent-hover shadow-(--shadow-sm) transition-all"
             onClick={handleNext}
           >
-            Continue
+            {t('schedulingWizard.continue')}
           </button>
         ) : (
           <button
             className="py-2 px-6 rounded-lg bg-success text-bg font-bold text-sm tracking-wide hover:brightness-110 shadow-lg shadow-success/20 transition-all flex items-center gap-2"
             onClick={() => onComplete(config)}
           >
-            Confirm Schedule
+            {t('schedulingWizard.confirmSchedule')}
             <svg
               width="16"
               height="16"
