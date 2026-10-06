@@ -142,11 +142,10 @@ impl BulkPaymentContract {
         }
 
         let token_client = token::Client::new(&env, &token);
-        let contract_addr = env.current_contract_address();
-        token_client.transfer(&sender, &contract_addr, &total);
+        token_client.transfer(&sender, &env.current_contract_address(), &total);
 
         for op in payments.iter() {
-            token_client.transfer(&contract_addr, &op.recipient, &op.amount);
+            token_client.transfer(&env.current_contract_address(), &op.recipient, &op.amount);
         }
 
         let batch_id = Self::next_batch_id(&env);
