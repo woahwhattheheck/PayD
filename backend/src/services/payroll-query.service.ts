@@ -97,7 +97,9 @@ export class PayrollQueryService {
     startDate?: Date,
     endDate?: Date,
     page?: number,
-    limit?: number
+    limit?: number,
+    sortBy?: 'timestamp' | 'amount' | 'employeeId',
+    sortOrder?: 'asc' | 'desc'
   ): Promise<PaginatedResult<PayrollTransaction>> {
     const query: PayrollIndexQuery = {
       organizationPublicKey,
@@ -108,8 +110,8 @@ export class PayrollQueryService {
 
     return this.queryPayroll(query, page, limit, {
       enrichPayrollData: true,
-      sortBy: 'timestamp',
-      sortOrder: 'desc',
+      sortBy: sortBy ?? 'timestamp',
+      sortOrder: sortOrder ?? 'desc',
     });
   }
 
@@ -120,7 +122,9 @@ export class PayrollQueryService {
     organizationPublicKey: string,
     batchId: string,
     page?: number,
-    limit?: number
+    limit?: number,
+    sortBy?: 'timestamp' | 'amount' | 'employeeId',
+    sortOrder?: 'asc' | 'desc'
   ): Promise<PaginatedResult<PayrollTransaction>> {
     const query: PayrollIndexQuery = {
       organizationPublicKey,
@@ -129,8 +133,8 @@ export class PayrollQueryService {
 
     return this.queryPayroll(query, page, limit, {
       enrichPayrollData: true,
-      sortBy: 'timestamp',
-      sortOrder: 'desc',
+      sortBy: sortBy ?? 'timestamp',
+      sortOrder: sortOrder ?? 'desc',
     });
   }
 
@@ -228,7 +232,9 @@ export class PayrollQueryService {
     organizationPublicKey: string,
     memoPattern: string,
     page?: number,
-    limit?: number
+    limit?: number,
+    sortBy?: 'timestamp' | 'amount' | 'employeeId',
+    sortOrder?: 'asc' | 'desc'
   ): Promise<PaginatedResult<PayrollTransaction>> {
     const pagination = parsePaginationParams(page, limit);
 
@@ -244,7 +250,12 @@ export class PayrollQueryService {
       );
 
       const enriched = payrollIndexingService.enrichTransactions(rawTransactions);
-      return payrollIndexingService.paginateTransactions(enriched, pagination);
+      const sorted = payrollIndexingService.sortTransactions(
+        enriched,
+        sortBy ?? 'timestamp',
+        sortOrder ?? 'desc'
+      );
+      return payrollIndexingService.paginateTransactions(sorted, pagination);
     } catch (error) {
       logger.error(`Failed to search by memo pattern ${memoPattern}`, error);
       throw error;
