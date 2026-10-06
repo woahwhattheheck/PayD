@@ -10,6 +10,7 @@ import os from 'node:os';
 export class ScheduleExecutor {
   private cronJob: ScheduledTask | null = null;
   private readonly podId: string;
+  private readonly activeRuns = new Set<Promise<void>>();
 
   constructor() {
     this.podId = `${os.hostname()}-${process.pid}`;
@@ -21,26 +22,48 @@ export class ScheduleExecutor {
    */
   initialize(): void {
     // Cron expression: run every minute
-    this.cronJob = cron.schedule('* * * * *', async () => {
-      try {
-        console.log('[ScheduleExecutor] Running scheduled task check...');
-        await this.processDueSchedules();
-      } catch (error) {
-        console.error('[ScheduleExecutor] Error in cron job execution:', error);
-      }
+    this.cronJob = cron.schedule('* * * * *', () => {
+      const run = (async () => {
+        try {
+          console.log('[ScheduleExecutor] Running scheduled task check...');
+          await this.processDueSchedules();
+        } catch (error) {
+          console.error('[ScheduleExecutor] Error in cron job execution:', error);
+        }
+      })();
+      this.trackRun(run);
     });
 
     console.log('[ScheduleExecutor] Cron job initialized - running every minute');
   }
 
+  private trackRun(run: Promise<void>): void {
+    this.activeRuns.add(run);
+    void run.then(
+      () => {
+        this.activeRuns.delete(run);
+      },
+      () => {
+        this.activeRuns.delete(run);
+      }
+    );
+  }
+
   /**
-   * Stop the cron job (for graceful shutdown)
+   * Stop future cron ticks and drain callbacks that are already using
+   * shared runtime dependencies.
    */
-  stop(): void {
+  async stop(): Promise<void> {
     if (this.cronJob) {
       this.cronJob.stop();
-      console.log('[ScheduleExecutor] Cron job stopped');
     }
+
+    const activeRuns = [...this.activeRuns];
+    if (activeRuns.length > 0) {
+      await Promise.allSettled(activeRuns);
+    }
+
+    console.log('[ScheduleExecutor] Cron job stopped and active runs drained');
   }
 
   /**
