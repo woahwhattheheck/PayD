@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import pool from '../db/index.js';
+import pool from '../config/database.js';
 import logger from '../utils/logger.js';
 
 /**
