@@ -3,6 +3,7 @@ import { Avatar } from './Avatar';
 import { CSVUploader } from './CSVUploader';
 import type { CSVRow } from './CSVUploader';
 import { Pencil, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Employee {
   id: string;
@@ -29,6 +30,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   onEditEmployee,
   onRemoveEmployee,
 }) => {
+  const { t } = useTranslation();
   const [csvData, setCsvData] = useState<Employee[]>([]);
   const [showCSVUploader, setShowCSVUploader] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -87,6 +89,12 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
     return `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
   };
 
+  const getStatusLabel = (status?: Employee['status']) => {
+    if (status === 'Active') return t('employees.status.active');
+    if (status === 'Inactive') return t('employees.status.inactive');
+    return '-';
+  };
+
   // Add Modal (simple inline for demo)
   const [newEmployee, setNewEmployee] = useState<Employee>({
     id: '',
@@ -139,7 +147,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   return (
     <div className="w-full card glass noise overflow-hidden p-0">
       <div className="flex justify-between items-center p-4 md:p-6">
-        <span className="font-bold text-lg md:text-xl">Employees</span>
+        <span className="font-bold text-lg md:text-xl">{t('nav.employees')}</span>
       </div>
 
       {/* Desktop Table View */}
@@ -151,34 +159,34 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 className="p-6 text-xs font-bold uppercase tracking-widest text-muted cursor-pointer"
                 onClick={() => handleSort('name')}
               >
-                Name {sortKey === 'name' && (sortAsc ? '▲' : '▼')}
+                {t('employees.table.name')} {sortKey === 'name' && (sortAsc ? '▲' : '▼')}
               </th>
               <th
                 className="p-6 text-xs font-bold uppercase tracking-widest text-muted cursor-pointer"
                 onClick={() => handleSort('position')}
               >
-                Role {sortKey === 'position' && (sortAsc ? '▲' : '▼')}
+                {t('employees.table.role')} {sortKey === 'position' && (sortAsc ? '▲' : '▼')}
               </th>
               <th
                 className="p-6 text-xs font-bold uppercase tracking-widest text-muted cursor-pointer"
                 onClick={() => handleSort('wallet')}
               >
-                Wallet {sortKey === 'wallet' && (sortAsc ? '▲' : '▼')}
+                {t('employees.table.wallet')} {sortKey === 'wallet' && (sortAsc ? '▲' : '▼')}
               </th>
               <th
                 className="p-6 text-xs font-bold uppercase tracking-widest text-muted cursor-pointer"
                 onClick={() => handleSort('salary')}
               >
-                Salary {sortKey === 'salary' && (sortAsc ? '▲' : '▼')}
+                {t('employees.table.salary')} {sortKey === 'salary' && (sortAsc ? '▲' : '▼')}
               </th>
               <th
                 className="p-6 text-xs font-bold uppercase tracking-widest text-muted cursor-pointer"
                 onClick={() => handleSort('status')}
               >
-                Status {sortKey === 'status' && (sortAsc ? '▲' : '▼')}
+                {t('employees.table.status')} {sortKey === 'status' && (sortAsc ? '▲' : '▼')}
               </th>
               <th className="p-6 text-xs font-bold uppercase tracking-widest text-muted">
-                Actions
+                {t('employees.table.actions')}
               </th>
             </tr>
           </thead>
@@ -186,7 +194,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
             {sortedEmployees.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-6 text-center text-(--muted)">
-                  No employees found
+                  {t('employees.empty')}
                 </td>
               </tr>
             ) : (
@@ -236,13 +244,13 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                           employee.status === 'Active' ? 'bg-green-600' : 'bg-red-600'
                         }`}
                       />
-                      {employee.status || '-'}
+                      {getStatusLabel(employee.status)}
                     </span>
                   </td>
                   <td className="p-6 flex gap-2">
                     <button
                       className="text-blue-500 hover:text-blue-700"
-                      title="Edit"
+                      title={t('employees.actions.edit')}
                       onClick={() => {
                         setEditSalary(employee.salary || 0);
                         setShowEditModal({ open: true, employee });
@@ -252,7 +260,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     </button>
                     <button
                       className="text-red-500 hover:text-red-700"
-                      title="Remove"
+                      title={t('employees.actions.remove')}
                       onClick={() => setShowDeleteConfirm({ open: true, id: employee.id })}
                     >
                       <Trash2 className="w-5 h-5" />
@@ -268,7 +276,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       {/* Mobile Card View */}
       <div className="md:hidden px-4 pb-4">
         {sortedEmployees.length === 0 ? (
-          <div className="text-center py-8 text-(--muted)">No employees found</div>
+          <div className="text-center py-8 text-(--muted)">{t('employees.empty')}</div>
         ) : (
           <div className="space-y-4">
             {sortedEmployees.map((employee) => (
@@ -302,20 +310,20 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                         employee.status === 'Active' ? 'bg-green-600' : 'bg-red-600'
                       }`}
                     />
-                    {employee.status || '-'}
+                    {getStatusLabel(employee.status)}
                   </span>
                 </div>
 
                 {/* Employee Details */}
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted">Wallet:</span>
+                    <span className="text-muted">{t('employees.mobile.wallet')}:</span>
                     <span className="font-mono text-xs">
                       {shortenWallet(employee.wallet || '')}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted">Salary:</span>
+                    <span className="text-muted">{t('employees.mobile.salary')}:</span>
                     {onEditEmployee ? (
                       <button
                         className="text-blue-500 underline text-sm"
@@ -343,7 +351,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     }}
                   >
                     <Pencil className="w-4 h-4" />
-                    Edit
+                    {t('employees.actions.edit')}
                   </button>
                   <button
                     className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition touch-manipulation"
@@ -351,7 +359,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                     onClick={() => setShowDeleteConfirm({ open: true, id: employee.id })}
                   >
                     <Trash2 className="w-4 h-4" />
-                    Remove
+                    {t('employees.actions.remove')}
                   </button>
                 </div>
               </div>
@@ -361,14 +369,14 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       </div>
       {/* CSV Import */}
       <div className="p-4 md:p-6 w-full flex flex-col items-center justify-center text-center bg-black/10">
-        <p className="text-muted mb-4 font-medium">Need to migrate your legacy payroll system?</p>
+        <p className="text-muted mb-4 font-medium">{t('employees.importPrompt')}</p>
         {!showCSVUploader && (
           <button
             className="text-accent font-bold text-sm hover:underline touch-manipulation py-2 px-4"
             style={{ minHeight: '44px' }}
             onClick={() => setShowCSVUploader(true)}
           >
-            Import from CSV
+            {t('employees.importFromCsv')}
           </button>
         )}
         {showCSVUploader && (
@@ -384,7 +392,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 style={{ minHeight: '44px' }}
                 disabled={csvData.length === 0}
               >
-                Add Employees from CSV
+                {t('employees.addEmployeesFromCsv')}
               </button>
               <button
                 onClick={() => {
@@ -394,7 +402,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Cancel
+                {t('employees.cancel')}
               </button>
             </div>
           </div>
@@ -405,38 +413,38 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       {showAddModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold mb-4">Add Employee</h2>
+            <h2 className="text-lg font-bold mb-4">{t('employees.addModal.title')}</h2>
             <input
               type="text"
-              placeholder="Name"
+              placeholder={t('employees.addModal.namePlaceholder')}
               value={newEmployee.name}
               onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
               className="w-full mb-2 px-3 py-2 border rounded"
             />
             <input
               type="email"
-              placeholder="Email"
+              placeholder={t('employees.addModal.emailPlaceholder')}
               value={newEmployee.email}
               onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
               className="w-full mb-2 px-3 py-2 border rounded"
             />
             <input
               type="text"
-              placeholder="Wallet"
+              placeholder={t('employees.addModal.walletPlaceholder')}
               value={newEmployee.wallet}
               onChange={(e) => setNewEmployee({ ...newEmployee, wallet: e.target.value })}
               className="w-full mb-2 px-3 py-2 border rounded"
             />
             <input
               type="text"
-              placeholder="Position"
+              placeholder={t('employees.addModal.positionPlaceholder')}
               value={newEmployee.position}
               onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
               className="w-full mb-2 px-3 py-2 border rounded"
             />
             <input
               type="number"
-              placeholder="Salary"
+              placeholder={t('employees.addModal.salaryPlaceholder')}
               value={newEmployee.salary}
               onChange={(e) => setNewEmployee({ ...newEmployee, salary: Number(e.target.value) })}
               className="w-full mb-2 px-3 py-2 border rounded"
@@ -448,8 +456,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
               }
               className="w-full mb-4 px-3 py-2 border rounded"
             >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
+              <option value="Active">{t('employees.status.active')}</option>
+              <option value="Inactive">{t('employees.status.inactive')}</option>
             </select>
             <div className="flex justify-end gap-2">
               <button
@@ -457,14 +465,14 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Cancel
+                {t('employees.cancel')}
               </button>
               <button
                 onClick={handleAddModalSubmit}
                 className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Add
+                {t('employees.addModal.add')}
               </button>
             </div>
           </div>
@@ -474,7 +482,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       {showEditModal.open && showEditModal.employee && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold mb-4">Edit Salary</h2>
+            <h2 className="text-lg font-bold mb-4">{t('employees.editModal.title')}</h2>
             <div className="mb-4">
               <span className="font-semibold">{showEditModal.employee.name}</span>
               <span className="ml-2 text-xs text-muted">{showEditModal.employee.position}</span>
@@ -491,14 +499,14 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Cancel
+                {t('employees.cancel')}
               </button>
               <button
                 onClick={handleEditModalSubmit}
                 className="px-4 py-2 bg-blue-500 text-white rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Save
+                {t('employees.editModal.save')}
               </button>
             </div>
           </div>
@@ -508,15 +516,15 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
       {showDeleteConfirm.open && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold mb-4">Confirm Removal</h2>
-            <p className="mb-4">Are you sure you want to remove this employee?</p>
+            <h2 className="text-lg font-bold mb-4">{t('employees.deleteModal.title')}</h2>
+            <p className="mb-4">{t('employees.deleteModal.body')}</p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowDeleteConfirm({ open: false })}
                 className="px-4 py-2 bg-(--surface-hi) text-(--text) rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Cancel
+                {t('employees.cancel')}
               </button>
               <button
                 onClick={handleDeleteConfirm}
