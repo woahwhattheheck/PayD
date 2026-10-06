@@ -284,3 +284,50 @@ fn test_execute_batch_partial_emits_all_events() {
         "BatchPartialEvent was not emitted"
     );
 }
+
+#[test]
+fn benchmark_issue_527_resource_profile() {
+    fn payments(env: &Env, count: u32, amount: i128) -> Vec<PaymentOp> {
+        let mut out = Vec::new(env);
+        for _ in 0..count {
+            out.push_back(PaymentOp {
+                recipient: Address::generate(env),
+                amount,
+            });
+        }
+        out
+    }
+
+    // Native Soroban test metering is intentionally used as a stable same-run
+    // comparison signal. It underestimates WASM/RPC resources; the benchmark is
+    // comparative evidence, not a mainnet fee estimate.
+    for count in [10u32, 100u32] {
+        let (env, sender, token, client) = setup_with_sender_balance(1_000_000);
+        let batch = payments(&env, count, 100);
+        client.execute_batch(&sender, &token, &batch, &0);
+        let budget = env.cost_estimate().budget();
+        println!(
+            "PAYD527 execute_batch count={} cpu={} mem={}",
+            count,
+            budget.cpu_instruction_cost(),
+            budget.memory_bytes_cost()
+        );
+    }
+
+    // Exercise the best-effort path with an intentionally insufficient balance,
+    // so both successful and skipped entries participate in the same invocation.
+    for count in [10u32, 100u32] {
+        let affordable = count / 2;
+        let sender_balance = i128::from(affordable) * 100 + 50;
+        let (env, sender, token, client) = setup_with_sender_balance(sender_balance);
+        let batch = payments(&env, count, 100);
+        client.execute_batch_partial(&sender, &token, &batch, &0);
+        let budget = env.cost_estimate().budget();
+        println!(
+            "PAYD527 execute_batch_partial count={} cpu={} mem={}",
+            count,
+            budget.cpu_instruction_cost(),
+            budget.memory_bytes_cost()
+        );
+    }
+}
