@@ -805,7 +805,8 @@
     "fee": "Fee:",
     "minimum": "Min:",
     "withdrawVia": "Withdraw via {{anchor}}",
-    "available": "Available: {{amount}}"
+    "available": "Available: {{amount}}",
+    "successProcessed": "Your withdrawal of {{amount}} has been processed successfully."
   },
   "crossAssetPayment": {
     "waitingForSubmission": "Waiting for submission...",
@@ -851,7 +852,8 @@
     "settlement": "Settlement",
     "transactionHash": "Transaction Hash",
     "changePrompt": "Change asset pair and amount to request path options from backend proxy.",
-    "pathFeeSlippage": "Fee: {{fee}} {{asset}} | Slippage: {{slippage}}%"
+    "pathFeeSlippage": "Fee: {{fee}} {{asset}} | Slippage: {{slippage}}%",
+    "rateLabel": "rate"
   },
   "payrollResidual": {
     "scheduleConfigured": "Payroll schedule configured!",
@@ -906,7 +908,11 @@
       "weekly": "Weekly",
       "biweekly": "Biweekly",
       "monthly": "Monthly"
-    }
+    },
+    "scheduledToRun": "Scheduled to run",
+    "broadcasting": "Broadcasting...",
+    "distribution": "Distribution",
+    "employees": "Employees"
   },
   "revenueSplit": {
     "loadFailed": "Failed to load dashboard",
