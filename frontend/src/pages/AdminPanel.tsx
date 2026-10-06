@@ -12,6 +12,7 @@ import {
 import { useNotification } from '../hooks/useNotification';
 import { useWallet } from '../hooks/useWallet';
 import ContractUpgradeTab from '../components/ContractUpgradeTab';
+import { useTranslation } from 'react-i18next';
 
 /** Centralized API base so URL changes happen in one place. */
 const API_BASE = '/api/v1';
@@ -78,15 +79,16 @@ const INPUT_CLASS =
 const LABEL_CLASS = 'block text-xs font-bold uppercase tracking-widest text-muted mb-2 ml-1';
 
 const TAB_LABELS: Record<ActiveTab, string> = {
-  account: 'Account Control',
-  global: 'Global Asset Control',
-  status: 'Status Check',
-  logs: 'Audit Logs',
-  contracts: 'Contract Upgrades',
-  clawback: 'Clawback',
+  account: 'admin.tabs.account',
+  global: 'admin.tabs.global',
+  status: 'admin.tabs.status',
+  logs: 'admin.tabs.logs',
+  contracts: 'admin.tabs.contracts',
+  clawback: 'admin.tabs.clawback',
 };
 
 export default function AdminPanel() {
+  const { t, i18n } = useTranslation();
   const { notifySuccess, notifyError } = useNotification();
   const { address: adminAddress } = useWallet();
 
@@ -157,7 +159,7 @@ export default function AdminPanel() {
         setLogsTotal(data.total);
       }
     } catch {
-      notifyError('Fetch Error', 'Failed to load audit logs.');
+      notifyError(t('admin.notifications.fetchError'), t('admin.notifications.auditLoadFailed'));
     } finally {
       setLogsLoading(false);
     }
@@ -179,7 +181,7 @@ export default function AdminPanel() {
         setClawbackLogsTotal(data.total);
       }
     } catch {
-      notifyError('Fetch Error', 'Failed to load clawback logs.');
+      notifyError(t('admin.notifications.fetchError'), t('admin.notifications.clawbackLoadFailed'));
     } finally {
       setClawbackLogsLoading(false);
     }
@@ -191,7 +193,7 @@ export default function AdminPanel() {
 
   async function handleAccountAction(action: 'freeze' | 'unfreeze') {
     if (!accountTarget || !accountAsset || !accountSecret) {
-      notifyError('Missing fields', 'Target account, asset code, and issuer secret are required.');
+      notifyError(t('admin.notifications.missingFields'), t('admin.notifications.accountRequired'));
       return;
     }
     setAccountLoading(true);
@@ -207,12 +209,12 @@ export default function AdminPanel() {
         }),
       });
       const data = (await res.json()) as ActionApiResponse;
-      if (!res.ok) throw new Error(data.error ?? 'Action failed');
-      notifySuccess('Success', data.message);
+      if (!res.ok) throw new Error(data.error ?? t('admin.notifications.actionFailedBody'));
+      notifySuccess(t('admin.notifications.success'), data.message);
       setAccountSecret('');
       setAccountReason('');
     } catch (err: unknown) {
-      notifyError('Action Failed', err instanceof Error ? err.message : 'Action failed');
+      notifyError(t('admin.notifications.actionFailed'), err instanceof Error ? err.message : t('admin.notifications.actionFailedBody'));
     } finally {
       setAccountLoading(false);
     }
@@ -220,7 +222,7 @@ export default function AdminPanel() {
 
   async function handleGlobalAction(action: 'freeze' | 'unfreeze') {
     if (!globalAsset || !globalSecret) {
-      notifyError('Missing fields', 'Asset code and issuer secret are required.');
+      notifyError(t('admin.notifications.missingFields'), t('admin.notifications.globalRequired'));
       return;
     }
     setGlobalLoading(true);
@@ -235,12 +237,12 @@ export default function AdminPanel() {
         }),
       });
       const data = (await res.json()) as ActionApiResponse;
-      if (!res.ok) throw new Error(data.error ?? 'Action failed');
-      notifySuccess('Success', data.message);
+      if (!res.ok) throw new Error(data.error ?? t('admin.notifications.actionFailedBody'));
+      notifySuccess(t('admin.notifications.success'), data.message);
       setGlobalSecret('');
       setGlobalReason('');
     } catch (err: unknown) {
-      notifyError('Action Failed', err instanceof Error ? err.message : 'Action failed');
+      notifyError(t('admin.notifications.actionFailed'), err instanceof Error ? err.message : t('admin.notifications.actionFailedBody'));
     } finally {
       setGlobalLoading(false);
     }
@@ -248,7 +250,7 @@ export default function AdminPanel() {
 
   async function handleStatusCheck() {
     if (!statusTarget || !statusAsset || !statusIssuer) {
-      notifyError('Missing fields', 'Target account, asset code, and asset issuer are required.');
+      notifyError(t('admin.notifications.missingFields'), t('admin.notifications.statusRequired'));
       return;
     }
     setStatusLoading(true);
@@ -262,12 +264,12 @@ export default function AdminPanel() {
         `${API_BASE}/freeze/status/${encodeURIComponent(statusTarget)}?${params}`
       );
       const data = (await res.json()) as StatusResult & { error?: string };
-      if (!res.ok) throw new Error(data.error ?? 'Status check failed');
+      if (!res.ok) throw new Error(data.error ?? t('admin.notifications.statusCheckFailedBody'));
       setStatusResult(data);
     } catch (err: unknown) {
       notifyError(
-        'Status Check Failed',
-        err instanceof Error ? err.message : 'Status check failed'
+        t('admin.notifications.statusCheckFailed'),
+        err instanceof Error ? err.message : t('admin.notifications.statusCheckFailedBody')
       );
     } finally {
       setStatusLoading(false);
@@ -276,12 +278,12 @@ export default function AdminPanel() {
 
   async function handleClawback() {
     if (!clawbackTarget || !clawbackAmount || !clawbackSecret) {
-      notifyError('Missing fields', 'Target account, amount, and issuer secret are required.');
+      notifyError(t('admin.notifications.missingFields'), t('admin.notifications.clawbackRequired'));
       return;
     }
     const parsed = parseFloat(clawbackAmount);
     if (isNaN(parsed) || parsed <= 0) {
-      notifyError('Invalid amount', 'Amount must be a positive number.');
+      notifyError(t('admin.notifications.invalidAmount'), t('admin.notifications.positiveAmount'));
       return;
     }
     setClawbackLoading(true);
@@ -297,8 +299,8 @@ export default function AdminPanel() {
         }),
       });
       const data = (await res.json()) as { success: boolean; txHash?: string; error?: string };
-      if (!res.ok) throw new Error(data.error ?? 'Clawback failed');
-      notifySuccess('Clawback Submitted', `Tx: ${data.txHash?.slice(0, 16)}…`);
+      if (!res.ok) throw new Error(data.error ?? t('admin.notifications.clawbackFailedBody'));
+      notifySuccess(t('admin.notifications.clawbackSubmitted'), t('admin.notifications.tx', { hash: `${data.txHash?.slice(0, 16)}…` }));
       setClawbackTarget('');
       setClawbackAmount('');
       setClawbackSecret('');
@@ -307,7 +309,7 @@ export default function AdminPanel() {
       void loadClawbackLogs(1);
       setClawbackLogsPage(1);
     } catch (err: unknown) {
-      notifyError('Clawback Failed', err instanceof Error ? err.message : 'Clawback failed');
+      notifyError(t('admin.notifications.clawbackFailed'), err instanceof Error ? err.message : t('admin.notifications.clawbackFailedBody'));
     } finally {
       setClawbackLoading(false);
     }
@@ -336,10 +338,10 @@ export default function AdminPanel() {
       <div className="w-full mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between border-b border-hi pb-4 sm:pb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2 tracking-tight">
-            Security <span className="text-red-500">Center</span>
+            {t('admin.titlePrefix')} <span className="text-red-500">{t('admin.titleHighlight')}</span>
           </h1>
           <p className="text-muted font-mono text-xs sm:text-sm tracking-wider uppercase">
-            Asset Freeze & Administrative Controls
+            {t('admin.subtitle')}
           </p>
         </div>
       </div>
@@ -354,7 +356,7 @@ export default function AdminPanel() {
             style={{ minWidth: '44px' }}
           >
             {tab === 'contracts' && <Code2 className="inline w-3.5 h-3.5 mr-1.5 -mt-0.5" />}
-            <span className="text-xs sm:text-sm">{TAB_LABELS[tab]}</span>
+            <span className="text-xs sm:text-sm">{t(TAB_LABELS[tab])}</span>
           </button>
         ))}
       </div>
@@ -365,16 +367,15 @@ export default function AdminPanel() {
         {activeTab === 'account' && (
           <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
             <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" /> Account Level Freeze
+              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" /> {t('admin.account.title')}
             </h2>
             <p className="text-xs sm:text-sm text-muted">
-              Instantly block or restore an individual account's ability to transact with your
-              asset.
+              {t('admin.account.description')}
             </p>
 
             <div className="grid gap-4">
               <div>
-                <label className={LABEL_CLASS}>Target Account (Public Key)</label>
+                <label className={LABEL_CLASS}>{t('admin.labels.targetAccount')}</label>
                 <input
                   type="text"
                   value={accountTarget}
@@ -387,7 +388,7 @@ export default function AdminPanel() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={LABEL_CLASS}>Asset Code</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.assetCode')}</label>
                   <input
                     type="text"
                     value={accountAsset}
@@ -397,7 +398,7 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div>
-                  <label className={LABEL_CLASS}>Issuer Secret Key</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.issuerSecret')}</label>
                   <input
                     type="password"
                     value={accountSecret}
@@ -410,13 +411,13 @@ export default function AdminPanel() {
               </div>
 
               <div>
-                <label className={LABEL_CLASS}>Reason (Audit Log)</label>
+                <label className={LABEL_CLASS}>{t('admin.labels.reasonAudit')}</label>
                 <input
                   type="text"
                   value={accountReason}
                   onChange={(e) => setAccountReason(e.target.value)}
                   className={INPUT_CLASS}
-                  placeholder="e.g. Suspicious activity detected"
+                  placeholder={t('admin.placeholders.suspicious')}
                   maxLength={500}
                 />
               </div>
@@ -428,14 +429,14 @@ export default function AdminPanel() {
                 onClick={() => void handleAccountAction('freeze')}
                 className="flex-1 py-3 sm:py-4 bg-red-500/20 text-red-500 border border-red-500/50 font-black rounded-xl hover:bg-red-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
-                {accountLoading ? 'Processing...' : 'Freeze Account'}
+                {accountLoading ? t('admin.actions.processing') : t('admin.actions.freezeAccount')}
               </button>
               <button
                 disabled={accountLoading}
                 onClick={() => void handleAccountAction('unfreeze')}
                 className="flex-1 py-3 sm:py-4 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 font-black rounded-xl hover:bg-emerald-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
-                {accountLoading ? 'Processing...' : 'Unfreeze Account'}
+                {accountLoading ? t('admin.actions.processing') : t('admin.actions.unfreezeAccount')}
               </button>
             </div>
           </div>
@@ -445,17 +446,16 @@ export default function AdminPanel() {
         {activeTab === 'global' && (
           <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
             <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" /> Global Asset Freeze
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" /> {t('admin.global.title')}
             </h2>
             <div className="bg-red-500/10 border border-red-500/30 p-3 sm:p-4 rounded-xl text-red-400 text-xs sm:text-sm">
-              <strong>WARNING:</strong> This will freeze ALL accounts holding this asset. Reserve
-              for systemic security breaches only.
+              <strong>{t('admin.global.warningLabel')}</strong> {t('admin.global.warningBody')}
             </div>
 
             <div className="grid gap-4 mt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={LABEL_CLASS}>Asset Code</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.assetCode')}</label>
                   <input
                     type="text"
                     value={globalAsset}
@@ -465,7 +465,7 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div>
-                  <label className={LABEL_CLASS}>Issuer Secret Key</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.issuerSecret')}</label>
                   <input
                     type="password"
                     value={globalSecret}
@@ -478,13 +478,13 @@ export default function AdminPanel() {
               </div>
 
               <div>
-                <label className={LABEL_CLASS}>Reason (Audit Log)</label>
+                <label className={LABEL_CLASS}>{t('admin.labels.reasonAudit')}</label>
                 <input
                   type="text"
                   value={globalReason}
                   onChange={(e) => setGlobalReason(e.target.value)}
                   className={INPUT_CLASS}
-                  placeholder="Mandatory systemic freeze reason"
+                  placeholder={t('admin.placeholders.systemic')}
                   maxLength={500}
                 />
               </div>
@@ -496,14 +496,14 @@ export default function AdminPanel() {
                 onClick={() => void handleGlobalAction('freeze')}
                 className="flex-1 py-3 sm:py-4 bg-red-600/30 text-red-400 border border-red-500/50 font-black rounded-xl hover:bg-red-600 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
-                {globalLoading ? 'Processing...' : 'Engage Global Freeze'}
+                {globalLoading ? t('admin.actions.processing') : t('admin.actions.engageGlobal')}
               </button>
               <button
                 disabled={globalLoading}
                 onClick={() => void handleGlobalAction('unfreeze')}
                 className="flex-1 py-3 sm:py-4 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 font-black rounded-xl hover:bg-emerald-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
-                {globalLoading ? 'Processing...' : 'Lift Global Freeze'}
+                {globalLoading ? t('admin.actions.processing') : t('admin.actions.liftGlobal')}
               </button>
             </div>
           </div>
@@ -513,15 +513,15 @@ export default function AdminPanel() {
         {activeTab === 'status' && (
           <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
             <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-accent" /> Trustline Status
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-accent" /> {t('admin.status.title')}
             </h2>
             <p className="text-xs sm:text-sm text-muted">
-              Verify whether an account's trustline is currently frozen for a given asset.
+              {t('admin.status.description')}
             </p>
 
             <div className="grid gap-4">
               <div>
-                <label className={LABEL_CLASS}>Target Account (Public Key)</label>
+                <label className={LABEL_CLASS}>{t('admin.labels.targetAccount')}</label>
                 <input
                   type="text"
                   value={statusTarget}
@@ -534,7 +534,7 @@ export default function AdminPanel() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={LABEL_CLASS}>Asset Code</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.assetCode')}</label>
                   <input
                     type="text"
                     value={statusAsset}
@@ -544,7 +544,7 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div>
-                  <label className={LABEL_CLASS}>Asset Issuer (Public Key)</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.assetIssuer')}</label>
                   <input
                     type="text"
                     value={statusIssuer}
@@ -562,14 +562,14 @@ export default function AdminPanel() {
               onClick={() => void handleStatusCheck()}
               className="w-full sm:w-auto py-3 sm:py-4 px-6 bg-black/20 border border-hi font-black rounded-xl hover:bg-black/40 transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
             >
-              {statusLoading ? 'Checking...' : 'Check Status'}
+              {statusLoading ? t('admin.actions.checking') : t('admin.actions.checkStatus')}
             </button>
 
             {statusResult && (
               <div className="p-4 sm:p-6 border border-hi rounded-xl bg-black/20">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-5">
                   <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-muted">
-                    Status
+                    {t('admin.labels.status')}
                   </span>
                   <span
                     className={`px-3 py-1.5 rounded text-xs font-black uppercase tracking-widest border ${
@@ -578,34 +578,34 @@ export default function AdminPanel() {
                         : 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'
                     }`}
                   >
-                    {statusResult.isFrozen ? 'Frozen' : 'Active'}
+                    {statusResult.isFrozen ? t('admin.status.frozen') : t('admin.status.active')}
                   </span>
                 </div>
                 <dl className="grid gap-3 text-xs sm:text-sm">
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                    <dt className="text-muted sm:min-w-[110px]">Account</dt>
+                    <dt className="text-muted sm:min-w-[110px]">{t('admin.labels.account')}</dt>
                     <dd className="font-mono text-xs break-all sm:truncate">
                       {statusResult.targetAccount}
                     </dd>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                    <dt className="text-muted sm:min-w-[110px]">Asset</dt>
+                    <dt className="text-muted sm:min-w-[110px]">{t('admin.labels.asset')}</dt>
                     <dd className="font-bold">{statusResult.assetCode}</dd>
                   </div>
                   {statusResult.latestAction && (
                     <>
                       <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                        <dt className="text-muted sm:min-w-[110px]">Last Action</dt>
-                        <dd className="capitalize">{statusResult.latestAction.action}</dd>
+                        <dt className="text-muted sm:min-w-[110px]">{t('admin.labels.lastAction')}</dt>
+                        <dd className="capitalize">{t(`admin.logAction.${statusResult.latestAction.action}`)}</dd>
                       </div>
                       <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                        <dt className="text-muted sm:min-w-[110px]">Reason</dt>
+                        <dt className="text-muted sm:min-w-[110px]">{t('admin.labels.reason')}</dt>
                         <dd className="break-words">{statusResult.latestAction.reason || '—'}</dd>
                       </div>
                       <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                        <dt className="text-muted sm:min-w-[110px]">Timestamp</dt>
+                        <dt className="text-muted sm:min-w-[110px]">{t('admin.labels.timestamp')}</dt>
                         <dd className="font-mono text-xs">
-                          {new Date(statusResult.latestAction.created_at).toLocaleString()}
+                          {new Date(statusResult.latestAction.created_at).toLocaleString(i18n.language)}
                         </dd>
                       </div>
                     </>
@@ -624,13 +624,16 @@ export default function AdminPanel() {
           <div className="flex flex-col gap-4 sm:gap-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-accent" /> Freeze Audit Logs
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-accent" /> {t('admin.logs.title')}
               </h2>
               <div className="flex items-center gap-3">
                 {logsTotal > 0 && (
                   <span className="text-xs text-muted">
-                    {(logsPage - 1) * LOGS_PER_PAGE + 1}–
-                    {Math.min(logsPage * LOGS_PER_PAGE, logsTotal)} of {logsTotal}
+                    {t('admin.pagination.range', {
+                      start: (logsPage - 1) * LOGS_PER_PAGE + 1,
+                      end: Math.min(logsPage * LOGS_PER_PAGE, logsTotal),
+                      total: logsTotal,
+                    })}
                   </span>
                 )}
                 <button
@@ -638,7 +641,7 @@ export default function AdminPanel() {
                   disabled={logsLoading}
                   className="text-xs bg-black/20 px-3 py-2 rounded border border-hi hover:bg-black/40 disabled:opacity-50 touch-manipulation min-h-[44px]"
                 >
-                  {logsLoading ? 'Loading…' : 'Refresh'}
+                  {logsLoading ? t('admin.actions.loading') : t('admin.actions.refresh')}
                 </button>
               </div>
             </div>
@@ -648,19 +651,19 @@ export default function AdminPanel() {
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-hi text-muted uppercase tracking-wider text-[10px]">
-                    <th className="p-3">Time</th>
-                    <th className="p-3">Target</th>
-                    <th className="p-3">Asset</th>
-                    <th className="p-3">Action</th>
-                    <th className="p-3">Scope</th>
-                    <th className="p-3">Reason</th>
+                    <th className="p-3">{t('admin.labels.time')}</th>
+                    <th className="p-3">{t('admin.labels.target')}</th>
+                    <th className="p-3">{t('admin.labels.asset')}</th>
+                    <th className="p-3">{t('admin.labels.action')}</th>
+                    <th className="p-3">{t('admin.labels.scope')}</th>
+                    <th className="p-3">{t('admin.labels.reason')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {logs.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="p-8 text-center text-muted">
-                        {logsLoading ? 'Loading…' : 'No freeze logs found.'}
+                        {logsLoading ? t('admin.actions.loading') : t('admin.logs.empty')}
                       </td>
                     </tr>
                   ) : (
@@ -670,7 +673,7 @@ export default function AdminPanel() {
                         className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
                       >
                         <td className="p-3 text-xs font-mono">
-                          {new Date(log.created_at).toLocaleString()}
+                          {new Date(log.created_at).toLocaleString(i18n.language)}
                         </td>
                         <td className="p-3 text-xs font-mono" title={log.target_account}>
                           {log.target_account.slice(0, 8)}…{log.target_account.slice(-4)}
@@ -684,10 +687,10 @@ export default function AdminPanel() {
                                 : 'bg-emerald-500/20 text-emerald-500'
                             }`}
                           >
-                            {log.action}
+                            {t(`admin.logAction.${log.action}`)}
                           </span>
                         </td>
-                        <td className="p-3 text-xs capitalize text-muted">{log.scope}</td>
+                        <td className="p-3 text-xs capitalize text-muted">{t(`admin.scope.${log.scope}`)}</td>
                         <td
                           className="p-3 text-xs text-muted max-w-[200px] truncate"
                           title={log.reason || ''}
@@ -705,7 +708,7 @@ export default function AdminPanel() {
             <div className="md:hidden space-y-3">
               {logs.length === 0 ? (
                 <div className="p-8 text-center text-muted text-sm">
-                  {logsLoading ? 'Loading…' : 'No freeze logs found.'}
+                  {logsLoading ? t('admin.actions.loading') : t('admin.logs.empty')}
                 </div>
               ) : (
                 logs.map((log: FreezeLog) => (
@@ -716,7 +719,7 @@ export default function AdminPanel() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-mono text-muted mb-1">
-                          {new Date(log.created_at).toLocaleString()}
+                          {new Date(log.created_at).toLocaleString(i18n.language)}
                         </div>
                         <div className="text-xs font-mono break-all">{log.target_account}</div>
                       </div>
@@ -727,22 +730,22 @@ export default function AdminPanel() {
                             : 'bg-emerald-500/20 text-emerald-500'
                         }`}
                       >
-                        {log.action}
+                        {t(`admin.logAction.${log.action}`)}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-muted">Asset:</span>
+                        <span className="text-muted">{t('admin.labels.asset')}:</span>
                         <span className="ml-1 font-bold">{log.asset_code}</span>
                       </div>
                       <div>
-                        <span className="text-muted">Scope:</span>
-                        <span className="ml-1 capitalize">{log.scope}</span>
+                        <span className="text-muted">{t('admin.labels.scope')}:</span>
+                        <span className="ml-1 capitalize">{t(`admin.scope.${log.scope}`)}</span>
                       </div>
                     </div>
                     {log.reason && (
                       <div className="text-xs">
-                        <span className="text-muted">Reason:</span>
+                        <span className="text-muted">{t('admin.labels.reason')}:</span>
                         <div className="mt-1 text-text break-words">{log.reason}</div>
                       </div>
                     )}
@@ -760,17 +763,17 @@ export default function AdminPanel() {
                   className="flex items-center gap-1 px-4 py-2.5 text-xs border border-hi rounded hover:bg-black/20 disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
                 >
                   <ChevronLeft className="w-4 h-4" />{' '}
-                  <span className="hidden sm:inline">Previous</span>
+                  <span className="hidden sm:inline">{t('admin.actions.previous')}</span>
                 </button>
                 <span className="text-xs text-muted px-2">
-                  Page {logsPage} of {totalPages}
+                  {t('admin.pagination.page', { page: logsPage, total: totalPages })}
                 </span>
                 <button
                   onClick={() => setLogsPage((p: number) => Math.min(totalPages, p + 1))}
                   disabled={logsPage === totalPages || logsLoading}
                   className="flex items-center gap-1 px-4 py-2.5 text-xs border border-hi rounded hover:bg-black/20 disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
                 >
-                  <span className="hidden sm:inline">Next</span>{' '}
+                  <span className="hidden sm:inline">{t('admin.actions.next')}</span>{' '}
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -784,19 +787,17 @@ export default function AdminPanel() {
             {/* ── Clawback Form ── */}
             <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
               <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" /> Stellar Asset
-                Clawback
+                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" /> {t('admin.clawback.title')}
               </h2>
               <div className="bg-orange-500/10 border border-orange-500/30 p-3 sm:p-4 rounded-xl text-orange-300 text-xs sm:text-sm">
-                <strong>Irreversible:</strong> Clawback burns the specified amount from the target
-                account. Use only for compliance or error-correction. Requires{' '}
-                <code className="bg-black/20 px-1 rounded">auth_clawback_enabled</code> on the
-                issuer account.
+                <strong>{t('admin.clawback.irreversibleLabel')}</strong> {t('admin.clawback.irreversiblePrefix')}{' '}
+                <code className="bg-black/20 px-1 rounded">auth_clawback_enabled</code>{' '}
+                {t('admin.clawback.irreversibleSuffix')}
               </div>
 
               <div className="grid gap-4">
                 <div>
-                  <label className={LABEL_CLASS}>Target Account (Public Key)</label>
+                  <label className={LABEL_CLASS}>{t('admin.labels.targetAccount')}</label>
                   <input
                     id="clawback-target-account"
                     type="text"
@@ -810,7 +811,7 @@ export default function AdminPanel() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={LABEL_CLASS}>Amount (ORGUSD)</label>
+                    <label className={LABEL_CLASS}>{t('admin.clawback.amountOrgusd')}</label>
                     <input
                       id="clawback-amount"
                       type="number"
@@ -823,7 +824,7 @@ export default function AdminPanel() {
                     />
                   </div>
                   <div>
-                    <label className={LABEL_CLASS}>Issuer Secret Key</label>
+                    <label className={LABEL_CLASS}>{t('admin.labels.issuerSecret')}</label>
                     <input
                       id="clawback-issuer-secret"
                       type="password"
@@ -837,14 +838,14 @@ export default function AdminPanel() {
                 </div>
 
                 <div>
-                  <label className={LABEL_CLASS}>Reason (Compliance Audit Log)</label>
+                  <label className={LABEL_CLASS}>{t('admin.clawback.reasonCompliance')}</label>
                   <input
                     id="clawback-reason"
                     type="text"
                     value={clawbackReason}
                     onChange={(e) => setClawbackReason(e.target.value)}
                     className={INPUT_CLASS}
-                    placeholder="e.g. Funds sent to incorrect address"
+                    placeholder={t('admin.placeholders.funds')}
                     maxLength={500}
                   />
                 </div>
@@ -856,7 +857,7 @@ export default function AdminPanel() {
                 onClick={() => void handleClawback()}
                 className="w-full sm:w-auto py-3 sm:py-4 px-8 bg-orange-500/20 text-orange-400 border border-orange-500/50 font-black rounded-xl hover:bg-orange-500 hover:text-(--text) transition-all shadow-lg uppercase tracking-widest text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
               >
-                {clawbackLoading ? 'Submitting…' : 'Execute Clawback'}
+                {clawbackLoading ? t('admin.actions.submitting') : t('admin.actions.executeClawback')}
               </button>
             </div>
 
@@ -864,14 +865,16 @@ export default function AdminPanel() {
             <div className="flex flex-col gap-4 border-t border-hi pt-6">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <h3 className="text-base sm:text-lg font-bold flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-accent" /> Clawback History
+                  <Activity className="w-4 h-4 text-accent" /> {t('admin.clawback.history')}
                 </h3>
                 <div className="flex items-center gap-3">
                   {clawbackLogsTotal > 0 && (
                     <span className="text-xs text-muted">
-                      {(clawbackLogsPage - 1) * LOGS_PER_PAGE + 1}–
-                      {Math.min(clawbackLogsPage * LOGS_PER_PAGE, clawbackLogsTotal)} of{' '}
-                      {clawbackLogsTotal}
+                      {t('admin.pagination.range', {
+                        start: (clawbackLogsPage - 1) * LOGS_PER_PAGE + 1,
+                        end: Math.min(clawbackLogsPage * LOGS_PER_PAGE, clawbackLogsTotal),
+                        total: clawbackLogsTotal,
+                      })}
                     </span>
                   )}
                   <button
@@ -879,7 +882,7 @@ export default function AdminPanel() {
                     disabled={clawbackLogsLoading}
                     className="text-xs bg-black/20 px-3 py-2 rounded border border-hi hover:bg-black/40 disabled:opacity-50 touch-manipulation min-h-[44px]"
                   >
-                    {clawbackLogsLoading ? 'Loading…' : 'Refresh'}
+                    {clawbackLogsLoading ? t('admin.actions.loading') : t('admin.actions.refresh')}
                   </button>
                 </div>
               </div>
@@ -889,19 +892,19 @@ export default function AdminPanel() {
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-hi text-muted uppercase tracking-wider text-[10px]">
-                      <th className="p-3">Time</th>
-                      <th className="p-3">From Account</th>
-                      <th className="p-3">Asset</th>
-                      <th className="p-3">Amount</th>
-                      <th className="p-3">Tx Hash</th>
-                      <th className="p-3">Reason</th>
+                      <th className="p-3">{t('admin.labels.time')}</th>
+                      <th className="p-3">{t('admin.labels.fromAccount')}</th>
+                      <th className="p-3">{t('admin.labels.asset')}</th>
+                      <th className="p-3">{t('admin.labels.amount')}</th>
+                      <th className="p-3">{t('admin.labels.txHash')}</th>
+                      <th className="p-3">{t('admin.labels.reason')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {clawbackLogs.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="p-8 text-center text-muted">
-                          {clawbackLogsLoading ? 'Loading…' : 'No clawback records found.'}
+                          {clawbackLogsLoading ? t('admin.actions.loading') : t('admin.clawback.empty')}
                         </td>
                       </tr>
                     ) : (
@@ -911,7 +914,7 @@ export default function AdminPanel() {
                           className="border-b border-hi/50 hover:bg-(--surface-hi) transition-colors"
                         >
                           <td className="p-3 text-xs font-mono">
-                            {new Date(log.created_at).toLocaleString()}
+                            {new Date(log.created_at).toLocaleString(i18n.language)}
                           </td>
                           <td className="p-3 text-xs font-mono" title={log.from_account}>
                             {log.from_account.slice(0, 8)}…{log.from_account.slice(-4)}
@@ -938,7 +941,7 @@ export default function AdminPanel() {
               <div className="md:hidden space-y-3">
                 {clawbackLogs.length === 0 ? (
                   <div className="p-8 text-center text-muted text-sm">
-                    {clawbackLogsLoading ? 'Loading…' : 'No clawback records found.'}
+                    {clawbackLogsLoading ? t('admin.actions.loading') : t('admin.clawback.empty')}
                   </div>
                 ) : (
                   clawbackLogs.map((log: ClawbackLog) => (
@@ -949,21 +952,21 @@ export default function AdminPanel() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-mono text-muted mb-1">
-                            {new Date(log.created_at).toLocaleString()}
+                            {new Date(log.created_at).toLocaleString(i18n.language)}
                           </div>
                           <div className="text-xs font-mono break-all">{log.from_account}</div>
                         </div>
                         <span className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-widest bg-orange-500/20 text-orange-400 flex-shrink-0">
-                          Clawback
+                          {t('admin.actions.clawback')}
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-muted">Asset:</span>
+                          <span className="text-muted">{t('admin.labels.asset')}:</span>
                           <span className="ml-1 font-bold">{log.asset_code}</span>
                         </div>
                         <div>
-                          <span className="text-muted">Amount:</span>
+                          <span className="text-muted">{t('admin.labels.amount')}:</span>
                           <span className="ml-1 font-mono text-orange-400">{log.amount}</span>
                         </div>
                       </div>
@@ -971,11 +974,11 @@ export default function AdminPanel() {
                         className="text-xs font-mono text-muted break-all"
                         title={log.transaction_hash}
                       >
-                        Tx: {log.transaction_hash.slice(0, 16)}…
+                        {t('admin.notifications.tx', { hash: `${log.transaction_hash.slice(0, 16)}…` })}
                       </div>
                       {log.reason && (
                         <div className="text-xs">
-                          <span className="text-muted">Reason:</span>
+                          <span className="text-muted">{t('admin.labels.reason')}:</span>
                           <div className="mt-1 text-text break-words">{log.reason}</div>
                         </div>
                       )}
@@ -993,10 +996,10 @@ export default function AdminPanel() {
                     className="flex items-center gap-1 px-4 py-2.5 text-xs border border-hi rounded hover:bg-black/20 disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
                   >
                     <ChevronLeft className="w-4 h-4" />{' '}
-                    <span className="hidden sm:inline">Previous</span>
+                    <span className="hidden sm:inline">{t('admin.actions.previous')}</span>
                   </button>
                   <span className="text-xs text-muted px-2">
-                    Page {clawbackLogsPage} of {clawbackTotalPages}
+                    {t('admin.pagination.page', { page: clawbackLogsPage, total: clawbackTotalPages })}
                   </span>
                   <button
                     onClick={() =>
@@ -1005,7 +1008,7 @@ export default function AdminPanel() {
                     disabled={clawbackLogsPage === clawbackTotalPages || clawbackLogsLoading}
                     className="flex items-center gap-1 px-4 py-2.5 text-xs border border-hi rounded hover:bg-black/20 disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
                   >
-                    <span className="hidden sm:inline">Next</span>{' '}
+                    <span className="hidden sm:inline">{t('admin.actions.next')}</span>{' '}
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
