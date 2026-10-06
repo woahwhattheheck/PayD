@@ -18,7 +18,7 @@ export interface AdvisoryLockClient {
     text: string,
     values?: unknown[]
   ): Promise<{ rows: Row[] }>;
-  release(): void;
+  release(destroy?: boolean): void;
 }
 
 export interface AdvisoryLockDatabase {
@@ -48,6 +48,8 @@ export async function runLeaderElectedFxRateIngestion(
   const log = options.log ?? logger;
   const client = await database.connect();
   let acquired = false;
+  // A session with uncertain lock state must never return to the idle pool.
+  let destroyClient = true;
 
   try {
     const lockResult = await client.query<AdvisoryLockRow>(
@@ -55,6 +57,7 @@ export async function runLeaderElectedFxRateIngestion(
       [FX_RATE_INGESTION_LOCK_ID]
     );
     acquired = Boolean(lockResult.rows[0]?.acquired);
+    destroyClient = acquired;
 
     if (!acquired) {
       log.debug('FX rate ingestion skipped: advisory lock held by another instance');
@@ -70,14 +73,16 @@ export async function runLeaderElectedFxRateIngestion(
           'SELECT pg_advisory_unlock($1) AS released',
           [FX_RATE_INGESTION_LOCK_ID]
         );
-        if (!unlockResult.rows[0]?.released) {
+        if (unlockResult.rows[0]?.released === true) {
+          destroyClient = false;
+        } else {
           log.error('FX rate ingestion advisory lock was not released');
         }
       } catch (unlockError) {
         log.error('FX rate ingestion advisory unlock failed', unlockError);
       }
     }
-    client.release();
+    client.release(destroyClient);
   }
 }
 
