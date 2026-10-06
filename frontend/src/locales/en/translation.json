@@ -656,5 +656,113 @@
     "toggleSidebar": "Toggle Sidebar",
     "license": "© {{year}} PayD — Licensed under Apache 2.0",
     "networkStatus": "Stellar Testnet Node · {{version}}"
+  },
+  "login": {
+    "welcomeBack": "Welcome back",
+    "subtitle": "Connect your account to manage your payroll system",
+    "continueGoogle": "Continue with Google",
+    "continueGithub": "Continue with GitHub",
+    "securityNote": "Secure · Encrypted · Non-Custodial"
+  },
+  "authCallback": {
+    "authenticating": "Authenticating..."
+  },
+  "employeeEntry": {
+    "defaultRole": "Employee",
+    "addedTitle": "{{name}} added successfully!",
+    "walletGenerated": "A new Stellar wallet was generated for this employee.",
+    "addedWithWallet": "Employee {{name}} added successfully! A wallet was created for them.",
+    "addedMessage": "Employee {{name}} added successfully!",
+    "backToDirectory": "Back to Directory",
+    "title": "Add New Employee",
+    "simulatedEmailLabel": "[SIMULATED EMAIL NOTIFICATION TO EMPLOYEE]",
+    "simulatedEmailGreeting": "Hello {{name}}, your employer has added you to the payroll.",
+    "simulatedEmailWalletBody": "A default Stellar wallet has been created for you to receive claimable balances.",
+    "secretKeyLabel": "Your Secret Key:",
+    "secretKeyWarning": "Please save this secret key securely to claim your future salary.",
+    "successTitle": "Success",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "walletAddressOptional": "Stellar Wallet Address (Optional)",
+    "walletNote": "If no wallet is provided, a claimable balance will be created using a new wallet generated for them.",
+    "walletPlaceholder": "Leave blank to generate a wallet",
+    "role": "Role",
+    "roles": {
+      "contractor": "Contractor",
+      "fullTime": "Full Time",
+      "partTime": "Part Time"
+    },
+    "preferredCurrency": "Preferred Currency",
+    "addEmployee": "Add Employee"
+  },
+  "walletQr": {
+    "copied": "{{label}} copied to clipboard!",
+    "title": "Your Stellar Wallet Address",
+    "walletAddress": "Wallet Address",
+    "copyAddress": "Copy Address",
+    "secretKeySecure": "Secret Key (Save Securely!)",
+    "secretKey": "Secret key",
+    "copySecretKey": "Copy Secret Key",
+    "revealSecretKey": "Click to reveal secret key",
+    "trustlineGuide": "Trustline Setup Guide",
+    "trustlineIntro": "To receive payments in different currencies, you need to set up trustlines. Follow these steps:",
+    "steps": {
+      "fund": {
+        "title": "Fund Your Wallet",
+        "description": "Add XLM to your wallet. You need at least 1 XLM to create a trustline."
+      },
+      "asset": {
+        "title": "Choose Your Asset",
+        "description": "Decide which asset you want to receive (USDC, EURC, or XLM). Each asset requires a separate trustline."
+      },
+      "create": {
+        "title": "Create Trustline",
+        "description": "Navigate to your wallet's asset settings and add a trustline for the chosen asset using its issuer address."
+      },
+      "verify": {
+        "title": "Verify Trustline",
+        "description": "After creation, verify the trustline appears in your wallet's asset list. You can now receive payments in that asset."
+      }
+    },
+    "supportedAssets": "Supported Assets",
+    "issuer": "Issuer",
+    "nativeAsset": "Native Asset",
+    "assetIssuer": "{{asset}} issuer",
+    "shareQr": "Share this QR code with {{name}} so they can receive payments directly to their wallet."
+  },
+  "vesting": {
+    "form": {
+      "title": "Create New Vesting Grant",
+      "employeeAddress": "Employee Wallet Address (G...)",
+      "totalAmount": "Total Grant Amount",
+      "durationYears": "Duration (Years)",
+      "startDate": "Start Date",
+      "cliffDate": "Cliff Date",
+      "simulating": "Simulating...",
+      "initialize": "Initialize Vesting Escrow"
+    },
+    "list": {
+      "empty": "No active vesting grants found.",
+      "summary": "Total: {{total}} XLM | Vested: {{vested}} XLM",
+      "claim": "Claim",
+      "cliff": "Cliff",
+      "start": "Start"
+    },
+    "notifications": {
+      "simReadyTitle": "Grant simulation ready",
+      "simReadyBody": "Review the transaction details before confirming.",
+      "simFailedTitle": "Grant simulation failed",
+      "simFailedBody": "Please check the contract parameters.",
+      "claimTitle": "Claim Initialized",
+      "claimBody": "Simulating on-chain claim transaction...",
+      "createdTitle": "Vesting grant created!",
+      "createdBody": "The transaction has been broadcast to the network."
+    },
+    "page": {
+      "titlePrefix": "Vesting",
+      "titleHighlight": "Escrow",
+      "subtitle": "Manage employee token vesting schedules",
+      "confirmCreate": "Confirm & Create Grant"
+    }
   }
 }
