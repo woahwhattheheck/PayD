@@ -32,7 +32,7 @@ const WithdrawalFlow: React.FC<WithdrawalFlowProps> = ({
 }) => {
   const { t } = useTranslation();
   const {
-    state:
+    state,
     setStep,
     selectAnchor,
     setAmount,
