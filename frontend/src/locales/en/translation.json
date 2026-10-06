@@ -933,7 +933,11 @@
     "tx": "Tx",
     "notAvailable": "N/A",
     "recipientLabel": "Recipient:",
-    "amountLabel": "Amount:"
+    "amountLabel": "Amount:",
+    "connected": "Connected: {{address}}",
+    "total": "Total: {{total}}%",
+    "totalDistributed": "Total Distributed:",
+    "viewTransaction": "View Transaction: {{hash}}"
   },
   "transactionHistory": {
     "loadFailed": "Failed to load transaction history",
@@ -950,7 +954,16 @@
     "assetPlaceholder": "Asset (USDC, XLM...)",
     "empty": "No records found for current filters.",
     "loading": "Loading...",
-    "loadMore": "Load More"
+    "loadMore": "Load More",
+    "filters": "Filters",
+    "actor": "Actor:",
+    "amountLabel": "Amount:",
+    "status": {
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "failed": "Failed",
+      "indexed": "Indexed"
+    }
   },
   "bulkPaymentTracker": {
     "status": {
