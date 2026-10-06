@@ -801,7 +801,11 @@
     "failureFallback": "Se produjo un error con tu retiro.",
     "tryAgain": "Intentar de nuevo",
     "close": "Cerrar",
-    "cashOut": "Retirar"
+    "cashOut": "Retirar",
+    "fee": "Comisión:",
+    "minimum": "Mín.:",
+    "withdrawVia": "Retirar mediante {{anchor}}",
+    "available": "Disponible: {{amount}}"
   },
   "crossAssetPayment": {
     "waitingForSubmission": "Esperando el envío...",
@@ -846,7 +850,8 @@
     "simulatedSubmitted": "Llamada al contrato simulada y enviada",
     "settlement": "Liquidación",
     "transactionHash": "Hash de transacción",
-    "changePrompt": "Cambia el par de activos y el importe para solicitar opciones de ruta al proxy del backend."
+    "changePrompt": "Cambia el par de activos y el importe para solicitar opciones de ruta al proxy del backend.",
+    "pathFeeSlippage": "Comisión: {{fee}} {{asset}} | Deslizamiento: {{slippage}} %"
   },
   "payrollResidual": {
     "scheduleConfigured": "¡Programación de nómina configurada!",
@@ -892,7 +897,16 @@
     "cancelAutomation": "Cancelar automatización",
     "recentClaims": "Saldos reclamables manuales recientes",
     "noClaims": "No hay saldos reclamables manuales recientes.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "at": "a las",
+    "amountLabel": "Importe:",
+    "scheduledLabel": "Programado:",
+    "toLabel": "A:",
+    "frequency": {
+      "weekly": "Semanal",
+      "biweekly": "Quincenal",
+      "monthly": "Mensual"
+    }
   },
   "revenueSplit": {
     "loadFailed": "No se pudo cargar el panel",
