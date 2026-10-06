@@ -1,10 +1,22 @@
 import express from 'express';
+import { z } from 'zod';
 import { tenantSecurityService } from '../services/tenantSecurityService.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = express.Router();
+
+const eventParamsSchema = z.object({
+  eventId: z.string().regex(/^[1-9][0-9]*$/, 'eventId must be a positive integer'),
+});
+const organizationParamsSchema = z.object({
+  organizationId: z.string().regex(/^[1-9][0-9]*$/, 'organizationId must be a positive integer'),
+});
+const resolutionBodySchema = z.object({
+  resolutionNotes: z.string().min(1),
+});
 
 /**
  * GET /api/tenant-security/summary/:organizationId
@@ -75,7 +87,7 @@ router.get('/events/:organizationId', authenticateJWT, async (req, res) => {
  * POST /api/tenant-security/events/:eventId/resolve
  * Resolve a security event
  */
-router.post('/events/:eventId/resolve', authenticateJWT, async (req, res) => {
+router.post('/events/:eventId/resolve', authenticateJWT, validateRequest({ params: eventParamsSchema, body: resolutionBodySchema }), async (req, res) => {
   try {
     const eventId = parseInt(req.params.eventId, 10);
     const { resolutionNotes } = req.body;
@@ -114,7 +126,7 @@ router.post('/events/:eventId/resolve', authenticateJWT, async (req, res) => {
  * POST /api/tenant-security/detect-anomalies/:organizationId
  * Manually trigger anomaly detection
  */
-router.post('/detect-anomalies/:organizationId', authenticateJWT, async (req, res) => {
+router.post('/detect-anomalies/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
 
