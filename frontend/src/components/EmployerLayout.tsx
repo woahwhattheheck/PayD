@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardTopBar } from './DashboardTopBar';
 import { Menu, X } from 'lucide-react';
-import { hasActiveAccessToken, normalizeAuthReturnPath } from '../utils/authSession';
+import { hasActiveAccessToken } from '../utils/authSession';
+import RequireAuth from './RequireAuth';
 
 export const EmployerLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const location = useLocation();
-
   if (!hasActiveAccessToken()) {
-    const from = normalizeAuthReturnPath(
-      `${location.pathname}${location.search}${location.hash}`
-    );
-    return <Navigate to="/login" replace state={{ from }} />;
+    return <RequireAuth />;
   }
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
