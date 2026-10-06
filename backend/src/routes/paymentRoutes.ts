@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { PaymentController } from '../controllers/paymentController.js';
 import { require2FA } from '../middlewares/require2fa.js';
 import { authenticateJWT } from '../middlewares/auth.js';
@@ -9,8 +10,24 @@ import {
   validateActiveTenant,
   logTenantAccess,
 } from '../middleware/enhancedTenantIsolation.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = Router();
+
+const objectPayloadSchema = z.unknown().refine(
+  (value) => value !== null && typeof value === 'object',
+  'payload must be an object'
+);
+const sep31BodySchema = z.object({
+  domain: z.string().min(1),
+  paymentData: objectPayloadSchema,
+  secretKey: z.string().min(1),
+});
+const sep24BodySchema = z.object({
+  domain: z.string().min(1),
+  secretKey: z.string().min(1),
+  withdrawalData: objectPayloadSchema,
+});
 
 router.use(authenticateJWT);
 router.use(strictTenantBoundary);
@@ -22,6 +39,7 @@ router.post(
   '/sep31/initiate',
   isolateOrganization,
   require2FA,
+  validateRequest({ body: sep31BodySchema }),
   idempotencyMiddleware(),
   PaymentController.initiateSEP31
 );
@@ -32,6 +50,7 @@ router.post(
   '/sep24/withdraw',
   isolateOrganization,
   require2FA,
+  validateRequest({ body: sep24BodySchema }),
   idempotencyMiddleware(),
   PaymentController.initiateSEP24Withdrawal
 );
