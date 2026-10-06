@@ -18,24 +18,46 @@ interface LiquiditySettings {
 
 export class LiquidityAlertChecker {
   private cronJob: ScheduledTask | null = null;
+  private readonly activeRuns = new Set<Promise<void>>();
 
   initialize(): void {
-    this.cronJob = cron.schedule('0 * * * *', async () => {
-      try {
-        await this.checkAllOrganizations();
-      } catch (error) {
-        console.error('[LiquidityAlertChecker] Error executing check:', error);
-      }
+    this.cronJob = cron.schedule('0 * * * *', () => {
+      const run = (async () => {
+        try {
+          await this.checkAllOrganizations();
+        } catch (error) {
+          console.error('[LiquidityAlertChecker] Error executing check:', error);
+        }
+      })();
+      this.trackRun(run);
     });
 
     console.log('[LiquidityAlertChecker] Cron job initialized - running hourly');
   }
 
-  stop(): void {
+  private trackRun(run: Promise<void>): void {
+    this.activeRuns.add(run);
+    void run.then(
+      () => {
+        this.activeRuns.delete(run);
+      },
+      () => {
+        this.activeRuns.delete(run);
+      }
+    );
+  }
+
+  async stop(): Promise<void> {
     if (this.cronJob) {
       this.cronJob.stop();
-      console.log('[LiquidityAlertChecker] Cron job stopped');
     }
+
+    const activeRuns = [...this.activeRuns];
+    if (activeRuns.length > 0) {
+      await Promise.allSettled(activeRuns);
+    }
+
+    console.log('[LiquidityAlertChecker] Cron job stopped and active runs drained');
   }
 
   async checkAllOrganizations(): Promise<void> {
