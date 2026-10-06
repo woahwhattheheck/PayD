@@ -18,8 +18,9 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
 CREATE INDEX IF NOT EXISTS idx_idempotency_keys_lookup
     ON idempotency_keys (organization_id, idempotency_key, expires_at);
 
--- Auto-cleanup of expired keys (TTL enforced by expires_at comparison).
--- Runs at table level; the application also checks expires_at on read.
+-- Expiry checks compare against the current time at query/cleanup time.
+-- PostgreSQL requires partial-index predicates to be immutable, so NOW()
+-- cannot appear in the predicate. A normal B-tree still supports bounded
+-- expires_at range scans without baking a moving clock value into the index.
 CREATE INDEX IF NOT EXISTS idx_idempotency_keys_expires
-    ON idempotency_keys (expires_at)
-    WHERE expires_at < NOW();
+    ON idempotency_keys (expires_at);
