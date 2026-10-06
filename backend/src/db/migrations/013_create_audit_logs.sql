@@ -159,7 +159,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_actor
 -- IP investigation: "all events from this IP/subnet"
 -- INET supports WHERE actor_ip << '10.0.0.0/8' subnet queries.
 CREATE INDEX IF NOT EXISTS idx_audit_logs_actor_ip
-  ON audit_logs USING GIST (actor_ip)
+  ON audit_logs USING GIST (actor_ip inet_ops)
   WHERE actor_ip IS NOT NULL;
 
 -- Severity alerting: quickly count critical events in rolling window.
