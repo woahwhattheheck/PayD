@@ -1,4 +1,5 @@
 // Modified 2026-10-05: cache tenant configuration reads at the service boundary.
+import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import { pool } from '../config/database.js';
 import { RedisClient } from './rateLimitService.js';
@@ -47,12 +48,66 @@ export class TenantConfigService {
 
   private static readonly CONFIG_CACHE_TTL_SECONDS = 30 * 60;
 
-  private configCacheKey(organizationId: number, configKey: string): string {
-    return `cache:organization-settings:${organizationId}:${configKey}`;
+  private configGenerationKey(organizationId: number, configKey: string): string {
+    return `cache:organization-settings:${organizationId}:key:${configKey}:generation`;
   }
 
-  private allConfigsCacheKey(organizationId: number): string {
-    return `cache:organization-settings:${organizationId}:all`;
+  private allConfigsGenerationKey(organizationId: number): string {
+    return `cache:organization-settings:${organizationId}:all:generation`;
+  }
+
+  private async getOrCreateCacheGeneration(
+    generationKey: string,
+    metadata: Record<string, unknown>
+  ): Promise<string | null> {
+    const redis = RedisClient.getInstance();
+    if (!redis) {
+      logger.info('Cache miss', {
+        cache: 'organization-settings',
+        ...metadata,
+        reason: 'redis_not_configured',
+      });
+      return null;
+    }
+
+    try {
+      let generation = await redis.get(generationKey);
+      if (generation === null) {
+        const candidate = randomUUID();
+        const created = await redis.set(generationKey, candidate, 'NX');
+        generation = created === 'OK' ? candidate : await redis.get(generationKey);
+      }
+      return generation;
+    } catch (error) {
+      logger.warn('Organization settings cache generation read failed', {
+        ...metadata,
+        error,
+      });
+      return null;
+    }
+  }
+
+  private async configCacheKey(
+    organizationId: number,
+    configKey: string
+  ): Promise<string | null> {
+    const generation = await this.getOrCreateCacheGeneration(
+      this.configGenerationKey(organizationId, configKey),
+      { organizationId, configKey }
+    );
+    return generation === null
+      ? null
+      : `cache:organization-settings:${organizationId}:key:${configKey}:${generation}`;
+  }
+
+  private async allConfigsCacheKey(organizationId: number): Promise<string | null> {
+    const generation = await this.getOrCreateCacheGeneration(
+      this.allConfigsGenerationKey(organizationId),
+      { organizationId, configKey: '*' }
+    );
+    return generation === null
+      ? null
+      : `cache:organization-settings:${organizationId}:all:${generation}`;
   }
 
   private async readCache<T>(
@@ -106,9 +161,11 @@ export class TenantConfigService {
    * Get a specific configuration by key
    */
   async getConfig(organizationId: number, configKey: string): Promise<any | null> {
-    const cacheKey = this.configCacheKey(organizationId, configKey);
-    const cached = await this.readCache<any>(cacheKey, { organizationId, configKey });
-    if (cached.hit) return cached.value;
+    const cacheKey = await this.configCacheKey(organizationId, configKey);
+    if (cacheKey !== null) {
+      const cached = await this.readCache<any>(cacheKey, { organizationId, configKey });
+      if (cached.hit) return cached.value;
+    }
 
     const query = `
       SELECT config_value
@@ -118,7 +175,7 @@ export class TenantConfigService {
 
     const result = await this.pool.query(query, [organizationId, configKey]);
     const value = result.rows[0]?.config_value ?? null;
-    if (value !== null) {
+    if (value !== null && cacheKey !== null) {
       await this.writeCache(cacheKey, value, { organizationId, configKey });
     }
     return value;
@@ -128,12 +185,14 @@ export class TenantConfigService {
    * Get all configurations for a tenant
    */
   async getAllConfigs(organizationId: number): Promise<Record<string, any>> {
-    const cacheKey = this.allConfigsCacheKey(organizationId);
-    const cached = await this.readCache<Record<string, any>>(cacheKey, {
-      organizationId,
-      configKey: '*',
-    });
-    if (cached.hit) return cached.value ?? {};
+    const cacheKey = await this.allConfigsCacheKey(organizationId);
+    if (cacheKey !== null) {
+      const cached = await this.readCache<Record<string, any>>(cacheKey, {
+        organizationId,
+        configKey: '*',
+      });
+      if (cached.hit) return cached.value ?? {};
+    }
 
     const query = `
       SELECT config_key, config_value
@@ -149,7 +208,9 @@ export class TenantConfigService {
       configs[row.config_key] = row.config_value;
     });
 
-    await this.writeCache(cacheKey, configs, { organizationId, configKey: '*' });
+    if (cacheKey !== null) {
+      await this.writeCache(cacheKey, configs, { organizationId, configKey: '*' });
+    }
     return configs;
   }
 
@@ -157,9 +218,11 @@ export class TenantConfigService {
     try {
       const redis = RedisClient.getInstance();
       if (redis) {
-        await redis.del(
-          this.configCacheKey(organizationId, configKey),
-          this.allConfigsCacheKey(organizationId)
+        await redis.mset(
+          this.configGenerationKey(organizationId, configKey),
+          randomUUID(),
+          this.allConfigsGenerationKey(organizationId),
+          randomUUID()
         );
       }
     } catch (error) {
