@@ -26,40 +26,80 @@ const ADVISORY_LOCK_INTEGRITY_CHECK = 84_901_002;
  */
 
 export interface ScheduledJob {
-  stop(): void;
+  stop(): Promise<void>;
+}
+
+function trackRun(activeRuns: Set<Promise<void>>, run: Promise<void>): void {
+  activeRuns.add(run);
+  void run.then(
+    () => {
+      activeRuns.delete(run);
+    },
+    () => {
+      activeRuns.delete(run);
+    }
+  );
+}
+
+async function stopAndDrain(
+  task: ScheduledTask,
+  activeRuns: Set<Promise<void>>,
+  label: string
+): Promise<void> {
+  task.stop();
+  const runs = [...activeRuns];
+  if (runs.length > 0) {
+    await Promise.allSettled(runs);
+  }
+  logger.info(`${label} cron stopped and active runs drained`);
 }
 
 export function scheduleDailyUsageSnapshots(): ScheduledJob {
+  const activeRuns = new Set<Promise<void>>();
+
   // Run once immediately on startup (non-leader-elected — safe idempotent catch-up)
-  void runDailyUsageSnapshots();
+  trackRun(activeRuns, runDailyUsageSnapshots());
 
   const task: ScheduledTask = cron.schedule('0 0 * * *', () => {
-    void runWithAdvisoryLock(ADVISORY_LOCK_USAGE_SNAPSHOT, 'daily-usage-snapshot', runDailyUsageSnapshots);
+    trackRun(
+      activeRuns,
+      runWithAdvisoryLock(
+        ADVISORY_LOCK_USAGE_SNAPSHOT,
+        'daily-usage-snapshot',
+        runDailyUsageSnapshots
+      )
+    );
   }, { timezone: 'UTC' });
 
   logger.info('Daily usage snapshot cron scheduled (midnight UTC, leader-elected)');
 
   return {
-    stop() {
-      task.stop();
-      logger.info('Daily usage snapshot cron stopped');
+    async stop() {
+      await stopAndDrain(task, activeRuns, 'Daily usage snapshot');
     },
   };
 }
 
 export function scheduleNightlyIntegrityCheck(): ScheduledJob {
-  void runNightlyIntegrityCheck();
+  const activeRuns = new Set<Promise<void>>();
+  trackRun(activeRuns, runNightlyIntegrityCheck());
 
   const task: ScheduledTask = cron.schedule('0 0 * * *', () => {
-    void runWithAdvisoryLock(ADVISORY_LOCK_INTEGRITY_CHECK, 'nightly-integrity-check', runNightlyIntegrityCheck);
+    trackRun(
+      activeRuns,
+      runWithAdvisoryLock(
+        ADVISORY_LOCK_INTEGRITY_CHECK,
+        'nightly-integrity-check',
+        runNightlyIntegrityCheck
+      )
+    );
   }, { timezone: 'UTC' });
 
   logger.info('Nightly integrity check cron scheduled (midnight UTC, leader-elected)');
 
   return {
-    stop() {
-      task.stop();
-      logger.info('Nightly integrity check cron stopped');
+    async stop() {
+      await stopAndDrain(task, activeRuns, 'Nightly integrity check');
     },
   };
 }
