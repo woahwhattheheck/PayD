@@ -1,0 +1,23 @@
+name: PayD 527 resource benchmark
+
+on:
+  push:
+    branches:
+      - sol56/payd527-direct-transfer-gas-20261004
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Soroban bulk-payment resource benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.89.0
+        with:
+          targets: wasm32v1-none
+      - name: Run focused issue 527 benchmark
+        run: cargo test -p bulk_payment benchmark_issue_527_resource_profile -- --nocapture
