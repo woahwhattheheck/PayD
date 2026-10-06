@@ -238,9 +238,9 @@ impl CrossAssetPaymentContract {
         common::require_admin(&env, &DataKey::Admin).map_err(ContractError::from)?;
 
         let mut record = load_payment(&env, payment_id)?;
-        // A legacy record has no sidecar terms. Keep it pending so the
-        // existing sender/admin cancellation path remains available.
-        load_terms(&env, payment_id)?;
+        // Keep the settlement sidecar on the same persistence horizon as the
+        // payment record whenever the nonterminal escrow is refreshed.
+        let terms = load_terms(&env, payment_id)?;
         if record.status != symbol_short!("pending") {
             return Err(ContractError::NotPending);
         }
@@ -250,6 +250,7 @@ impl CrossAssetPaymentContract {
 
         record.status = new_status.clone();
         persist_payment(&env, payment_id, &record);
+        persist_terms(&env, payment_id, &terms);
 
         PaymentStatusUpdatedEvent { payment_id, new_status };
 
