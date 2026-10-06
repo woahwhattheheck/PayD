@@ -238,6 +238,9 @@ impl CrossAssetPaymentContract {
         common::require_admin(&env, &DataKey::Admin).map_err(ContractError::from)?;
 
         let mut record = load_payment(&env, payment_id)?;
+        // A legacy record has no sidecar terms. Keep it pending so the
+        // existing sender/admin cancellation path remains available.
+        load_terms(&env, payment_id)?;
         if record.status != symbol_short!("pending") {
             return Err(ContractError::NotPending);
         }
