@@ -15,12 +15,26 @@ const recordMetricBodySchema = z.object({
   dimensionValue: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
+const parseableDateQuerySchema = z.string().refine(
+  (value) => Number.isFinite(Date.parse(value)),
+  'must be a valid date',
+);
+const dateRangeQuerySchema = z.object({
+  startDate: parseableDateQuerySchema.optional(),
+  endDate: parseableDateQuerySchema.optional(),
+});
+const trendsQuerySchema = dateRangeQuerySchema.extend({
+  interval: z.enum(['hour', 'day', 'week']).optional(),
+});
+const limitQuerySchema = z.object({
+  limit: z.string().regex(/^[1-9][0-9]*$/, 'limit must be a positive integer').optional(),
+});
 
 /**
  * GET /api/audit-analytics/summary/:organizationId
  * Get audit summary for an organization
  */
-router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/summary/:organizationId', authenticateJWT, validateRequest({ query: dateRangeQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const startDate = req.query.startDate
@@ -52,7 +66,7 @@ router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/audit-analytics/trends/:organizationId
  * Get audit trends over time
  */
-router.get('/trends/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/trends/:organizationId', authenticateJWT, validateRequest({ query: trendsQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const startDate = req.query.startDate
@@ -86,7 +100,7 @@ router.get('/trends/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/audit-analytics/endpoints/:organizationId
  * Get top endpoints by usage
  */
-router.get('/endpoints/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/endpoints/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 10;
@@ -130,7 +144,7 @@ router.get('/endpoints/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/audit-analytics/errors/:organizationId
  * Get recent errors
  */
-router.get('/errors/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/errors/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 20;
