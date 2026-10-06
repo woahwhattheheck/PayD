@@ -2,8 +2,10 @@ import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import ConnectAccount from './ConnectAccount';
 import { Text } from '@stellar/design-system';
+import { useTranslation } from 'react-i18next';
 
 export const DashboardTopBar: React.FC = () => {
+  const { t } = useTranslation();
   // Mock org data
   const orgName = 'FutureLabs Inc.';
   const balance = '1,250.45 USDC';
@@ -18,7 +20,7 @@ export const DashboardTopBar: React.FC = () => {
             weight="bold"
             addlClassName="text-(--muted) uppercase tracking-widest text-[10px]"
           >
-            Organization
+            {t('dashboardTopBar.organization')}
           </Text>
           <Text as="span" size="sm" weight="bold" addlClassName="text-(--text)">
             {orgName}
@@ -34,7 +36,7 @@ export const DashboardTopBar: React.FC = () => {
             weight="bold"
             addlClassName="text-(--muted) uppercase tracking-widest text-[10px]"
           >
-            Available Balance
+            {t('dashboardTopBar.availableBalance')}
           </Text>
           <Text as="span" size="sm" weight="bold" addlClassName="text-(--accent) font-mono">
             {balance}
