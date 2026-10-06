@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Loader2,
   ArrowRightLeft,
@@ -21,6 +22,7 @@ import {
 } from '../services/crossAssetPayment';
 
 export default function CrossAssetPayment() {
+  const { t } = useTranslation();
   const { notifySuccess, notifyError } = useNotification();
   const { address, signTransaction, connect } = useWallet();
   const { socket } = useSocket();
@@ -34,7 +36,7 @@ export default function CrossAssetPayment() {
   const [selectedPathId, setSelectedPathId] = useState<string>('');
   const [isLoadingPaths, setIsLoadingPaths] = useState(false);
   const [submissionTxHash, setSubmissionTxHash] = useState<string | null>(null);
-  const [liveStatusMessage, setLiveStatusMessage] = useState<string>('Waiting for submission...');
+  const [liveStatusMessage, setLiveStatusMessage] = useState<string>(t('crossAssetPayment.waitingForSubmission'));
   const [status, setStatus] = useState<string>('idle');
 
   const selectedPath = useMemo<ConversionPath | null>(
@@ -63,8 +65,8 @@ export default function CrossAssetPayment() {
           setSelectedPathId((current) => current || nextPaths[0]?.id || '');
         } catch (error) {
           notifyError(
-            'Pathfinding failed',
-            error instanceof Error ? error.message : 'Failed to fetch conversion paths.'
+            t('crossAssetPayment.pathfindingFailed'),
+            error instanceof Error ? error.message : t('crossAssetPayment.pathfindingFailedBody')
           );
         } finally {
           setIsLoadingPaths(false);
@@ -76,7 +78,7 @@ export default function CrossAssetPayment() {
       clearTimeout(timeout);
       setIsLoadingPaths(false);
     };
-  }, [amount, assetIn, assetOut, notifyError]);
+  }, [amount, assetIn, assetOut, notifyError, t]);
 
   useEffect(() => {
     if (!socket || !submissionTxHash) return;
@@ -88,9 +90,9 @@ export default function CrossAssetPayment() {
       if (!txHash || txHash !== submissionTxHash) return;
 
       const newStatus = (record.status as string | undefined) || 'unknown';
-      setLiveStatusMessage(`Update: ${newStatus}`);
+      setLiveStatusMessage(t('crossAssetPayment.updateStatus', { status: newStatus }));
       if (newStatus === 'confirmed' || newStatus === 'success') {
-        notifySuccess('Payment Confirmed', 'Your cross-asset payment was successful.');
+        notifySuccess(t('crossAssetPayment.paymentConfirmed'), t('crossAssetPayment.paymentConfirmedBody'));
         setStatus('success');
       }
     };
@@ -105,22 +107,22 @@ export default function CrossAssetPayment() {
       activeSocket.off('transaction:update', handler);
       activeSocket.emit('unsubscribe:transaction', submissionTxHash);
     };
-  }, [notifySuccess, socket, submissionTxHash]);
+  }, [notifySuccess, socket, submissionTxHash, t]);
 
   const handleInitiate = async () => {
     clearContractError();
     if (!address) {
-      notifyError('Wallet required', 'Connect your wallet before submitting cross-asset payment.');
+      notifyError(t('crossAssetPayment.walletRequired'), t('crossAssetPayment.walletRequiredBody'));
       return;
     }
     if (!selectedPath) {
-      notifyError('No path selected', 'Select a conversion path before submitting.');
+      notifyError(t('crossAssetPayment.noPath'), t('crossAssetPayment.noPathBody'));
       return;
     }
 
     const parsedAmount = Number.parseFloat(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-      notifyError('Invalid amount', 'Enter a valid payment amount.');
+      notifyError(t('crossAssetPayment.invalidAmount'), t('crossAssetPayment.invalidAmountBody'));
       return;
     }
 
@@ -131,7 +133,7 @@ export default function CrossAssetPayment() {
         contractService.getContractId('cross_asset_payment', 'testnet') ||
         (import.meta.env.VITE_CROSS_ASSET_PAYMENT_CONTRACT_ID as string | undefined);
       if (!contractId) {
-        throw new Error('Cross-asset contract ID is unavailable.');
+        throw new Error(t('crossAssetPayment.contractUnavailable'));
       }
 
       const result: { txHash: string } = await submitCrossAssetPayment({
@@ -147,8 +149,8 @@ export default function CrossAssetPayment() {
 
       setSubmissionTxHash(result.txHash);
       setStatus('pending');
-      setLiveStatusMessage('Submitted. Waiting for live settlement updates...');
-      notifySuccess('Payment submitted', `On-chain transaction hash: ${result.txHash}`);
+      setLiveStatusMessage(t('crossAssetPayment.waitingForSettlement'));
+      notifySuccess(t('crossAssetPayment.paymentSubmitted'), t('crossAssetPayment.paymentSubmittedBody', { hash: result.txHash }));
     } catch (error) {
       console.error(error);
       setStatus('error');
@@ -163,11 +165,11 @@ export default function CrossAssetPayment() {
           undefined,
           error instanceof Error
             ? error.message
-            : 'An unexpected error occurred during contract invocation.'
+            : t('crossAssetPayment.invocationFallback')
         );
       }
 
-      notifyError('Payment failed', 'A contract error occurred. Please review the details below.');
+      notifyError(t('crossAssetPayment.paymentFailed'), t('crossAssetPayment.paymentFailedBody'));
     }
   };
 
@@ -177,10 +179,10 @@ export default function CrossAssetPayment() {
         <header className="mb-12 flex items-end justify-between gap-4">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-              Cross-Asset Payment Settlement
+              {t('crossAssetPayment.title')}
             </h1>
             <p className="text-(--muted) mt-2">
-              Live pathfinding, Soroban simulation, and wallet-signed contract submission.
+              {t('crossAssetPayment.subtitle')}
             </p>
           </div>
           {!address ? (
@@ -191,7 +193,7 @@ export default function CrossAssetPayment() {
               }}
               className="px-4 py-2 rounded-full bg-accent text-on-accent font-semibold"
             >
-              Connect Wallet
+              {t('crossAssetPayment.connectWallet')}
             </button>
           ) : (
             <span className="text-xs text-(--muted) font-mono">
@@ -207,7 +209,7 @@ export default function CrossAssetPayment() {
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <label className="block text-xs font-semibold text-(--muted) uppercase tracking-wider mb-2">
-                    Send Asset
+                    {t('crossAssetPayment.sendAsset')}
                   </label>
                   <select
                     value={assetIn}
@@ -223,7 +225,7 @@ export default function CrossAssetPayment() {
                 </div>
                 <div className="flex-1">
                   <label className="block text-xs font-semibold text-(--muted) uppercase tracking-wider mb-2">
-                    Receive Asset
+                    {t('crossAssetPayment.receiveAsset')}
                   </label>
                   <select
                     value={assetOut}
@@ -242,7 +244,7 @@ export default function CrossAssetPayment() {
 
               <div>
                 <label className="block text-xs font-semibold text-(--muted) uppercase tracking-wider mb-2">
-                  Amount to Send
+                  {t('crossAssetPayment.amountToSend')}
                 </label>
                 <div className="relative">
                   <input
@@ -260,13 +262,13 @@ export default function CrossAssetPayment() {
 
               <div>
                 <label className="block text-xs font-semibold text-(--muted) uppercase tracking-wider mb-2">
-                  Receiver Address
+                  {t('crossAssetPayment.receiverAddress')}
                 </label>
                 <input
                   type="text"
                   value={receiver}
                   onChange={(e) => setReceiver(e.target.value)}
-                  placeholder="G... recipient wallet"
+                  placeholder={t('crossAssetPayment.receiverPlaceholder')}
                   className="w-full bg-[#0a0a0c] border border-(--border) rounded-xl px-4 py-3 outline-none"
                 />
               </div>
@@ -282,10 +284,10 @@ export default function CrossAssetPayment() {
                   <Loader2 className="animate-spin" />
                 ) : !address ? (
                   <>
-                    <Wallet className="w-5 h-5" /> Connect Wallet to Swap
+                    <Wallet className="w-5 h-5" /> {t('crossAssetPayment.connectWalletToSwap')}
                   </>
                 ) : (
-                  'Simulate + Submit Payment'
+                  t('crossAssetPayment.simulateSubmit')
                 )}
               </button>
             </div>
@@ -297,12 +299,12 @@ export default function CrossAssetPayment() {
               <div className="bg-(--surface) border border-(--border) shadow-(--shadow-sm) rounded-2xl p-8 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
                   <ShieldCheck className="text-emerald-400" />
-                  Available Conversion Paths
+                  {t('crossAssetPayment.availablePaths')}
                 </h3>
                 {isLoadingPaths ? (
                   <div className="flex items-center gap-2 text-sm text-(--muted)">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Fetching conversion paths...
+                    {t('crossAssetPayment.fetchingPaths')}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -319,12 +321,11 @@ export default function CrossAssetPayment() {
                             {path.hops.join(' -> ')}
                           </span>
                           <span className="text-xs text-(--muted)">
-                            {path.rate.toFixed(4)} rate
+                            {path.rate.toFixed(4)} {t('crossAssetPayment.rateLabel')}
                           </span>
                         </div>
                         <div className="mt-2 text-xs text-(--muted)">
-                          Fee: {path.fee.toFixed(4)} {assetOut} | Slippage:{' '}
-                          {path.slippage.toFixed(2)}%
+                          {t('crossAssetPayment.pathFeeSlippage', { fee: path.fee.toFixed(4), asset: assetOut, slippage: path.slippage.toFixed(2) })}
                         </div>
                       </button>
                     ))}
@@ -335,22 +336,22 @@ export default function CrossAssetPayment() {
 
             {selectedPath && (
               <div className="bg-[#16161a] border border-(--border) rounded-2xl p-6">
-                <h4 className="font-bold mb-3">Settlement Preview</h4>
+                <h4 className="font-bold mb-3">{t('crossAssetPayment.settlementPreview')}</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-(--muted)">
-                    <span>Expected Delivery</span>
+                    <span>{t('crossAssetPayment.expectedDelivery')}</span>
                     <span className="text-(--text) font-mono">
                       {selectedPath.estimatedDestinationAmount.toLocaleString()} {assetOut}
                     </span>
                   </div>
                   <div className="flex justify-between text-(--muted)">
-                    <span>Fee</span>
+                    <span>{t('crossAssetPayment.fee')}</span>
                     <span className="text-(--text)">
                       {selectedPath.fee.toFixed(4)} {assetOut}
                     </span>
                   </div>
                   <div className="flex justify-between text-(--muted)">
-                    <span>Slippage</span>
+                    <span>{t('crossAssetPayment.slippage')}</span>
                     <span className="text-(--text)">{selectedPath.slippage.toFixed(2)}%</span>
                   </div>
                 </div>
@@ -366,7 +367,7 @@ export default function CrossAssetPayment() {
                     {status}
                   </div>
                 </div>
-                <h3 className="text-lg font-bold mb-6">Contract Status</h3>
+                <h3 className="text-lg font-bold mb-6">{t('crossAssetPayment.contractStatus')}</h3>
 
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
@@ -376,8 +377,8 @@ export default function CrossAssetPayment() {
                       <CheckCircle2 className="h-5 w-5 text-(--text)" />
                     </div>
                     <div>
-                      <p className="font-bold">Authentication</p>
-                      <p className="text-xs text-(--muted)">Wallet connected and signer ready</p>
+                      <p className="font-bold">{t('crossAssetPayment.authentication')}</p>
+                      <p className="text-xs text-(--muted)">{t('crossAssetPayment.signerReady')}</p>
                     </div>
                   </div>
 
@@ -392,9 +393,9 @@ export default function CrossAssetPayment() {
                       )}
                     </div>
                     <div>
-                      <p className="font-bold">Initiation</p>
+                      <p className="font-bold">{t('crossAssetPayment.initiation')}</p>
                       <p className="text-xs text-(--muted)">
-                        Contract call simulated and submitted
+                        {t('crossAssetPayment.simulatedSubmitted')}
                       </p>
                     </div>
                   </div>
@@ -406,7 +407,7 @@ export default function CrossAssetPayment() {
                       <CheckCircle2 className="h-5 w-5 text-(--text)" />
                     </div>
                     <div>
-                      <p className="font-bold">Settlement</p>
+                      <p className="font-bold">{t('crossAssetPayment.settlement')}</p>
                       <p className="text-xs text-(--muted)">{liveStatusMessage}</p>
                     </div>
                   </div>
@@ -415,7 +416,7 @@ export default function CrossAssetPayment() {
                 {submissionTxHash && (
                   <div className="mt-8 pt-6 border-t border-(--border)">
                     <p className="text-xs text-(--muted) uppercase font-bold mb-2">
-                      Transaction Hash
+                      {t('crossAssetPayment.transactionHash')}
                     </p>
                     <p className="text-xs font-mono break-all text-blue-400">{submissionTxHash}</p>
                   </div>
@@ -427,7 +428,7 @@ export default function CrossAssetPayment() {
               <div className="bg-blue-900/10 border border-blue-900/30 rounded-2xl p-6 flex gap-4">
                 <Info className="text-blue-400 shrink-0" />
                 <p className="text-sm text-blue-300">
-                  Change asset pair and amount to request path options from backend proxy.
+                  {t('crossAssetPayment.changePrompt')}
                 </p>
               </div>
             )}
