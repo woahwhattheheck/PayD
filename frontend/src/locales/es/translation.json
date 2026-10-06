@@ -239,8 +239,13 @@
     "subtitle": "Proyecta la liquidez de nómina y configura alertas de financiación.",
     "months": "Meses a futuro",
     "refresh": "Actualizar",
+    "status": {
+      "green": "Normal",
+      "yellow": "Advertencia",
+      "red": "Crítico"
+    },
     "liquidityStatus": "Estado de liquidez",
-    "liquidityAvailable": "Liquidez disponible",
+    "liquidityAvailable": "Disponible: {{available}} {{asset}} · Necesario (próximas 2 ejecuciones): {{required}} {{asset}}",
     "configureLiquidity": "Configurar liquidez",
     "projectedMonthlyPayroll": "Nómina mensual proyectada",
     "liquiditySettings": "Configuración de liquidez",
@@ -260,6 +265,10 @@
     "dateRange": "Intervalo de fechas",
     "startDate": "Fecha de inicio",
     "endDate": "Fecha de fin",
+    "status": {
+      "paid": "Pagado",
+      "pending": "Pendiente"
+    },
     "columnsTitle": "Columnas",
     "exportData": "Exportar datos",
     "livePreview": "Vista previa",

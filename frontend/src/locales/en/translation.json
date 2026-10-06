@@ -239,8 +239,13 @@
     "subtitle": "Project payroll liquidity and configure funding alerts.",
     "months": "Months forward",
     "refresh": "Refresh",
+    "status": {
+      "green": "Healthy",
+      "yellow": "Warning",
+      "red": "Critical"
+    },
     "liquidityStatus": "Liquidity Status",
-    "liquidityAvailable": "Available liquidity",
+    "liquidityAvailable": "Available: {{available}} {{asset}} · Required (next 2 runs): {{required}} {{asset}}",
     "configureLiquidity": "Configure Liquidity",
     "projectedMonthlyPayroll": "Projected Monthly Payroll",
     "liquiditySettings": "Liquidity Settings",
@@ -260,6 +265,10 @@
     "dateRange": "Date Range",
     "startDate": "Start Date",
     "endDate": "End Date",
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending"
+    },
     "columnsTitle": "Columns",
     "exportData": "Export Data",
     "livePreview": "Live Preview",
