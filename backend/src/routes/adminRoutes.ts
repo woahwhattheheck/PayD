@@ -1,12 +1,33 @@
 import { Router, Request, Response } from 'express';
+import { z } from 'zod';
 import { auditIntegrityService } from '../services/auditIntegrityService.js';
 import { TenantRateLimitService } from '../services/tenantRateLimitService.js';
 import { pool } from '../config/database.js';
 import { requireAdminJustification } from '../middleware/requireAdminJustification.js';
 import { auditSensitiveOperation } from '../middleware/auditLogger.js';
 import logger from '../utils/logger.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = Router();
+
+const orgIdParamsSchema = z.object({
+  orgId: z.string().regex(/^[1-9][0-9]*$/, 'orgId must be a positive integer'),
+});
+const rateLimitTierSchema = z.object({
+  windowMs: z.number().int().positive(),
+  maxRequests: z.number().int().positive(),
+});
+const rateLimitOverridesBodySchema = z.object({
+  auth: rateLimitTierSchema.optional(),
+  api: rateLimitTierSchema.optional(),
+  data: rateLimitTierSchema.optional(),
+  strict: rateLimitTierSchema.optional(),
+});
+const quotaBodySchema = z.object({
+  maxEmployees: z.number().int().positive().optional(),
+  maxMonthlyTransactions: z.number().int().positive().optional(),
+  maxStorageMb: z.number().int().positive().optional(),
+});
 
 // ---------------------------------------------------------------------------
 // Audit integrity
@@ -70,7 +91,7 @@ router.get('/tenants/:orgId/rate-limits', requireAdminJustification, async (req:
  * Body: { "api": { "windowMs": 60000, "maxRequests": 500 }, ... }
  * Only the tiers provided in the body are updated; omitted tiers keep their current values.
  */
-router.patch('/tenants/:orgId/rate-limits', requireAdminJustification, async (req: Request, res: Response) => {
+router.patch('/tenants/:orgId/rate-limits', requireAdminJustification, validateRequest({ params: orgIdParamsSchema, body: rateLimitOverridesBodySchema }), async (req: Request, res: Response) => {
   const orgId = parseInt(req.params.orgId, 10);
   if (isNaN(orgId)) {
     res.status(400).json({ error: 'Invalid orgId' });
@@ -176,7 +197,7 @@ router.get('/tenants/:orgId/quotas', requireAdminJustification, async (req: Requ
  *
  * Body: { "maxEmployees": 1000, "maxMonthlyTransactions": 50000 }
  */
-router.patch('/tenants/:orgId/quotas', requireAdminJustification, async (req: Request, res: Response) => {
+router.patch('/tenants/:orgId/quotas', requireAdminJustification, validateRequest({ params: orgIdParamsSchema, body: quotaBodySchema }), async (req: Request, res: Response) => {
   const orgId = parseInt(req.params.orgId, 10);
   if (isNaN(orgId)) { res.status(400).json({ error: 'Invalid orgId' }); return; }
 
