@@ -130,7 +130,12 @@
     "authenticated": "Autenticado",
     "connect": "Conectar",
     "wallet": "Billetera",
-    "exit": "Salir"
+    "exit": "Salir",
+    "connecting": "Conectando...",
+    "socialActive": "Acceso social activo",
+    "sessionActive": "Sesión activa",
+    "stellar": "Stellar",
+    "signIn": "Iniciar sesión"
   },
   "wallet": {
     "modalTitle": "Conectar a PayD"
@@ -442,5 +447,58 @@
     "calculatePreview": "Calcular vista previa",
     "generateReport": "Generar informe",
     "continue": "Continuar"
+  },
+  "contractError": {
+    "title": "Error al invocar el contrato",
+    "suggestedAction": "Acción sugerida",
+    "rawTransactionResult": "Resultado bruto de la transacción (XDR)",
+    "copyXdr": "Copiar XDR",
+    "copy": "Copiar",
+    "notAvailable": "N/D"
+  },
+  "schedulingWizard": {
+    "steps": {
+      "schedule": "Paso 1: Configurar programación",
+      "currencyPreferences": "Paso 2: Preferencias de moneda",
+      "previewConfirm": "Paso 3: Vista previa y confirmación"
+    },
+    "loading": "Cargando datos de la organización...",
+    "currencyIntro": "Configura la moneda de pago predeterminada para cada empleado.",
+    "table": {
+      "employee": "Empleado",
+      "scheduledAmount": "Importe programado",
+      "receiveIn": "Recibir en",
+      "noEmployees": "No se encontraron empleados en la organización."
+    },
+    "currencies": {
+      "usdcStellar": "USDC (Stellar)",
+      "xlm": "XLM",
+      "eurc": "EURC"
+    },
+    "frequencyLabel": "Frecuencia",
+    "frequency": {
+      "weekly": "Semanal",
+      "biweekly": "Quincenal",
+      "monthly": "Mensual"
+    },
+    "dayOfWeek": "Día de la semana",
+    "weekdays": {
+      "sunday": "Domingo",
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado"
+    },
+    "dayOfMonth": "Día del mes",
+    "runTime": "Hora de ejecución",
+    "scheduleOverview": "Resumen de la programación",
+    "time": "Hora",
+    "upcomingRuns": "Próximas ejecuciones",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "confirmSchedule": "Confirmar programación"
   }
 }
