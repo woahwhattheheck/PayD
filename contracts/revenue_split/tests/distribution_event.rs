@@ -66,17 +66,16 @@ fn distribution_event_matches_indexer_payload_schema() {
     let (topics, data) = matching_event.expect("expected one DistributionExecutedEvent");
     assert_eq!(
         topics,
-        Vec::from_array(&env, [event_name.into_val(&env)]),
-        "indexer event type must remain the sole topic"
+        Vec::from_array(
+            &env,
+            [event_name.into_val(&env), token_id.clone().into_val(&env)],
+        ),
+        "indexer topics must preserve the event type and distributed asset"
     );
 
     let expected_data = Map::<Symbol, Val>::from_array(
         &env,
         [
-            (
-                Symbol::new(&env, "asset"),
-                token_id.clone().into_val(&env),
-            ),
             (
                 Symbol::new(&env, "recipient_count"),
                 2u32.into_val(&env),

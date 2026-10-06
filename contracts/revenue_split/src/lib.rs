@@ -50,6 +50,7 @@ pub const TOTAL_BASIS_POINTS: u32 = 10000; // 100%
 /// recipient counts, and the active split weights (basis points, 10000 = 100%).
 #[contractevent]
 pub struct DistributionExecutedEvent {
+    #[topic]
     pub asset: Address,
     pub total_amount: i128,
     pub recipient_count: u32,
