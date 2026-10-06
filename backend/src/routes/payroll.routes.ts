@@ -63,6 +63,9 @@ const memoSearchQuerySchema = z.object({
   pattern: nonEmptyQueryStringSchema,
   ...paginationQueryFields,
 });
+const employeeIdParamsSchema = z.object({ employeeId: z.string().min(1) });
+const batchIdParamsSchema = z.object({ batchId: z.string().min(1) });
+const txHashParamsSchema = z.object({ txHash: z.string().min(1) });
 
 function asString(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
@@ -153,7 +156,7 @@ router.get('/transactions', validateRequest({ query: transactionsQuerySchema }),
  * Get payroll for a specific employee
  * GET /api/payroll/employees/:employeeId
  */
-router.get('/employees/:employeeId', validateRequest({ query: employeePayrollQuerySchema }), async (req: Request, res: Response) => {
+router.get('/employees/:employeeId', validateRequest({ params: employeeIdParamsSchema, query: employeePayrollQuerySchema }), async (req: Request, res: Response) => {
   try {
     const { employeeId } = req.params;
     const { orgPublicKey, startDate, endDate, page, limit } = req.query;
@@ -191,7 +194,7 @@ router.get('/employees/:employeeId', validateRequest({ query: employeePayrollQue
  * Get employee payroll summary
  * GET /api/payroll/employees/:employeeId/summary
  */
-router.get('/employees/:employeeId/summary', validateRequest({ query: dateRangeQuerySchema }), async (req: Request, res: Response) => {
+router.get('/employees/:employeeId/summary', validateRequest({ params: employeeIdParamsSchema, query: dateRangeQuerySchema }), async (req: Request, res: Response) => {
   try {
     const { employeeId } = req.params;
     const { orgPublicKey, startDate, endDate } = req.query;
@@ -227,7 +230,7 @@ router.get('/employees/:employeeId/summary', validateRequest({ query: dateRangeQ
  * Get payroll batch details
  * GET /api/payroll/batches/:batchId
  */
-router.get('/batches/:batchId', validateRequest({ query: batchQuerySchema }), async (req: Request, res: Response) => {
+router.get('/batches/:batchId', validateRequest({ params: batchIdParamsSchema, query: batchQuerySchema }), async (req: Request, res: Response) => {
   try {
     const { batchId } = req.params;
     const { orgPublicKey, page, limit } = req.query;
@@ -369,7 +372,7 @@ router.get('/search/memo', validateRequest({ query: memoSearchQuerySchema }), as
  * Get transaction details by hash
  * GET /api/payroll/transactions/:txHash
  */
-router.get('/transactions/:txHash', async (req: Request, res: Response) => {
+router.get('/transactions/:txHash', validateRequest({ params: txHashParamsSchema }), async (req: Request, res: Response) => {
   try {
     const { txHash } = req.params;
 
