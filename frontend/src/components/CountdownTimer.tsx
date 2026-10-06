@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const CountdownTimer = ({ targetDate }: { targetDate: Date | null }) => {
+  const { t } = useTranslation();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -40,28 +42,28 @@ export const CountdownTimer = ({ targetDate }: { targetDate: Date | null }) => {
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center">
         <span className="text-2xl font-mono font-black text-accent">{timeLeft.days}</span>
-        <span className="text-[10px] uppercase tracking-widest text-muted">Days</span>
+        <span className="text-[10px] uppercase tracking-widest text-muted">{t('countdownTimer.days')}</span>
       </div>
       <span className="text-muted font-bold -mt-4">:</span>
       <div className="flex flex-col items-center">
         <span className="text-2xl font-mono font-black text-accent">
           {timeLeft.hours.toString().padStart(2, '0')}
         </span>
-        <span className="text-[10px] uppercase tracking-widest text-muted">Hrs</span>
+        <span className="text-[10px] uppercase tracking-widest text-muted">{t('countdownTimer.hours')}</span>
       </div>
       <span className="text-muted font-bold -mt-4">:</span>
       <div className="flex flex-col items-center">
         <span className="text-2xl font-mono font-black text-accent">
           {timeLeft.minutes.toString().padStart(2, '0')}
         </span>
-        <span className="text-[10px] uppercase tracking-widest text-muted">Min</span>
+        <span className="text-[10px] uppercase tracking-widest text-muted">{t('countdownTimer.minutes')}</span>
       </div>
       <span className="text-muted font-bold -mt-4">:</span>
       <div className="flex flex-col items-center">
         <span className="text-2xl font-mono font-black text-accent">
           {timeLeft.seconds.toString().padStart(2, '0')}
         </span>
-        <span className="text-[10px] uppercase tracking-widest text-muted">Sec</span>
+        <span className="text-[10px] uppercase tracking-widest text-muted">{t('countdownTimer.seconds')}</span>
       </div>
     </div>
   );
