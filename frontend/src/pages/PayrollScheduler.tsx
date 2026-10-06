@@ -171,12 +171,12 @@ export default function PayrollScheduler() {
       };
 
       const result = await createSchedule(input);
-      notifySuccess('Payroll schedule configured!', `Ref ID: ${result.id}`);
+      notifySuccess(t('payrollResidual.scheduleConfigured'), t('payrollResidual.refId', { id: result.id }));
       setIsWizardOpen(false);
       void fetchActiveSchedules();
     } catch (err) {
       console.error('Failed to create schedule:', err);
-      notifyError('Failed to create schedule', 'Please try again later.');
+      notifyError(t('payrollResidual.createFailed'), t('payrollResidual.tryAgainLater'));
     }
   };
 
@@ -202,7 +202,7 @@ export default function PayrollScheduler() {
       );
 
       if (data.status === 'confirmed') {
-        notifySuccess('Payment confirmed!', `TX: ${data.transactionId}`);
+        notifySuccess(t('payrollResidual.paymentConfirmed'), t('payrollResidual.tx', { id: data.transactionId }));
       }
     };
 
@@ -213,13 +213,13 @@ export default function PayrollScheduler() {
     return () => {
       activeSocket.off('transaction:update', handleTransactionUpdate);
     };
-  }, [socket, notifySuccess]);
+  }, [socket, notifySuccess, t]);
 
   const handleInitialize = async () => {
     if (!formData.employeeName || !formData.amount || !formData.walletAddress) {
       notifyError(
-        'Missing required fields',
-        'Please provide employee name, amount, and wallet address.'
+        t('payrollResidual.missingRequired'),
+        t('payrollResidual.missingRequiredBody')
       );
       return;
     }
@@ -229,8 +229,8 @@ export default function PayrollScheduler() {
     if (!hasTrustline) {
       setTrustlineMissing(true);
       notifyWarning(
-        'Trustline missing!',
-        `${formData.employeeName} does not have a USDC trustline. You can proceed, but the payment will be held as a claimable balance.`
+        t('payrollResidual.trustlineMissing'),
+        t('payrollResidual.trustlineMissingBody', { name: formData.employeeName })
       );
     } else {
       setTrustlineMissing(false);
@@ -265,8 +265,8 @@ export default function PayrollScheduler() {
       );
 
       if (!result.success) {
-        handleContractError(undefined, 'Failed to create claimable balance');
-        throw new Error('Failed to create claimable balance');
+        handleContractError(undefined, t('payrollResidual.claimFailed'));
+        throw new Error(t('payrollResidual.claimFailed'));
       }
 
       // Simulate a brief delay for network broadcast
@@ -276,7 +276,7 @@ export default function PayrollScheduler() {
       if (formData.amount === '403') {
         const mockErrorXdr = 'AAAABAAAAAEAAAABAAAABQ=='; // ScvError(ScError{type: SCE_CONTRACT, code: 5})
         handleContractError(mockErrorXdr);
-        throw new Error('Contract invocation failed');
+        throw new Error(t('payrollResidual.invocationFailed'));
       }
 
       // Add to pending claims
@@ -298,8 +298,8 @@ export default function PayrollScheduler() {
       subscribeToTransaction(newClaim.id);
 
       notifySuccess(
-        'Broadcast successful!',
-        `Claimable balance created for ${formData.employeeName}`
+        t('payrollResidual.broadcastSuccess'),
+        t('payrollResidual.broadcastSuccessBody', { name: formData.employeeName })
       );
 
       // Trigger Webhook Event (Internal simulation)
@@ -326,8 +326,8 @@ export default function PayrollScheduler() {
     } catch (err) {
       console.error(err);
       notifyError(
-        'Broadcast failed',
-        'A contract error occurred. Please review the details below.'
+        t('payrollResidual.broadcastFailed'),
+        t('payrollResidual.broadcastFailedBody')
       );
     } finally {
       setIsBroadcasting(false);
@@ -337,11 +337,11 @@ export default function PayrollScheduler() {
   const handleCancelSchedule = async (id: number) => {
     try {
       await deleteSchedule(id);
-      notifySuccess('Schedule cancelled', 'The automation has been halted.');
+      notifySuccess(t('payrollResidual.scheduleCancelled'), t('payrollResidual.scheduleCancelledBody'));
       void fetchActiveSchedules();
     } catch (err) {
       console.error('Failed to cancel schedule:', err);
-      notifyError('Cancellation failed', 'Unable to reach the server.');
+      notifyError(t('payrollResidual.cancellationFailed'), t('payrollResidual.cancellationFailedBody'));
     }
   };
 
@@ -381,7 +381,7 @@ export default function PayrollScheduler() {
             onClick={() => setIsWizardOpen(true)}
             className="p-2.5 rounded-lg hover:bg-(--surface-hi) transition-colors touch-manipulation"
             style={{ minHeight: '44px', minWidth: '44px' }}
-            aria-label="Open scheduling wizard"
+            aria-label={t('payrollResidual.openWizard')}
           >
             <svg
               width="18"
@@ -418,17 +418,17 @@ export default function PayrollScheduler() {
               >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              Automation Active
+              {t('payrollResidual.automationActive')}
             </h3>
             <p className="text-muted text-xs sm:text-sm break-words">
-              Scheduled to run{' '}
-              <span className="font-bold text-text capitalize">{activeSchedule.frequency}</span> at{' '}
+              {t('payrollResidual.scheduledToRun')}{' '}
+              <span className="font-bold text-text capitalize">{t(`payrollResidual.frequency.${activeSchedule.frequency}`, { defaultValue: activeSchedule.frequency })}</span>{' '}{t('payrollResidual.at')}{' '}
               <span className="font-mono text-text">{activeSchedule.timeOfDay}</span>
             </p>
           </div>
           <div className="bg-bg border border-hi rounded-xl p-3 sm:p-4 shadow-inner w-full md:w-auto">
             <span className="block text-[10px] uppercase font-bold text-muted mb-2 tracking-widest text-center">
-              Next Scheduled Run
+              {t('payrollResidual.nextRun')}
             </span>
             <CountdownTimer targetDate={nextRunDate} />
           </div>
@@ -461,7 +461,7 @@ export default function PayrollScheduler() {
                   name="employeeName"
                   value={formData.employeeName}
                   onChange={handleChange}
-                  placeholder="e.g. Satoshi Nakamoto"
+                  placeholder={t('payrollResidual.employeePlaceholder')}
                 />
               </div>
 
@@ -527,7 +527,7 @@ export default function PayrollScheduler() {
                     isFullWidth
                   >
                     {isSimulating
-                      ? 'Simulating...'
+                      ? t('payrollResidual.simulating')
                       : t('payroll.submit', 'Initialize and Validate')}
                   </Button>
                 ) : (
@@ -541,7 +541,7 @@ export default function PayrollScheduler() {
                     size="md"
                     isFullWidth
                   >
-                    {isBroadcasting ? 'Broadcasting...' : 'Confirm & Broadcast to Network'}
+                    {isBroadcasting ? t('payrollResidual.broadcasting') : t('payrollResidual.confirmBroadcast')}
                   </Button>
                 )}
               </div>
@@ -572,7 +572,7 @@ export default function PayrollScheduler() {
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                Pre-flight Validation
+                {t('payrollResidual.preflight')}
               </Heading>
 
               {trustlineMissing && (
@@ -595,7 +595,7 @@ export default function PayrollScheduler() {
                   </div>
                   <div>
                     <Text as="p" size="xs" weight="bold" addlClassName="text-orange-500 mb-1">
-                      Trustline Missing
+                      {t('payrollResidual.trustlineMissingLabel')}
                     </Text>
                     <Text
                       as="p"
@@ -603,8 +603,7 @@ export default function PayrollScheduler() {
                       weight="regular"
                       addlClassName="text-orange-200/70 leading-relaxed"
                     >
-                      Employee does not have a USDC trustline. Payment will be held as a claimable
-                      balance.
+                      {t('payrollResidual.trustlineWarning')}
                     </Text>
                   </div>
                 </div>
@@ -616,16 +615,15 @@ export default function PayrollScheduler() {
                 weight="regular"
                 addlClassName="text-muted leading-relaxed mb-4"
               >
-                All transactions are simulated via Stellar Horizon before submission. This catches
-                common errors like:
+                {t('payrollResidual.preflightIntro')}
               </Text>
               <ul className="text-xs text-muted space-y-2 list-disc pl-4 font-medium">
-                <li>Insufficient XLM balance for fees</li>
-                <li>Invalid sequence numbers</li>
+                <li>{t('payrollResidual.preflightItems.balance')}</li>
+                <li>{t('payrollResidual.preflightItems.sequence')}</li>
                 <li className={trustlineMissing ? 'text-orange-400 font-bold' : ''}>
-                  Missing trustlines for tokens
+                  {t('payrollResidual.preflightItems.trustlines')}
                 </li>
-                <li>Account eligibility status</li>
+                <li>{t('payrollResidual.preflightItems.eligibility')}</li>
               </ul>
             </div>
           </div>
@@ -634,7 +632,7 @@ export default function PayrollScheduler() {
 
       <div className="w-full mb-6 sm:mb-8 lg:mb-12">
         <Heading as="h2" size="sm" weight="bold" addlClassName="mb-4 text-lg sm:text-xl">
-          Scheduled Automations
+          {t('payrollResidual.scheduledAutomations')}
         </Heading>
         {isLoadingSchedules ? (
           <div className="flex justify-center p-8">
@@ -660,7 +658,7 @@ export default function PayrollScheduler() {
               weight="regular"
               addlClassName="text-muted p-4 text-xs sm:text-sm"
             >
-              No active payroll schedules found in the database.
+              {t('payrollResidual.noSchedules')}
             </Text>
           </Card>
         ) : (
@@ -691,7 +689,7 @@ export default function PayrollScheduler() {
                     </div>
                     <div>
                       <h4 className="font-bold text-base capitalize">
-                        {schedule.frequency} Distribution
+                        {t(`payrollResidual.frequency.${schedule.frequency}`, { defaultValue: schedule.frequency })} {t('payrollResidual.distribution')}
                       </h4>
                       <p className="text-xs text-muted font-mono">{schedule.timeOfDay} UTC</p>
                     </div>
@@ -699,15 +697,15 @@ export default function PayrollScheduler() {
 
                   <div className="space-y-2 mb-6">
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted">Next Run</span>
+                      <span className="text-muted">{t('payrollResidual.nextRunLabel')}</span>
                       <span className="font-mono text-text">
                         {new Date(schedule.nextRunTimestamp).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted">Recipients</span>
+                      <span className="text-muted">{t('payrollResidual.recipients')}</span>
                       <span className="font-bold text-text">
-                        {schedule.paymentConfig.recipients.length} Employees
+                        {schedule.paymentConfig.recipients.length} {t('payrollResidual.employees')}
                       </span>
                     </div>
                   </div>
@@ -718,7 +716,7 @@ export default function PayrollScheduler() {
                     }}
                     className="w-full py-3 bg-danger/10 hover:bg-danger/20 text-danger text-xs font-bold rounded-lg transition-colors touch-manipulation min-h-[44px]"
                   >
-                    Cancel Automation
+                    {t('payrollResidual.cancelAutomation')}
                   </button>
                 </div>
               </li>
@@ -729,7 +727,7 @@ export default function PayrollScheduler() {
 
       <div className="w-full mb-6 sm:mb-8 lg:mb-12">
         <Heading as="h2" size="sm" weight="bold" addlClassName="mb-4 text-lg sm:text-xl">
-          Recent Manual Claims
+          {t('payrollResidual.recentClaims')}
         </Heading>
         <Card>
           {pendingClaims.length === 0 ? (
@@ -739,7 +737,7 @@ export default function PayrollScheduler() {
               weight="regular"
               addlClassName="text-muted p-4 text-xs sm:text-sm"
             >
-              No recent manual claimable balances.
+              {t('payrollResidual.noClaims')}
             </Text>
           ) : (
             <ul className="flex flex-col gap-3 sm:gap-4 p-4 sm:p-6">
@@ -756,10 +754,10 @@ export default function PayrollScheduler() {
                   <div className="text-xs sm:text-sm text-muted flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                     <div className="flex-1 min-w-0 space-y-1">
                       <Text as="p" size="xs" weight="regular">
-                        Amount: {claim.amount} USDC
+                        {t('payrollResidual.amountLabel')} {claim.amount} USDC
                       </Text>
                       <Text as="p" size="xs" weight="regular">
-                        Scheduled: {formatDate(claim.dateScheduled)}
+                        {t('payrollResidual.scheduledLabel')} {formatDate(claim.dateScheduled)}
                       </Text>
                       <Text
                         as="p"
@@ -768,14 +766,14 @@ export default function PayrollScheduler() {
                         addlClassName="font-mono truncate max-w-[200px]"
                         title={claim.walletAddress}
                       >
-                        To: {claim.walletAddress}
+                        {t('payrollResidual.toLabel')} {claim.walletAddress}
                       </Text>
                     </div>
                     <button
                       onClick={() => handleRemoveClaim(claim.id)}
                       className="text-danger hover:text-danger/80 text-sm font-medium py-2 px-4 rounded-lg hover:bg-danger/10 transition-colors touch-manipulation min-h-[44px] self-start sm:self-auto"
                     >
-                      Cancel
+                      {t('payrollResidual.cancel')}
                     </button>
                   </div>
                 </li>
