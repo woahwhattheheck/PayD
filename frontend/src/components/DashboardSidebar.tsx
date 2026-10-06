@@ -14,25 +14,26 @@ import {
   TrendingUp,
   Receipt,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
-  label: string;
+  labelKey: string;
   path: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Wallet, label: 'Payroll', path: '/payroll' },
-  { icon: Users, label: 'Employees', path: '/employee' },
-  { icon: TrendingUp, label: 'Forecast', path: '/forecast' },
-  { icon: FileText, label: 'Reports', path: '/reports' },
-  { icon: Receipt, label: 'Tax Compliance', path: '/tax-compliance' },
-  { icon: Globe, label: 'Cross-Asset', path: '/cross-asset-payment' },
-  { icon: History, label: 'History', path: '/transactions' },
-  { icon: Layout, label: 'Employee Portal', path: '/portal' },
-  { icon: ShieldAlert, label: 'Security Center', path: '/admin' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
+  { icon: LayoutDashboard, labelKey: 'nav.dashboard', path: '/' },
+  { icon: Wallet, labelKey: 'nav.payroll', path: '/payroll' },
+  { icon: Users, labelKey: 'nav.employees', path: '/employee' },
+  { icon: TrendingUp, labelKey: 'nav.forecast', path: '/forecast' },
+  { icon: FileText, labelKey: 'nav.reports', path: '/reports' },
+  { icon: Receipt, labelKey: 'nav.taxCompliance', path: '/tax-compliance' },
+  { icon: Globe, labelKey: 'nav.crossAsset', path: '/cross-asset-payment' },
+  { icon: History, labelKey: 'nav.history', path: '/transactions' },
+  { icon: Layout, labelKey: 'nav.employeePortal', path: '/portal' },
+  { icon: ShieldAlert, labelKey: 'nav.securityCenter', path: '/admin' },
+  { icon: Settings, labelKey: 'nav.settings', path: '/settings' },
 ];
 
 interface DashboardSidebarProps {
@@ -42,6 +43,8 @@ interface DashboardSidebarProps {
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   onClose,
 }: DashboardSidebarProps) => {
+  const { t } = useTranslation();
+
   return (
     <aside className="h-full w-64 border-r border-(--border) bg-(--surface) flex flex-col">
       <div className="p-6 flex items-center gap-3">
@@ -68,7 +71,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             }
           >
             <item.icon className="w-5 h-5" />
-            <span className="font-medium text-sm">{item.label}</span>
+            <span className="font-medium text-sm">{t(item.labelKey)}</span>
           </NavLink>
         ))}
       </nav>
@@ -86,16 +89,16 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           }
         >
           <HelpCircle className="w-5 h-5" />
-          <span className="font-medium text-sm">Help Center</span>
+          <span className="font-medium text-sm">{t('nav.helpCenter')}</span>
         </NavLink>
 
         <div className="mt-4 p-4 border border-(--border) rounded-2xl bg-(--surface-hi)">
           <p className="text-[10px] text-(--muted) uppercase font-bold tracking-widest mb-2">
-            Network
+            {t('nav.network')}
           </p>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-(--accent) animate-pulse" />
-            <span className="text-xs font-mono font-medium">Stellar Testnet</span>
+            <span className="text-xs font-mono font-medium">{t('nav.stellarTestnet')}</span>
           </div>
         </div>
       </div>
