@@ -1,3 +1,5 @@
+import logger from '../../utils/logger.js';
+
 export interface SendMailInput {
   to: string[];
   subject: string;
@@ -10,12 +12,24 @@ export class MailerService {
   }
 
   static async sendMail(input: SendMailInput): Promise<void> {
-    if (!this.isConfigured()) return;
+    const context = {
+      recipients: input.to,
+      mailType: input.subject,
+    };
+
+    if (!this.isConfigured()) {
+      logger.warn('Mailer skipped because SMTP is not configured.', context);
+      return;
+    }
 
     let nodemailer: any;
     try {
       nodemailer = (await import('nodemailer')).default;
-    } catch {
+    } catch (error) {
+      logger.error('Mailer failed to load nodemailer.', {
+        ...context,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return;
     }
 
@@ -31,11 +45,19 @@ export class MailerService {
 
     const from = process.env.SMTP_FROM || process.env.SMTP_USER;
 
-    await transporter.sendMail({
-      from,
-      to: input.to.join(','),
-      subject: input.subject,
-      text: input.text,
-    });
+    try {
+      await transporter.sendMail({
+        from,
+        to: input.to.join(','),
+        subject: input.subject,
+        text: input.text,
+      });
+    } catch (error) {
+      logger.error('Mailer failed to send email.', {
+        ...context,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 }
