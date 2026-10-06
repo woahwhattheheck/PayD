@@ -3,7 +3,25 @@
     "payroll": "Nómina",
     "employees": "Empleados",
     "debugger": "depurador",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "dashboard": "Panel",
+    "forecast": "Pronóstico",
+    "reports": "Informes",
+    "taxCompliance": "Cumplimiento fiscal",
+    "crossAsset": "Entre activos",
+    "history": "Historial",
+    "employeePortal": "Portal del empleado",
+    "securityCenter": "Centro de seguridad",
+    "helpCenter": "Centro de ayuda",
+    "network": "Red",
+    "stellarTestnet": "Red de prueba Stellar",
+    "myPortal": "Mi portal",
+    "cashFlow": "Flujo de caja",
+    "bulkPayments": "Pagos masivos",
+    "admin": "Administración",
+    "help": "Ayuda",
+    "toggleMenu": "Alternar menú",
+    "closeMenu": "Cerrar menú"
   },
   "home": {
     "titleLine1Prefix": "Automatiza tu",
@@ -55,10 +73,45 @@
       "placeholderEmail": "wilfred@example.com",
       "placeholderRole": "Desarrollador principal",
       "placeholderWallet": "GD6F...4R2T",
-      "statusActive": "Activo"
+      "statusActive": "Activo",
+      "name": "Nombre",
+      "salary": "Salario"
     },
     "importPrompt": "¿Necesitas migrar tu sistema de nómina heredado?",
-    "importCta": "Importar desde CSV (Próximamente)"
+    "importCta": "Importar desde CSV (Próximamente)",
+    "empty": "No se encontraron empleados",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "actions": {
+      "edit": "Editar",
+      "remove": "Eliminar"
+    },
+    "mobile": {
+      "wallet": "Billetera",
+      "salary": "Salario"
+    },
+    "importFromCsv": "Importar desde CSV",
+    "addEmployeesFromCsv": "Añadir empleados desde CSV",
+    "cancel": "Cancelar",
+    "addModal": {
+      "title": "Añadir empleado",
+      "namePlaceholder": "Nombre",
+      "emailPlaceholder": "Correo electrónico",
+      "walletPlaceholder": "Billetera",
+      "positionPlaceholder": "Puesto",
+      "salaryPlaceholder": "Salario",
+      "add": "Añadir"
+    },
+    "editModal": {
+      "title": "Editar salario",
+      "save": "Guardar"
+    },
+    "deleteModal": {
+      "title": "Confirmar eliminación",
+      "body": "¿Seguro que quieres eliminar a este empleado?"
+    }
   },
   "debugger": {
     "title": "{{highlight}} de contratos",
