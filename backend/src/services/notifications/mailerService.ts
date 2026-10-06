@@ -11,6 +11,10 @@ export class MailerService {
     return !!process.env.SMTP_HOST && !!process.env.SMTP_USER && !!process.env.SMTP_PASS;
   }
 
+  private static async loadNodemailer(): Promise<any> {
+    return (await import('nodemailer')).default;
+  }
+
   static async sendMail(input: SendMailInput): Promise<void> {
     const context = {
       recipients: input.to,
@@ -24,7 +28,7 @@ export class MailerService {
 
     let nodemailer: any;
     try {
-      nodemailer = (await import('nodemailer')).default;
+      nodemailer = await this.loadNodemailer();
     } catch (error) {
       logger.error('Mailer failed to load nodemailer.', {
         ...context,
