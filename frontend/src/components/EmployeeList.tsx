@@ -531,7 +531,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 className="px-4 py-2 bg-red-500 text-white rounded touch-manipulation"
                 style={{ minHeight: '44px' }}
               >
-                Remove
+                {t('employees.actions.remove')}
               </button>
             </div>
           </div>
