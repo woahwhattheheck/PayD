@@ -3,7 +3,25 @@
     "payroll": "Payroll",
     "employees": "Employees",
     "debugger": "debugger",
-    "settings": "Settings"
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "forecast": "Forecast",
+    "reports": "Reports",
+    "taxCompliance": "Tax Compliance",
+    "crossAsset": "Cross-Asset",
+    "history": "History",
+    "employeePortal": "Employee Portal",
+    "securityCenter": "Security Center",
+    "helpCenter": "Help Center",
+    "network": "Network",
+    "stellarTestnet": "Stellar Testnet",
+    "myPortal": "My Portal",
+    "cashFlow": "Cash Flow",
+    "bulkPayments": "Bulk Payments",
+    "admin": "Admin",
+    "help": "Help",
+    "toggleMenu": "Toggle menu",
+    "closeMenu": "Close menu"
   },
   "home": {
     "titleLine1Prefix": "Automate your",
@@ -55,10 +73,45 @@
       "placeholderEmail": "wilfred@example.com",
       "placeholderRole": "Lead Developer",
       "placeholderWallet": "GD6F...4R2T",
-      "statusActive": "Active"
+      "statusActive": "Active",
+      "name": "Name",
+      "salary": "Salary"
     },
     "importPrompt": "Need to migrate your legacy payroll system?",
-    "importCta": "Import from CSV (Coming Soon)"
+    "importCta": "Import from CSV (Coming Soon)",
+    "empty": "No employees found",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "remove": "Remove"
+    },
+    "mobile": {
+      "wallet": "Wallet",
+      "salary": "Salary"
+    },
+    "importFromCsv": "Import from CSV",
+    "addEmployeesFromCsv": "Add Employees from CSV",
+    "cancel": "Cancel",
+    "addModal": {
+      "title": "Add Employee",
+      "namePlaceholder": "Name",
+      "emailPlaceholder": "Email",
+      "walletPlaceholder": "Wallet",
+      "positionPlaceholder": "Position",
+      "salaryPlaceholder": "Salary",
+      "add": "Add"
+    },
+    "editModal": {
+      "title": "Edit Salary",
+      "save": "Save"
+    },
+    "deleteModal": {
+      "title": "Confirm Removal",
+      "body": "Are you sure you want to remove this employee?"
+    }
   },
   "debugger": {
     "title": "Contract {{highlight}}",
