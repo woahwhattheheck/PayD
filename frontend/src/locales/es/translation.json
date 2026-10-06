@@ -805,7 +805,8 @@
     "fee": "Comisión:",
     "minimum": "Mín.:",
     "withdrawVia": "Retirar mediante {{anchor}}",
-    "available": "Disponible: {{amount}}"
+    "available": "Disponible: {{amount}}",
+    "successProcessed": "Tu retiro de {{amount}} se procesó correctamente."
   },
   "crossAssetPayment": {
     "waitingForSubmission": "Esperando el envío...",
@@ -851,7 +852,8 @@
     "settlement": "Liquidación",
     "transactionHash": "Hash de transacción",
     "changePrompt": "Cambia el par de activos y el importe para solicitar opciones de ruta al proxy del backend.",
-    "pathFeeSlippage": "Comisión: {{fee}} {{asset}} | Deslizamiento: {{slippage}} %"
+    "pathFeeSlippage": "Comisión: {{fee}} {{asset}} | Deslizamiento: {{slippage}} %",
+    "rateLabel": "tasa"
   },
   "payrollResidual": {
     "scheduleConfigured": "¡Programación de nómina configurada!",
@@ -906,7 +908,11 @@
       "weekly": "Semanal",
       "biweekly": "Quincenal",
       "monthly": "Mensual"
-    }
+    },
+    "scheduledToRun": "Programado para ejecutarse",
+    "broadcasting": "Transmitiendo...",
+    "distribution": "Distribución",
+    "employees": "Empleados"
   },
   "revenueSplit": {
     "loadFailed": "No se pudo cargar el panel",
