@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   benchmark:
@@ -20,4 +20,37 @@ jobs:
         with:
           targets: wasm32v1-none
       - name: Run focused issue 527 benchmark
-        run: cargo test -p bulk_payment benchmark_issue_527_resource_profile -- --nocapture
+        shell: bash
+        run: |
+          set +e
+          cargo test -p bulk_payment benchmark_issue_527_resource_profile -- --nocapture 2>&1 | tee /tmp/payd527-benchmark.log
+          status=${PIPESTATUS[0]}
+          echo "${status}" > /tmp/payd527-benchmark.status
+          {
+            echo "source_commit=${GITHUB_SHA}"
+            echo "exit_status=${status}"
+            grep 'PAYD527 ' /tmp/payd527-benchmark.log || true
+            if [ "${status}" -ne 0 ]; then
+              echo "--- failure tail ---"
+              tail -n 80 /tmp/payd527-benchmark.log
+            fi
+          } > .github/payd527-benchmark-receipt.txt
+          exit 0
+      - name: Persist benchmark receipt
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/payd527-benchmark-receipt.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "chore(bench): persist issue 527 resource receipt [skip ci]"
+          git push
+      - name: Enforce benchmark result
+        shell: bash
+        run: |
+          status="$(cat /tmp/payd527-benchmark.status)"
+          if [ "${status}" -ne 0 ]; then
+            exit "${status}"
+          fi
