@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   RefreshCw,
   ChevronDown,
@@ -42,11 +43,12 @@ function shortHash(hash: string | null) {
 // ── Status Badge ─────────────────────────────────────────────────────────────
 
 function BatchStatusBadge({ status }: { status: BatchRun['status'] }) {
+  const { t } = useTranslation();
   const map: Record<BatchRun['status'], { cls: string; dot: string; label: string }> = {
-    confirmed: { cls: styles.statusConfirmed, dot: styles.statusDotConfirmed, label: 'Confirmed' },
-    pending: { cls: styles.statusPending, dot: styles.statusDotPending, label: 'Pending' },
-    partial: { cls: styles.statusPartial, dot: styles.statusDotPartial, label: 'Partial' },
-    failed: { cls: styles.statusFailed, dot: styles.statusDotFailed, label: 'Failed' },
+    confirmed: { cls: styles.statusConfirmed, dot: styles.statusDotConfirmed, label: t('bulkPaymentTracker.status.confirmed') },
+    pending: { cls: styles.statusPending, dot: styles.statusDotPending, label: t('bulkPaymentTracker.status.pending') },
+    partial: { cls: styles.statusPartial, dot: styles.statusDotPartial, label: t('bulkPaymentTracker.status.partial') },
+    failed: { cls: styles.statusFailed, dot: styles.statusDotFailed, label: t('bulkPaymentTracker.status.failed') },
   };
   const { cls, dot, label } = map[status];
   return (
@@ -58,10 +60,11 @@ function BatchStatusBadge({ status }: { status: BatchRun['status'] }) {
 }
 
 function RecipientStatusBadge({ status }: { status: BatchRecipient['status'] }) {
+  const { t } = useTranslation();
   const map: Record<BatchRecipient['status'], { cls: string; dot: string; label: string }> = {
-    confirmed: { cls: styles.statusConfirmed, dot: styles.statusDotConfirmed, label: 'Confirmed' },
-    pending: { cls: styles.statusPending, dot: styles.statusDotPending, label: 'Pending' },
-    failed: { cls: styles.statusFailed, dot: styles.statusDotFailed, label: 'Failed' },
+    confirmed: { cls: styles.statusConfirmed, dot: styles.statusDotConfirmed, label: t('bulkPaymentTracker.status.confirmed') },
+    pending: { cls: styles.statusPending, dot: styles.statusDotPending, label: t('bulkPaymentTracker.status.pending') },
+    failed: { cls: styles.statusFailed, dot: styles.statusDotFailed, label: t('bulkPaymentTracker.status.failed') },
   };
   const { cls, dot, label } = map[status];
   return (
@@ -75,22 +78,23 @@ function RecipientStatusBadge({ status }: { status: BatchRecipient['status'] }) 
 // ── Recipient Expansion Panel ─────────────────────────────────────────────────
 
 function RecipientPanel({ recipients }: { recipients: BatchRecipient[] }) {
+  const { t } = useTranslation();
   return (
     <div className={styles.recipientPanel}>
       <div className={styles.recipientHeader}>
-        <span>Per-Recipient Breakdown</span>
+        <span>{t('bulkPaymentTracker.perRecipient')}</span>
         <span>
-          {recipients.length} recipient{recipients.length !== 1 ? 's' : ''}
+          {t('bulkPaymentTracker.recipientCount', { count: recipients.length })}
         </span>
       </div>
 
       {/* Column headers */}
       <div className={styles.recipientGrid}>
-        <span>Employee</span>
-        <span>Amount</span>
-        <span>Status</span>
-        <span>Tx Hash</span>
-        <span>Details</span>
+        <span>{t('bulkPaymentTracker.employee')}</span>
+        <span>{t('bulkPaymentTracker.amount')}</span>
+        <span>{t('bulkPaymentTracker.statusLabel')}</span>
+        <span>{t('bulkPaymentTracker.txHash')}</span>
+        <span>{t('bulkPaymentTracker.details')}</span>
       </div>
 
       {recipients.map((r) => (
@@ -162,6 +166,7 @@ const BatchRow: React.FC<BatchRowProps> = ({
   onToggle,
   onRetry,
 }) => {
+  const { t } = useTranslation();
   const hasFailed =
     batch.status === 'failed' ||
     batch.recipients.some((r: BatchRecipient) => r.status === 'failed');
@@ -232,21 +237,21 @@ const BatchRow: React.FC<BatchRowProps> = ({
               className={styles.retryBtn}
               onClick={onRetry}
               disabled={isRetrying}
-              title="Retry failed batch"
-              aria-label={`Retry batch ${batch.id}`}
+              title={t('bulkPaymentTracker.retryFailedBatch')}
+              aria-label={t('bulkPaymentTracker.retryBatch', { id: batch.id })}
             >
               {isRetrying ? (
                 <RefreshCw size={11} className={styles.refreshSpin} />
               ) : (
                 <RotateCcw size={11} />
               )}
-              Retry
+              {t('bulkPaymentTracker.retry')}
             </button>
           )}
           <button
             className={styles.expandBtn}
             onClick={onToggle}
-            aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+            aria-label={isExpanded ? t('bulkPaymentTracker.collapseRow') : t('bulkPaymentTracker.expandRow')}
           >
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
@@ -261,6 +266,7 @@ const BatchRow: React.FC<BatchRowProps> = ({
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function BulkPaymentTracker() {
+  const { t } = useTranslation();
   const {
     batches,
     total,
@@ -293,16 +299,16 @@ export default function BulkPaymentTracker() {
       <div className={styles.header}>
         <div className={styles.titleBlock}>
           <h1 className={styles.title}>
-            Bulk Payment <span className={styles.titleAccent}>Status Tracker</span>
+            {t('bulkPaymentTracker.titlePrefix')} <span className={styles.titleAccent}>{t('bulkPaymentTracker.titleHighlight')}</span>
           </h1>
-          <p className={styles.subtitle}>Real-time on-chain confirmation for batch payroll runs</p>
+          <p className={styles.subtitle}>{t('bulkPaymentTracker.subtitle')}</p>
         </div>
 
         <div className={styles.toolbar}>
           {/* Live indicator */}
           <div className={styles.liveIndicator}>
             <span className={`${styles.liveDot} ${connected ? '' : styles.disconnectedDot}`} />
-            {connected ? 'Live' : 'Offline'}
+            {connected ? t('bulkPaymentTracker.live') : t('bulkPaymentTracker.offline')}
           </div>
 
           {connected ? (
@@ -320,13 +326,13 @@ export default function BulkPaymentTracker() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            aria-label="Filter by status"
+            aria-label={t('bulkPaymentTracker.filterStatus')}
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="partial">Partial</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="failed">Failed</option>
+            <option value="all">{t('bulkPaymentTracker.allStatuses')}</option>
+            <option value="pending">{t('bulkPaymentTracker.status.pending')}</option>
+            <option value="partial">{t('bulkPaymentTracker.status.partial')}</option>
+            <option value="confirmed">{t('bulkPaymentTracker.status.confirmed')}</option>
+            <option value="failed">{t('bulkPaymentTracker.status.failed')}</option>
           </select>
 
           <button
@@ -334,10 +340,10 @@ export default function BulkPaymentTracker() {
             className={styles.refreshBtn}
             onClick={refresh}
             disabled={isLoading}
-            aria-label="Refresh batch list"
+            aria-label={t('bulkPaymentTracker.refreshAria')}
           >
             <RefreshCw size={13} className={isLoading ? styles.refreshSpin : ''} />
-            Refresh
+            {t('bulkPaymentTracker.refresh')}
           </button>
         </div>
       </div>
@@ -356,7 +362,7 @@ export default function BulkPaymentTracker() {
           </div>
           <div>
             <div className={styles.statChipValue}>{total}</div>
-            <div className={styles.statChipLabel}>Total Batches</div>
+            <div className={styles.statChipLabel}>{t('bulkPaymentTracker.totalBatches')}</div>
           </div>
         </div>
 
@@ -369,7 +375,7 @@ export default function BulkPaymentTracker() {
           </div>
           <div>
             <div className={styles.statChipValue}>{confirmedCount}</div>
-            <div className={styles.statChipLabel}>Confirmed</div>
+            <div className={styles.statChipLabel}>{t('bulkPaymentTracker.status.confirmed')}</div>
           </div>
         </div>
 
@@ -382,7 +388,7 @@ export default function BulkPaymentTracker() {
           </div>
           <div>
             <div className={styles.statChipValue}>{pendingCount}</div>
-            <div className={styles.statChipLabel}>In Progress</div>
+            <div className={styles.statChipLabel}>{t('bulkPaymentTracker.inProgress')}</div>
           </div>
         </div>
 
@@ -398,7 +404,7 @@ export default function BulkPaymentTracker() {
           </div>
           <div>
             <div className={styles.statChipValue}>{failedCount}</div>
-            <div className={styles.statChipLabel}>Failed</div>
+            <div className={styles.statChipLabel}>{t('bulkPaymentTracker.status.failed')}</div>
           </div>
         </div>
 
@@ -416,7 +422,7 @@ export default function BulkPaymentTracker() {
             <div className={styles.statChipValue}>
               {batches.reduce((s: number, b: BatchRun) => s + b.employeeCount, 0)}
             </div>
-            <div className={styles.statChipLabel}>Recipients</div>
+            <div className={styles.statChipLabel}>{t('bulkPaymentTracker.recipients')}</div>
           </div>
         </div>
 
@@ -436,7 +442,7 @@ export default function BulkPaymentTracker() {
                 .reduce((s: number, b: BatchRun) => s + parseFloat(b.totalAmount), 0)
                 .toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </div>
-            <div className={styles.statChipLabel}>Volume (page)</div>
+            <div className={styles.statChipLabel}>{t('bulkPaymentTracker.volumePage')}</div>
           </div>
         </div>
       </div>
@@ -453,13 +459,13 @@ export default function BulkPaymentTracker() {
       <div className={styles.tableContainer}>
         {/* Table Header */}
         <div className={styles.tableHead}>
-          <span className={styles.thCell}>Date</span>
-          <span className={styles.thCell}>Employees</span>
-          <span className={styles.thCell}>Total Amount</span>
-          <span className={styles.thCell}>Status</span>
-          <span className={styles.thCell}>Confs</span>
-          <span className={styles.thCell}>Tx Hash</span>
-          <span className={styles.thCell}>Actions</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.date')}</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.employees')}</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.totalAmount')}</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.statusLabel')}</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.confirmations')}</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.txHash')}</span>
+          <span className={styles.thCell}>{t('bulkPaymentTracker.actions')}</span>
         </div>
 
         {/* Body */}
@@ -470,11 +476,11 @@ export default function BulkPaymentTracker() {
         ) : batches.length === 0 ? (
           <div className={styles.empty}>
             <Layers className={styles.emptyIcon} />
-            <p className={styles.emptyTitle}>No batch runs found</p>
+            <p className={styles.emptyTitle}>{t('bulkPaymentTracker.empty')}</p>
             <p className={styles.emptyDesc}>
               {statusFilter !== 'all'
-                ? `No batches with status "${statusFilter}". Try a different filter.`
-                : 'Payroll batch runs will appear here once the first bulk payment is submitted.'}
+                ? t('bulkPaymentTracker.emptyFiltered', { status: statusFilter })
+                : t('bulkPaymentTracker.emptyDefault')}
             </p>
           </div>
         ) : (
@@ -499,7 +505,7 @@ export default function BulkPaymentTracker() {
               className={styles.pageBtn}
               onClick={() => setPage(page - 1)}
               disabled={page <= 1 || isLoading}
-              aria-label="Previous page"
+              aria-label={t('bulkPaymentTracker.previousPage')}
             >
               ‹
             </button>
@@ -518,7 +524,7 @@ export default function BulkPaymentTracker() {
                   key={p}
                   className={`${styles.pageBtn} ${p === page ? styles.pageBtnActive : ''}`}
                   onClick={() => setPage(p)}
-                  aria-label={`Page ${p}`}
+                  aria-label={t('bulkPaymentTracker.page', { page: p })}
                   aria-current={p === page ? 'page' : undefined}
                 >
                   {p}
@@ -530,7 +536,7 @@ export default function BulkPaymentTracker() {
               className={styles.pageBtn}
               onClick={() => setPage(page + 1)}
               disabled={page >= totalPages || isLoading}
-              aria-label="Next page"
+              aria-label={t('bulkPaymentTracker.nextPage')}
             >
               ›
             </button>
