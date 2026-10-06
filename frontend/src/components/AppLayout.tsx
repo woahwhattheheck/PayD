@@ -4,6 +4,7 @@ import ConnectAccount from '../components/ConnectAccount';
 import AppNav from './AppNav';
 import ThemeToggle from './ThemeToggle';
 import { WalletExtensionBanner } from './WalletExtensionBanner';
+import { useTranslation } from 'react-i18next';
 
 // ── Page Wrapper ───────────────────────
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -13,6 +14,7 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 // ── Layout ────────────────────────────
 const AppLayout: React.FC = () => {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div
@@ -36,7 +38,7 @@ const AppLayout: React.FC = () => {
             Pay<span className="text-(--accent)">D</span>
           </span>
           <span className="text-[9px] font-normal font-mono text-(--muted) tracking-widest uppercase border border-(--border-hi) px-1.5 py-0.5 rounded ml-0.5">
-            BETA
+            {t('appLayout.beta')}
           </span>
         </NavLink>
 
@@ -69,19 +71,19 @@ const AppLayout: React.FC = () => {
         style={{ borderColor: 'var(--border)' }}
       >
         <span>
-          © {new Date().getFullYear()} PayD — Licensed under the{' '}
+          {t('footer.licensePrefix', { year: new Date().getFullYear() })}{' '}
           <a
             href="http://www.apache.org/licenses/LICENSE-2.0"
             target="_blank"
             rel="noopener noreferrer"
             className="text-(--link) hover:underline"
           >
-            Apache License 2.0
+            {t('footer.licenseName')}
           </a>
         </span>
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-(--accent2)" />
-          STELLAR NETWORK · MAINNET
+          {t('footer.networkStatus')}
         </div>
       </footer>
     </div>
