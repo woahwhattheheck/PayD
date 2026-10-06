@@ -9,6 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNotification } from '../hooks/useNotification';
 import { WalletContext } from '../hooks/useWallet';
+import { requireConnectedWallet, waitForWalletSelection } from './walletConnection';
 
 const LAST_WALLET_STORAGE_KEY = 'payd:last_wallet_name';
 
@@ -76,6 +77,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         newKit.setWallet(lastWalletName);
         const account = await newKit.getAddress();
         if (account?.address) {
+          addressRef.current = account.address;
           setAddress(account.address);
           notifySuccess(
             'Wallet reconnected',
@@ -100,43 +102,40 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     setIsConnecting(true);
     try {
-      await kit.openModal({
-        modalTitle: t('wallet.modalTitle'),
-        onWalletSelected: (option) => {
-          void (async () => {
-            try {
-              const { address } = await kit.getAddress();
-              // Update both the state (for re-render) and the ref
-              // (immediately, so requireWallet right after connect()
-              // sees the fresh value without waiting for a re-render).
-              addressRef.current = address;
-              setAddress(address);
-              setWalletName(option.id);
-              localStorage.setItem(LAST_WALLET_STORAGE_KEY, option.id);
-              notifySuccess(
-                'Wallet connected',
-                `${address.slice(0, 6)}...${address.slice(-4)} via ${option.id}`
-              );
-            } catch (err) {
-              console.error('onWalletSelected error:', err);
-            }
-          })();
-        },
-        onClosed: () => {
-          setIsConnecting(false);
-        },
-      });
+      const selection = await waitForWalletSelection(
+        ({ onWalletSelected, onClosed }) =>
+          kit.openModal({
+            modalTitle: t('wallet.modalTitle'),
+            onWalletSelected: (option) => onWalletSelected(option.id),
+            onClosed,
+          }),
+        () => kit.getAddress()
+      );
+
+      if (!selection) return;
+
+      const { address: selectedAddress, walletId } = selection;
+      addressRef.current = selectedAddress;
+      setAddress(selectedAddress);
+      setWalletName(walletId);
+      localStorage.setItem(LAST_WALLET_STORAGE_KEY, walletId);
+      notifySuccess(
+        'Wallet connected',
+        `${selectedAddress.slice(0, 6)}...${selectedAddress.slice(-4)} via ${walletId}`
+      );
     } catch (error) {
       console.error('Failed to connect wallet:', error);
       notifyError(
         'Wallet connection failed',
         error instanceof Error ? error.message : 'Please try again.'
       );
+    } finally {
       setIsConnecting(false);
     }
   }, [t, notifySuccess, notifyError]);
 
   const disconnect = () => {
+    addressRef.current = null;
     setAddress(null);
     setWalletName(null);
     localStorage.removeItem(LAST_WALLET_STORAGE_KEY);
@@ -144,22 +143,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const requireWallet = useCallback(
-    async <T,>(callback: () => Promise<T>): Promise<T> => {
-      if (addressRef.current) {
-        return callback();
-      }
-
-      await connect();
-
-      // Check again after modal interaction — reads from the ref which is
-      // kept in sync with React state by the effect above, so it always
-      // reflects the latest value after the modal's onWalletSelected fires.
-      if (!addressRef.current) {
-        throw new Error('Wallet connection required to perform this action');
-      }
-
-      return callback();
-    },
+    <T,>(callback: () => Promise<T>): Promise<T> =>
+      requireConnectedWallet(() => addressRef.current, connect, callback),
     [connect]
   );
 
