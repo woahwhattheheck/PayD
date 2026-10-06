@@ -227,6 +227,7 @@ export default function Forecasting() {
               <Line
                 type="monotone"
                 dataKey="projectedTotalLiability"
+                name={t('forecasting.projectedMonthlyPayroll')}
                 stroke="var(--accent)"
                 strokeWidth={2}
                 dot={false}

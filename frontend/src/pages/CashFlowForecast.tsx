@@ -343,6 +343,7 @@ export default function CashFlowForecast() {
                   <Area
                     type="monotone"
                     dataKey="balance"
+                    name={t('cashFlowForecast.projectedBalance')}
                     stroke="#3b82f6"
                     fillOpacity={1}
                     fill="url(#balanceGradient)"
