@@ -88,9 +88,26 @@ export function authRateLimit(options: Omit<RateLimitOptions, 'tier'> = {}) {
 }
 
 /**
- * Login-specific auth limiter keyed by normalized wallet address when present.
- * Falling back to the request source preserves throttling for malformed requests
- * while avoiding one reverse-proxy IP becoming a shared login bucket.
+ * Source-side login limiter.
+ *
+ * This stays independent from account throttling so rotating submitted wallet
+ * identifiers cannot bypass brute-force protection from one request source.
+ */
+export function loginSourceRateLimit(
+  options: Omit<RateLimitOptions, 'tier' | 'identifier'> = {}
+) {
+  return rateLimitMiddleware({
+    ...options,
+    tier: 'auth',
+    identifier: (req: Request) => `login-source:${defaultIdentifier(req)}`,
+  });
+}
+
+/**
+ * Account-side login limiter keyed by normalized wallet address when present.
+ *
+ * Invalid or missing wallet identifiers fall back to a source-derived bucket;
+ * the independent source limiter still runs first on every login request.
  */
 export function loginRateLimit(options: Omit<RateLimitOptions, 'tier' | 'identifier'> = {}) {
   return rateLimitMiddleware({
@@ -104,7 +121,7 @@ export function loginRateLimit(options: Omit<RateLimitOptions, 'tier' | 'identif
           return `login:${normalizedWallet}`;
         }
       }
-      return defaultIdentifier(req);
+      return `login-invalid:${defaultIdentifier(req)}`;
     },
   });
 }
