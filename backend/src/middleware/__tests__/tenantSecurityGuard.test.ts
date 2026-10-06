@@ -71,16 +71,19 @@ describe('Tenant Security Guard Middleware', () => {
       expect(tenantSecurityService.recordAccessPattern).toHaveBeenCalled();
     });
 
-    it('should block requests without organization in strict mode', async () => {
+    it('should block requests without verified tenant context', async () => {
       mockRequest.tenantId = undefined;
-      mockRequest.user = undefined;
 
-      const middleware = tenantSecurityGuardMiddleware({ strictMode: true });
+      const middleware = tenantSecurityGuardMiddleware();
 
       await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       expect(nextFunction).not.toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        error: 'Access denied',
+        message: 'Verified organization context required',
+      });
     });
 
     it('should detect and log anomalies', async () => {
@@ -127,7 +130,7 @@ describe('Tenant Security Guard Middleware', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(403);
     });
 
-    it('should handle errors gracefully', async () => {
+    it('should fail closed when a tenant security check errors', async () => {
       (tenantSecurityService.recordAccessPattern as jest.Mock).mockRejectedValue(
         new Error('Service error')
       );
@@ -136,12 +139,43 @@ describe('Tenant Security Guard Middleware', () => {
 
       await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
-      expect(nextFunction).toHaveBeenCalled();
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(503);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        error: 'Tenant security check unavailable',
+        message: 'Unable to verify tenant access at this time',
+      });
       expect(logger.error).toHaveBeenCalledWith('Tenant security guard error', expect.any(Object));
+    });
+
+    it('should fail closed when IP policy lookup fails', async () => {
+      mockPool.query = jest.fn().mockRejectedValue(new Error('Database error'));
+
+      const middleware = tenantSecurityGuardMiddleware({
+        detectAnomalies: false,
+        logAccess: false,
+      });
+
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(logger.error).toHaveBeenCalledWith('Failed to check IP access', expect.any(Object));
     });
   });
 
   describe('validateTenantResourceAccess', () => {
+    it('should reject access when verified tenant context is missing', async () => {
+      mockRequest.tenantId = undefined;
+
+      const middleware = validateTenantResourceAccess();
+
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(403);
+    });
+
     it('should allow access to same organization resources', async () => {
       mockRequest.params = { organizationId: '1' };
 
