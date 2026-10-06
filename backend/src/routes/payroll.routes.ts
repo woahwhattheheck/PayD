@@ -27,6 +27,13 @@ const payrollTransactionsQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
+const payrollListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  sort: z.enum(['timestamp', 'amount', 'employeeId']).default('timestamp'),
+  order: z.enum(['asc', 'desc']).default('desc'),
+});
+
 // Apply authentication to all payroll routes
 router.use(authenticateJWT);
 
@@ -142,7 +149,7 @@ router.get('/transactions', async (req: Request, res: Response) => {
 router.get('/employees/:employeeId', async (req: Request, res: Response) => {
   try {
     const { employeeId } = req.params;
-    const { orgPublicKey, startDate, endDate, page, limit } = req.query;
+    const { orgPublicKey, startDate, endDate, page, limit, sort, order } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
@@ -151,18 +158,37 @@ router.get('/employees/:employeeId', async (req: Request, res: Response) => {
       });
     }
 
+    const paginationResult = payrollListQuerySchema.safeParse({
+      page: asString(page),
+      limit: asString(limit),
+      sort: asString(sort),
+      order: asString(order),
+    });
+    if (!paginationResult.success) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        details: paginationResult.error.issues,
+      });
+    }
+
+    const pagination = paginationResult.data;
     const result = await payrollQueryService.getEmployeePayroll(
       orgPublicKeyStr,
       employeeId as string,
       asString(startDate) ? new Date(asString(startDate)!) : undefined,
       asString(endDate) ? new Date(asString(endDate)!) : undefined,
-      Number(page),
-      Number(limit)
+      pagination.page,
+      pagination.limit,
+      pagination.sort,
+      pagination.order
     );
 
     res.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        totalPages: result.pageCount,
+      },
     });
   } catch (error) {
     logger.error(`GET /api/payroll/employees/${req.params.employeeId} failed`, error);
@@ -216,7 +242,7 @@ router.get('/employees/:employeeId/summary', async (req: Request, res: Response)
 router.get('/batches/:batchId', async (req: Request, res: Response) => {
   try {
     const { batchId } = req.params;
-    const { orgPublicKey, page, limit } = req.query;
+    const { orgPublicKey, page, limit, sort, order } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     if (!orgPublicKeyStr) {
@@ -225,16 +251,35 @@ router.get('/batches/:batchId', async (req: Request, res: Response) => {
       });
     }
 
+    const paginationResult = payrollListQuerySchema.safeParse({
+      page: asString(page),
+      limit: asString(limit),
+      sort: asString(sort),
+      order: asString(order),
+    });
+    if (!paginationResult.success) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        details: paginationResult.error.issues,
+      });
+    }
+
+    const pagination = paginationResult.data;
     const result = await payrollQueryService.getPayrollBatch(
       orgPublicKeyStr,
       batchId as string,
-      Number(page),
-      Number(limit)
+      pagination.page,
+      pagination.limit,
+      pagination.sort,
+      pagination.order
     );
 
     res.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        totalPages: result.pageCount,
+      },
     });
   } catch (error) {
     logger.error(`GET /api/payroll/batches/${req.params.batchId} failed`, error);
@@ -321,7 +366,7 @@ router.get('/audit', async (req: Request, res: Response) => {
  */
 router.get('/search/memo', async (req: Request, res: Response) => {
   try {
-    const { orgPublicKey, pattern, page, limit } = req.query;
+    const { orgPublicKey, pattern, page, limit, sort, order } = req.query;
 
     const orgPublicKeyStr = asString(orgPublicKey);
     const patternStr = asString(pattern);
@@ -331,16 +376,35 @@ router.get('/search/memo', async (req: Request, res: Response) => {
       });
     }
 
+    const paginationResult = payrollListQuerySchema.safeParse({
+      page: asString(page),
+      limit: asString(limit),
+      sort: asString(sort),
+      order: asString(order),
+    });
+    if (!paginationResult.success) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        details: paginationResult.error.issues,
+      });
+    }
+
+    const pagination = paginationResult.data;
     const result = await payrollQueryService.searchByMemoPattern(
       orgPublicKeyStr,
       patternStr,
-      Number(page),
-      Number(limit)
+      pagination.page,
+      pagination.limit,
+      pagination.sort,
+      pagination.order
     );
 
     res.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        totalPages: result.pageCount,
+      },
     });
   } catch (error) {
     logger.error('GET /api/payroll/search/memo failed', error);
