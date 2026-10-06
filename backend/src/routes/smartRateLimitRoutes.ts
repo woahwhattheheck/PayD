@@ -24,7 +24,7 @@ const limitQuerySchema = z.object({
  * GET /api/smart-rate-limit/status/:organizationId
  * Get rate limit status for an organization
  */
-router.get('/status/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/status/:organizationId', authenticateJWT, validateRequest({ params: orgParamsSchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
 
@@ -58,7 +58,7 @@ router.get('/status/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/smart-rate-limit/history/:organizationId
  * Get rate limit recovery history
  */
-router.get('/history/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
+router.get('/history/:organizationId', authenticateJWT, validateRequest({ params: orgParamsSchema, query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 10;
@@ -82,7 +82,7 @@ router.get('/history/:organizationId', authenticateJWT, validateRequest({ query:
  * GET /api/smart-rate-limit/violations/:organizationId
  * Get rate limit violations
  */
-router.get('/violations/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
+router.get('/violations/:organizationId', authenticateJWT, validateRequest({ params: orgParamsSchema, query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 20;
