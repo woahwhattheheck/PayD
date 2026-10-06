@@ -4,7 +4,7 @@ use super::*;
 use soroban_sdk::{
     testutils::{Address as _, Events},
     token::{Client as TokenClient, StellarAssetClient},
-    Address, Env, FromVal, String, Symbol,
+    Address, Env, FromVal, IntoVal, Map, String, Symbol, Val,
 };
 
 // ── Error codes ───────────────────────────────────────────────────────────────
@@ -55,11 +55,18 @@ fn initiate(s: &Setup, amount: i128) -> u64 {
     )
 }
 
-fn has_event(env: &Env, contract_addr: &Address, event_name: &str) -> bool {
+fn event_data(env: &Env, contract_addr: &Address, event_name: &str) -> Map<Symbol, Val> {
     let target = Symbol::new(env, event_name);
-    env.events().all().iter().any(|(addr, topics, _data)| {
-        addr == *contract_addr && topics.iter().any(|topic| Symbol::from_val(env, &topic) == target)
-    })
+    for (addr, topics, data) in env.events().all().iter() {
+        if addr == *contract_addr
+            && topics
+                .iter()
+                .any(|topic| Symbol::from_val(env, &topic) == target)
+        {
+            return Map::from_val(env, &data);
+        }
+    }
+    panic!("contract event {event_name} was not emitted");
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
@@ -144,25 +151,61 @@ fn test_payment_count_increments() {
 }
 
 #[test]
-fn test_payment_lifecycle_emits_contract_events() {
+fn test_payment_lifecycle_emits_contract_events_with_correct_data() {
     let s = setup(0);
     let id = initiate(&s, 500);
 
-    assert!(
-        has_event(&s.env, &s.contract_id, "payment_initiated_event"),
-        "PaymentInitiatedEvent was not emitted"
+    let initiated = event_data(&s.env, &s.contract_id, "payment_initiated_event");
+    assert_eq!(
+        initiated,
+        Map::<Symbol, Val>::from_array(
+            &s.env,
+            [
+                (Symbol::new(&s.env, "payment_id"), id.into_val(&s.env)),
+                (Symbol::new(&s.env, "from"), s.sender.clone().into_val(&s.env)),
+                (Symbol::new(&s.env, "amount"), 500i128.into_val(&s.env)),
+                (
+                    Symbol::new(&s.env, "target_asset"),
+                    String::from_str(&s.env, "EUR").into_val(&s.env),
+                ),
+                (
+                    Symbol::new(&s.env, "anchor_id"),
+                    String::from_str(&s.env, "anchor-eu").into_val(&s.env),
+                ),
+            ],
+        )
     );
 
     s.client.update_status(&id, &symbol_short!("pending"));
-    assert!(
-        has_event(&s.env, &s.contract_id, "payment_status_updated_event"),
-        "PaymentStatusUpdatedEvent was not emitted"
+    let status = event_data(&s.env, &s.contract_id, "payment_status_updated_event");
+    assert_eq!(
+        status,
+        Map::<Symbol, Val>::from_array(
+            &s.env,
+            [
+                (Symbol::new(&s.env, "payment_id"), id.into_val(&s.env)),
+                (
+                    Symbol::new(&s.env, "new_status"),
+                    symbol_short!("pending").into_val(&s.env),
+                ),
+            ],
+        )
     );
 
     s.client.cancel_payment(&s.sender, &id);
-    assert!(
-        has_event(&s.env, &s.contract_id, "payment_cancelled_event"),
-        "PaymentCancelledEvent was not emitted"
+    let cancelled = event_data(&s.env, &s.contract_id, "payment_cancelled_event");
+    assert_eq!(
+        cancelled,
+        Map::<Symbol, Val>::from_array(
+            &s.env,
+            [
+                (Symbol::new(&s.env, "payment_id"), id.into_val(&s.env)),
+                (
+                    Symbol::new(&s.env, "refunded_amount"),
+                    500i128.into_val(&s.env),
+                ),
+            ],
+        )
     );
 }
 
