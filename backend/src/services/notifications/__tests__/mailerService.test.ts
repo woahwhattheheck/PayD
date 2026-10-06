@@ -54,10 +54,39 @@ describe('MailerService failure logging', () => {
     );
   });
 
+  it('logs nodemailer load failures and preserves the existing no-op behavior', async () => {
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_USER = 'mailer@example.com';
+    process.env.SMTP_PASS = 'test-pass';
+
+    const loadSpy = jest
+      .spyOn(MailerService as any, 'loadNodemailer')
+      .mockRejectedValueOnce(new Error('module unavailable'));
+
+    await expect(
+      MailerService.sendMail({
+        to: ['employee@example.com'],
+        subject: 'password-reset',
+        text: 'body',
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      'Mailer failed to load nodemailer.',
+      {
+        recipients: ['employee@example.com'],
+        mailType: 'password-reset',
+        error: 'module unavailable',
+      },
+    );
+
+    loadSpy.mockRestore();
+  });
+
   it('logs send failures with recipient and mail type context, then preserves the failure', async () => {
     process.env.SMTP_HOST = 'smtp.example.com';
     process.env.SMTP_USER = 'mailer@example.com';
-    process.env.SMTP_PASS = 'secret';
+    process.env.SMTP_PASS = 'test-pass';
 
     const sendFailure = new Error('provider unavailable');
     const nodemailer = (await import('nodemailer')).default as any;
