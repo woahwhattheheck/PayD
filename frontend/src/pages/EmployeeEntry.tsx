@@ -76,7 +76,7 @@ export default function EmployeeEntry() {
         id: String(emp.id),
         name: `${emp.first_name} ${emp.last_name}`,
         email: emp.email,
-        position: emp.position ?? emp.job_title ?? 'Employee',
+        position: emp.position ?? emp.job_title ?? t('employeeEntry.defaultRole'),
         wallet: emp.wallet_address,
         status: emp.status === 'active' ? ('Active' as const) : ('Inactive' as const),
       }));
@@ -86,7 +86,7 @@ export default function EmployeeEntry() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchEmployees();
@@ -137,14 +137,14 @@ export default function EmployeeEntry() {
       await api.post('/employees', payload);
 
       notifySuccess(
-        `${formData.fullName} added successfully!`,
-        generatedWallet ? 'A new Stellar wallet was generated for this employee.' : undefined
+        t('employeeEntry.addedTitle', { name: formData.fullName }),
+        generatedWallet ? t('employeeEntry.walletGenerated') : undefined
       );
 
       setNotification({
-        message: `Employee ${formData.fullName} added successfully! ${
-          generatedWallet ? 'A wallet was created for them.' : ''
-        }`,
+        message: generatedWallet
+          ? t('employeeEntry.addedWithWallet', { name: formData.fullName })
+          : t('employeeEntry.addedMessage', { name: formData.fullName }),
         secretKey: generatedWallet?.secretKey,
         walletAddress,
         employeeName: formData.fullName,
@@ -182,7 +182,7 @@ export default function EmployeeEntry() {
             <button
               onClick={() => setIsAdding(false)}
               className="text-muted cursor-pointer hover:text-text transition-colors"
-              title="Back to Directory"
+              title={t('employeeEntry.backToDirectory')}
             >
               <Icon.ArrowLeft />
             </button>
@@ -193,7 +193,7 @@ export default function EmployeeEntry() {
                 margin: 0,
               }}
             >
-              Add New Employee
+              {t('employeeEntry.title')}
             </h1>
           </div>
           <AutosaveIndicator saving={saving} lastSaved={lastSaved} />
@@ -219,17 +219,17 @@ export default function EmployeeEntry() {
                 }}
               >
                 <strong style={{ display: 'block', marginBottom: '0.5rem' }}>
-                  [SIMULATED EMAIL NOTIFICATION TO EMPLOYEE]
+                  {t('employeeEntry.simulatedEmailLabel')}
                 </strong>
-                Hello {formData.fullName}, your employer has added you to the payroll.
+                {t('employeeEntry.simulatedEmailGreeting', { name: notification.employeeName ?? formData.fullName })}
                 <br />
-                A default Stellar wallet has been created for you to receive claimable balances.
+                {t('employeeEntry.simulatedEmailWalletBody')}
                 <br />
-                <b style={{ display: 'block', marginTop: '0.5rem' }}>Your Secret Key:</b>{' '}
+                <b style={{ display: 'block', marginTop: '0.5rem' }}>{t('employeeEntry.secretKeyLabel')}</b>{' '}
                 <code style={{ wordBreak: 'break-all' }}>{notification.secretKey}</code>
                 <br />
                 <i style={{ display: 'block', marginTop: '0.5rem' }}>
-                  Please save this secret key securely to claim your future salary.
+                  {t('employeeEntry.secretKeyWarning')}
                 </i>
               </div>
             )}
@@ -238,7 +238,7 @@ export default function EmployeeEntry() {
 
         {notification && !notification.walletAddress && (
           <div style={{ marginBottom: '1.5rem' }}>
-            <Alert variant="success" title="Success" placement="inline">
+            <Alert variant="success" title={t('employeeEntry.successTitle')} placement="inline">
               {notification.message}
             </Alert>
           </div>
@@ -254,7 +254,7 @@ export default function EmployeeEntry() {
             <Input
               id="fullName"
               fieldSize="md"
-              label="Full Name"
+              label={t('employeeEntry.fullName')}
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
@@ -264,7 +264,7 @@ export default function EmployeeEntry() {
             <Input
               id="email"
               fieldSize="md"
-              label="Email Address"
+              label={t('employeeEntry.email')}
               name="email"
               type="email"
               value={formData.email}
@@ -275,30 +275,30 @@ export default function EmployeeEntry() {
             <Input
               id="walletAddress"
               fieldSize="md"
-              label="Stellar Wallet Address (Optional)"
-              note="If no wallet is provided, a claimable balance will be created using a new wallet generated for them."
+              label={t('employeeEntry.walletAddressOptional')}
+              note={t('employeeEntry.walletNote')}
               name="walletAddress"
               value={formData.walletAddress}
               onChange={handleChange}
-              placeholder="Leave blank to generate a wallet"
+              placeholder={t('employeeEntry.walletPlaceholder')}
             />
             <Select
               id="role"
               fieldSize="md"
-              label="Role"
+              label={t('employeeEntry.role')}
               value={formData.role}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleSelectChange('role', e.target.value)
               }
             >
-              <option value="contractor">Contractor</option>
-              <option value="full-time">Full Time</option>
-              <option value="part-time">Part Time</option>
+              <option value="contractor">{t('employeeEntry.roles.contractor')}</option>
+              <option value="full-time">{t('employeeEntry.roles.fullTime')}</option>
+              <option value="part-time">{t('employeeEntry.roles.partTime')}</option>
             </Select>
             <Select
               id="currency"
               fieldSize="md"
-              label="Preferred Currency"
+              label={t('employeeEntry.preferredCurrency')}
               value={formData.currency}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleSelectChange('currency', e.target.value)
@@ -309,7 +309,7 @@ export default function EmployeeEntry() {
               <option value="EURC">EURC</option>
             </Select>
             <Button type="submit" variant="primary" size="md">
-              Add Employee
+              {t('employeeEntry.addEmployee')}
             </Button>
           </form>
         </Card>
