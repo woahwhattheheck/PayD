@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Activity, Calendar, Filter, Search } from 'lucide-react';
 import {
   fetchHistoryPage,
@@ -44,6 +45,7 @@ function TimelineSkeleton() {
 }
 
 export default function TransactionHistory() {
+  const { t, i18n } = useTranslation();
   const [filters, setFilters] = useState<HistoryFilters>(DEFAULT_FILTERS);
   const [debouncedFilters, setDebouncedFilters] = useState<HistoryFilters>(DEFAULT_FILTERS);
   const [items, setItems] = useState<TimelineItem[]>([]);
@@ -79,7 +81,7 @@ export default function TransactionHistory() {
         setHasMore(result.hasMore);
       } catch (loadError) {
         setError(
-          loadError instanceof Error ? loadError.message : 'Failed to load transaction history'
+          loadError instanceof Error ? loadError.message : t('transactionHistory.loadFailed')
         );
       } finally {
         setIsLoading(false);
@@ -87,7 +89,7 @@ export default function TransactionHistory() {
     };
 
     void load();
-  }, [debouncedFilters]);
+  }, [debouncedFilters, t]);
 
   const activeFilterCount = useMemo(
     () => (Object.values(filters) as string[]).filter((value) => value.trim().length > 0).length,
@@ -107,7 +109,7 @@ export default function TransactionHistory() {
       setPage(nextPage);
       setHasMore(result.hasMore);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Failed to load more history');
+      setError(loadError instanceof Error ? loadError.message : t('transactionHistory.loadMoreFailed'));
     } finally {
       setIsLoadingMore(false);
     }
@@ -118,10 +120,10 @@ export default function TransactionHistory() {
       <div className="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-end justify-between border-b border-(--border) pb-4 sm:pb-6 gap-4">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2 tracking-tight">
-            Transaction <span className="text-accent">History</span>
+            {t('transactionHistory.titlePrefix')} <span className="text-accent">{t('transactionHistory.titleHighlight')}</span>
           </h1>
           <p className="text-(--muted) font-mono text-xs sm:text-sm tracking-wider uppercase">
-            Unified classic + contract event timeline
+            {t('transactionHistory.subtitle')}
           </p>
         </div>
         <button
@@ -129,7 +131,7 @@ export default function TransactionHistory() {
           className="px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-2 bg-(--surface-hi) text-(--text) hover:bg-(--border) transition-all touch-manipulation min-h-[44px] text-sm sm:text-base"
         >
           <Filter size={18} />
-          Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+          {t('transactionHistory.filters')} {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
         </button>
       </div>
 
@@ -143,7 +145,7 @@ export default function TransactionHistory() {
                 onChange={(event) =>
                   setFilters((prev) => ({ ...prev, search: event.target.value }))
                 }
-                placeholder="Search tx hash / actor"
+                placeholder={t('transactionHistory.searchPlaceholder')}
                 className="w-full bg-[#0a0a0c] border border-(--border) rounded-lg py-2.5 pl-10 pr-4 text-sm"
               />
             </div>
@@ -153,10 +155,10 @@ export default function TransactionHistory() {
               onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
               className="bg-[#0a0a0c] border border-(--border) rounded-lg px-3 py-2.5 text-sm"
             >
-              <option value="">All Statuses</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
+              <option value="">{t('transactionHistory.allStatuses')}</option>
+              <option value="confirmed">{t('transactionHistory.confirmed')}</option>
+              <option value="pending">{t('transactionHistory.pending')}</option>
+              <option value="failed">{t('transactionHistory.failed')}</option>
             </select>
 
             <input
@@ -164,14 +166,14 @@ export default function TransactionHistory() {
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, employee: event.target.value }))
               }
-              placeholder="Employee"
+              placeholder={t('transactionHistory.employeePlaceholder')}
               className="bg-[#0a0a0c] border border-(--border) rounded-lg px-3 py-2.5 text-sm"
             />
 
             <input
               value={filters.asset}
               onChange={(event) => setFilters((prev) => ({ ...prev, asset: event.target.value }))}
-              placeholder="Asset (USDC, XLM...)"
+              placeholder={t('transactionHistory.assetPlaceholder')}
               className="bg-[#0a0a0c] border border-(--border) rounded-lg px-3 py-2.5 text-sm"
             />
 
@@ -209,7 +211,7 @@ export default function TransactionHistory() {
         {!isLoading && items.length === 0 ? (
           <div className="text-(--muted) text-center py-12 sm:py-16">
             <Activity className="w-6 h-6 sm:w-8 sm:h-8 opacity-30 mx-auto mb-3" />
-            <p className="text-xs sm:text-sm">No records found for current filters.</p>
+            <p className="text-xs sm:text-sm">{t('transactionHistory.empty')}</p>
           </div>
         ) : null}
 
@@ -227,16 +229,16 @@ export default function TransactionHistory() {
                   <span
                     className={`px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-bold uppercase ${getStatusClass(item.status)}`}
                   >
-                    {item.status}
+                    {t(`transactionHistory.status.${item.status}`, { defaultValue: item.status })}
                   </span>
                   <span className="text-[10px] sm:text-xs text-(--muted)">
-                    {new Date(item.createdAt).toLocaleString()}
+                    {new Date(item.createdAt).toLocaleString(i18n.language)}
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm font-semibold mb-1">{item.label}</p>
-                <p className="text-[10px] sm:text-xs text-(--muted)">Actor: {item.actor}</p>
+                <p className="text-[10px] sm:text-xs text-(--muted)">{t('transactionHistory.actor')} {item.actor}</p>
                 <p className="text-[10px] sm:text-xs text-(--muted)">
-                  Amount: {item.amount} {item.asset}
+                  {t('transactionHistory.amountLabel')} {item.amount} {item.asset}
                 </p>
                 {item.txHash ? (
                   <>
@@ -262,7 +264,7 @@ export default function TransactionHistory() {
               disabled={isLoadingMore}
               className="px-6 py-3 rounded-lg bg-(--surface-hi) hover:bg-(--border) text-sm font-semibold disabled:opacity-70 transition-colors touch-manipulation min-h-[44px]"
             >
-              {isLoadingMore ? 'Loading...' : 'Load More'}
+              {isLoadingMore ? t('transactionHistory.loading') : t('transactionHistory.loadMore')}
             </button>
           </div>
         ) : null}
