@@ -362,8 +362,8 @@ export default function PayrollScheduler() {
             weight="bold"
             addlClassName="mb-2 tracking-tight text-2xl sm:text-3xl lg:text-4xl"
           >
-            {t('payroll.title', 'Workforce')}{' '}
-            <span className="text-accent">{t('payroll.titleHighlight', 'Scheduler')}</span>
+            {t('payroll.title')}{' '}
+            <span className="text-accent">{t('payroll.titleHighlight')}</span>
           </Heading>
           <Text
             as="p"
@@ -372,7 +372,7 @@ export default function PayrollScheduler() {
             addlClassName="text-muted font-mono tracking-wider uppercase text-xs sm:text-sm"
           >
             {}
-            {t('payroll.subtitle', 'Automated distribution engine')}
+            {t('payroll.subtitle')}
           </Text>
         </div>
         <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 sm:gap-2">
@@ -457,7 +457,7 @@ export default function PayrollScheduler() {
                 <Input
                   id="employeeName"
                   fieldSize="md"
-                  label={t('payroll.employeeName', 'Employee Name')}
+                  label={t('payroll.employeeName')}
                   name="employeeName"
                   value={formData.employeeName}
                   onChange={handleChange}
@@ -469,7 +469,7 @@ export default function PayrollScheduler() {
                 <Input
                   id="walletAddress"
                   fieldSize="md"
-                  label={t('payroll.walletAddress', 'Wallet Address')}
+                  label={t('payroll.walletAddress')}
                   name="walletAddress"
                   value={formData.walletAddress}
                   onChange={handleChange}
@@ -481,7 +481,7 @@ export default function PayrollScheduler() {
                 <Input
                   id="amount"
                   fieldSize="md"
-                  label={t('payroll.amountLabel', 'Amount (USD equivalent)')}
+                  label={t('payroll.amountLabel')}
                   name="amount"
                   value={formData.amount}
                   onChange={handleChange}
@@ -493,15 +493,15 @@ export default function PayrollScheduler() {
                 <Select
                   id="frequency"
                   fieldSize="md"
-                  label={t('payroll.distributionFrequency', 'Distribution Frequency')}
+                  label={t('payroll.distributionFrequency')}
                   name="frequency"
                   value={formData.frequency}
                   onChange={handleChange}
                 >
                   {}
-                  <option value="weekly">{t('payroll.frequencyWeekly', 'Weekly')}</option>
+                  <option value="weekly">{t('payroll.frequencyWeekly')}</option>
                   {}
-                  <option value="monthly">{t('payroll.frequencyMonthly', 'Monthly')}</option>
+                  <option value="monthly">{t('payroll.frequencyMonthly')}</option>
                 </Select>
               </div>
 
@@ -509,7 +509,7 @@ export default function PayrollScheduler() {
                 <Input
                   id="startDate"
                   fieldSize="md"
-                  label={t('payroll.commencementDate', 'Commencement Date')}
+                  label={t('payroll.commencementDate')}
                   name="startDate"
                   type="date"
                   value={formData.startDate}
@@ -528,7 +528,7 @@ export default function PayrollScheduler() {
                   >
                     {isSimulating
                       ? t('payrollResidual.simulating')
-                      : t('payroll.submit', 'Initialize and Validate')}
+                      : t('payroll.submit')}
                   </Button>
                 ) : (
                   <Button
