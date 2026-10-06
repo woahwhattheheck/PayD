@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Heading, Text, Button } from '@stellar/design-system';
+import { useTranslation } from 'react-i18next';
 
 interface VestingGrant {
   id: string;
@@ -17,12 +18,14 @@ interface VestingGrantListProps {
 }
 
 export const VestingGrantList: React.FC<VestingGrantListProps> = ({ grants, onClaim }) => {
+  const { t, i18n } = useTranslation();
+
   return (
     <div className="space-y-4">
       {grants.length === 0 ? (
         <Card>
           <Text as="p" size="sm" weight="regular" addlClassName="text-muted">
-            No active vesting grants found.
+            {t('vesting.list.empty')}
           </Text>
         </Card>
       ) : (
@@ -37,7 +40,7 @@ export const VestingGrantList: React.FC<VestingGrantListProps> = ({ grants, onCl
                       {grant.employeeName}
                     </Heading>
                     <Text as="p" size="xs" weight="regular" addlClassName="text-muted">
-                      Total: {grant.totalAmount} XLM | Vested: {grant.vestedAmount} XLM
+                      {t('vesting.list.summary', { total: grant.totalAmount, vested: grant.vestedAmount })}
                     </Text>
                   </div>
                   <Button
@@ -46,7 +49,7 @@ export const VestingGrantList: React.FC<VestingGrantListProps> = ({ grants, onCl
                     onClick={() => onClaim(grant.id)}
                     disabled={grant.vestedAmount === 0}
                   >
-                    Claim
+                    {t('vesting.list.claim')}
                   </Button>
                 </div>
 
@@ -59,15 +62,15 @@ export const VestingGrantList: React.FC<VestingGrantListProps> = ({ grants, onCl
 
                 <div className="grid grid-cols-2 gap-4 text-[10px] uppercase font-bold tracking-widest text-muted">
                   <div>
-                    <span>Cliff:</span>
+                    <span>{t('vesting.list.cliff')}:</span>
                     <span className="ml-1 text-text">
-                      {new Date(grant.cliffDate).toLocaleDateString()}
+                      {new Date(grant.cliffDate).toLocaleDateString(i18n.language)}
                     </span>
                   </div>
                   <div>
-                    <span>Start:</span>
+                    <span>{t('vesting.list.start')}:</span>
                     <span className="ml-1 text-text">
-                      {new Date(grant.startDate).toLocaleDateString()}
+                      {new Date(grant.startDate).toLocaleDateString(i18n.language)}
                     </span>
                   </div>
                 </div>
