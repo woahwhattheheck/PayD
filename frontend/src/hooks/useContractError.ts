@@ -15,6 +15,7 @@ export function useContractError() {
           code: 'GENERIC_ERROR',
           message: fallbackMessage,
           action: 'Please check the transaction parameters and try again.',
+          actionKey: 'contractError.genericAction',
         });
       }
       return null;

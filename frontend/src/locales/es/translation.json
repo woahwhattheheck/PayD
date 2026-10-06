@@ -590,7 +590,8 @@
         "message": "No se ha podido decodificar el resultado XDR de la transacción.",
         "action": "Puede que el resultado no sea un objeto de error de Soroban válido."
       }
-    }
+    },
+    "genericAction": "Comprueba los parámetros de la transacción e inténtalo de nuevo."
   },
   "schedulingWizard": {
     "steps": {

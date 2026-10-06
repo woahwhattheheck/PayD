@@ -590,7 +590,8 @@
         "message": "Failed to decode the transaction result XDR.",
         "action": "The result may not be a valid Soroban error object."
       }
-    }
+    },
+    "genericAction": "Please check the transaction parameters and try again."
   },
   "schedulingWizard": {
     "steps": {
