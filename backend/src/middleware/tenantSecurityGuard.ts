@@ -20,16 +20,14 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const organizationId = req.tenantId || req.user?.organizationId;
+    // Only trust tenant context established by extractTenantId.
+    const organizationId = req.tenantId;
     if (!organizationId) {
-      if (strictMode) {
-        res.status(403).json({
-          error: 'Access denied',
-          message: 'Organization context required',
-        });
-        return;
-      }
-      return next();
+      res.status(403).json({
+        error: 'Access denied',
+        message: 'Verified organization context required',
+      });
+      return;
     }
 
     try {
@@ -100,8 +98,10 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
       next();
     } catch (error) {
       logger.error('Tenant security guard error', { error, organizationId });
-      // Fail open in case of error
-      next();
+      res.status(503).json({
+        error: 'Tenant security check unavailable',
+        message: 'Unable to verify tenant access at this time',
+      });
     }
   };
 }
@@ -111,8 +111,14 @@ export function tenantSecurityGuardMiddleware(options: TenantSecurityGuardOption
  */
 export function validateTenantResourceAccess() {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const organizationId = req.tenantId || req.user?.organizationId;
-    if (!organizationId) return next();
+    const organizationId = req.tenantId;
+    if (!organizationId) {
+      res.status(403).json({
+        error: 'Access denied',
+        message: 'Verified organization context required',
+      });
+      return;
+    }
 
     // Check if user is trying to access resource from different tenant
     const targetOrgId = req.params.organizationId || req.body.organizationId;
@@ -232,6 +238,6 @@ async function checkIpAccess(organizationId: number, ip?: string): Promise<boole
     return true;
   } catch (error) {
     logger.error('Failed to check IP access', { error, organizationId });
-    return true; // Fail open
+    return false; // Authorization check unavailable: fail closed.
   }
 }
