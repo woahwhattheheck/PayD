@@ -85,7 +85,7 @@ router.get(
  * GET /api/admin/tenants/:orgId/rate-limits
  * Return the current effective rate limit overrides for an organisation.
  */
-router.get('/tenants/:orgId/rate-limits', requireAdminJustification, async (req: Request, res: Response) => {
+router.get('/tenants/:orgId/rate-limits', requireAdminJustification, validateRequest({ params: orgIdParamsSchema }), async (req: Request, res: Response) => {
   const orgId = parseInt(req.params.orgId, 10);
   if (isNaN(orgId)) {
     res.status(400).json({ error: 'Invalid orgId' });
@@ -192,7 +192,7 @@ router.get('/access-logs', requireAdminJustification, validateRequest({ query: a
  * GET /api/admin/tenants/:orgId/quotas
  * Return quota config and current usage for an organisation.
  */
-router.get('/tenants/:orgId/quotas', requireAdminJustification, async (req: Request, res: Response) => {
+router.get('/tenants/:orgId/quotas', requireAdminJustification, validateRequest({ params: orgIdParamsSchema }), async (req: Request, res: Response) => {
   const orgId = parseInt(req.params.orgId, 10);
   if (isNaN(orgId)) { res.status(400).json({ error: 'Invalid orgId' }); return; }
 
