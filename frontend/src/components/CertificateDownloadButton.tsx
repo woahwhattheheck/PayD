@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
 import { downloadCertificate, getTransactionInfo } from '../services/certificateApi.js';
 import { useNotification } from '../hooks/useNotification.js';
+import { useTranslation } from 'react-i18next';
 
 interface CertificateDownloadButtonProps {
   transactionHash: string;
@@ -21,6 +22,7 @@ export function CertificateDownloadButton({
   const [employeeId, setEmployeeId] = useState<number | undefined>(propEmployeeId);
   const [organizationId, setOrganizationId] = useState<number | undefined>(propOrganizationId);
   const { notifySuccess, notifyError } = useNotification();
+  const { t } = useTranslation();
 
   // Auto-fetch employee and organization info if not provided
   useEffect(() => {
@@ -44,7 +46,7 @@ export function CertificateDownloadButton({
 
   const handleDownload = async () => {
     if (!transactionHash) {
-      notifyError('Missing Information', 'Transaction hash is required');
+      notifyError(t('certificate.missingInformation'), t('certificate.transactionHashRequired'));
       return;
     }
 
@@ -71,8 +73,8 @@ export function CertificateDownloadButton({
 
     if (!finalEmployeeId || !finalOrganizationId) {
       notifyError(
-        'Missing Information',
-        'Unable to determine employee and organization. Please provide employeeId and organizationId.'
+        t('certificate.missingInformation'),
+        t('certificate.identityUnavailable')
       );
       return;
     }
@@ -85,13 +87,13 @@ export function CertificateDownloadButton({
         organizationId: finalOrganizationId,
       });
       notifySuccess(
-        'Certificate Downloaded',
-        'Payment certificate has been downloaded successfully'
+        t('certificate.downloadedTitle'),
+        t('certificate.downloadedBody')
       );
     } catch (error) {
       notifyError(
-        'Download Failed',
-        error instanceof Error ? error.message : 'Failed to download certificate'
+        t('certificate.downloadFailed'),
+        error instanceof Error ? error.message : t('certificate.downloadFailedBody')
       );
     } finally {
       setIsDownloading(false);
@@ -111,17 +113,17 @@ export function CertificateDownloadButton({
       }}
       disabled={isDisabled}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      title="Download Proof of Payment Certificate"
+      title={t('certificate.downloadTitle')}
     >
       {isDownloading || isLoadingInfo ? (
         <>
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          <span>{isDownloading ? 'Generating...' : 'Loading...'}</span>
+          <span>{isDownloading ? t('certificate.generating') : t('certificate.loading')}</span>
         </>
       ) : (
         <>
           <FileText className="w-3.5 h-3.5" />
-          <span>Certificate</span>
+          <span>{t('certificate.label')}</span>
         </>
       )}
     </button>
