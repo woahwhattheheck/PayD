@@ -37,6 +37,7 @@ import {
 } from '../services/contractUpgrade';
 import UpgradeConfirmModal from './UpgradeConfirmModal';
 import { useNotification } from '../hooks/useNotification';
+import { useTranslation } from 'react-i18next';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -78,6 +79,7 @@ function NetworkBadge({ network }: { network: string }) {
 
 /** Upgrade log status badge */
 function StatusBadge({ status }: { status: UpgradeLog['status'] }) {
+  const { t } = useTranslation();
   const colorMap: Record<UpgradeLog['status'], string> = {
     pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
     simulated: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
@@ -91,7 +93,7 @@ function StatusBadge({ status }: { status: UpgradeLog['status'] }) {
     <span
       className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-widest rounded border ${colorMap[status]}`}
     >
-      {status}
+      {t(`contractUpgrade.status.${status}`)}
     </span>
   );
 }
@@ -106,6 +108,7 @@ interface ContractCardProps {
 }
 
 function ContractCard({ contract, onUpgrade }: ContractCardProps) {
+  const { t, i18n } = useTranslation();
   const [showHistory, setShowHistory] = useState(false);
   const [logs, setLogs] = useState<UpgradeLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
@@ -147,7 +150,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
           className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-accent/15 text-accent border border-accent/30 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
         >
           <ArrowUpCircle className="w-3.5 h-3.5" />
-          Upgrade
+          {t('contractUpgrade.upgrade')}
         </button>
       </div>
 
@@ -156,7 +159,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
             <p className="text-muted uppercase tracking-widest text-[10px] font-bold mb-1">
-              Contract ID
+              {t('contractUpgrade.contractId')}
             </p>
             <div className="flex items-center gap-1.5">
               <code className="font-mono text-text/80 truncate">{contract.contract_id}</code>
@@ -165,7 +168,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
                 target="_blank"
                 rel="noreferrer"
                 className="text-muted hover:text-accent transition-colors shrink-0"
-                title="View on Stellar Expert"
+                title={t('contractUpgrade.viewOnStellarExpert')}
               >
                 <ExternalLink className="w-3 h-3" />
               </a>
@@ -174,7 +177,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
 
           <div>
             <p className="text-muted uppercase tracking-widest text-[10px] font-bold mb-1">
-              Current WASM Hash
+              {t('contractUpgrade.currentWasmHash')}
             </p>
             <HashBadge hash={contract.current_wasm_hash} />
           </div>
@@ -184,13 +187,13 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
           <div className="flex items-center gap-1.5 text-xs text-muted">
             <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
             <span>
-              Last upgraded:{' '}
+              {t('contractUpgrade.lastUpgraded')}{' '}
               <span className="text-text">
-                {new Date(contract.last_upgraded_at).toLocaleString()}
+                {new Date(contract.last_upgraded_at).toLocaleString(i18n.language)}
               </span>
               {contract.last_upgraded_by && (
                 <>
-                  {' by '}
+                  {' '}{t('contractUpgrade.by')}{' '}
                   <code className="font-mono">{contract.last_upgraded_by.slice(0, 8)}…</code>
                 </>
               )}
@@ -208,7 +211,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
         >
           <span className="flex items-center gap-1.5 font-bold uppercase tracking-widest">
             <Clock className="w-3.5 h-3.5" />
-            {logsLoading ? 'Loading history…' : 'Upgrade History'}
+            {logsLoading ? t('contractUpgrade.loadingHistory') : t('contractUpgrade.upgradeHistory')}
           </span>
           {showHistory ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
@@ -216,16 +219,16 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
         {showHistory && (
           <div className="px-5 pb-4">
             {logs.length === 0 ? (
-              <p className="text-xs text-muted py-3 text-center">No upgrade history yet.</p>
+              <p className="text-xs text-muted py-3 text-center">{t('contractUpgrade.noHistory')}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-hi text-muted text-[10px] uppercase tracking-widest">
-                      <th className="py-2 pr-3">Date</th>
-                      <th className="py-2 pr-3">New Hash</th>
-                      <th className="py-2 pr-3">Status</th>
-                      <th className="py-2">TX</th>
+                      <th className="py-2 pr-3">{t('contractUpgrade.date')}</th>
+                      <th className="py-2 pr-3">{t('contractUpgrade.newHash')}</th>
+                      <th className="py-2 pr-3">{t('contractUpgrade.statusLabel')}</th>
+                      <th className="py-2">{t('contractUpgrade.tx')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -235,7 +238,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
                         className="border-b border-hi/40 hover:bg-(--surface-hi) transition-colors"
                       >
                         <td className="py-2 pr-3 font-mono text-muted">
-                          {new Date(log.created_at).toLocaleDateString()}
+                          {new Date(log.created_at).toLocaleDateString(i18n.language)}
                         </td>
                         <td className="py-2 pr-3">
                           <HashBadge hash={log.new_wasm_hash} />
@@ -270,6 +273,7 @@ function ContractCard({ contract, onUpgrade }: ContractCardProps) {
 // ---------------------------------------------------------------------------
 
 export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabProps) {
+  const { t } = useTranslation();
   const { notifyError } = useNotification();
 
   const [contracts, setContracts] = useState<ContractRecord[]>([]);
@@ -283,13 +287,13 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
       setContracts(data);
     } catch (err: unknown) {
       notifyError(
-        'Load Failed',
-        err instanceof Error ? err.message : 'Failed to load contract registry.'
+        t('contractUpgrade.loadFailed'),
+        err instanceof Error ? err.message : t('contractUpgrade.loadFailedBody')
       );
     } finally {
       setLoading(false);
     }
-  }, [notifyError]);
+  }, [notifyError, t]);
 
   useEffect(() => {
     void loadContracts();
@@ -316,7 +320,7 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
       {/* Section header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold flex items-center gap-2">
-          <Code2 className="w-5 h-5 text-accent" /> Contract Registry
+          <Code2 className="w-5 h-5 text-accent" /> {t('contractUpgrade.registry')}
         </h2>
         <button
           onClick={() => void loadContracts()}
@@ -324,14 +328,13 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-black/20 border border-hi rounded hover:bg-black/40 disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Loading…' : 'Refresh'}
+          {loading ? t('contractUpgrade.loading') : t('contractUpgrade.refresh')}
         </button>
       </div>
 
       {/* Description */}
       <p className="text-sm text-muted">
-        Manage deployed Soroban smart contract upgrades. Each upgrade triggers a simulation,
-        multi-step confirmation, and on-chain execution followed by automated data migration.
+        {t('contractUpgrade.description')}
       </p>
 
       {/* No admin address warning */}
@@ -339,7 +342,7 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
         <div className="flex items-start gap-3 p-4 bg-yellow-500/5 border border-yellow-500/30 rounded-xl">
           <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
           <p className="text-sm text-yellow-400">
-            Connect your admin wallet to initiate contract upgrades.
+            {t('contractUpgrade.connectAdmin')}
           </p>
         </div>
       )}
@@ -361,9 +364,9 @@ export default function ContractUpgradeTab({ adminAddress }: ContractUpgradeTabP
       ) : contracts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 border border-hi rounded-2xl bg-black/10">
           <Code2 className="w-10 h-10 text-muted mb-3" />
-          <p className="text-muted">No contracts found in registry.</p>
+          <p className="text-muted">{t('contractUpgrade.noContracts')}</p>
           <p className="text-xs text-muted/60 mt-1">
-            Run the database migration to seed the contract registry.
+            {t('contractUpgrade.seedRegistry')}
           </p>
         </div>
       ) : (
