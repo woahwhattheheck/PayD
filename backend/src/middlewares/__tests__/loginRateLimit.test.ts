@@ -1,19 +1,25 @@
 import type { NextFunction, Request, Response } from 'express';
-import { loginRateLimit } from '../rateLimitMiddleware.js';
+import {
+  loginRateLimit,
+  loginSourceRateLimit,
+} from '../rateLimitMiddleware.js';
 import { rateLimitService } from '../../services/rateLimitService.js';
 
 describe('authentication login rate limiting', () => {
   const primaryIdentifier = 'login:GTEST';
   const alternateIdentifier = 'login:GOTHER';
+  const sourceIdentifier = 'login-source:198.51.100.41';
 
   beforeEach(async () => {
     await rateLimitService.resetRateLimit(primaryIdentifier, 'auth');
     await rateLimitService.resetRateLimit(alternateIdentifier, 'auth');
+    await rateLimitService.resetRateLimit(sourceIdentifier, 'auth');
   });
 
   afterEach(async () => {
     await rateLimitService.resetRateLimit(primaryIdentifier, 'auth');
     await rateLimitService.resetRateLimit(alternateIdentifier, 'auth');
+    await rateLimitService.resetRateLimit(sourceIdentifier, 'auth');
   });
 
   function response() {
@@ -89,8 +95,6 @@ describe('authentication login rate limiting', () => {
       })
     );
 
-    // The same source remains usable for a different wallet because login
-    // attempts no longer collapse into one reverse-proxy IP bucket.
     const alternateResponse = response();
     const alternateNext = jest.fn() as unknown as NextFunction;
     await middleware(
@@ -101,5 +105,37 @@ describe('authentication login rate limiting', () => {
 
     expect(alternateNext).toHaveBeenCalledTimes(1);
     expect(alternateResponse.res.statusCode).toBe(200);
+  });
+
+  it('throttles one request source even when wallet identifiers rotate', async () => {
+    const middleware = loginSourceRateLimit();
+    const limit = rateLimitService.getTierConfig('auth').maxRequests;
+    const sourceIp = '198.51.100.41';
+
+    for (let attempt = 0; attempt < limit; attempt += 1) {
+      const { res } = response();
+      const next = jest.fn() as unknown as NextFunction;
+
+      await middleware(
+        request(`GROTATE${attempt}`, sourceIp),
+        res,
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(res.statusCode).toBe(200);
+    }
+
+    const blockedResponse = response();
+    const blockedNext = jest.fn() as unknown as NextFunction;
+    await middleware(
+      request('GROTATE-LAST', sourceIp),
+      blockedResponse.res,
+      blockedNext
+    );
+
+    expect(blockedNext).not.toHaveBeenCalled();
+    expect(blockedResponse.res.statusCode).toBe(429);
+    expect(Number(blockedResponse.headers.get('Retry-After'))).toBeGreaterThan(0);
   });
 });
