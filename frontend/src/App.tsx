@@ -109,7 +109,9 @@ function App() {
         <Route
           path="/cash-flow"
           element={
-            <ErrorBoundary fallback={<ErrorFallback onReset={() => {}} />}>
+            <ErrorBoundary
+              fallback={({ onReset }) => <ErrorFallback onReset={onReset} />}
+            >
               <CashFlowForecast />
             </ErrorBoundary>
           }
