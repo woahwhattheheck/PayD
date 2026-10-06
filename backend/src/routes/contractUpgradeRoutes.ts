@@ -1,7 +1,26 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { ContractUpgradeController } from '../controllers/contractUpgradeController.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = Router();
+
+const registryParamsSchema = z.object({
+  registryId: z.string().regex(/^[1-9][0-9]*$/, 'registryId must be a positive integer'),
+});
+const upgradeLogParamsSchema = z.object({
+  logId: z.string().regex(/^[1-9][0-9]*$/, 'logId must be a positive integer'),
+});
+const wasmHashSchema = z.string().length(64).regex(/^[0-9a-fA-F]{64}$/);
+const validateHashBodySchema = z.object({ newWasmHash: wasmHashSchema });
+const simulateBodySchema = z.object({
+  newWasmHash: wasmHashSchema,
+  initiatedBy: z.string().min(56).max(64),
+  notes: z.string().max(1000).optional(),
+});
+const executeBodySchema = z.object({
+  adminSecret: z.string().min(56),
+});
 
 // ---------------------------------------------------------------------------
 // Contract registry — list & detail
@@ -24,6 +43,7 @@ router.get('/:registryId', (req, res) => void ContractUpgradeController.getContr
  */
 router.post(
   '/:registryId/validate-hash',
+  validateRequest({ params: registryParamsSchema, body: validateHashBodySchema }),
   (req, res) => void ContractUpgradeController.validateHash(req, res)
 );
 
@@ -34,6 +54,7 @@ router.post(
  */
 router.post(
   '/:registryId/simulate-upgrade',
+  validateRequest({ params: registryParamsSchema, body: simulateBodySchema }),
   (req, res) => void ContractUpgradeController.simulateUpgrade(req, res)
 );
 
@@ -59,6 +80,7 @@ router.get(
  */
 router.post(
   '/upgrade-logs/:logId/execute',
+  validateRequest({ params: upgradeLogParamsSchema, body: executeBodySchema }),
   (req, res) => void ContractUpgradeController.executeUpgrade(req, res)
 );
 
@@ -77,6 +99,7 @@ router.get(
  */
 router.post(
   '/upgrade-logs/:logId/cancel',
+  validateRequest({ params: upgradeLogParamsSchema }),
   (req, res) => void ContractUpgradeController.cancelUpgrade(req, res)
 );
 
