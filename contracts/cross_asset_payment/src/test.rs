@@ -21,6 +21,7 @@ use soroban_sdk::{
 //   InvalidStatus      = 10
 //   NotReady           = 11
 //   DeadlineOverflow   = 12
+//   SettlementUnavailable = 13
 
 struct Setup {
     env: Env,
@@ -112,13 +113,14 @@ fn test_initiate_payment_binds_recipient_and_deadline() {
     assert_eq!(tc.balance(&s.sender), 99_500);
 
     let record = s.client.get_payment(&id).unwrap();
+    let terms = s.client.get_settlement_terms(&id).unwrap();
     assert_eq!(record.amount, 500);
     assert_eq!(record.net_amount, 500);
-    assert_eq!(record.recipient, s.recipient);
     assert_eq!(record.status, symbol_short!("pending"));
-    assert_eq!(record.created_at, 1_000_000);
+    assert_eq!(terms.recipient, s.recipient);
+    assert_eq!(terms.created_at, 1_000_000);
     assert_eq!(
-        record.refund_available_at,
+        terms.refund_available_at,
         1_000_000 + REFUND_DELAY_SECONDS
     );
 }
