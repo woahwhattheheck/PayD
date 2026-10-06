@@ -45,21 +45,25 @@ fn distribution_event_matches_indexer_payload_schema() {
     );
 
     let event_name = Symbol::new(&env, "distribution_executed_event");
-    let mut matching_events = env.events().all().iter().filter(|(address, topics, _)| {
-        address == client.address
-            && topics
-                .get(0)
-                .map(|topic| Symbol::from_val(&env, &topic) == event_name)
-                .unwrap_or(false)
-    });
+    let mut matching_event = None;
+    for (address, topics, data) in env.events().all().iter() {
+        if address != client.address {
+            continue;
+        }
+        let is_target_event = topics
+            .get(0)
+            .map(|topic| Symbol::from_val(&env, &topic) == event_name)
+            .unwrap_or(false);
+        if is_target_event {
+            assert!(
+                matching_event.is_none(),
+                "expected exactly one DistributionExecutedEvent"
+            );
+            matching_event = Some((topics, data));
+        }
+    }
 
-    let (_, topics, data) = matching_events
-        .next()
-        .expect("expected one DistributionExecutedEvent");
-    assert!(
-        matching_events.next().is_none(),
-        "expected exactly one DistributionExecutedEvent"
-    );
+    let (topics, data) = matching_event.expect("expected one DistributionExecutedEvent");
     assert_eq!(
         topics,
         Vec::from_array(&env, [event_name.into_val(&env)]),
