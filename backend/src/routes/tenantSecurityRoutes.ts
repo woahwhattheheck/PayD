@@ -40,7 +40,7 @@ const limitQuerySchema = z.object({
  * GET /api/tenant-security/summary/:organizationId
  * Get security summary for an organization
  */
-router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/summary/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
 
@@ -63,7 +63,7 @@ router.get('/summary/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/tenant-security/events/:organizationId
  * Get security events with filtering
  */
-router.get('/events/:organizationId', authenticateJWT, validateRequest({ query: eventsQuerySchema }), async (req, res) => {
+router.get('/events/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: eventsQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const {
@@ -168,7 +168,7 @@ router.post('/detect-anomalies/:organizationId', authenticateJWT, validateReques
  * GET /api/tenant-security/anomalies/:organizationId
  * Get detected anomalies for an organization
  */
-router.get('/anomalies/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
+router.get('/anomalies/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 20;
@@ -238,7 +238,7 @@ router.get('/organizations', authenticateJWT, async (req, res) => {
  * GET /api/tenant-security/access-logs/:organizationId
  * Get recent access logs for an organization
  */
-router.get('/access-logs/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
+router.get('/access-logs/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 50;
