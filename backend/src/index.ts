@@ -20,11 +20,24 @@ dotenv.config();
 const server = createServer(app);
 
 // Part-49 job handles — assigned on server start, cleaned up on shutdown
-let usageSnapshotJob: { stop(): void };
-let integrityCheckJob: { stop(): void };
+let usageSnapshotJob: { stop(): Promise<void> } | undefined;
+let integrityCheckJob: { stop(): Promise<void> } | undefined;
 let auditCacheCleanup: ReturnType<typeof setInterval> | undefined;
 let idempotencyCleanup: ReturnType<typeof setInterval> | undefined;
+const activeCleanupRuns = new Set<Promise<void>>();
 let isShuttingDown = false;
+
+function trackCleanupRun(run: Promise<void>): void {
+  activeCleanupRuns.add(run);
+  void run.then(
+    () => {
+      activeCleanupRuns.delete(run);
+    },
+    () => {
+      activeCleanupRuns.delete(run);
+    }
+  );
+}
 
 // Initialize Socket.IO
 initializeSocket(server);
@@ -61,15 +74,18 @@ server.listen(PORT, () => {
 
   // Part 45 — cleanup expired audit cache every hour
   auditCacheCleanup = setInterval(
-    async () => {
-      try {
-        const deleted = await auditAnalyticsService.cleanupExpiredCache();
-        if (deleted > 0) {
-          logger.info(`Cleaned up ${deleted} expired audit cache entries`);
+    () => {
+      const run = (async () => {
+        try {
+          const deleted = await auditAnalyticsService.cleanupExpiredCache();
+          if (deleted > 0) {
+            logger.info(`Cleaned up ${deleted} expired audit cache entries`);
+          }
+        } catch (error) {
+          logger.error('Failed to cleanup audit cache', { error });
         }
-      } catch (error) {
-        logger.error('Failed to cleanup audit cache', { error });
-      }
+      })();
+      trackCleanupRun(run);
     },
     60 * 60 * 1000
   ); // Every hour
@@ -77,12 +93,15 @@ server.listen(PORT, () => {
 
   // Idempotency key cleanup — every hour, remove expired keys
   idempotencyCleanup = setInterval(
-    async () => {
-      try {
-        await cleanupExpiredIdempotencyKeys();
-      } catch (error) {
-        logger.error('Failed to cleanup expired idempotency keys', { error });
-      }
+    () => {
+      const run = (async () => {
+        try {
+          await cleanupExpiredIdempotencyKeys();
+        } catch (error) {
+          logger.error('Failed to cleanup expired idempotency keys', { error });
+        }
+      })();
+      trackCleanupRun(run);
     },
     60 * 60 * 1000
   );
@@ -105,9 +124,10 @@ const gracefulShutdown = createGracefulShutdown({
       () => integrityCheckJob?.stop(),
       () => contractEventIndexer.stop(),
     ];
-    const results = await Promise.allSettled(
-      stops.map((stop) => Promise.resolve().then(stop))
-    );
+    const results = await Promise.allSettled([
+      ...stops.map((stop) => Promise.resolve().then(stop)),
+      ...activeCleanupRuns,
+    ]);
     const failures = results
       .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
       .map((result) => result.reason);
