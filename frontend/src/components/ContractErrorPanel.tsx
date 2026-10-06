@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Copy, AlertTriangle, Info } from 'lucide-react';
 import { ContractErrorDetails } from '../utils/contractErrorParser';
+import { useTranslation } from 'react-i18next';
 import styles from './ContractErrorPanel.module.css';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 
 export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const { t } = useTranslation();
 
   if (!error) return null;
 
@@ -26,7 +28,7 @@ export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) =
       <div className={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
         <div className={styles.headerLeft}>
           <AlertTriangle className={styles.errorIcon} size={18} />
-          <span className={styles.title}>Contract Invocation Failed</span>
+          <span className={styles.title}>{t('contractError.title')}</span>
         </div>
         <div className={styles.headerRight}>
           <span className={styles.errorCode}>{error.code}</span>
@@ -43,7 +45,7 @@ export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) =
           <div className={styles.actionSection}>
             <div className={styles.actionHeader}>
               <Info size={14} className={styles.infoIcon} />
-              <span className={styles.actionLabel}>Suggested Action</span>
+              <span className={styles.actionLabel}>{t('contractError.suggestedAction')}</span>
             </div>
             <p className={styles.actionText}>{error.action}</p>
           </div>
@@ -51,19 +53,19 @@ export const ContractErrorPanel: React.FC<Props> = ({ error, className = '' }) =
           {(isUnknown || error.rawXdr) && (
             <div className={styles.rawSection}>
               <div className={styles.rawHeader}>
-                <span className={styles.rawLabel}>Raw Transaction Result (XDR)</span>
+                <span className={styles.rawLabel}>{t('contractError.rawTransactionResult')}</span>
                 <button
                   type="button"
                   onClick={handleCopyRaw}
                   className={styles.copyButton}
-                  title="Copy XDR"
+                  title={t('contractError.copyXdr')}
                 >
                   <Copy size={14} />
-                  <span>Copy</span>
+                  <span>{t('contractError.copy')}</span>
                 </button>
               </div>
               <div className={styles.rawContent}>
-                <code>{error.rawXdr || 'N/A'}</code>
+                <code>{error.rawXdr || t('contractError.notAvailable')}</code>
               </div>
             </div>
           )}
