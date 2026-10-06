@@ -933,7 +933,11 @@
     "tx": "Tx",
     "notAvailable": "N/D",
     "recipientLabel": "Destinatario:",
-    "amountLabel": "Importe:"
+    "amountLabel": "Importe:",
+    "connected": "Conectado: {{address}}",
+    "total": "Total: {{total}} %",
+    "totalDistributed": "Total distribuido:",
+    "viewTransaction": "Ver transacción: {{hash}}"
   },
   "transactionHistory": {
     "loadFailed": "No se pudo cargar el historial de transacciones",
@@ -950,7 +954,16 @@
     "assetPlaceholder": "Activo (USDC, XLM...)",
     "empty": "No se encontraron registros para los filtros actuales.",
     "loading": "Cargando...",
-    "loadMore": "Cargar más"
+    "loadMore": "Cargar más",
+    "filters": "Filtros",
+    "actor": "Actor:",
+    "amountLabel": "Importe:",
+    "status": {
+      "confirmed": "Confirmado",
+      "pending": "Pendiente",
+      "failed": "Fallido",
+      "indexed": "Indexado"
+    }
   },
   "bulkPaymentTracker": {
     "status": {
