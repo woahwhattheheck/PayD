@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { completeTwoFactorLogin, twoFactorErrorMessage } from '../services/twoFactorApi.js';
+import { AUTH_TOKEN_KEY, consumeAuthReturnPath } from '../utils/authSession';
 
 const AuthCallback: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -21,9 +22,9 @@ const AuthCallback: React.FC = () => {
 
     const token = searchParams.get('token');
     if (token) {
-      localStorage.setItem('payd_auth_token', token);
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
       // Optional: decode token to get user info or trigger a refresh in a context provider
-      void navigate('/');
+      void navigate(consumeAuthReturnPath(), { replace: true });
     } else {
       void navigate('/login?error=no_token');
     }
@@ -37,8 +38,8 @@ const AuthCallback: React.FC = () => {
     setIsSubmitting(true);
     try {
       const session = await completeTwoFactorLogin(challengeToken, code.trim());
-      localStorage.setItem('payd_auth_token', session.accessToken);
-      void navigate('/');
+      localStorage.setItem(AUTH_TOKEN_KEY, session.accessToken);
+      void navigate(consumeAuthReturnPath(), { replace: true });
     } catch (submitError) {
       setError(twoFactorErrorMessage(submitError, t('twoFactor.errors.loginFailed')));
     } finally {
