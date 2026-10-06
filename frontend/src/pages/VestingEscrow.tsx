@@ -5,6 +5,7 @@ import { useTransactionSimulation } from '../hooks/useTransactionSimulation';
 import { TransactionSimulationPanel } from '../components/TransactionSimulationPanel';
 import { VestingGrantList } from '../components/vesting/VestingGrantList';
 import { VestingGrantForm } from '../components/vesting/VestingGrantForm';
+import { useTranslation } from 'react-i18next';
 
 interface VestingGrantFormData {
   employeeAddress: string;
@@ -25,6 +26,7 @@ interface VestingGrant {
 }
 
 export default function VestingEscrow() {
+  const { t } = useTranslation();
   const { notifySuccess, notifyError } = useNotification();
   const {
     simulate,
@@ -71,16 +73,16 @@ export default function VestingEscrow() {
       const mockXdr =
         'AAAAAgAAAABmF8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
       await simulate({ envelopeXdr: mockXdr });
-      notifySuccess('Grant simulation ready', 'Review the transaction details before confirming.');
+      notifySuccess(t('vesting.notifications.simReadyTitle'), t('vesting.notifications.simReadyBody'));
     } catch {
-      notifyError('Grant simulation failed', 'Please check the contract parameters.');
+      notifyError(t('vesting.notifications.simFailedTitle'), t('vesting.notifications.simFailedBody'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleClaim = () => {
-    notifySuccess('Claim Initialized', 'Simulating on-chain claim transaction...');
+    notifySuccess(t('vesting.notifications.claimTitle'), t('vesting.notifications.claimBody'));
     // Real logic would invoke the claim entry point
   };
 
@@ -88,7 +90,7 @@ export default function VestingEscrow() {
     <div className="flex-1 flex flex-col items-center justify-start p-12 max-w-6xl mx-auto w-full">
       <div className="w-full mb-12 border-b border-hi pb-8">
         <Heading as="h1" size="lg" weight="bold" addlClassName="mb-2 tracking-tight">
-          Vesting <span className="text-accent">Escrow</span>
+          {t('vesting.page.titlePrefix')} <span className="text-accent">{t('vesting.page.titleHighlight')}</span>
         </Heading>
         <Text
           as="p"
@@ -96,7 +98,7 @@ export default function VestingEscrow() {
           weight="regular"
           addlClassName="text-muted font-mono tracking-wider uppercase"
         >
-          Manage employee token vesting schedules
+          {t('vesting.page.subtitle')}
         </Text>
       </div>
 
@@ -117,12 +119,12 @@ export default function VestingEscrow() {
                 className="btn btn-primary w-full py-4 text-lg font-bold"
                 onClick={() =>
                   notifySuccess(
-                    'Vesting grant created!',
-                    'The transaction has been broadcast to the network.'
+                    t('vesting.notifications.createdTitle'),
+                    t('vesting.notifications.createdBody')
                   )
                 }
               >
-                Confirm & Create Grant
+                {t('vesting.page.confirmCreate')}
               </button>
             </div>
           )}
