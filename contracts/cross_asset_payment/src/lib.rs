@@ -24,6 +24,7 @@ pub enum ContractError {
     InvalidStatus       = 10,
     NotReady            = 11,
     DeadlineOverflow    = 12,
+    SettlementUnavailable = 13,
 }
 
 impl From<CommonError> for ContractError {
@@ -81,7 +82,6 @@ pub struct PaymentRefundedEvent {
 #[derive(Clone, Debug)]
 pub struct PaymentRecord {
     pub from: Address,
-    pub recipient: Address,
     pub amount: i128,
     pub net_amount: i128,
     pub asset: Address,
@@ -89,6 +89,12 @@ pub struct PaymentRecord {
     pub target_asset: String,
     pub anchor_id: String,
     pub status: Symbol,
+}
+
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct SettlementTerms {
+    pub recipient: Address,
     pub created_at: u64,
     pub refund_available_at: u64,
 }
@@ -99,6 +105,7 @@ pub enum DataKey {
     PaymentCount,
     FeeRateBps,
     Payment(u64),
+    Terms(u64),
 }
 
 // ~30 days at 5 s/ledger
@@ -193,7 +200,6 @@ impl CrossAssetPaymentContract {
 
         let record = PaymentRecord {
             from: from.clone(),
-            recipient,
             amount,
             net_amount,
             asset,
@@ -201,11 +207,15 @@ impl CrossAssetPaymentContract {
             target_asset: target_asset.clone(),
             anchor_id: anchor_id.clone(),
             status: symbol_short!("pending"),
+        };
+        let terms = SettlementTerms {
+            recipient,
             created_at,
             refund_available_at,
         };
 
         persist_payment(&env, count, &record);
+        persist_terms(&env, count, &terms);
 
         PaymentInitiatedEvent {
             payment_id: count,
@@ -254,12 +264,13 @@ impl CrossAssetPaymentContract {
         if record.status != symbol_short!("ready") {
             return Err(ContractError::NotReady);
         }
-        if now >= record.refund_available_at {
+        let terms = load_terms(&env, payment_id)?;
+        if now >= terms.refund_available_at {
             return Err(ContractError::SettlementExpired);
         }
 
         let amount = record.net_amount;
-        let recipient = record.recipient.clone();
+        let recipient = terms.recipient.clone();
 
         // Commit the terminal state before the outward token call. Soroban
         // transaction rollback restores it if the token transfer fails.
@@ -303,7 +314,8 @@ impl CrossAssetPaymentContract {
         if record.status != symbol_short!("pending") && record.status != symbol_short!("ready") {
             return Err(ContractError::NotPending);
         }
-        if now < record.refund_available_at {
+        let terms = load_terms(&env, payment_id)?;
+        if now < terms.refund_available_at {
             return Err(ContractError::RefundNotAvailable);
         }
 
@@ -373,6 +385,10 @@ impl CrossAssetPaymentContract {
         env.storage().persistent().get(&DataKey::Payment(payment_id))
     }
 
+    pub fn get_settlement_terms(env: Env, payment_id: u64) -> Option<SettlementTerms> {
+        env.storage().persistent().get(&DataKey::Terms(payment_id))
+    }
+
     pub fn get_payment_count(env: Env) -> u64 {
         env.storage().instance().get(&DataKey::PaymentCount).unwrap_or(0)
     }
@@ -387,6 +403,22 @@ fn load_payment(env: &Env, payment_id: u64) -> Result<PaymentRecord, ContractErr
 fn persist_payment(env: &Env, payment_id: u64, record: &PaymentRecord) {
     let key = DataKey::Payment(payment_id);
     env.storage().persistent().set(&key, record);
+    env.storage().persistent().extend_ttl(
+        &key,
+        PAYMENT_TTL_LEDGERS,
+        PAYMENT_TTL_LEDGERS,
+    );
+}
+
+fn load_terms(env: &Env, payment_id: u64) -> Result<SettlementTerms, ContractError> {
+    env.storage().persistent()
+        .get(&DataKey::Terms(payment_id))
+        .ok_or(ContractError::SettlementUnavailable)
+}
+
+fn persist_terms(env: &Env, payment_id: u64, terms: &SettlementTerms) {
+    let key = DataKey::Terms(payment_id);
+    env.storage().persistent().set(&key, terms);
     env.storage().persistent().extend_ttl(
         &key,
         PAYMENT_TTL_LEDGERS,
