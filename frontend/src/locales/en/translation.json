@@ -56,7 +56,8 @@
     "frequencyWeekly": "Weekly",
     "frequencyMonthly": "Monthly",
     "commencementDate": "Commencement Date",
-    "submit": "Initialize Payroll Stream"
+    "submit": "Initialize Payroll Stream",
+    "walletAddress": "Wallet Address"
   },
   "employees": {
     "title": "Workforce {{highlight}}",
