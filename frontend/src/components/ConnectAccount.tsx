@@ -20,15 +20,15 @@ const ConnectAccount: React.FC = () => {
         {token && (
           <div className="hidden sm:flex flex-col items-end px-3 py-1.5 glass rounded-lg border-hi/5">
             <span className="text-[9px] uppercase tracking-tighter text-accent font-black leading-none mb-1 opacity-70">
-              Social Active
+              {t('connectAccount.socialActive')}
             </span>
-            <span className="text-[11px] text-text font-bold leading-none">Session Active</span>
+            <span className="text-[11px] text-text font-bold leading-none">{t('connectAccount.sessionActive')}</span>
           </div>
         )}
         {address && (
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-[10px] uppercase tracking-widest text-muted font-mono leading-none mb-1">
-              Stellar
+              {t('connectAccount.stellar')}
             </span>
             <span className="text-xs text-accent font-mono leading-none">
               {address.slice(0, 6)}...{address.slice(-4)}
@@ -42,7 +42,7 @@ const ConnectAccount: React.FC = () => {
           }}
           className="px-4 py-2 rounded-full border border-border-hi text-xs font-semibold text-text hover:bg-danger/10 hover:border-danger/30 hover:text-danger transition-colors"
         >
-          Exit
+          {t('connectAccount.exit')}
         </button>
       </div>
     );
@@ -56,7 +56,7 @@ const ConnectAccount: React.FC = () => {
         }}
         className="px-3 py-2 text-sm font-semibold text-text hover:text-accent transition-colors"
       >
-        Sign In
+        {t('connectAccount.signIn')}
       </button>
       <button
         id="tour-connect"
@@ -69,12 +69,12 @@ const ConnectAccount: React.FC = () => {
         {isConnecting ? (
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 border-2 border-on-accent/30 border-t-on-accent rounded-full animate-spin" />
-            {t('connectAccount.connecting') || 'Connecting...'}
+            {t('connectAccount.connecting')}
           </span>
         ) : (
           <>
-            {t('connectAccount.connect') || 'Connect'}{' '}
-            <span className="hidden sm:inline">{t('connectAccount.wallet') || 'Wallet'}</span>
+            {t('connectAccount.connect')}{' '}
+            <span className="hidden sm:inline">{t('connectAccount.wallet')}</span>
           </>
         )}
       </button>
