@@ -28,6 +28,22 @@ const quotaBodySchema = z.object({
   maxMonthlyTransactions: z.number().int().positive().optional(),
   maxStorageMb: z.number().int().positive().optional(),
 });
+const positiveIntegerQuerySchema = z.string().regex(/^[1-9][0-9]*$/, 'must be a positive integer');
+const parseableDateQuerySchema = z.string().refine(
+  (value) => Number.isFinite(Date.parse(value)),
+  'must be a valid date',
+);
+const auditIntegrityQuerySchema = z.object({
+  limit: positiveIntegerQuerySchema.optional(),
+});
+const accessLogsQuerySchema = z.object({
+  organizationId: positiveIntegerQuerySchema.optional(),
+  adminUserId: z.string().min(1).optional(),
+  from: parseableDateQuerySchema.optional(),
+  to: parseableDateQuerySchema.optional(),
+  page: positiveIntegerQuerySchema.optional(),
+  limit: positiveIntegerQuerySchema.optional(),
+});
 
 // ---------------------------------------------------------------------------
 // Audit integrity
@@ -45,6 +61,7 @@ router.get(
   '/audit/integrity',
   requireAdminJustification,
   auditSensitiveOperation('audit_integrity_check'),
+  validateRequest({ query: auditIntegrityQuerySchema }),
   async (req: Request, res: Response) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
@@ -129,7 +146,7 @@ router.patch('/tenants/:orgId/rate-limits', requireAdminJustification, validateR
  *   to              — ISO date upper bound
  *   page, limit
  */
-router.get('/access-logs', requireAdminJustification, async (req: Request, res: Response) => {
+router.get('/access-logs', requireAdminJustification, validateRequest({ query: accessLogsQuerySchema }), async (req: Request, res: Response) => {
   const { organizationId, adminUserId, from, to, page = '1', limit = '50' } = req.query;
 
   const conditions: string[] = [];
