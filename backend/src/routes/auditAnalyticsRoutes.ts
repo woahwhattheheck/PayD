@@ -1,10 +1,20 @@
 import express from 'express';
+import { z } from 'zod';
 import { auditAnalyticsService } from '../services/auditAnalyticsService.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = express.Router();
+
+const recordMetricBodySchema = z.object({
+  metricType: z.string().min(1),
+  metricValue: z.number(),
+  dimension: z.string().min(1).optional(),
+  dimensionValue: z.string().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
 
 /**
  * GET /api/audit-analytics/summary/:organizationId
@@ -167,7 +177,7 @@ router.get('/errors/:organizationId', authenticateJWT, async (req, res) => {
  * POST /api/audit-analytics/record
  * Record a custom analytics metric
  */
-router.post('/record', authenticateJWT, async (req, res) => {
+router.post('/record', authenticateJWT, validateRequest({ body: recordMetricBodySchema }), async (req, res) => {
   try {
     const { metricType, metricValue, dimension, dimensionValue, metadata } = req.body;
 
