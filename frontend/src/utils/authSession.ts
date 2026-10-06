@@ -22,7 +22,8 @@ function decodeJwtPayload(token: string): JwtPayload | null {
 
 /**
  * Frontend session eligibility only. API authorization remains authoritative.
- * Rejects malformed, expired, or non-access JWTs before protected UI renders.
+ * Mirrors backend authentication: legacy tokens without a typ claim remain valid,
+ * while explicit non-access token types are rejected before protected UI renders.
  */
 export function hasActiveAccessToken(): boolean {
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
@@ -30,7 +31,8 @@ export function hasActiveAccessToken(): boolean {
 
   const payload = decodeJwtPayload(token);
   const active =
-    payload?.typ === 'access' &&
+    payload !== null &&
+    (payload.typ === undefined || payload.typ === 'access') &&
     typeof payload.exp === 'number' &&
     Number.isFinite(payload.exp) &&
     payload.exp * 1000 > Date.now();
