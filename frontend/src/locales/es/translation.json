@@ -631,5 +631,30 @@
   "themeToggle": {
     "switchToLight": "Cambiar al modo claro",
     "switchToDark": "Cambiar al modo oscuro"
+  },
+  "appLayout": {
+    "beta": "BETA"
+  },
+  "certificate": {
+    "missingInformation": "Falta información",
+    "transactionHashRequired": "Se requiere el hash de la transacción",
+    "identityUnavailable": "No se pudo determinar el empleado y la organización. Proporciona employeeId y organizationId.",
+    "downloadedTitle": "Certificado descargado",
+    "downloadedBody": "El certificado de pago se descargó correctamente",
+    "downloadFailed": "Error de descarga",
+    "downloadFailedBody": "No se pudo descargar el certificado",
+    "downloadTitle": "Descargar certificado de comprobante de pago",
+    "generating": "Generando...",
+    "loading": "Cargando...",
+    "label": "Certificado"
+  },
+  "dashboardTopBar": {
+    "organization": "Organización",
+    "availableBalance": "Saldo disponible"
+  },
+  "employerLayout": {
+    "toggleSidebar": "Alternar barra lateral",
+    "license": "© {{year}} PayD — Licenciado bajo Apache 2.0",
+    "networkStatus": "Nodo de Stellar Testnet · {{version}}"
   }
 }
