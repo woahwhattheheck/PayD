@@ -56,7 +56,8 @@
     "frequencyWeekly": "Semanal",
     "frequencyMonthly": "Mensual",
     "commencementDate": "Fecha de inicio",
-    "submit": "Iniciar flujo de nómina"
+    "submit": "Iniciar flujo de nómina",
+    "walletAddress": "Dirección de billetera"
   },
   "employees": {
     "title": "Directorio de {{highlight}}",
