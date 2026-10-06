@@ -1,10 +1,21 @@
 import express from 'express';
+import { z } from 'zod';
 import { smartRateLimitService } from '../services/smartRateLimitService.js';
 import authenticateJWT from '../middlewares/auth.js';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
 const router = express.Router();
+
+const orgParamsSchema = z.object({
+  organizationId: z.string().regex(/^[1-9][0-9]*$/),
+});
+const scoreBodySchema = z.object({ scoreDelta: z.number() });
+const restrictBodySchema = z.object({
+  reason: z.string().min(1),
+  durationMinutes: z.number().int().positive().optional(),
+});
 
 /**
  * GET /api/smart-rate-limit/status/:organizationId
@@ -112,7 +123,7 @@ router.get('/violations/:organizationId', authenticateJWT, async (req, res) => {
  * POST /api/smart-rate-limit/update-score/:organizationId
  * Update behavior score for an organization
  */
-router.post('/update-score/:organizationId', authenticateJWT, async (req, res) => {
+router.post('/update-score/:organizationId', authenticateJWT, validateRequest({ params: orgParamsSchema, body: scoreBodySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const { scoreDelta } = req.body;
@@ -148,7 +159,7 @@ router.post('/update-score/:organizationId', authenticateJWT, async (req, res) =
  * POST /api/smart-rate-limit/restrict/:organizationId
  * Manually restrict an organization
  */
-router.post('/restrict/:organizationId', authenticateJWT, async (req, res) => {
+router.post('/restrict/:organizationId', authenticateJWT, validateRequest({ params: orgParamsSchema, body: restrictBodySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const { reason, durationMinutes } = req.body;
@@ -203,7 +214,7 @@ router.post('/restrict/:organizationId', authenticateJWT, async (req, res) => {
  * POST /api/smart-rate-limit/unrestrict/:organizationId
  * Remove restriction from an organization
  */
-router.post('/unrestrict/:organizationId', authenticateJWT, async (req, res) => {
+router.post('/unrestrict/:organizationId', authenticateJWT, validateRequest({ params: orgParamsSchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
 
