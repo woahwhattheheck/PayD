@@ -130,7 +130,12 @@
     "authenticated": "Authenticated",
     "connect": "Connect",
     "wallet": "Wallet",
-    "exit": "Exit"
+    "exit": "Exit",
+    "connecting": "Connecting...",
+    "socialActive": "Social Active",
+    "sessionActive": "Session Active",
+    "stellar": "Stellar",
+    "signIn": "Sign In"
   },
   "wallet": {
     "modalTitle": "Connect to PayD"
@@ -442,5 +447,58 @@
     "calculatePreview": "Calculate Preview",
     "generateReport": "Generate Report",
     "continue": "Continue"
+  },
+  "contractError": {
+    "title": "Contract Invocation Failed",
+    "suggestedAction": "Suggested Action",
+    "rawTransactionResult": "Raw Transaction Result (XDR)",
+    "copyXdr": "Copy XDR",
+    "copy": "Copy",
+    "notAvailable": "N/A"
+  },
+  "schedulingWizard": {
+    "steps": {
+      "schedule": "Step 1: Set Schedule",
+      "currencyPreferences": "Step 2: Currency Preferences",
+      "previewConfirm": "Step 3: Preview & Confirm"
+    },
+    "loading": "Loading Organizational Data...",
+    "currencyIntro": "Set default currency payout outputs for each employee.",
+    "table": {
+      "employee": "Employee",
+      "scheduledAmount": "Scheduled Amount",
+      "receiveIn": "Receive In",
+      "noEmployees": "No employees found in organization."
+    },
+    "currencies": {
+      "usdcStellar": "USDC (Stellar)",
+      "xlm": "XLM",
+      "eurc": "EURC"
+    },
+    "frequencyLabel": "Frequency",
+    "frequency": {
+      "weekly": "Weekly",
+      "biweekly": "Biweekly",
+      "monthly": "Monthly"
+    },
+    "dayOfWeek": "Day of Week",
+    "weekdays": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    },
+    "dayOfMonth": "Day of Month",
+    "runTime": "Run Time",
+    "scheduleOverview": "Schedule Overview",
+    "time": "Time",
+    "upcomingRuns": "Upcoming Runs",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "confirmSchedule": "Confirm Schedule"
   }
 }
