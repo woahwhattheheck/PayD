@@ -16,6 +16,9 @@ const restrictBodySchema = z.object({
   reason: z.string().min(1),
   durationMinutes: z.number().int().positive().optional(),
 });
+const limitQuerySchema = z.object({
+  limit: z.string().regex(/^[1-9][0-9]*$/, 'limit must be a positive integer').optional(),
+});
 
 /**
  * GET /api/smart-rate-limit/status/:organizationId
@@ -55,7 +58,7 @@ router.get('/status/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/smart-rate-limit/history/:organizationId
  * Get rate limit recovery history
  */
-router.get('/history/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/history/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 10;
@@ -79,7 +82,7 @@ router.get('/history/:organizationId', authenticateJWT, async (req, res) => {
  * GET /api/smart-rate-limit/violations/:organizationId
  * Get rate limit violations
  */
-router.get('/violations/:organizationId', authenticateJWT, async (req, res) => {
+router.get('/violations/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 20;
