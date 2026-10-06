@@ -56,8 +56,9 @@ export async function runLeaderElectedFxRateIngestion(
       'SELECT pg_try_advisory_lock($1) AS acquired',
       [FX_RATE_INGESTION_LOCK_ID]
     );
-    acquired = Boolean(lockResult.rows[0]?.acquired);
-    destroyClient = acquired;
+    const lockAcquired = lockResult.rows[0]?.acquired;
+    acquired = lockAcquired === true;
+    destroyClient = lockAcquired !== false;
 
     if (!acquired) {
       log.debug('FX rate ingestion skipped: advisory lock held by another instance');
