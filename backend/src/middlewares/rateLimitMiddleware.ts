@@ -87,6 +87,28 @@ export function authRateLimit(options: Omit<RateLimitOptions, 'tier'> = {}) {
   return rateLimitMiddleware({ ...options, tier: 'auth' });
 }
 
+/**
+ * Login-specific auth limiter keyed by normalized wallet address when present.
+ * Falling back to the request source preserves throttling for malformed requests
+ * while avoiding one reverse-proxy IP becoming a shared login bucket.
+ */
+export function loginRateLimit(options: Omit<RateLimitOptions, 'tier' | 'identifier'> = {}) {
+  return rateLimitMiddleware({
+    ...options,
+    tier: 'auth',
+    identifier: (req: Request) => {
+      const walletAddress = req.body?.walletAddress;
+      if (typeof walletAddress === 'string') {
+        const normalizedWallet = walletAddress.trim().toUpperCase();
+        if (normalizedWallet) {
+          return `login:${normalizedWallet}`;
+        }
+      }
+      return defaultIdentifier(req);
+    },
+  });
+}
+
 export function apiRateLimit(options: Omit<RateLimitOptions, 'tier'> = {}) {
   return rateLimitMiddleware({ ...options, tier: 'api' });
 }
