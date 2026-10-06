@@ -627,5 +627,9 @@
       "retrySubmittedTitle": "Reintento enviado",
       "retrySubmittedBody": "El lote {{batchId}} se volvió a ejecutar. TX: {{txHash}}"
     }
+  },
+  "themeToggle": {
+    "switchToLight": "Cambiar al modo claro",
+    "switchToDark": "Cambiar al modo oscuro"
   }
 }

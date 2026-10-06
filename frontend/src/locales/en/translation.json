@@ -627,5 +627,9 @@
       "retrySubmittedTitle": "Retry submitted",
       "retrySubmittedBody": "Batch {{batchId}} was re-invoked. TX: {{txHash}}"
     }
+  },
+  "themeToggle": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
   }
 }
