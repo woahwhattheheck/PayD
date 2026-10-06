@@ -13,6 +13,7 @@ import { auditLoggerMiddleware } from './middleware/auditLogger.js';
 import { tieredOrganizationRateLimit } from './middleware/advancedRateLimiting.js';
 import { rateLimitHeaders } from './middleware/rateLimitHeaders.js';
 import { syncTenantFromUser } from './middleware/tenantContext.js';
+import { authenticateJWT } from './middlewares/auth.js';
 
 // Feature Routes
 import v1Routes from './routes/v1/index.js';
@@ -121,10 +122,6 @@ app.use(
   })
 );
 
-// Global tenant context sync — sets req.tenantId from JWT user when available
-// Must run before any authenticated routes
-app.use(syncTenantFromUser);
-
 // Serve stellar.toml for SEP-0001
 app.get('/.well-known/stellar.toml', (req, res) => {
   res.setHeader('Content-Type', 'text/plain');
@@ -147,7 +144,33 @@ app.use('/api', detectSqlInjection());
 // Part 45 — enhanced audit analytics, smart rate limiting, tenant security guard
 app.use('/api', enhancedAuditMiddleware({ trackPerformance: true, trackErrors: true }));
 app.use('/api', smartRateLimitMiddleware({ organizationBased: true }));
-app.use('/api', tenantSecurityGuardMiddleware({ detectAnomalies: true }));
+
+// Establish authenticated tenant identity before the global tenant guard.
+// The two existing authentication route families must remain reachable without
+// an access token; every other /api request is authenticated before tenant
+// context is derived from the verified JWT.
+const tenantSecurityGuard = tenantSecurityGuardMiddleware({
+  detectAnomalies: true,
+  strictMode: true,
+});
+app.use('/api', (req, res, next) => {
+  const isAuthRoute =
+    req.path === '/auth' ||
+    req.path.startsWith('/auth/') ||
+    req.path === '/v1/auth' ||
+    req.path.startsWith('/v1/auth/');
+
+  if (isAuthRoute) {
+    next();
+    return;
+  }
+
+  authenticateJWT(req, res, () => {
+    syncTenantFromUser(req, res, () => {
+      void tenantSecurityGuard(req, res, next);
+    });
+  });
+});
 
 // Feature / PR specific routes
 app.use('/auth', authRoutes);
