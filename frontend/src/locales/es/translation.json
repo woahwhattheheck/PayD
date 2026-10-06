@@ -656,5 +656,113 @@
     "toggleSidebar": "Alternar barra lateral",
     "license": "© {{year}} PayD — Licenciado bajo Apache 2.0",
     "networkStatus": "Nodo de Stellar Testnet · {{version}}"
+  },
+  "login": {
+    "welcomeBack": "Bienvenido de nuevo",
+    "subtitle": "Conecta tu cuenta para administrar tu sistema de nómina",
+    "continueGoogle": "Continuar con Google",
+    "continueGithub": "Continuar con GitHub",
+    "securityNote": "Seguro · Cifrado · Sin custodia"
+  },
+  "authCallback": {
+    "authenticating": "Autenticando..."
+  },
+  "employeeEntry": {
+    "defaultRole": "Empleado",
+    "addedTitle": "¡{{name}} se añadió correctamente!",
+    "walletGenerated": "Se generó una nueva billetera Stellar para este empleado.",
+    "addedWithWallet": "¡Empleado {{name}} añadido correctamente! Se creó una billetera para esta persona.",
+    "addedMessage": "¡Empleado {{name}} añadido correctamente!",
+    "backToDirectory": "Volver al directorio",
+    "title": "Añadir nuevo empleado",
+    "simulatedEmailLabel": "[NOTIFICACIÓN DE CORREO SIMULADA AL EMPLEADO]",
+    "simulatedEmailGreeting": "Hola {{name}}, tu empleador te ha añadido a la nómina.",
+    "simulatedEmailWalletBody": "Se ha creado una billetera Stellar predeterminada para que recibas saldos reclamables.",
+    "secretKeyLabel": "Tu clave secreta:",
+    "secretKeyWarning": "Guarda esta clave secreta de forma segura para reclamar tu salario futuro.",
+    "successTitle": "Correcto",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "walletAddressOptional": "Dirección de billetera Stellar (opcional)",
+    "walletNote": "Si no se proporciona una billetera, se creará un saldo reclamable usando una billetera nueva generada para el empleado.",
+    "walletPlaceholder": "Deja en blanco para generar una billetera",
+    "role": "Rol",
+    "roles": {
+      "contractor": "Contratista",
+      "fullTime": "Tiempo completo",
+      "partTime": "Tiempo parcial"
+    },
+    "preferredCurrency": "Moneda preferida",
+    "addEmployee": "Añadir empleado"
+  },
+  "walletQr": {
+    "copied": "¡{{label}} copiado al portapapeles!",
+    "title": "Tu dirección de billetera Stellar",
+    "walletAddress": "Dirección de billetera",
+    "copyAddress": "Copiar dirección",
+    "secretKeySecure": "Clave secreta (¡guárdala de forma segura!)",
+    "secretKey": "Clave secreta",
+    "copySecretKey": "Copiar clave secreta",
+    "revealSecretKey": "Haz clic para mostrar la clave secreta",
+    "trustlineGuide": "Guía de configuración de líneas de confianza",
+    "trustlineIntro": "Para recibir pagos en distintas monedas, debes configurar líneas de confianza. Sigue estos pasos:",
+    "steps": {
+      "fund": {
+        "title": "Fondea tu billetera",
+        "description": "Añade XLM a tu billetera. Necesitas al menos 1 XLM para crear una línea de confianza."
+      },
+      "asset": {
+        "title": "Elige tu activo",
+        "description": "Decide qué activo quieres recibir (USDC, EURC o XLM). Cada activo requiere una línea de confianza independiente."
+      },
+      "create": {
+        "title": "Crea la línea de confianza",
+        "description": "Ve a la configuración de activos de tu billetera y añade una línea de confianza para el activo elegido usando la dirección de su emisor."
+      },
+      "verify": {
+        "title": "Verifica la línea de confianza",
+        "description": "Después de crearla, verifica que aparezca en la lista de activos de tu billetera. Ya puedes recibir pagos en ese activo."
+      }
+    },
+    "supportedAssets": "Activos compatibles",
+    "issuer": "Emisor",
+    "nativeAsset": "Activo nativo",
+    "assetIssuer": "Emisor de {{asset}}",
+    "shareQr": "Comparte este código QR con {{name}} para que pueda recibir pagos directamente en su billetera."
+  },
+  "vesting": {
+    "form": {
+      "title": "Crear nueva concesión con consolidación",
+      "employeeAddress": "Dirección de billetera del empleado (G...)",
+      "totalAmount": "Importe total de la concesión",
+      "durationYears": "Duración (años)",
+      "startDate": "Fecha de inicio",
+      "cliffDate": "Fecha de carencia",
+      "simulating": "Simulando...",
+      "initialize": "Inicializar depósito de consolidación"
+    },
+    "list": {
+      "empty": "No se encontraron concesiones de consolidación activas.",
+      "summary": "Total: {{total}} XLM | Consolidado: {{vested}} XLM",
+      "claim": "Reclamar",
+      "cliff": "Carencia",
+      "start": "Inicio"
+    },
+    "notifications": {
+      "simReadyTitle": "Simulación de concesión lista",
+      "simReadyBody": "Revisa los detalles de la transacción antes de confirmar.",
+      "simFailedTitle": "Falló la simulación de la concesión",
+      "simFailedBody": "Comprueba los parámetros del contrato.",
+      "claimTitle": "Reclamación iniciada",
+      "claimBody": "Simulando la transacción de reclamación en cadena...",
+      "createdTitle": "¡Concesión de consolidación creada!",
+      "createdBody": "La transacción se ha transmitido a la red."
+    },
+    "page": {
+      "titlePrefix": "Consolidación",
+      "titleHighlight": "en depósito",
+      "subtitle": "Administra los calendarios de consolidación de tokens de empleados",
+      "confirmCreate": "Confirmar y crear concesión"
+    }
   }
 }
