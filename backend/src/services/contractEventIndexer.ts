@@ -6,6 +6,7 @@ import * as StellarSdk from '@stellar/stellar-sdk';
 export class ContractEventIndexer {
   private isRunning = false;
   private intervalId: NodeJS.Timeout | null = null;
+  private readonly activeRuns = new Set<Promise<void>>();
   private readonly POLL_INTERVAL_MS = 10000; // Poll every 10 seconds
   private readonly BATCH_SIZE = 100;
   private readonly CONTRACTS_TO_INDEX = [
@@ -15,6 +16,18 @@ export class ContractEventIndexer {
   ].filter(Boolean) as string[];
 
   private readonly RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
+
+  private trackRun(run: Promise<void>): void {
+    this.activeRuns.add(run);
+    void run.then(
+      () => {
+        this.activeRuns.delete(run);
+      },
+      () => {
+        this.activeRuns.delete(run);
+      }
+    );
+  }
 
   /**
    * Initialize the indexer and start polling
@@ -35,15 +48,18 @@ export class ContractEventIndexer {
     
     this.isRunning = true;
     
-    // Run immediately on startup
-    await this.pollAndIndexEvents();
+    // Run immediately on startup and retain the promise so stop() can drain
+    // a shutdown that arrives while the initial poll is still using the DB.
+    const initialRun = this.pollAndIndexEvents();
+    this.trackRun(initialRun);
+    await initialRun;
 
     // Shutdown may have stopped the indexer while the initial poll was pending.
     if (!this.isRunning) return;
     
     // Then poll at regular intervals
-    this.intervalId = setInterval(async () => {
-      await this.pollAndIndexEvents();
+    this.intervalId = setInterval(() => {
+      this.trackRun(this.pollAndIndexEvents());
     }, this.POLL_INTERVAL_MS);
 
     console.log(`[ContractEventIndexer] Started polling every ${this.POLL_INTERVAL_MS}ms`);
@@ -52,13 +68,19 @@ export class ContractEventIndexer {
   /**
    * Stop the indexer gracefully
    */
-  stop(): void {
+  async stop(): Promise<void> {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
     this.isRunning = false;
-    console.log('[ContractEventIndexer] Stopped');
+
+    const activeRuns = [...this.activeRuns];
+    if (activeRuns.length > 0) {
+      await Promise.allSettled(activeRuns);
+    }
+
+    console.log('[ContractEventIndexer] Stopped and active polls drained');
   }
 
   /**
