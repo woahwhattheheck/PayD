@@ -277,9 +277,14 @@ export default function Forecasting() {
             label="Yellow Buffer %"
             type="number"
             value={String(settingsDraft.yellowBufferPct ?? 10)}
-            onChange={(e) =>
-              setSettingsDraft((s) => ({ ...s, yellowBufferPct: Number(e.target.value) || 10 }))
-            }
+            onChange={(e) => {
+              const value = e.target.value.trim();
+              const parsed = Number(value);
+              setSettingsDraft((s) => ({
+                ...s,
+                yellowBufferPct: value !== '' && !Number.isNaN(parsed) ? parsed : 10,
+              }));
+            }}
             fieldSize="sm"
           />
           <Input
