@@ -87,6 +87,26 @@ export function authRateLimit(options: Omit<RateLimitOptions, 'tier'> = {}) {
   return rateLimitMiddleware({ ...options, tier: 'auth' });
 }
 
+function loginIdentifier(req: Request): string {
+  const walletAddress = req.body?.walletAddress;
+  if (typeof walletAddress === 'string') {
+    const normalizedWallet = walletAddress.trim().toUpperCase();
+    if (normalizedWallet) {
+      return `login:${normalizedWallet}`;
+    }
+  }
+
+  return `login-source:${defaultIdentifier(req)}`;
+}
+
+export function loginRateLimit(options: Omit<RateLimitOptions, 'tier' | 'identifier'> = {}) {
+  return rateLimitMiddleware({
+    ...options,
+    tier: 'auth',
+    identifier: loginIdentifier,
+  });
+}
+
 export function apiRateLimit(options: Omit<RateLimitOptions, 'tier'> = {}) {
   return rateLimitMiddleware({ ...options, tier: 'api' });
 }
