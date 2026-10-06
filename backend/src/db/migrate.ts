@@ -1,5 +1,6 @@
 /**
  * Production PostgreSQL migration runner with transactional single-step rollback.
+ * Modified 2026-10-06: forward dry runs inspect existing migration history.
  *
  * Usage:
  *   ts-node src/db/migrate.ts
@@ -194,10 +195,11 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
     const result: RunResult = { applied: [], skipped: [], driftDetected: [] };
 
     try {
+        const hasTrackingTable = !isDryRun || (await trackingTableExists(client));
         if (!isDryRun) {
             await client.query(BOOTSTRAP_SQL);
             console.log('[migrate] ✓ schema_migrations table ready');
-        } else {
+        } else if (!hasTrackingTable) {
             console.log('[migrate] [dry-run] Would bootstrap schema_migrations table');
         }
 
@@ -212,9 +214,9 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
             return result;
         }
 
-        const applied = isDryRun
-            ? new Map<string, AppliedMigration>()
-            : await fetchAppliedMigrations(client);
+        const applied = hasTrackingTable
+            ? await fetchAppliedMigrations(client)
+            : new Map<string, AppliedMigration>();
 
         for (const file of files) {
             const record = applied.get(file.filename);
