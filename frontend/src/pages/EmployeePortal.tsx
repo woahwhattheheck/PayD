@@ -654,7 +654,7 @@ const EmployeePortal: React.FC = () => {
               disabled={isLoading}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? styles.refreshSpin : ''}`} />
-              Refresh
+              {t('employeePortal.common.refresh')}
             </button>
           </div>
         </div>
