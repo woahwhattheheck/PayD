@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNotification } from '../hooks/useNotification';
 import { useSocket } from '../hooks/useSocket';
 import { useWallet } from '../hooks/useWallet';
@@ -28,10 +29,10 @@ function toRecipientStatus(
   return 'pending';
 }
 
-function getEmployeeName(recipient: PayrollRecipientStatus): string {
+function getEmployeeName(recipient: PayrollRecipientStatus, fallback: string): string {
   const fullName =
     `${recipient.employee_first_name ?? ''} ${recipient.employee_last_name ?? ''}`.trim();
-  return fullName || recipient.employee_email || `Employee #${recipient.employee_id}`;
+  return fullName || recipient.employee_email || fallback;
 }
 
 function findRunTxHash(summary?: PayrollRunSummary): string | null {
@@ -72,6 +73,7 @@ function normalizeConfirmationPayload(payload: unknown): {
 }
 
 export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTrackerProps) {
+  const { t } = useTranslation();
   const [runs, setRuns] = useState<PayrollRunRecord[]>([]);
   const [summaries, setSummaries] = useState<Record<number, PayrollRunSummary>>({});
   const [expandedRunId, setExpandedRunId] = useState<number | null>(null);
@@ -92,13 +94,16 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
       const payload = await fetchPayrollRuns(organizationId, 1, 20);
       setRuns(payload.data);
     } catch (loadError) {
-      const message = loadError instanceof Error ? loadError.message : 'Failed to load bulk runs';
+      const message =
+        loadError instanceof Error
+          ? loadError.message
+          : t('bulkPaymentStatusTracker.errors.loadRuns');
       setError(message);
-      notifyError('Bulk payment load failed', message);
+      notifyError(t('bulkPaymentStatusTracker.errors.loadTitle'), message);
     } finally {
       setIsLoading(false);
     }
-  }, [notifyError, organizationId]);
+  }, [notifyError, organizationId, t]);
 
   useEffect(() => {
     void loadRuns();
@@ -114,11 +119,11 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
         const message =
           summaryError instanceof Error
             ? summaryError.message
-            : 'Failed to load per-recipient status';
-        notifyError('Failed to load batch details', message);
+            : t('bulkPaymentStatusTracker.errors.loadRecipientStatus');
+        notifyError(t('bulkPaymentStatusTracker.errors.loadDetailsTitle'), message);
       }
     },
-    [notifyError, summaries]
+    [notifyError, summaries, t]
   );
 
   useEffect(() => {
@@ -160,7 +165,10 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
 
   const handleRetry = async (run: PayrollRunRecord) => {
     if (!address) {
-      notifyError('Wallet required', 'Connect a wallet before retrying failed recipients.');
+      notifyError(
+        t('bulkPaymentStatusTracker.errors.walletRequiredTitle'),
+        t('bulkPaymentStatusTracker.errors.walletRequiredBody')
+      );
       return;
     }
 
@@ -176,7 +184,7 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
         (import.meta.env.VITE_BULK_PAYMENT_CONTRACT_ID as string | undefined);
 
       if (!contractId) {
-        throw new Error('Bulk payment contract ID is unavailable.');
+        throw new Error(t('bulkPaymentStatusTracker.errors.contractUnavailable'));
       }
 
       const { txHash } = await retryFailedBatch({
@@ -186,11 +194,20 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
         signTransaction: sign,
       });
 
-      notifySuccess('Retry submitted', `Batch ${run.batch_id} was re-invoked. TX: ${txHash}`);
+      notifySuccess(
+        t('bulkPaymentStatusTracker.notifications.retrySubmittedTitle'),
+        t('bulkPaymentStatusTracker.notifications.retrySubmittedBody', {
+          batchId: run.batch_id,
+          txHash,
+        })
+      );
       await loadSummary(run.id);
     } catch (retryError) {
-      const message = retryError instanceof Error ? retryError.message : 'Retry failed';
-      notifyError('Retry failed', message);
+      const message =
+        retryError instanceof Error
+          ? retryError.message
+          : t('bulkPaymentStatusTracker.errors.retryFailed');
+      notifyError(t('bulkPaymentStatusTracker.errors.retryFailed'), message);
     } finally {
       setIsRetryingBatchId(null);
     }
@@ -218,7 +235,7 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
   return (
     <div className="card glass noise mt-4 sm:mt-8 p-4 sm:p-6">
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h3 className="text-base sm:text-lg font-bold">Bulk Payment Status Tracker</h3>
+        <h3 className="text-base sm:text-lg font-bold">{t('bulkPaymentStatusTracker.title')}</h3>
         <button
           type="button"
           onClick={() => {
@@ -226,17 +243,17 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
           }}
           className="text-xs sm:text-sm font-semibold text-accent hover:text-accent/80 px-4 py-2 rounded-lg hover:bg-accent/10 transition-colors touch-manipulation min-h-[44px] self-start sm:self-auto"
         >
-          Refresh
+          {t('bulkPaymentStatusTracker.refresh')}
         </button>
       </div>
 
       {isLoading ? (
-        <p className="text-xs sm:text-sm text-muted">Loading bulk payroll runs...</p>
+        <p className="text-xs sm:text-sm text-muted">{t('bulkPaymentStatusTracker.loadingRuns')}</p>
       ) : null}
       {error ? <p className="text-xs sm:text-sm text-danger">{error}</p> : null}
 
       {!isLoading && rows.length === 0 ? (
-        <p className="text-xs sm:text-sm text-muted">No payroll batch runs found.</p>
+        <p className="text-xs sm:text-sm text-muted">{t('bulkPaymentStatusTracker.emptyRuns')}</p>
       ) : (
         <>
           {/* Desktop Table View */}
@@ -244,13 +261,13 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
             <table className="w-full text-sm">
               <thead className="text-left text-muted border-b border-hi">
                 <tr>
-                  <th className="py-2 pr-4">Batch</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Employees</th>
-                  <th className="py-2 pr-4">Total</th>
-                  <th className="py-2 pr-4">Confirmations</th>
-                  <th className="py-2 pr-4">Tx Hash</th>
-                  <th className="py-2 pr-4">Actions</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.batch')}</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.status')}</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.employees')}</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.total')}</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.confirmations')}</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.txHash')}</th>
+                  <th className="py-2 pr-4">{t('bulkPaymentStatusTracker.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -296,8 +313,12 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-mono text-muted mb-1">Batch: {run.batch_id}</div>
-                      <div className="text-sm font-bold capitalize">{run.status}</div>
+                      <div className="text-xs font-mono text-muted mb-1">
+                        {t('bulkPaymentStatusTracker.labels.batch', { batchId: run.batch_id })}
+                      </div>
+                      <div className="text-sm font-bold capitalize">
+                        {t(`bulkPaymentStatusTracker.status.${run.status}`)}
+                      </div>
                     </div>
                     <span
                       className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${
@@ -308,27 +329,27 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
                             : 'bg-red-500/20 text-red-500'
                       }`}
                     >
-                      {run.status}
+                      {t(`bulkPaymentStatusTracker.status.${run.status}`)}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-muted">Employees:</span>
+                      <span className="text-muted">{t('bulkPaymentStatusTracker.labels.employees')}</span>
                       <span className="ml-1 font-bold">{employeeCount}</span>
                     </div>
                     <div>
-                      <span className="text-muted">Total:</span>
+                      <span className="text-muted">{t('bulkPaymentStatusTracker.labels.total')}</span>
                       <span className="ml-1 font-bold">
                         {run.total_amount} {run.asset_code}
                       </span>
                     </div>
                     <div>
-                      <span className="text-muted">Confirmations:</span>
+                      <span className="text-muted">{t('bulkPaymentStatusTracker.labels.confirmations')}</span>
                       <span className="ml-1 font-bold">{confirmationCount}</span>
                     </div>
                     {txHash && (
                       <div className="col-span-2">
-                        <span className="text-muted">Tx Hash:</span>
+                        <span className="text-muted">{t('bulkPaymentStatusTracker.labels.txHash')}</span>
                         <a
                           href={getTxExplorerUrl(txHash)}
                           target="_blank"
@@ -348,7 +369,9 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
                       }}
                       className="flex-1 py-2 px-3 text-xs font-semibold text-accent hover:text-accent/80 hover:bg-accent/10 rounded-lg transition-colors touch-manipulation min-h-[44px]"
                     >
-                      {expandedRunId === run.id ? 'Hide Details' : 'Show Details'}
+                      {expandedRunId === run.id
+                        ? t('bulkPaymentStatusTracker.actions.hideDetails')
+                        : t('bulkPaymentStatusTracker.actions.showDetails')}
                     </button>
                     {hasFailedRecipients && (
                       <button
@@ -359,33 +382,40 @@ export function BulkPaymentStatusTracker({ organizationId }: BulkPaymentStatusTr
                         disabled={isRetryingBatchId === run.batch_id}
                         className="flex-1 py-2 px-3 text-xs font-semibold text-danger hover:text-danger/80 hover:bg-danger/10 rounded-lg transition-colors disabled:opacity-60 touch-manipulation min-h-[44px]"
                       >
-                        {isRetryingBatchId === run.batch_id ? 'Retrying...' : 'Retry Failed'}
+                        {isRetryingBatchId === run.batch_id
+                          ? t('bulkPaymentStatusTracker.actions.retrying')
+                          : t('bulkPaymentStatusTracker.actions.retryFailed')}
                       </button>
                     )}
                   </div>
                   {expandedRunId === run.id && summary && (
                     <div className="pt-3 border-t border-hi/30 text-xs space-y-2">
                       <div>
-                        <span className="text-muted">Successful:</span>
+                        <span className="text-muted">{t('bulkPaymentStatusTracker.labels.successful')}</span>
                         <span className="ml-1 text-emerald-400 font-bold">
                           {summary.items.filter((item) => item.status === 'completed').length}
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted">Failed:</span>
+                        <span className="text-muted">{t('bulkPaymentStatusTracker.labels.failed')}</span>
                         <span className="ml-1 text-red-400 font-bold">
                           {summary.items.filter((item) => item.status === 'failed').length}
                         </span>
                       </div>
                       {summary.items.filter((item) => item.status === 'failed').length > 0 && (
                         <div className="mt-2">
-                          <div className="text-muted mb-1">Failed Recipients:</div>
+                          <div className="text-muted mb-1">{t('bulkPaymentStatusTracker.labels.failedRecipients')}</div>
                           <div className="space-y-1">
                             {summary.items
                               .filter((item) => item.status === 'failed')
                               .map((item) => (
                                 <div key={item.id} className="font-mono text-[10px] break-all">
-                                  {getEmployeeName(item)}
+                                  {getEmployeeName(
+                                    item,
+                                    t('bulkPaymentStatusTracker.employeeFallback', {
+                                      id: item.employee_id,
+                                    })
+                                  )}
                                 </div>
                               ))}
                           </div>
@@ -428,11 +458,15 @@ function FragmentRow({
   onToggleExpand,
   onRetry,
 }: FragmentRowProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <tr className="border-b border-hi/40">
         <td className="py-3 pr-4 font-mono">{run.batch_id}</td>
-        <td className="py-3 pr-4 capitalize">{run.status}</td>
+        <td className="py-3 pr-4 capitalize">
+          {t(`bulkPaymentStatusTracker.status.${run.status}`)}
+        </td>
         <td className="py-3 pr-4">{employeeCount}</td>
         <td className="py-3 pr-4">
           {run.total_amount} {run.asset_code}
@@ -449,7 +483,7 @@ function FragmentRow({
               {txHash.slice(0, 10)}...
             </a>
           ) : (
-            <span className="text-muted">N/A</span>
+            <span className="text-muted">{t('bulkPaymentStatusTracker.notAvailable')}</span>
           )}
         </td>
         <td className="py-3 pr-4">
@@ -459,7 +493,9 @@ function FragmentRow({
               onClick={onToggleExpand}
               className="text-accent hover:text-accent/80"
             >
-              {expanded ? 'Hide' : 'Details'}
+              {expanded
+                ? t('bulkPaymentStatusTracker.actions.hide')
+                : t('bulkPaymentStatusTracker.actions.details')}
             </button>
             {hasFailedRecipients ? (
               <button
@@ -468,7 +504,9 @@ function FragmentRow({
                 disabled={retrying}
                 className="text-danger hover:text-danger/80 disabled:opacity-60"
               >
-                {retrying ? 'Retrying...' : 'Retry Failed'}
+                {retrying
+                  ? t('bulkPaymentStatusTracker.actions.retrying')
+                  : t('bulkPaymentStatusTracker.actions.retryFailed')}
               </button>
             ) : null}
           </div>
@@ -478,7 +516,9 @@ function FragmentRow({
         <tr className="border-b border-hi/40 bg-black/10">
           <td colSpan={7} className="py-3">
             {!summary ? (
-              <p className="text-sm text-muted">Loading recipient statuses...</p>
+              <p className="text-sm text-muted">
+                {t('bulkPaymentStatusTracker.loadingRecipientStatuses')}
+              </p>
             ) : (
               <div className="space-y-2">
                 {summary.items.map((recipient) => (
@@ -486,11 +526,22 @@ function FragmentRow({
                     key={recipient.id}
                     className="flex items-center justify-between rounded-md border border-hi/30 px-3 py-2 text-xs"
                   >
-                    <span>{getEmployeeName(recipient)}</span>
+                    <span>
+                      {getEmployeeName(
+                        recipient,
+                        t('bulkPaymentStatusTracker.employeeFallback', {
+                          id: recipient.employee_id,
+                        })
+                      )}
+                    </span>
                     <span>
                       {recipient.amount} {run.asset_code}
                     </span>
-                    <span className="capitalize">{toRecipientStatus(recipient.status)}</span>
+                    <span className="capitalize">
+                      {t(
+                        `bulkPaymentStatusTracker.status.${toRecipientStatus(recipient.status)}`
+                      )}
+                    </span>
                   </div>
                 ))}
               </div>
