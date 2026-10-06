@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import pool from '../db/index.js';
+import pool from '../config/database.js';
 import logger from '../utils/logger.js';
 
 /**
