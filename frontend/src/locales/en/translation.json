@@ -500,5 +500,79 @@
     "back": "Back",
     "continue": "Continue",
     "confirmSchedule": "Confirm Schedule"
+  },
+  "csvUploader": {
+    "missingRequiredColumns": "Missing required columns: {{columns}}",
+    "missingRequiredField": "Missing required field: {{column}}",
+    "pleaseUploadCsv": "Please upload a CSV file",
+    "dragDrop": "Drag and drop your CSV file",
+    "browse": "or click to browse",
+    "requiredColumns": "Required columns: {{columns}}",
+    "file": "File: {{fileName}}",
+    "validRows": "{{count}} valid rows",
+    "rowsWithErrors": "{{count}} rows with errors",
+    "preview": "Preview",
+    "row": "Row",
+    "status": "Status",
+    "errors": "Errors",
+    "ok": "OK"
+  },
+  "bulkPaymentStatusTracker": {
+    "title": "Bulk Payment Status Tracker",
+    "refresh": "Refresh",
+    "loadingRuns": "Loading bulk payroll runs...",
+    "emptyRuns": "No payroll batch runs found.",
+    "loadingRecipientStatuses": "Loading recipient statuses...",
+    "notAvailable": "N/A",
+    "employeeFallback": "Employee #{{id}}",
+    "headers": {
+      "batch": "Batch",
+      "status": "Status",
+      "employees": "Employees",
+      "total": "Total",
+      "confirmations": "Confirmations",
+      "txHash": "Tx Hash",
+      "actions": "Actions"
+    },
+    "labels": {
+      "batch": "Batch: {{batchId}}",
+      "employees": "Employees:",
+      "total": "Total:",
+      "confirmations": "Confirmations:",
+      "txHash": "Tx Hash:",
+      "successful": "Successful:",
+      "failed": "Failed:",
+      "failedRecipients": "Failed Recipients:"
+    },
+    "actions": {
+      "hideDetails": "Hide Details",
+      "showDetails": "Show Details",
+      "hide": "Hide",
+      "details": "Details",
+      "retrying": "Retrying...",
+      "retryFailed": "Retry Failed"
+    },
+    "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed",
+      "confirmed": "Confirmed"
+    },
+    "errors": {
+      "loadRuns": "Failed to load bulk runs",
+      "loadTitle": "Bulk payment load failed",
+      "loadRecipientStatus": "Failed to load per-recipient status",
+      "loadDetailsTitle": "Failed to load batch details",
+      "walletRequiredTitle": "Wallet required",
+      "walletRequiredBody": "Connect a wallet before retrying failed recipients.",
+      "contractUnavailable": "Bulk payment contract ID is unavailable.",
+      "retryFailed": "Retry failed"
+    },
+    "notifications": {
+      "retrySubmittedTitle": "Retry submitted",
+      "retrySubmittedBody": "Batch {{batchId}} was re-invoked. TX: {{txHash}}"
+    }
   }
 }
