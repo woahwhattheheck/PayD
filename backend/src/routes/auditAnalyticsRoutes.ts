@@ -15,6 +15,9 @@ const recordMetricBodySchema = z.object({
   dimensionValue: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
+const organizationParamsSchema = z.object({
+  organizationId: z.string().regex(/^[1-9][0-9]*$/, 'organizationId must be a positive integer'),
+});
 const parseableDateQuerySchema = z.string().refine(
   (value) => Number.isFinite(Date.parse(value)),
   'must be a valid date',
@@ -34,7 +37,7 @@ const limitQuerySchema = z.object({
  * GET /api/audit-analytics/summary/:organizationId
  * Get audit summary for an organization
  */
-router.get('/summary/:organizationId', authenticateJWT, validateRequest({ query: dateRangeQuerySchema }), async (req, res) => {
+router.get('/summary/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: dateRangeQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const startDate = req.query.startDate
@@ -66,7 +69,7 @@ router.get('/summary/:organizationId', authenticateJWT, validateRequest({ query:
  * GET /api/audit-analytics/trends/:organizationId
  * Get audit trends over time
  */
-router.get('/trends/:organizationId', authenticateJWT, validateRequest({ query: trendsQuerySchema }), async (req, res) => {
+router.get('/trends/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: trendsQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const startDate = req.query.startDate
@@ -100,7 +103,7 @@ router.get('/trends/:organizationId', authenticateJWT, validateRequest({ query: 
  * GET /api/audit-analytics/endpoints/:organizationId
  * Get top endpoints by usage
  */
-router.get('/endpoints/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
+router.get('/endpoints/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 10;
@@ -144,7 +147,7 @@ router.get('/endpoints/:organizationId', authenticateJWT, validateRequest({ quer
  * GET /api/audit-analytics/errors/:organizationId
  * Get recent errors
  */
-router.get('/errors/:organizationId', authenticateJWT, validateRequest({ query: limitQuerySchema }), async (req, res) => {
+router.get('/errors/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema, query: limitQuerySchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
     const limit = parseInt(req.query.limit as string, 10) || 20;
@@ -233,7 +236,7 @@ router.post('/record', authenticateJWT, validateRequest({ body: recordMetricBody
  * DELETE /api/audit-analytics/cache/:organizationId
  * Clear audit cache for an organization
  */
-router.delete('/cache/:organizationId', authenticateJWT, async (req, res) => {
+router.delete('/cache/:organizationId', authenticateJWT, validateRequest({ params: organizationParamsSchema }), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.organizationId, 10);
 
