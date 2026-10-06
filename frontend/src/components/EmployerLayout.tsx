@@ -3,8 +3,10 @@ import { Outlet } from 'react-router-dom';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardTopBar } from './DashboardTopBar';
 import { Menu, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const EmployerLayout: React.FC = () => {
+  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -49,7 +51,7 @@ export const EmployerLayout: React.FC = () => {
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg bg-(--surface) border border-(--border) hover:bg-(--surface-hi) transition-colors"
-            aria-label="Toggle Sidebar"
+            aria-label={t('employerLayout.toggleSidebar')}
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -64,11 +66,11 @@ export const EmployerLayout: React.FC = () => {
         </main>
 
         <footer className="p-8 border-t border-(--border) text-(--muted) text-xs flex flex-wrap justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} PayD — Licensed under Apache 2.0</p>
+          <p>{t('employerLayout.license', { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-(--accent)" />
             <span className="uppercase tracking-widest font-mono text-[10px]">
-              Stellar Testnet Node · V22.1.0
+              {t('employerLayout.networkStatus', { version: 'V22.1.0' })}
             </span>
           </div>
         </footer>
