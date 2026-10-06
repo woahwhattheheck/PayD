@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import pool from '../db/index.js';
+import pool from '../config/database.js';
 import logger from '../utils/logger.js';
 
 /**
