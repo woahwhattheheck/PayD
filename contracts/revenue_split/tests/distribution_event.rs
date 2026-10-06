@@ -95,4 +95,42 @@ fn distribution_event_matches_indexer_payload_schema() {
         expected_data.into_val(&env),
         "event data must match the map schema decoded by the contract-event indexer"
     );
+
+    let legacy_name = Symbol::new(&env, "distribute");
+    let mut legacy_event = None;
+    for (address, topics, data) in env.events().all().iter() {
+        if address != client.address {
+            continue;
+        }
+        let is_legacy_event = topics
+            .get(0)
+            .map(|topic| Symbol::from_val(&env, &topic) == legacy_name)
+            .unwrap_or(false);
+        if is_legacy_event {
+            assert!(
+                legacy_event.is_none(),
+                "expected exactly one legacy distribute event"
+            );
+            legacy_event = Some((topics, data));
+        }
+    }
+
+    let (legacy_topics, legacy_data) =
+        legacy_event.expect("expected one legacy distribute event");
+    assert_eq!(
+        legacy_topics,
+        Vec::from_array(
+            &env,
+            [
+                legacy_name.into_val(&env),
+                token_id.clone().into_val(&env),
+            ],
+        ),
+        "legacy (distribute, asset) topic query must remain compatible"
+    );
+    assert_eq!(
+        legacy_data,
+        1000i128.into_val(&env),
+        "legacy distribute event data must remain the distributed amount"
+    );
 }
