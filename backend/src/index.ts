@@ -8,6 +8,7 @@ import { scheduleExecutor } from './services/scheduleExecutor.js';
 import { contractEventIndexer } from './services/contractEventIndexer.js';
 import { liquidityAlertChecker } from './services/forecasting/liquidityAlertChecker.js';
 import { scheduleDailyUsageSnapshots, scheduleNightlyIntegrityCheck } from './jobs/part49Jobs.js';
+import { scheduleFxRateIngestionJob } from './jobs/fxRateIngestionJob.js';
 import { auditAnalyticsService } from './services/auditAnalyticsService.js';
 import { cleanupExpired as cleanupExpiredIdempotencyKeys } from './services/idempotencyService.js';
 
@@ -18,6 +19,7 @@ const server = createServer(app);
 // Part-49 job handles — assigned on server start, cleaned up on shutdown
 let usageSnapshotJob: { stop(): void };
 let integrityCheckJob: { stop(): void };
+let fxRateIngestionJob: { stop(): void };
 
 // Initialize Socket.IO
 initializeSocket(server);
@@ -46,6 +48,9 @@ server.listen(PORT, () => {
   usageSnapshotJob = scheduleDailyUsageSnapshots();
   integrityCheckJob = scheduleNightlyIntegrityCheck();
   logger.info('Part-49 jobs scheduled (usage snapshots + audit integrity)');
+
+  // Daily FX history ingestion, with an immediate leader-elected catch-up run.
+  fxRateIngestionJob = scheduleFxRateIngestionJob();
 
   // Part 45 — cleanup expired audit cache every hour
   setInterval(
@@ -86,9 +91,10 @@ const shutdown = () => {
 
   liquidityAlertChecker.stop();
 
-  // Stop Part-49 cron jobs
+  // Stop Part-49 and FX ingestion cron jobs
   usageSnapshotJob?.stop();
   integrityCheckJob?.stop();
+  fxRateIngestionJob?.stop();
 
   // Stop the contract event indexer
   contractEventIndexer.stop();
