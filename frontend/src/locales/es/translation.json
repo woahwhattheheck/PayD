@@ -500,5 +500,79 @@
     "back": "Atrás",
     "continue": "Continuar",
     "confirmSchedule": "Confirmar programación"
+  },
+  "csvUploader": {
+    "missingRequiredColumns": "Faltan columnas obligatorias: {{columns}}",
+    "missingRequiredField": "Falta el campo obligatorio: {{column}}",
+    "pleaseUploadCsv": "Sube un archivo CSV",
+    "dragDrop": "Arrastra y suelta tu archivo CSV",
+    "browse": "o haz clic para buscar",
+    "requiredColumns": "Columnas obligatorias: {{columns}}",
+    "file": "Archivo: {{fileName}}",
+    "validRows": "{{count}} filas válidas",
+    "rowsWithErrors": "{{count}} filas con errores",
+    "preview": "Vista previa",
+    "row": "Fila",
+    "status": "Estado",
+    "errors": "Errores",
+    "ok": "Correcto"
+  },
+  "bulkPaymentStatusTracker": {
+    "title": "Seguimiento del estado de pagos masivos",
+    "refresh": "Actualizar",
+    "loadingRuns": "Cargando ejecuciones de nómina masiva...",
+    "emptyRuns": "No se encontraron lotes de nómina.",
+    "loadingRecipientStatuses": "Cargando estados de destinatarios...",
+    "notAvailable": "N/D",
+    "employeeFallback": "Empleado #{{id}}",
+    "headers": {
+      "batch": "Lote",
+      "status": "Estado",
+      "employees": "Empleados",
+      "total": "Total",
+      "confirmations": "Confirmaciones",
+      "txHash": "Hash de transacción",
+      "actions": "Acciones"
+    },
+    "labels": {
+      "batch": "Lote: {{batchId}}",
+      "employees": "Empleados:",
+      "total": "Total:",
+      "confirmations": "Confirmaciones:",
+      "txHash": "Hash de transacción:",
+      "successful": "Exitosos:",
+      "failed": "Fallidos:",
+      "failedRecipients": "Destinatarios fallidos:"
+    },
+    "actions": {
+      "hideDetails": "Ocultar detalles",
+      "showDetails": "Mostrar detalles",
+      "hide": "Ocultar",
+      "details": "Detalles",
+      "retrying": "Reintentando...",
+      "retryFailed": "Reintentar fallidos"
+    },
+    "status": {
+      "draft": "Borrador",
+      "pending": "Pendiente",
+      "processing": "Procesando",
+      "completed": "Completado",
+      "failed": "Fallido",
+      "confirmed": "Confirmado"
+    },
+    "errors": {
+      "loadRuns": "No se pudieron cargar las ejecuciones masivas",
+      "loadTitle": "Error al cargar pagos masivos",
+      "loadRecipientStatus": "No se pudo cargar el estado por destinatario",
+      "loadDetailsTitle": "No se pudieron cargar los detalles del lote",
+      "walletRequiredTitle": "Billetera necesaria",
+      "walletRequiredBody": "Conecta una billetera antes de reintentar los destinatarios fallidos.",
+      "contractUnavailable": "El ID del contrato de pagos masivos no está disponible.",
+      "retryFailed": "Error al reintentar"
+    },
+    "notifications": {
+      "retrySubmittedTitle": "Reintento enviado",
+      "retrySubmittedBody": "El lote {{batchId}} se volvió a ejecutar. TX: {{txHash}}"
+    }
   }
 }
