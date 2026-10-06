@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 
 export interface CSVRow {
@@ -19,6 +20,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
   onDataParsed,
   validators = {},
 }) => {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [parsedData, setParsedData] = useState<CSVRow[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
     // Validate headers
     const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
     if (missingColumns.length > 0) {
-      alert(`Missing required columns: ${missingColumns.join(', ')}`);
+      alert(t('csvUploader.missingRequiredColumns', { columns: missingColumns.join(', ') }));
       return [];
     }
 
@@ -51,7 +53,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
       // Validate each field
       requiredColumns.forEach((col) => {
         if (!row[col]) {
-          errors.push(`Missing required field: ${col}`);
+          errors.push(t('csvUploader.missingRequiredField', { column: col }));
         }
       });
 
@@ -78,7 +80,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
 
   const handleFileParse = (file: File) => {
     if (!file.name.endsWith('.csv')) {
-      alert('Please upload a CSV file');
+      alert(t('csvUploader.pleaseUploadCsv'));
       return;
     }
 
@@ -148,10 +150,10 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
 
         <button onClick={() => fileInputRef.current?.click()} className="w-full">
           <Upload className="w-12 h-12 mx-auto mb-2 text-(--muted)" />
-          <p className="text-lg font-semibold text-(--text)">Drag and drop your CSV file</p>
-          <p className="text-sm text-(--muted) mt-1">or click to browse</p>
+          <p className="text-lg font-semibold text-(--text)">{t('csvUploader.dragDrop')}</p>
+          <p className="text-sm text-(--muted) mt-1">{t('csvUploader.browse')}</p>
           <p className="text-xs text-(--muted) mt-2">
-            Required columns: {requiredColumns.join(', ')}
+            {t('csvUploader.requiredColumns', { columns: requiredColumns.join(', ') })}
           </p>
         </button>
       </div>
@@ -159,16 +161,16 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
       {/* File info */}
       {fileName && (
         <div className="mt-4 text-left p-3 bg-transparent border rounded text-sm">
-          <p className="font-semibold">File: {fileName}</p>
+          <p className="font-semibold">{t('csvUploader.file', { fileName })}</p>
           <div className="mt-2 flex gap-4 text-sm">
             <span className="flex items-center gap-1">
               <CheckCircle className="w-4 h-4 text-green-100" />
-              {validRowsCount} valid rows
+              {t('csvUploader.validRows', { count: validRowsCount })}
             </span>
             {invalidRowsCount > 0 && (
               <span className="flex items-center gap-1">
                 <AlertCircle className="w-4 h-4 text-red-500" />
-                {invalidRowsCount} rows with errors
+                {t('csvUploader.rowsWithErrors', { count: invalidRowsCount })}
               </span>
             )}
           </div>
@@ -178,19 +180,19 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
       {/* Preview Table */}
       {parsedData.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">Preview</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('csvUploader.preview')}</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full text-left border-collapse">
               <thead>
                 <tr className="border-b">
-                  <th className="px-4 py-2 text-left font-semibold">Row</th>
-                  <th className="px-4 py-2 text-left font-semibold">Status</th>
+                  <th className="px-4 py-2 text-left font-semibold">{t('csvUploader.row')}</th>
+                  <th className="px-4 py-2 text-left font-semibold">{t('csvUploader.status')}</th>
                   {Object.keys(parsedData[0]?.data || {}).map((col) => (
                     <th key={col} className="px-4 py-2 text-left font-semibold">
                       {col}
                     </th>
                   ))}
-                  <th className="px-4 py-2 text-left font-semibold">Errors</th>
+                  <th className="px-4 py-2 text-left font-semibold">{t('csvUploader.errors')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--border)">
@@ -227,7 +229,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
                           ))}
                         </ul>
                       ) : (
-                        <span className="text-green-600">OK</span>
+                        <span className="text-green-600">{t('csvUploader.ok')}</span>
                       )}
                     </td>
                   </tr>
