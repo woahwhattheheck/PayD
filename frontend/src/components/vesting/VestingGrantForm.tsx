@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Heading, Input, Button } from '@stellar/design-system';
+import { useTranslation } from 'react-i18next';
 
 interface VestingGrantFormData {
   employeeAddress: string;
@@ -15,6 +16,7 @@ interface VestingGrantFormProps {
 }
 
 export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, isSubmitting }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     employeeAddress: '',
     totalAmount: '',
@@ -37,12 +39,12 @@ export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, is
     <Card>
       <div className="p-6">
         <Heading as="h3" size="xs" weight="bold" addlClassName="mb-6">
-          Create New Vesting Grant
+          {t('vesting.form.title')}
         </Heading>
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             id="employeeAddress"
-            label="Employee Wallet Address (G...)"
+            label={t('vesting.form.employeeAddress')}
             name="employeeAddress"
             value={formData.employeeAddress}
             onChange={handleChange}
@@ -52,7 +54,7 @@ export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, is
           <div className="grid grid-cols-2 gap-4">
             <Input
               id="totalAmount"
-              label="Total Grant Amount"
+              label={t('vesting.form.totalAmount')}
               name="totalAmount"
               type="number"
               value={formData.totalAmount}
@@ -62,7 +64,7 @@ export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, is
             />
             <Input
               id="durationYears"
-              label="Duration (Years)"
+              label={t('vesting.form.durationYears')}
               name="durationYears"
               type="number"
               value={formData.durationYears}
@@ -73,7 +75,7 @@ export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, is
           <div className="grid grid-cols-2 gap-4">
             <Input
               id="startDate"
-              label="Start Date"
+              label={t('vesting.form.startDate')}
               name="startDate"
               type="date"
               value={formData.startDate}
@@ -82,7 +84,7 @@ export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, is
             />
             <Input
               id="cliffDate"
-              label="Cliff Date"
+              label={t('vesting.form.cliffDate')}
               name="cliffDate"
               type="date"
               value={formData.cliffDate}
@@ -91,7 +93,7 @@ export const VestingGrantForm: React.FC<VestingGrantFormProps> = ({ onSubmit, is
             />
           </div>
           <Button type="submit" variant="primary" size="md" isFullWidth disabled={isSubmitting}>
-            {isSubmitting ? 'Simulating...' : 'Initialize Vesting Escrow'}
+            {isSubmitting ? t('vesting.form.simulating') : t('vesting.form.initialize')}
           </Button>
         </form>
       </div>
