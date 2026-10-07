@@ -139,8 +139,10 @@ export async function claimKey(
 /**
  * Wait for another request holding the key to publish its terminal cached response.
  *
- * Returns the completed/failed record when it becomes available. Returns null
- * when the key disappears/expires or remains in progress past the bounded wait.
+ * Returns a completed cached record when it becomes available. Returns null
+ * when the key disappears/expires, the first request fails, or it remains in
+ * progress past the bounded wait. Failed 5xx attempts are deliberately
+ * non-sticky so a later request can atomically claim and execute them again.
  * Polling backs off to keep duplicate bursts from hammering PostgreSQL.
  */
 export async function waitForReplay(
@@ -165,7 +167,7 @@ export async function waitForReplay(
     const row = result.rows[0];
     if (!row) return null;
 
-    if (row.status === 'completed' || row.status === 'failed') {
+    if (row.status === 'completed') {
       return {
         id: row.id,
         organizationId: row.organization_id,
@@ -176,6 +178,10 @@ export async function waitForReplay(
         createdAt: row.created_at,
         expiresAt: row.expires_at,
       };
+    }
+
+    if (row.status === 'failed') {
+      return null;
     }
 
     const remainingMs = deadline - Date.now();
