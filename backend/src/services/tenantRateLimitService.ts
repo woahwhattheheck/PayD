@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Redis } from 'ioredis';
 import { pool } from '../config/database.js';
 import logger from '../utils/logger.js';
@@ -77,6 +78,12 @@ export class TenantRateLimitService {
     // Invalidate cache so next request picks up the new values
     if (this.redis) {
       try {
+        await this.redis.mset(
+          `cache:organization-settings:${organizationId}:key:rate_limit_overrides:generation`,
+          randomUUID(),
+          `cache:organization-settings:${organizationId}:all:generation`,
+          randomUUID()
+        );
         await this.redis.del(this.cacheKey(organizationId));
       } catch (err) {
         logger.warn('Redis delete failed in TenantRateLimitService', { err });
