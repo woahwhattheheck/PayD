@@ -224,6 +224,9 @@ export class TenantConfigService {
           this.allConfigsGenerationKey(organizationId),
           randomUUID()
         );
+        if (configKey === 'rate_limit_overrides') {
+          await redis.del(`rate_limits:org:${organizationId}`);
+        }
       }
     } catch (error) {
       // The database write has already succeeded; cache failure must not undo its result.
