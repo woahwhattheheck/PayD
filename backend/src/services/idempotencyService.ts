@@ -41,7 +41,8 @@ export type IdempotencyClaimResult = IdempotencyLease | IdempotencyReplay;
 /**
  * Store an idempotency key with a lock (in_progress status).
  * Returns a lease when this request owns the key.
- * Returns a replay record when a completed/failed key already exists.
+ * Returns a replay record when a completed key already exists.
+ * Failed server-error attempts are immediately recyclable by a later request.
  * Throws IdempotencyConflictError if another request is in progress.
  */
 export async function claimKey(
@@ -90,8 +91,8 @@ export async function claimKey(
     }
 
     // Step 3: Key exists and is NOT expired. Fetch its current state to
-    // distinguish between a replay (completed/failed) and a concurrent
-    // duplicate (in_progress from another in-flight request).
+    // distinguish a completed replay from a concurrent in-progress request.
+    // A failed row can appear here only if it became failed after Step 2.
     const existingResult = await query(
       `SELECT id, organization_id, idempotency_key, status, response_status, response_body, created_at, expires_at
        FROM idempotency_keys
@@ -116,8 +117,14 @@ export async function claimKey(
       expiresAt: row.expires_at,
     };
 
-    if (record.status === 'completed' || record.status === 'failed') {
+    if (record.status === 'completed') {
       return { kind: 'replay', record };
+    }
+
+    if (record.status === 'failed') {
+      // The row became failed after the recycle attempt above. Retry the
+      // atomic claim path so a transient 5xx cannot become a sticky replay.
+      return claimKey(organizationId, idempotencyKey, ttlMs);
     }
 
     // status is in_progress — another request holds the lock.
