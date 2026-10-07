@@ -18,8 +18,6 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
 CREATE INDEX IF NOT EXISTS idx_idempotency_keys_lookup
     ON idempotency_keys (organization_id, idempotency_key, expires_at);
 
--- Auto-cleanup of expired keys (TTL enforced by expires_at comparison).
--- Runs at table level; the application also checks expires_at on read.
+-- Support efficient TTL cleanup scans; expiration is enforced by queries.
 CREATE INDEX IF NOT EXISTS idx_idempotency_keys_expires
-    ON idempotency_keys (expires_at)
-    WHERE expires_at < NOW();
+    ON idempotency_keys (expires_at);
