@@ -57,8 +57,12 @@ export async function runLeaderElectedFxRateIngestion(
       [FX_RATE_INGESTION_LOCK_ID]
     );
     const lockAcquired = lockResult.rows[0]?.acquired;
-    acquired = lockAcquired === true;
-    destroyClient = lockAcquired !== false;
+    if (lockAcquired !== true && lockAcquired !== false) {
+      throw new Error('FX rate ingestion advisory lock returned an invalid result');
+    }
+
+    acquired = lockAcquired;
+    destroyClient = acquired;
 
     if (!acquired) {
       log.debug('FX rate ingestion skipped: advisory lock held by another instance');

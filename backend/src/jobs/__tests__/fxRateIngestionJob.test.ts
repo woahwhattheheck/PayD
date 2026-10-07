@@ -93,4 +93,33 @@ describe('FX rate ingestion leader election', () => {
     expect(acquiredClientReleased).toBe(true);
     expect(secondLog.error).toContain('FX rate ingestion startup run failed');
   });
+
+  it('rejects an uncertain lock result and destroys that database session', async () => {
+    let ingestCount = 0;
+    const releaseArguments: Array<boolean | undefined> = [];
+    const malformedDatabase = {
+      async connect() {
+        return {
+          async query() {
+            return { rows: [] };
+          },
+          release(destroy?: boolean) {
+            releaseArguments.push(destroy);
+          },
+        };
+      },
+    } as unknown as AdvisoryLockDatabase;
+
+    await expect(
+      runLeaderElectedFxRateIngestion({
+        database: malformedDatabase,
+        ingest: async () => {
+          ingestCount += 1;
+        },
+      })
+    ).rejects.toThrow('FX rate ingestion advisory lock returned an invalid result');
+
+    expect(ingestCount).toBe(0);
+    expect(releaseArguments).toEqual([true]);
+  });
 });
