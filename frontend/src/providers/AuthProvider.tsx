@@ -53,7 +53,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
       if (
         axios.isAxiosError(error) &&
-        (error.response?.status === 401 || error.response?.status === 404)
+        (error.response?.status === 401 ||
+          error.response?.status === 403 ||
+          error.response?.status === 404)
       ) {
         localStorage.removeItem('payd_auth_token');
         localStorage.removeItem('accessToken');
