@@ -12,6 +12,7 @@ export interface GracefulShutdownOptions {
   stopBackgroundWork: () => void | Promise<void>;
   closeDependencies: () => Promise<void>;
   timeoutMs?: number;
+  cleanupTimeoutMs?: number;
   exit?: (code: number) => void;
 }
 
@@ -48,12 +49,40 @@ async function drainHttpServer(
   });
 }
 
+async function runBoundedCleanup(
+  label: string,
+  cleanup: () => void | Promise<void>,
+  timeoutMs: number,
+  logger: ShutdownLogger
+): Promise<boolean> {
+  let timeout: NodeJS.Timeout | undefined;
+
+  try {
+    await Promise.race([
+      Promise.resolve().then(cleanup),
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(
+          () => reject(new Error(`${label} exceeded ${timeoutMs}ms`)),
+          timeoutMs
+        );
+      }),
+    ]);
+    return true;
+  } catch (error) {
+    logger.error(`${label} failed`, { error });
+    return false;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 export function createGracefulShutdown({
   server,
   logger,
   stopBackgroundWork,
   closeDependencies,
   timeoutMs = 30_000,
+  cleanupTimeoutMs = 10_000,
   exit = (code) => process.exit(code),
 }: GracefulShutdownOptions): (signal: NodeJS.Signals) => Promise<void> {
   let shutdownPromise: Promise<void> | null = null;
@@ -68,22 +97,29 @@ export function createGracefulShutdown({
       // connections are refused before background cleanup begins.
       const httpDrain = drainHttpServer(server, logger, timeoutMs);
 
-      try {
-        await stopBackgroundWork();
-      } catch (error) {
-        logger.error('Failed to stop background work cleanly', { error });
-      }
+      const backgroundStopped = await runBoundedCleanup(
+        'Background work shutdown',
+        stopBackgroundWork,
+        cleanupTimeoutMs,
+        logger
+      );
 
       await httpDrain;
 
-      try {
-        await closeDependencies();
-      } catch (error) {
-        logger.error('Failed to close one or more runtime dependencies', { error });
-      }
+      const dependenciesClosed = await runBoundedCleanup(
+        'Runtime dependency cleanup',
+        closeDependencies,
+        cleanupTimeoutMs,
+        logger
+      );
 
-      logger.info('Graceful shutdown complete');
-      exit(0);
+      const clean = backgroundStopped && dependenciesClosed;
+      if (clean) {
+        logger.info('Graceful shutdown complete');
+      } else {
+        logger.error('Graceful shutdown completed with cleanup failures');
+      }
+      exit(clean ? 0 : 1);
     })();
 
     return shutdownPromise;
