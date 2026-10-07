@@ -204,6 +204,21 @@ describe('idempotencyService', () => {
       expect(query).toHaveBeenCalledTimes(2);
     });
 
+    it('should return null when the in-progress request finishes failed', async () => {
+      const failedRow = {
+        ...inProgressRow,
+        status: 'failed',
+        response_status: 503,
+        response_body: { error: 'Service Unavailable' },
+      };
+      (query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [inProgressRow] })
+        .mockResolvedValueOnce({ rows: [failedRow] });
+
+      await expect(waitForReplay(1, 'race-key', 50, 0, 0)).resolves.toBeNull();
+      expect(query).toHaveBeenCalledTimes(2);
+    });
+
     it('should return null when the duplicate stays in progress past the bounded wait', async () => {
       (query as jest.Mock).mockResolvedValue({ rows: [inProgressRow] });
 
