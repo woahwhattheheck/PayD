@@ -67,31 +67,20 @@ describe('idempotencyService', () => {
       }
     });
 
-    it('should return an existing failed record for replay', async () => {
+    it('should recycle a failed server-error record so a retry can execute', async () => {
       (query as jest.Mock)
         .mockResolvedValueOnce({ rowCount: 0, rows: [] })
-        .mockResolvedValueOnce({ rowCount: 0, rows: [] })
-        .mockResolvedValueOnce({
-          rows: [
-            {
-              id: 2,
-              organization_id: 1,
-              idempotency_key: 'fail-key',
-              status: 'failed',
-              response_status: 400,
-              response_body: { error: 'Bad Request' },
-              created_at: new Date(),
-              expires_at: new Date(Date.now() + 3600000),
-            },
-          ],
-        });
+        .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 2 }] });
 
       const result = await claimKey(1, 'fail-key');
 
-      expect(result.kind).toBe('replay');
-      if (result.kind === 'replay') {
-        expect(result.record.status).toBe('failed');
-      }
+      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date) });
+      expect(query).toHaveBeenCalledTimes(2);
+      const recycleSql = (query as jest.Mock).mock.calls[1][0] as string;
+      expect(recycleSql).toContain("status = 'failed'");
+      expect(recycleSql).toContain('expires_at <= NOW()');
+      expect(recycleSql).toContain('response_status = NULL');
+      expect(recycleSql).toContain('response_body = NULL');
     });
 
     it('should recycle expired cached keys and return a new lease', async () => {
