@@ -68,9 +68,9 @@ export async function claimKey(
       return { kind: 'claimed', expiresAt };
     }
 
-    // Step 2: Recycle an expired record atomically. Expiry applies to every
-    // terminal state, not only in_progress rows; otherwise an expired cached
-    // success/error can never be reused because the unique row remains.
+    // Step 2: Recycle an expired record or a failed server-error attempt
+    // atomically. Failed responses are not sticky idempotency results: a later
+    // retry must be allowed to execute instead of replaying a transient 5xx.
     const updateResult = await query(
       `UPDATE idempotency_keys
        SET status = 'in_progress',
@@ -80,7 +80,7 @@ export async function claimKey(
            expires_at = $3
        WHERE organization_id = $1
          AND idempotency_key = $2
-         AND expires_at <= NOW()
+         AND (expires_at <= NOW() OR status = 'failed')
        RETURNING id`,
       [organizationId, idempotencyKey, expiresAt]
     );
