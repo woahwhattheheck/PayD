@@ -63,4 +63,41 @@ describe('createGracefulShutdown', () => {
     expect(exit).toHaveBeenCalledWith(0);
     jest.useRealTimers();
   });
+
+  it('logs cleanup failure while preserving the zero-exit shutdown contract', async () => {
+    let onClose: (() => void) | undefined;
+    const server = {
+      close: jest.fn((callback: () => void) => {
+        onClose = callback;
+        return server;
+      }),
+      closeAllConnections: jest.fn(),
+    } as unknown as Server;
+    const stopBackgroundWork = jest.fn().mockRejectedValue(new Error('stop failed'));
+    const closeDependencies = jest.fn().mockResolvedValue(undefined);
+    const exit = jest.fn();
+    const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+
+    const pending = createGracefulShutdown({
+      server,
+      logger,
+      stopBackgroundWork,
+      closeDependencies,
+      exit,
+    })('SIGTERM');
+
+    onClose?.();
+    await pending;
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Background work shutdown failed',
+      expect.objectContaining({ error: expect.any(Error) })
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Graceful shutdown completed with cleanup failures'
+    );
+    expect(closeDependencies).toHaveBeenCalledTimes(1);
+    expect(exit).toHaveBeenCalledWith(0);
+  });
+
 });
