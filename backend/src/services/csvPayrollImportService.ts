@@ -77,9 +77,12 @@ export class CsvPayrollImportService {
       const salaryText = row.base_salary?.trim() ?? '';
       const salary = row.base_salary ? Number(salaryText) : 0;
       const decimalSalary = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+      const salarySignificand = salaryText.replace(/^[+-]/, '').split(/[eE]/, 1)[0] ?? '';
+      const negativeSalary =
+        salaryText.startsWith('-') && /[1-9]/.test(salarySignificand);
       if (row.base_salary && (!decimalSalary.test(salaryText) || !Number.isFinite(salary))) {
         rowErrors.push('Invalid salary format: must be a number');
-      } else if (salary < 0) {
+      } else if (negativeSalary || salary < 0) {
         rowErrors.push('Salary cannot be negative');
       }
 
