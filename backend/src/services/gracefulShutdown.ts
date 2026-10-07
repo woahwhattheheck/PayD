@@ -119,7 +119,10 @@ export function createGracefulShutdown({
       } else {
         logger.error('Graceful shutdown completed with cleanup failures');
       }
-      exit(clean ? 0 : 1);
+      // SIGTERM/SIGINT is an intentionally handled shutdown path. Cleanup
+      // failures remain visible above, but the issue contract requires an
+      // orderly signal-driven shutdown to terminate with status zero.
+      exit(0);
     })();
 
     return shutdownPromise;
