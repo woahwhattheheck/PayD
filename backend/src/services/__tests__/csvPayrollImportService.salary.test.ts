@@ -99,7 +99,9 @@ describe('CSV salary values', () => {
     expect(client.release).toHaveBeenCalledTimes(1);
   });
 
-  it.each(['-1', '-.5', '-1e3'])('retains the negative-salary error for %j', async (salary) => {
+  it.each(['-1', '-.5', '-1e3', '-1e-400'])(
+    'retains the negative-salary error for %j',
+    async (salary) => {
     const result = await csvPayrollImportService.processCsv(7, csvForSalary(salary));
 
     expect(result).toMatchObject({ totalRows: 1, successCount: 0, errorCount: 1 });
@@ -109,9 +111,10 @@ describe('CSV salary values', () => {
         errors: expect.arrayContaining(['Salary cannot be negative']),
       }),
     ]);
-    expect(employeeService.create).not.toHaveBeenCalled();
-    expect(pool.connect).not.toHaveBeenCalled();
-  });
+      expect(employeeService.create).not.toHaveBeenCalled();
+      expect(pool.connect).not.toHaveBeenCalled();
+    }
+  );
 
   it('retains row numbers and imports only valid rows in one transaction', async () => {
     const content = [
