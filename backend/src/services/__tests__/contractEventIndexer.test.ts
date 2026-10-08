@@ -268,6 +268,17 @@ describe('ContractEventIndexer', () => {
       });
     });
 
+    it('decodes a real getEvents base64 ScVal value without losing the raw evidence', () => {
+      // FIPS-compatible Soroban RPC sends "value" as a base64 string, not
+      // the legacy { xdr } wrapper used by older mocked clients.
+      const value = 'AAAACgAAAAAAAAAAAAAAALLQXgA=';
+      const event = { ...indexedEvent(1), value };
+      const payload = (indexer as any).parseEventPayload(event);
+      expect(payload.value).toBe(value);
+      expect(payload.decoded.value).not.toBeNull();
+      expect(payload.decoded.value).not.toBeUndefined();
+    });
+
     it('drains a full RPC page via cursor before advancing the shared ledger checkpoint', async () => {
       const firstPage = Array.from({ length: 100 }, (_, i) => indexedEvent(i + 1, 100));
       const lastEvent = indexedEvent(101, 100);
