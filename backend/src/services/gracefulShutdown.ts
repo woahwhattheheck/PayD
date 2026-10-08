@@ -32,17 +32,36 @@ async function drainHttpServer(
       resolve();
     };
 
-    server.close((error) => {
-      if (error && (error as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING') {
-        logger.error('HTTP server close failed', { error });
+    try {
+      server.close((error) => {
+        if (error && (error as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING') {
+          logger.error('HTTP server close failed', { error });
+        }
+        finish();
+      });
+    } catch (error) {
+      // A closing/listen-racing server or injected transport can fail before
+      // registering the callback. Do not skip dependency shutdown or turn a
+      // deliberately handled SIGTERM into an unhandled rejection.
+      logger.error('HTTP server close threw synchronously', { error });
+      try {
+        server.closeAllConnections();
+      } catch (forceError) {
+        logger.error('Unable to force-close HTTP connections', { error: forceError });
       }
       finish();
-    });
+    }
 
     if (!settled) {
       timeout = setTimeout(() => {
         logger.warn(`HTTP drain exceeded ${timeoutMs}ms; closing remaining connections`);
-        server.closeAllConnections();
+        try {
+          server.closeAllConnections();
+        } catch (error) {
+          // Exceptions inside a timer otherwise escape the drain Promise and
+          // crash the process before PostgreSQL/Redis cleanup can run.
+          logger.error('Unable to force-close timed-out HTTP connections', { error });
+        }
         finish();
       }, timeoutMs);
     }
