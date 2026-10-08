@@ -268,6 +268,52 @@ describe('ContractEventIndexer', () => {
       });
     });
 
+    it('drains a full RPC page via cursor before advancing the shared ledger checkpoint', async () => {
+      const firstPage = Array.from({ length: 100 }, (_, i) => indexedEvent(i + 1, 100));
+      const lastEvent = indexedEvent(101, 100);
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ result: { events: firstPage, cursor: 'next-page', latestLedger: 100 } }),
+        })
+        .mockResolvedValueOnce(rpcPage([lastEvent]));
+
+      await indexer.initialize();
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      const firstParams = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body).params;
+      const secondParams = JSON.parse((global.fetch as jest.Mock).mock.calls[1][1].body).params;
+      expect(firstParams.startLedger).toBe(100);
+      expect(firstParams.pagination.cursor).toBeUndefined();
+      expect(secondParams.startLedger).toBeUndefined();
+      expect(secondParams.pagination.cursor).toBe('next-page');
+      const inserts = mockClient.query.mock.calls.filter(
+        ([sql]: [string]) => sql.includes('INSERT INTO contract_events')
+      );
+      expect(inserts).toHaveLength(101);
+      expect(checkpoint).toBe(100);
+    });
+
+    it('does not insert any partial page or advance the checkpoint if a later RPC page fails', async () => {
+      const firstPage = Array.from({ length: 100 }, (_, i) => indexedEvent(i + 1, 100));
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ result: { events: firstPage, cursor: 'next-page', latestLedger: 100 } }),
+        })
+        .mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Service Unavailable' });
+
+      await indexer.initialize();
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(mockClient.query).not.toHaveBeenCalled();
+      expect(checkpoint).toBe(99);
+      expect(pool.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE indexer_state'),
+        [99, 'error', expect.stringContaining('RPC request failed: 503')]
+      );
+    });
+
     it('increments a string ledger numerically and commits one combined contract batch', async () => {
       const events = [indexedEvent(1), indexedEvent(2), indexedEvent(3)];
       (global.fetch as jest.Mock).mockResolvedValue(rpcPage(events));
