@@ -62,18 +62,12 @@ const LEGACY_MIGRATION_FILENAMES: Readonly<Record<string, string>> = Object.free
     '0020_add_deleted_at_to_employees.sql': '002_add_deleted_at_to_employees.sql',
     '0021_extend_employee_profiles.sql': '002_extend_employee_profiles.sql',
     '0030_create_users_2fa.sql': '003_create_users_2fa.sql',
-    '0031_multi_tenant_rls.sql': '003_multi_tenant_rls.sql',
     '0040_create_clawback_audit_logs.sql': '004_create_clawback_audit_logs.sql',
-    '0041_tenant_configurations.sql': '004_tenant_configurations.sql',
-    '0050_auth_rbac_updates.sql': '005_auth_rbac_updates.sql',
     '0051_create_employee_trustlines.sql': '005_create_employee_trustlines.sql',
     '0100_add_salary_to_employees.sql': '010_add_salary_to_employees.sql',
     '0101_create_account_freeze_logs.sql': '010_create_account_freeze_logs.sql',
-    '0102_create_multisig_configs.sql': '010_create_multisig_configs.sql',
     '0140_create_contract_registry.sql': '014_create_contract_registry.sql',
-    '0141_create_schedules.sql': '014_create_schedules.sql',
     '0150_create_contract_events.sql': '015_create_contract_events.sql',
-    '0151_create_execution_history.sql': '015_create_execution_history.sql',
 });
 
 /**
