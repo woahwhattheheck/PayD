@@ -147,45 +147,59 @@ export class ContractEventIndexer {
    * Fetch events from Soroban RPC
    */
   private async fetchEventsFromRPC(contractIds: string[], startLedger: number): Promise<SorobanEvent[]> {
+    const allEvents: SorobanEvent[] = [];
+    const seenCursors = new Set<string>();
+    let cursor: string | undefined;
+    // Keep an RPC failure or a runaway cursor loop from advancing the ledger
+    // checkpoint with an incomplete set of events.
+    const MAX_RPC_PAGES = 100;
+
     try {
-      const response = await fetch(this.RPC_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getEvents',
-          params: {
-            startLedger: startLedger + 1,
-            filters: [
-              {
-                type: 'contract',
-                contractIds,
-              },
-            ],
-            pagination: {
-              limit: this.BATCH_SIZE,
-            },
-          },
-        }),
-      });
+      for (let page = 0; page < MAX_RPC_PAGES; page++) {
+        const params: {
+          startLedger?: number;
+          filters: { type: string; contractIds: string[] }[];
+          pagination: { limit: number; cursor?: string };
+        } = {
+          filters: [{ type: 'contract', contractIds }],
+          pagination: { limit: this.BATCH_SIZE },
+        };
+        // Stellar RPC forbids startLedger and a pagination cursor together.
+        if (cursor) params.pagination.cursor = cursor;
+        else params.startLedger = startLedger + 1;
 
-      if (!response.ok) {
-        throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        const response = await fetch(this.RPC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getEvents', params }),
+        });
+        if (!response.ok) {
+          throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        }
+        const data = (await response.json()) as {
+          error?: { message?: string };
+          result?: GetEventsResponse & { cursor?: string };
+        };
+        if (data.error) {
+          throw new Error(`RPC error: ${data.error.message || 'Unknown RPC error'}`);
+        }
+        const events = data.result?.events;
+        if (!Array.isArray(events)) throw new Error('RPC getEvents response is missing the events array');
+        allEvents.push(...events);
+        if (events.length < this.BATCH_SIZE) return allEvents;
+
+        // A full page is not a completed ledger. Resume at the RPC cursor,
+        // falling back to the event paging token for older RPC deployments.
+        const nextCursor = data.result?.cursor || events[events.length - 1]?.pagingToken;
+        if (typeof nextCursor !== 'string' || !nextCursor || seenCursors.has(nextCursor)) {
+          throw new Error('RPC getEvents returned a full page without a new pagination cursor');
+        }
+        seenCursors.add(nextCursor);
+        cursor = nextCursor;
       }
-
-      const data = (await response.json()) as { error?: { message?: string }; result?: GetEventsResponse };
-
-      if (data.error) {
-        throw new Error(`RPC error: ${data.error.message || 'Unknown RPC error'}`);
-      }
-
-      const result: GetEventsResponse = (data.result || {}) as GetEventsResponse;
-      return result.events || [];
+      throw new Error(`RPC getEvents exceeded ${MAX_RPC_PAGES} pages; retaining checkpoint`);
     } catch (error) {
-      console.error(`[ContractEventIndexer] Error fetching events from RPC:`, error);
+      console.error('[ContractEventIndexer] Error fetching events from RPC:', error);
       throw error;
     }
   }
