@@ -40,7 +40,7 @@ function trackCleanupRun(run: Promise<void>): void {
 }
 
 // Initialize Socket.IO
-initializeSocket(server);
+const socketServer = initializeSocket(server);
 
 const PORT = config.port || process.env.PORT || 4000;
 
@@ -118,6 +118,9 @@ const gracefulShutdown = createGracefulShutdown({
     if (idempotencyCleanup) clearInterval(idempotencyCleanup);
 
     const stops = [
+      // HTTP server.close() does not close upgraded WebSocket connections.
+      // Close this engine's transports so clients can reconnect to other pods.
+      () => { socketServer.engine.close(); },
       () => scheduleExecutor.stop(),
       () => liquidityAlertChecker.stop(),
       () => usageSnapshotJob?.stop(),
