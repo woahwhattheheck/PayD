@@ -103,12 +103,24 @@ export class EmployeeService {
       paramIndex++;
     }
 
-    query += ` ORDER BY ${sortColumn} ${sortDirection} LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    // Window totals exist only on rows actually returned. Preserve the same
+    // tenant/search/status/department filters for an empty out-of-range page
+    // so a page past the end cannot falsely report total=0.
+    const countQuery = query.replace(
+      'SELECT *, count(*) OVER() as total_count',
+      'SELECT COUNT(*) AS total_count'
+    );
+    const countValues = values.slice();
+    query += ` ORDER BY ${sortColumn} ${sortDirection} LIMIT ${paramIndex++} OFFSET ${paramIndex++}`;
     values.push(limit, offset);
 
     const result = await pool.query(query, values);
 
-    const total = result.rows.length > 0 ? parseInt(result.rows[0].total_count) : 0;
+    let total = result.rows.length > 0 ? parseInt(result.rows[0].total_count, 10) : 0;
+    if (result.rows.length === 0 && offset > 0) {
+      const countResult = await pool.query(countQuery, countValues);
+      total = Number.parseInt(String(countResult.rows[0]?.total_count ?? 0), 10);
+    }
     const employees = result.rows.map((row) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { total_count, ...employee } = row;
