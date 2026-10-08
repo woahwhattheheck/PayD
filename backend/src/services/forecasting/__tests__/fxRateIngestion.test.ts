@@ -84,6 +84,21 @@ describe('FX rate ingestion', () => {
     );
   });
 
+  it('rejects non-decimal or non-scalar provider FX rates', async () => {
+    for (const rawRate of [true, ['1.25'], '0x1']) {
+      const fetchImpl: FxFetch = async () =>
+        response({ data: { currency: 'EUR', rates: { USD: rawRate } } });
+
+      await expect(fetchUsdRate('EUR', { fetchImpl, timeoutMs: 100 }))
+        .rejects.toThrow('missing a positive USD rate');
+    }
+
+    const fetchImpl: FxFetch = async () =>
+      response({ data: { currency: 'EUR', rates: { USD: '1.25e-3' } } });
+    await expect(fetchUsdRate('EUR', { fetchImpl, timeoutMs: 100 }))
+      .resolves.toMatchObject({ rate: 0.00125 });
+  });
+
   it('does not open a write transaction when the provider fails', async () => {
     let connectCount = 0;
     const database = {
