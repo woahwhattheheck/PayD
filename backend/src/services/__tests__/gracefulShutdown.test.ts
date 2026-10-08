@@ -64,7 +64,7 @@ describe('createGracefulShutdown', () => {
     jest.useRealTimers();
   });
 
-  it('logs cleanup failure while preserving the zero-exit shutdown contract', async () => {
+  it('does not close dependencies under failed background work and still exits zero', async () => {
     let onClose: (() => void) | undefined;
     const server = {
       close: jest.fn((callback: () => void) => {
@@ -94,9 +94,12 @@ describe('createGracefulShutdown', () => {
       expect.objectContaining({ error: expect.any(Error) })
     );
     expect(logger.error).toHaveBeenCalledWith(
+      'Runtime dependency cleanup skipped because background work did not stop cleanly'
+    );
+    expect(logger.error).toHaveBeenCalledWith(
       'Graceful shutdown completed with cleanup failures'
     );
-    expect(closeDependencies).toHaveBeenCalledTimes(1);
+    expect(closeDependencies).not.toHaveBeenCalled();
     expect(exit).toHaveBeenCalledWith(0);
   });
 
