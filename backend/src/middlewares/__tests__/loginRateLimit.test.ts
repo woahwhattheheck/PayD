@@ -107,6 +107,30 @@ describe('authentication login rate limiting', () => {
     expect(alternateResponse.res.statusCode).toBe(200);
   });
 
+  it('returns unavailable instead of passing login through when the limiter check fails', async () => {
+    const check = jest
+      .spyOn(rateLimitService, 'checkRateLimit')
+      .mockRejectedValueOnce(new Error('limiter unavailable'));
+    const middleware = loginSourceRateLimit();
+    const { res, headers } = response();
+    const next = jest.fn() as unknown as NextFunction;
+
+    await middleware(request('GTEST', '198.51.100.41'), res, next);
+
+    expect(check).toHaveBeenCalledWith(sourceIdentifier, 'auth', undefined, true);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(503);
+    expect(headers.get('Retry-After')).toBe(60);
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        error: 'Service Unavailable',
+        retryAfter: 60,
+      })
+    );
+
+    check.mockRestore();
+  });
+
   it('throttles one request source even when wallet identifiers rotate', async () => {
     const middleware = loginSourceRateLimit();
     const limit = rateLimitService.getTierConfig('auth').maxRequests;
