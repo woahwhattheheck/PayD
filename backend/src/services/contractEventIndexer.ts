@@ -289,7 +289,8 @@ export class ContractEventIndexer {
           .filter((topic): topic is string => typeof topic === 'string')
           .map((topic) => this.decodeSorobanTopic(topic))
       : null;
-    const decodedValue = event.value?.xdr ? this.decodeSorobanScVal(event.value.xdr) : null;
+    const valueXdr = typeof event.value === 'string' ? event.value : event.value?.xdr;
+    const decodedValue = valueXdr ? this.decodeSorobanScVal(valueXdr) : null;
 
     return {
       type: event.type,
