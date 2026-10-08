@@ -29,26 +29,36 @@ export class WebhookController {
     }
   }
 
-  static listSubscriptions(req: Request, res: Response) {
-    const organizationId = req.tenantId!;
-    const subscriptions = WebhookService.listSubscriptions(organizationId);
-    res.json(subscriptions);
+  static async listSubscriptions(req: Request, res: Response) {
+    try {
+      const organizationId = req.tenantId!;
+      const subscriptions = await WebhookService.listSubscriptions(organizationId);
+      res.json(subscriptions);
+    } catch {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 
-  static deleteSubscription(req: Request, res: Response) {
-    const { id } = req.params;
-    const organizationId = req.tenantId!;
-    const success = WebhookService.deleteSubscription(id as string, organizationId);
-    if (success) {
-      res.status(204).send();
-      return;
+  static async deleteSubscription(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const organizationId = req.tenantId!;
+      const success = await WebhookService.deleteSubscription(id as string, organizationId);
+      if (success) {
+        res.status(204).send();
+        return;
+      }
+      res.status(404).json({ error: 'Subscription not found' });
+    } catch {
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-    res.status(404).json({ error: 'Subscription not found' });
   }
 
   static async triggerMockEvent(req: Request, res: Response) {
     const { event, payload } = req.body;
+    const organizationId = req.tenantId!;
     await WebhookService.dispatch(
+      organizationId,
       (event as string) || 'payment.completed',
       payload || { id: 'test_tx_123', amount: 100 }
     );
