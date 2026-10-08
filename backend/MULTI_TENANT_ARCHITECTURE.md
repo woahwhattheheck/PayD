@@ -34,9 +34,9 @@ Run migrations in order:
 
 ```bash
 psql -d payd -f src/db/migrations/001_create_tables.sql
-psql -d payd -f src/db/migrations/002_extend_employee_profiles.sql
-psql -d payd -f src/db/migrations/003_multi_tenant_rls.sql
-psql -d payd -f src/db/migrations/004_tenant_configurations.sql
+psql -d payd -f src/db/migrations/003_extend_employee_profiles.sql
+psql -d payd -f src/db/migrations/005_multi_tenant_rls.sql
+psql -d payd -f src/db/migrations/007_tenant_configurations.sql
 ```
 
 ### Middleware Usage

@@ -10,8 +10,8 @@ This implementation adds comprehensive multi-tenant support to the PayD backend 
 
 ### Database Migrations
 
-- `backend/src/db/migrations/003_multi_tenant_rls.sql` - RLS policies for data isolation
-- `backend/src/db/migrations/004_tenant_configurations.sql` - Tenant-specific configurations
+- `backend/src/db/migrations/005_multi_tenant_rls.sql` - RLS policies for data isolation
+- `backend/src/db/migrations/007_tenant_configurations.sql` - Tenant-specific configurations
 
 ### Middleware
 
@@ -111,8 +111,8 @@ This implementation adds comprehensive multi-tenant support to the PayD backend 
 1. Run database migrations:
 
    ```bash
-   psql -d payd -f backend/src/db/migrations/003_multi_tenant_rls.sql
-   psql -d payd -f backend/src/db/migrations/004_tenant_configurations.sql
+   psql -d payd -f backend/src/db/migrations/005_multi_tenant_rls.sql
+   psql -d payd -f backend/src/db/migrations/007_tenant_configurations.sql
    ```
 
 2. Run tests:

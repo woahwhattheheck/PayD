@@ -14,7 +14,7 @@
 
 - [x] ContractEventIndexer service (background worker)
 - [x] ContractEventController (REST API)
-- [x] Database migration (016_create_contract_events.sql)
+- [x] Database migration (024_create_contract_events.sql)
 - [x] TypeScript types and interfaces
 - [x] Route registration in Express app
 - [x] Graceful shutdown handling
@@ -51,7 +51,7 @@
 
 ### Schema
 
-- [x] Migration file created (016_create_contract_events.sql)
+- [x] Migration file created (024_create_contract_events.sql)
 - [x] contract_events table with all required fields
 - [x] indexer_state table for tracking progress
 - [x] Unique constraint for duplicate prevention
@@ -275,7 +275,7 @@
 
 1. `src/services/contractEventIndexer.ts` - Core indexing logic
 2. `src/controllers/contractEventController.ts` - API endpoints
-3. `src/db/migrations/016_create_contract_events.sql` - Database schema
+3. `src/db/migrations/024_create_contract_events.sql` - Database schema
 4. `src/types/contractEvent.ts` - Type definitions
 
 ### Testing the Feature

@@ -189,7 +189,7 @@ curl -H "X-RateLimit-Bypass: <token>" https://api.example.com/endpoint
 
 ## Database Migrations
 
-A new migration file has been created: `backend/src/db/migrations/023_enhanced_auditing_and_monitoring.sql`
+A new migration file has been created: `backend/src/db/migrations/031_enhanced_auditing_and_monitoring.sql`
 
 ### New Tables
 

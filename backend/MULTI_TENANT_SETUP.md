@@ -8,8 +8,8 @@ Apply the multi-tenant migrations to enable Row-Level Security:
 
 ```bash
 # From the backend directory
-psql -d payd -f src/db/migrations/003_multi_tenant_rls.sql
-psql -d payd -f src/db/migrations/004_tenant_configurations.sql
+psql -d payd -f src/db/migrations/005_multi_tenant_rls.sql
+psql -d payd -f src/db/migrations/007_tenant_configurations.sql
 ```
 
 ### 2. Verify RLS is Enabled
@@ -52,13 +52,13 @@ npm test -- tenantContext.test.ts
 
 ### Database Layer
 
-1. **RLS Policies** (003_multi_tenant_rls.sql)
+1. **RLS Policies** (005_multi_tenant_rls.sql)
    - Enabled RLS on employees, transactions tables
    - Created policies for SELECT, INSERT, UPDATE, DELETE
    - Added validation triggers for referential integrity
    - Created helper functions for tenant context
 
-2. **Tenant Configurations** (004_tenant_configurations.sql)
+2. **Tenant Configurations** (007_tenant_configurations.sql)
    - New table for tenant-specific settings
    - RLS policies for configuration isolation
    - Default configurations for all tenants

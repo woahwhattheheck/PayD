@@ -68,7 +68,7 @@ Disabling deliberately refuses recovery codes: a leaked recovery code should let
 
 ## Migration notes
 
-Migration `029_admin_two_factor_auth.sql`:
+Migration `037_admin_two_factor_auth.sql`:
 
 - widens the `users.role` CHECK constraint to include `ADMIN`;
 - adds `totp_pending_secret`, `two_factor_enabled_at`, `totp_last_used_step`, `two_factor_failed_attempts`, `two_factor_locked_until` (the timestamp columns are `TIMESTAMPTZ`, see the lockout note above);

@@ -15,7 +15,7 @@ Successfully implemented a production-ready contract event indexer for Soroban s
 
 ### ✅ Events stored in a contract_events table with contract_id, event_type, payload, and ledger sequence
 
-- Created migration `016_create_contract_events.sql`
+- Created migration `024_create_contract_events.sql`
 - Table includes all required fields:
   - `contract_id` (VARCHAR 56)
   - `event_type` (VARCHAR 100)
@@ -56,7 +56,7 @@ Successfully implemented a production-ready contract event indexer for Soroban s
 2. `src/services/contractEventIndexer.ts` - Background indexer service (350+ lines)
 3. `src/controllers/contractEventController.ts` - REST API controller (180+ lines)
 4. `src/routes/contractEventRoutes.ts` - Express route definitions
-5. `src/db/migrations/016_create_contract_events.sql` - Database schema
+5. `src/db/migrations/024_create_contract_events.sql` - Database schema
 
 ### Tests
 

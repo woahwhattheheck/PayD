@@ -16,7 +16,7 @@ Part 49 adds three complementary hardening layers to the PayD multi-tenant backe
 
 ## Database migration
 
-`backend/src/db/migrations/024_audit_integrity_and_quotas.sql`
+`backend/src/db/migrations/032_audit_integrity_and_quotas.sql`
 
 | Object | Purpose |
 |---|---|

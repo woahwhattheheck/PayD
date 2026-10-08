@@ -208,7 +208,7 @@ Run the migration to create new tables:
 
 ```bash
 cd backend
-psql -d payd -f src/db/migrations/026_backend_robustness_part45.sql
+psql -d payd -f src/db/migrations/034_backend_robustness_part45.sql
 ```
 
 ### New Tables

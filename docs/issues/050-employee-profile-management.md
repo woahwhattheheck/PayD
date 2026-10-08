@@ -10,7 +10,7 @@ Added support for richer employee profiles, including contact details, departmen
 
 ### 1. Database Schema Extension
 
-**File:** `backend/src/db/migrations/002_extend_employee_profiles.sql`
+**File:** `backend/src/db/migrations/003_extend_employee_profiles.sql`
 
 Extended the `employees` table with the following fields:
 
@@ -129,7 +129,7 @@ cd backend
 To apply the database migration:
 
 ```sql
-psql -U your_user -d your_database -f backend/src/db/migrations/002_extend_employee_profiles.sql
+psql -U your_user -d your_database -f backend/src/db/migrations/003_extend_employee_profiles.sql
 ```
 
 ## API Usage Example
@@ -166,7 +166,7 @@ curl -X PUT http://localhost:3000/api/employees/organizations/1/1 \
 
 ### Added:
 
-- `backend/src/db/migrations/002_extend_employee_profiles.sql`
+- `backend/src/db/migrations/003_extend_employee_profiles.sql`
 - `backend/src/services/employeeService.ts`
 - `backend/src/controllers/employeeController.ts`
 - `backend/src/routes/employeeRoutes.ts`
