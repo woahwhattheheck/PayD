@@ -49,7 +49,20 @@ export function sanitizeSentryEvent(event: any): any {
   const sanitizedHeaders: Record<string, unknown> = {};
   for (const [name, value] of Object.entries(event.request.headers || {})) {
     const normalized = name.toLowerCase();
-    if (normalized === 'authorization' || normalized === 'cookie' || normalized === 'set-cookie') {
+    // API keys and reverse-proxy authentication can be carried in separate
+    // headers, so stripping only Authorization/Cookie is not sufficient.
+    if (
+      normalized === 'authorization' ||
+      normalized === 'proxy-authorization' ||
+      normalized === 'cookie' ||
+      normalized === 'set-cookie' ||
+      normalized === 'x-api-key' ||
+      normalized === 'api-key' ||
+      normalized === 'x-auth-token' ||
+      normalized === 'x-access-token' ||
+      normalized === 'x-session-token' ||
+      normalized === 'x-csrf-token'
+    ) {
       continue;
     }
     sanitizedHeaders[name] = normalized === 'referer' || normalized === 'referrer'
