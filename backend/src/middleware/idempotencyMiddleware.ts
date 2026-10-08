@@ -79,9 +79,10 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
       }
 
       // New request — intercept the response to store the result. The exact
-      // lease expiry identifies this claim generation, so a stale request
+      // per-generation UUID AND expiry identify this claim, so a stale request
       // cannot overwrite a row recycled by a later request.
       const leaseExpiresAt = claim.expiresAt;
+      const leaseToken = claim.leaseToken;
       const originalJson = res.json.bind(res);
 
       res.json = function (body: unknown) {
@@ -92,7 +93,7 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
         // 5xx errors are not stored so retries can attempt again.
         if (statusCode < 500) {
           idempotencyService
-            .completeKey(organizationId, idempotencyKey, leaseExpiresAt, statusCode, body)
+            .completeKey(organizationId, idempotencyKey, leaseExpiresAt, leaseToken, statusCode, body)
             .then((stored) => {
               if (!stored) {
                 logger.warn('Skipped stale idempotency completion', {
@@ -111,7 +112,7 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
         } else {
           // Server errors: mark as failed so retries work.
           idempotencyService
-            .failKey(organizationId, idempotencyKey, leaseExpiresAt, statusCode, body)
+            .failKey(organizationId, idempotencyKey, leaseExpiresAt, leaseToken, statusCode, body)
             .then((stored) => {
               if (!stored) {
                 logger.warn('Skipped stale idempotency failure', {
