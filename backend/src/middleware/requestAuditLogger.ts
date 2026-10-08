@@ -261,7 +261,9 @@ export function requestAuditLoggerMiddleware(
         requestId,
         method: req.method,
         path: req.path,
-        queryParams: Object.keys(req.query).length > 0 ? req.query : null,
+        queryParams: Object.keys(req.query).length > 0
+          ? sanitizeObject(req.query, finalConfig.sensitiveFields!)
+          : null,
         requestBody: finalConfig.includeRequestBody
           ? truncatePayload(
               sanitizeObject(req.body, finalConfig.sensitiveFields!),

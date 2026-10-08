@@ -85,8 +85,8 @@ export function auditLoggerMiddleware(options: AuditMiddlewareOptions = {}) {
           responseStatus: res.statusCode,
           errorMessage: res.statusCode >= 400 ? extractErrorMessage(responseBody) : undefined,
           metadata: {
-            query: req.query,
-            params: req.params,
+            query: sanitizeData(req.query, sensitiveFields),
+            params: sanitizeData(req.params, sensitiveFields),
             contentType: req.headers['content-type'],
           },
           duration,

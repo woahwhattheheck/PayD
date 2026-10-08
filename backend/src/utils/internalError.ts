@@ -32,7 +32,7 @@ export function sendInternalError(
   const requestId = typeof (req as any).requestId === 'string' ? (req as any).requestId : undefined;
   logger.error('Request failed', {
     requestId,
-    path: req.originalUrl,
+    path: req.originalUrl.split('?')[0], // never log the query string; it may carry credentials (#605)
     method: req.method,
     message,
     stack: error instanceof Error ? error.stack : undefined,

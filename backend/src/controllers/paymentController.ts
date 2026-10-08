@@ -4,6 +4,29 @@ import { Keypair, Asset } from '@stellar/stellar-sdk';
 import { StellarService } from '../services/stellarService.js';
 import { sendInternalError } from '../utils/internalError.js';
 
+/**
+ * Resolve the caller's Stellar secret for status lookups.
+ *
+ * Status endpoints previously accepted `?secretKey=S...` in the URL query
+ * string, which drops the full account seed into access logs, browser
+ * history, proxies, and Referer headers (#605). The secret must now arrive
+ * in the `Authorization: Bearer <seed>` header (or `X-Stellar-Secret-Key`
+ * for non-Authorization clients). Query-string secrets are rejected
+ * outright so callers stop leaking them.
+ */
+export function resolveClientSecret(req: Request): string | undefined {
+  const auth = req.get('authorization');
+  if (auth && auth.toLowerCase().startsWith('bearer ')) {
+    const value = auth.slice(7).trim();
+    if (value) return value;
+  }
+  const headerSecret = req.get('x-stellar-secret-key');
+  if (headerSecret && headerSecret.trim()) {
+    return headerSecret.trim();
+  }
+  return undefined;
+}
+
 export class PaymentController {
   /**
    * GET /api/payments/anchor-info
@@ -50,14 +73,20 @@ export class PaymentController {
    */
   static async getStatus(req: Request, res: Response) {
     const { domain, id } = req.params;
-    const { secretKey } = req.query;
+
+    if ('secretKey' in req.query) {
+      return res.status(400).json({
+        error: 'secretKey must not be sent in the URL query string; use the Authorization: Bearer header instead'
+      });
+    }
+    const secretKey = resolveClientSecret(req);
 
     if (!domain || !id || !secretKey) {
       return res.status(400).json({ error: 'Missing required params' });
     }
 
     try {
-      const clientKeypair = Keypair.fromSecret(secretKey as string);
+      const clientKeypair = Keypair.fromSecret(secretKey);
       // Re-auth to get a fresh token or use a session-based approach
       // For simplicity in this implementation, we re-auth
       const token = await AnchorService.authenticate(domain as string, clientKeypair);
@@ -114,14 +143,20 @@ export class PaymentController {
    */
   static async getSEP24Status(req: Request, res: Response) {
     const { domain, id } = req.params;
-    const { secretKey } = req.query;
+
+    if ('secretKey' in req.query) {
+      return res.status(400).json({
+        error: 'secretKey must not be sent in the URL query string; use the Authorization: Bearer header instead'
+      });
+    }
+    const secretKey = resolveClientSecret(req);
 
     if (!domain || !id || !secretKey) {
       return res.status(400).json({ error: 'Missing required params' });
     }
 
     try {
-      const clientKeypair = Keypair.fromSecret(secretKey as string);
+      const clientKeypair = Keypair.fromSecret(secretKey);
       const token = await AnchorService.authenticate(domain as string, clientKeypair);
 
       const status = await AnchorService.getSEP24Transaction(domain as string, token, id as string);
