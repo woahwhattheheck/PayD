@@ -125,7 +125,7 @@ export class LiquidityAlertChecker {
     };
 
     if (webhookUrl) {
-      await WebhookService.dispatch('liquidity.insufficient', payload);
+      await WebhookService.dispatch(organizationId, 'liquidity.insufficient', payload);
     }
 
     const alertEmails = liquiditySettings.alertEmails || [];
