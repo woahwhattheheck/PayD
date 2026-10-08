@@ -65,7 +65,8 @@ const withdrawalService = {
         { params: { assetCode } }
       );
       return response.data.anchors;
-    } catch {
+    } catch (err) {
+      if (!import.meta.env.DEV) throw err;
       // Mock data for development until backend is ready
       return [
         {
@@ -134,7 +135,8 @@ const withdrawalService = {
         { params: { anchorDomain } }
       );
       return response.data;
-    } catch {
+    } catch (err) {
+      if (!import.meta.env.DEV) throw err;
       // Mock status for development
       return {
         id: transactionId,
@@ -154,7 +156,8 @@ const withdrawalService = {
   cancelWithdrawal: async (transactionId: string): Promise<void> => {
     try {
       await axios.post(`${API_BASE_URL}/withdrawal/cancel`, { transactionId });
-    } catch {
+    } catch (err) {
+      if (!import.meta.env.DEV) throw err;
       // Mock success for development
       console.log('Mock: Withdrawal cancelled', transactionId);
     }
