@@ -100,7 +100,8 @@ export class RateLimitService {
   async checkRateLimit(
     identifier: string,
     tier: RateLimitTierName = 'api',
-    organizationId?: number
+    organizationId?: number,
+    failClosedOnError: boolean = false
   ): Promise<RateLimitResult> {
     let tierConfig = RATE_LIMIT_TIERS[tier];
 
@@ -135,7 +136,7 @@ export class RateLimitService {
 
     const result = this.useMemoryFallback || !this.redis
       ? await this.checkMemoryRateLimit(key, tierConfig, now)
-      : await this.checkRedisRateLimit(key, tierConfig, now);
+      : await this.checkRedisRateLimit(key, tierConfig, now, failClosedOnError);
 
     // Record outcome for circuit breaker telemetry
     if (organizationId) {
@@ -148,7 +149,8 @@ export class RateLimitService {
   private async checkRedisRateLimit(
     key: string,
     config: RateLimitTier,
-    now: number
+    now: number,
+    failClosedOnError: boolean = false
   ): Promise<RateLimitResult> {
     try {
       const redis = this.redis!;
@@ -162,6 +164,9 @@ export class RateLimitService {
         .exec();
 
       if (!results) {
+        if (failClosedOnError) {
+          throw new Error('Redis authentication rate limit transaction is unavailable');
+        }
         return this.checkMemoryRateLimit(key, config, now);
       }
 
@@ -195,6 +200,10 @@ export class RateLimitService {
         resetAt,
       };
     } catch (error) {
+      if (failClosedOnError) {
+        logger.error('Login rate limit backend unavailable; denying request', { error });
+        throw error;
+      }
       logger.error('Redis rate limit error, falling back to memory', { error });
       return this.checkMemoryRateLimit(key, config, now);
     }
