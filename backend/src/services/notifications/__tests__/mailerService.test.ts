@@ -140,4 +140,33 @@ describe('MailerService failure logging', () => {
       },
     );
   });
+
+  it('redacts credentials embedded in SMTP provider errors without swallowing the failure', async () => {
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_USER = 'smtp-account@example.com';
+    process.env.SMTP_PASS = 'example-only-smtp-secret';
+
+    const providerFailure = new Error(
+      'Login failed for smtp-account@example.com with example-only-smtp-secret'
+    );
+    const nodemailer = (await import('nodemailer')).default as any;
+    nodemailer.createTransport.mockReturnValue({
+      sendMail: jest.fn().mockRejectedValue(providerFailure),
+    });
+
+    await expect(MailerService.sendMail({
+      to: ['employee@example.com'],
+      subject: 'payroll-notification',
+      text: 'body',
+    })).rejects.toBe(providerFailure);
+
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      'Mailer failed to send email.',
+      expect.objectContaining({
+        error: 'Login failed for [REDACTED] with [REDACTED]',
+      }),
+    );
+    expect(JSON.stringify(mockedLogger.error.mock.calls)).not.toContain('example-only-smtp-secret');
+    expect(JSON.stringify(mockedLogger.error.mock.calls)).not.toContain('smtp-account@example.com');
+  });
 });
