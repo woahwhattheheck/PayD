@@ -106,8 +106,12 @@ const withdrawalService = {
         request
       );
       return response.data;
-    } catch {
-      // Mock response for development
+    } catch (err) {
+      if (!import.meta.env.DEV) {
+        throw err;
+      }
+
+      // Mock response for development only
       const mockTxId = `wd-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
       return {
         transactionId: mockTxId,
