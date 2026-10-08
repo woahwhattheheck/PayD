@@ -54,15 +54,20 @@ const DEFAULT_REFRESH_BEFORE_MS = 60 * 1000;
 const METADATA_TIMEOUT_MS = 1500;
 const AWS_API_TIMEOUT_MS = 5000;
 
-async function fetchWithTimeout(
+// A fetch() promise resolves after response HEADERS. Keep its deadline active
+// until JSON BODY consumption also finishes, or a stalled secret response can
+// block scheduled payments indefinitely after returning HTTP 200.
+async function fetchJsonWithTimeout<T>(
   input: string,
   init: RequestInit,
   timeoutMs: number
-): Promise<Response> {
+): Promise<{ response: Response; data: T | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(input, { ...init, signal: controller.signal });
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    const data = response.ok ? (await response.json()) as T : null;
+    return { response, data };
   } finally {
     clearTimeout(timeout);
   }
@@ -86,13 +91,14 @@ async function loadEcsTaskCredentials(): Promise<Aws4Credentials> {
   const authorizationToken = process.env.AWS_CONTAINER_AUTHORIZATION_TOKEN;
   if (authorizationToken) headers.Authorization = authorizationToken;
 
-  const response = await fetchWithTimeout(endpoint, { headers }, METADATA_TIMEOUT_MS);
+  const { response, data: document } = await fetchJsonWithTimeout<EcsCredentialDocument>(
+    endpoint, { headers }, METADATA_TIMEOUT_MS
+  );
   if (!response.ok) {
     throw new Error(`ECS task credential lookup failed with HTTP ${response.status}`);
   }
 
-  const document = (await response.json()) as EcsCredentialDocument;
-  if (!document.AccessKeyId || !document.SecretAccessKey) {
+  if (!document?.AccessKeyId || !document.SecretAccessKey) {
     throw new Error('ECS task credential lookup returned an incomplete document');
   }
 
@@ -154,7 +160,7 @@ export class AwsSecretsManagerClient implements SecretValueClient {
     };
 
     aws4.sign(request, credentials);
-    const response = await fetchWithTimeout(
+    const { response, data: payload } = await fetchJsonWithTimeout<SecretsManagerResponse>(
       `https://${request.host}${request.path}`,
       {
         method: request.method,
@@ -170,7 +176,7 @@ export class AwsSecretsManagerClient implements SecretValueClient {
       );
     }
 
-    const payload = (await response.json()) as SecretsManagerResponse;
+    if (!payload) throw new Error('AWS Secrets Manager returned no secret value');
     const raw =
       payload.SecretString ??
       (payload.SecretBinary
