@@ -23,18 +23,42 @@ describe('idempotencyService', () => {
 
       const result = await claimKey(1, 'key-1');
 
-      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date) });
+      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date), leaseToken: expect.any(String) });
       expect(query).toHaveBeenCalledTimes(1);
       expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO idempotency_keys'), [
         1,
         'key-1',
         expect.any(Date),
+        expect.any(String),
       ]);
       const claimSql = (query as jest.Mock).mock.calls[0][0] as string;
       expect(claimSql).toContain(
         'ON CONFLICT (organization_id, idempotency_key) DO NOTHING'
       );
       expect(claimSql).not.toContain('WHERE NOT EXISTS');
+    });
+
+    it('uses distinct lease tokens even for two generations within the same clock tick', async () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(1_791_278_400_000);
+      try {
+        (query as jest.Mock)
+          .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1 }] })
+          .mockResolvedValueOnce({ rowCount: 0, rows: [] })
+          .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1 }] });
+
+        const first = await claimKey(1, 'recycled-in-same-ms');
+        const second = await claimKey(1, 'recycled-in-same-ms');
+        expect(first.kind).toBe('claimed');
+        expect(second.kind).toBe('claimed');
+        if (first.kind !== 'claimed' || second.kind !== 'claimed') return;
+        expect(first.expiresAt).toEqual(second.expiresAt);
+        expect(first.leaseToken).not.toBe(second.leaseToken);
+        expect((query as jest.Mock).mock.calls[2][0]).toContain('lease_token = $4');
+        expect((query as jest.Mock).mock.calls[0][1][3]).toBe(first.leaseToken);
+        expect((query as jest.Mock).mock.calls[2][1][3]).toBe(second.leaseToken);
+      } finally {
+        now.mockRestore();
+      }
     });
 
     it('should return an existing completed record for replay', async () => {
@@ -74,7 +98,7 @@ describe('idempotencyService', () => {
 
       const result = await claimKey(1, 'fail-key');
 
-      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date) });
+      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date), leaseToken: expect.any(String) });
       expect(query).toHaveBeenCalledTimes(2);
       const recycleSql = (query as jest.Mock).mock.calls[1][0] as string;
       expect(recycleSql).toContain("status = 'failed'");
@@ -90,7 +114,7 @@ describe('idempotencyService', () => {
 
       const result = await claimKey(1, 'expired-key');
 
-      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date) });
+      expect(result).toEqual({ kind: 'claimed', expiresAt: expect.any(Date), leaseToken: expect.any(String) });
       expect(query).toHaveBeenCalledTimes(2);
       const recycleSql = (query as jest.Mock).mock.calls[1][0] as string;
       expect(recycleSql).toContain("SET status = 'in_progress'");
@@ -246,24 +270,27 @@ describe('idempotencyService', () => {
 
   describe('lease-owned completion', () => {
     const leaseExpiresAt = new Date('2026-10-06T12:00:00.000Z');
+    const token = '11111111-1111-4111-8111-111111111111';
 
     it('should complete only the matching in-progress lease', async () => {
       (query as jest.Mock).mockResolvedValue({ rowCount: 1 });
 
       await expect(
-        completeKey(1, 'done-key', leaseExpiresAt, 201, { id: 42 })
+        completeKey(1, 'done-key', leaseExpiresAt, token, 201, { id: 42 })
       ).resolves.toBe(true);
 
       expect(query).toHaveBeenCalledWith(expect.stringContaining("SET status = 'completed'"), [
         1,
         'done-key',
         leaseExpiresAt,
+        token,
         201,
         '{"id":42}',
       ]);
       const completionSql = (query as jest.Mock).mock.calls[0][0] as string;
       expect(completionSql).toContain("status = 'in_progress'");
       expect(completionSql).toContain('expires_at = $3');
+      expect(completionSql).toContain('lease_token = $4');
       expect(completionSql).toContain('expires_at > NOW()');
     });
 
@@ -272,29 +299,46 @@ describe('idempotencyService', () => {
       const staleLease = new Date('2026-10-05T12:00:00.000Z');
 
       await expect(
-        completeKey(1, 'recycled-key', staleLease, 201, { id: 'stale' })
+        completeKey(1, 'recycled-key', staleLease, token, 201, { id: 'stale' })
       ).resolves.toBe(false);
 
       expect((query as jest.Mock).mock.calls[0][1][2]).toBe(staleLease);
+    });
+
+    it('rejects stale settlement even when a recycled key has identical expiry', async () => {
+      const expiry = new Date('2026-10-06T12:00:00.000Z');
+      const currentToken = '22222222-2222-4222-8222-222222222222';
+      (query as jest.Mock).mockImplementation(async (sql: string, args: unknown[]) => {
+        expect(sql).toContain('lease_token = $4');
+        return { rowCount: args[3] === currentToken ? 1 : 0 };
+      });
+
+      await expect(completeKey(1, 'recycled-key', expiry, token, 201, { id: 'old' }))
+        .resolves.toBe(false);
+      await expect(completeKey(1, 'recycled-key', expiry, currentToken, 201, { id: 'new' }))
+        .resolves.toBe(true);
+      expect(query).toHaveBeenCalledTimes(2);
     });
 
     it('should fail only the matching in-progress lease', async () => {
       (query as jest.Mock).mockResolvedValue({ rowCount: 1 });
 
       await expect(
-        failKey(1, 'err-key', leaseExpiresAt, 500, { error: 'Server Error' })
+        failKey(1, 'err-key', leaseExpiresAt, token, 500, { error: 'Server Error' })
       ).resolves.toBe(true);
 
       expect(query).toHaveBeenCalledWith(expect.stringContaining("SET status = 'failed'"), [
         1,
         'err-key',
         leaseExpiresAt,
+        token,
         500,
         '{"error":"Server Error"}',
       ]);
       const failureSql = (query as jest.Mock).mock.calls[0][0] as string;
       expect(failureSql).toContain("status = 'in_progress'");
       expect(failureSql).toContain('expires_at = $3');
+      expect(failureSql).toContain('lease_token = $4');
       expect(failureSql).toContain('expires_at > NOW()');
     });
   });
