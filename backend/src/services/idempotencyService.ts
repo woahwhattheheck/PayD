@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { query } from '../config/database.js';
 import logger from '../utils/logger.js';
 
@@ -29,6 +30,8 @@ export interface IdempotencyRecord {
 export interface IdempotencyLease {
   kind: 'claimed';
   expiresAt: Date;
+  /** Unique for each claim, including same-millisecond failed/expired recycling. */
+  leaseToken: string;
 }
 
 export interface IdempotencyReplay {
@@ -51,6 +54,9 @@ export async function claimKey(
   ttlMs: number = DEFAULT_TTL_MS
 ): Promise<IdempotencyClaimResult> {
   const expiresAt = new Date(Date.now() + ttlMs);
+  // Two generations can have identical expiresAt when a failed request is
+  // reclaimed within one JS clock tick. A random token fences the old owner.
+  const leaseToken = randomUUID();
 
   try {
     // Step 1: Atomically reserve a fresh key. The unique constraint is the
@@ -58,15 +64,15 @@ export async function claimKey(
     // serialized by PostgreSQL, and losers return rowCount 0 instead of
     // surfacing a unique-violation that the middleware could fail open on.
     const insertResult = await query(
-      `INSERT INTO idempotency_keys (organization_id, idempotency_key, status, expires_at)
-       VALUES ($1, $2, 'in_progress', $3)
+      `INSERT INTO idempotency_keys (organization_id, idempotency_key, status, expires_at, lease_token)
+       VALUES ($1, $2, 'in_progress', $3, $4)
        ON CONFLICT (organization_id, idempotency_key) DO NOTHING
        RETURNING id`,
-      [organizationId, idempotencyKey, expiresAt]
+      [organizationId, idempotencyKey, expiresAt, leaseToken]
     );
 
     if ((insertResult.rowCount ?? 0) > 0) {
-      return { kind: 'claimed', expiresAt };
+      return { kind: 'claimed', expiresAt, leaseToken };
     }
 
     // Step 2: Recycle an expired record or a failed server-error attempt
@@ -78,16 +84,17 @@ export async function claimKey(
            response_status = NULL,
            response_body = NULL,
            created_at = NOW(),
-           expires_at = $3
+           expires_at = $3,
+           lease_token = $4
        WHERE organization_id = $1
          AND idempotency_key = $2
          AND (expires_at <= NOW() OR status = 'failed')
        RETURNING id`,
-      [organizationId, idempotencyKey, expiresAt]
+      [organizationId, idempotencyKey, expiresAt, leaseToken]
     );
 
     if ((updateResult.rowCount ?? 0) > 0) {
-      return { kind: 'claimed', expiresAt };
+      return { kind: 'claimed', expiresAt, leaseToken };
     }
 
     // Step 3: Key exists and is NOT expired. Fetch its current state to
@@ -223,18 +230,20 @@ export async function completeKey(
   organizationId: number,
   idempotencyKey: string,
   leaseExpiresAt: Date,
+  leaseToken: string,
   responseStatus: number,
   responseBody: unknown
 ): Promise<boolean> {
   const result = await query(
     `UPDATE idempotency_keys
-     SET status = 'completed', response_status = $4, response_body = $5
+     SET status = 'completed', response_status = $5, response_body = $6
      WHERE organization_id = $1
        AND idempotency_key = $2
        AND status = 'in_progress'
        AND expires_at = $3
+       AND lease_token = $4
        AND expires_at > NOW()`,
-    [organizationId, idempotencyKey, leaseExpiresAt, responseStatus, JSON.stringify(responseBody)]
+    [organizationId, idempotencyKey, leaseExpiresAt, leaseToken, responseStatus, JSON.stringify(responseBody)]
   );
   return (result.rowCount ?? 0) > 0;
 }
@@ -247,18 +256,20 @@ export async function failKey(
   organizationId: number,
   idempotencyKey: string,
   leaseExpiresAt: Date,
+  leaseToken: string,
   responseStatus: number,
   responseBody: unknown
 ): Promise<boolean> {
   const result = await query(
     `UPDATE idempotency_keys
-     SET status = 'failed', response_status = $4, response_body = $5
+     SET status = 'failed', response_status = $5, response_body = $6
      WHERE organization_id = $1
        AND idempotency_key = $2
        AND status = 'in_progress'
        AND expires_at = $3
+       AND lease_token = $4
        AND expires_at > NOW()`,
-    [organizationId, idempotencyKey, leaseExpiresAt, responseStatus, JSON.stringify(responseBody)]
+    [organizationId, idempotencyKey, leaseExpiresAt, leaseToken, responseStatus, JSON.stringify(responseBody)]
   );
   return (result.rowCount ?? 0) > 0;
 }
