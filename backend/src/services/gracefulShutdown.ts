@@ -125,12 +125,22 @@ export function createGracefulShutdown({
 
       await httpDrain;
 
-      const dependenciesClosed = await runBoundedCleanup(
-        'Runtime dependency cleanup',
-        closeDependencies,
-        cleanupTimeoutMs,
-        logger
-      );
+      let dependenciesClosed = false;
+      if (backgroundStopped) {
+        dependenciesClosed = await runBoundedCleanup(
+          'Runtime dependency cleanup',
+          closeDependencies,
+          cleanupTimeoutMs,
+          logger
+        );
+      } else {
+        // A timed-out/rejected background drain may still be using PostgreSQL
+        // or Redis. Do not tear those dependencies out from under in-flight
+        // work; process exit will reclaim them after the failed drain is logged.
+        logger.error(
+          'Runtime dependency cleanup skipped because background work did not stop cleanly'
+        );
+      }
 
       const clean = backgroundStopped && dependenciesClosed;
       if (clean) {
