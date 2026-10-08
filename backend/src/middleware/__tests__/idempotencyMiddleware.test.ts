@@ -325,13 +325,22 @@ describe('idempotencyMiddleware', () => {
       expect(nextFunction).not.toHaveBeenCalled();
     });
 
-    it('should fail open on non-conflict service errors', async () => {
+    it('should return 503 without processing when the idempotency claim fails', async () => {
       mockRequest.headers = { 'idempotency-key': 'error-key' };
       (idempotencyService.claimKey as jest.Mock).mockRejectedValue(new Error('DB down'));
 
       await idempotencyMiddleware()(mockRequest as Request, mockResponse as Response, nextFunction);
 
-      expect(nextFunction).toHaveBeenCalled();
+      expect(nextFunction).not.toHaveBeenCalled();
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Retry-After', '1');
+      expect(mockResponse.status).toHaveBeenCalledWith(503);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        error: 'Service Unavailable',
+        message: 'Unable to verify the Idempotency-Key. Retry later with the same key.',
+      });
+      expect(idempotencyService.waitForReplay).not.toHaveBeenCalled();
+      expect(idempotencyService.completeKey).not.toHaveBeenCalled();
+      expect(idempotencyService.failKey).not.toHaveBeenCalled();
     });
   });
 });

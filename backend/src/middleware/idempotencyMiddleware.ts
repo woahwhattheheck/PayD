@@ -181,8 +181,14 @@ export function idempotencyMiddleware(options: IdempotencyMiddlewareOptions = {}
         idempotencyKey,
         error,
       });
-      // On other errors, proceed without idempotency (fail open)
-      next();
+      // Ownership is unknown when the claim fails. Do not execute a payment
+      // without a confirmed idempotency lease; retry with the same key instead.
+      res.setHeader('Retry-After', '1');
+      res.status(503).json({
+        error: 'Service Unavailable',
+        message: 'Unable to verify the Idempotency-Key. Retry later with the same key.',
+      });
+      return;
     }
   };
 }
