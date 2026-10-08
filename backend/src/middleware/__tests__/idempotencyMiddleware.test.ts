@@ -7,7 +7,11 @@ jest.mock('../../services/idempotencyService.js');
 jest.mock('../../utils/logger.js');
 
 const leaseExpiresAt = new Date('2026-10-06T12:00:00.000Z');
-const claimed = () => ({ kind: 'claimed' as const, expiresAt: leaseExpiresAt });
+const claimed = () => ({
+  kind: 'claimed' as const,
+  expiresAt: leaseExpiresAt,
+  leaseToken: '11111111-1111-4111-8111-111111111111',
+});
 
 describe('idempotencyMiddleware', () => {
   let mockRequest: Partial<Request>;
@@ -174,6 +178,24 @@ describe('idempotencyMiddleware', () => {
   });
 
   describe('response interception', () => {
+    it('forwards the specific claim-generation token before settling a response', async () => {
+      mockRequest.headers = { 'idempotency-key': 'same-ms-recycle' };
+      const leaseToken = '22222222-2222-4222-8222-222222222222';
+      (idempotencyService.claimKey as jest.Mock).mockResolvedValue({
+        kind: 'claimed', expiresAt: leaseExpiresAt, leaseToken,
+      });
+      (idempotencyService.completeKey as jest.Mock).mockResolvedValue(true);
+
+      await idempotencyMiddleware()(mockRequest as Request, mockResponse as Response, nextFunction);
+      mockResponse.statusCode = 201;
+      (mockResponse.json as any)({ id: 'new-generation' });
+      await Promise.resolve();
+
+      expect(idempotencyService.completeKey).toHaveBeenCalledWith(
+        1, 'same-ms-recycle', leaseExpiresAt, leaseToken, 201, { id: 'new-generation' }
+      );
+    });
+
     it('should store successful responses with the owning lease', async () => {
       mockRequest.headers = { 'idempotency-key': 'new-key' };
       (idempotencyService.claimKey as jest.Mock).mockResolvedValue(claimed());
@@ -190,6 +212,7 @@ describe('idempotencyMiddleware', () => {
         1,
         'new-key',
         leaseExpiresAt,
+        '11111111-1111-4111-8111-111111111111',
         201,
         responseBody
       );
@@ -211,6 +234,7 @@ describe('idempotencyMiddleware', () => {
         1,
         'error-key',
         leaseExpiresAt,
+        '11111111-1111-4111-8111-111111111111',
         400,
         errorBody
       );
@@ -232,6 +256,7 @@ describe('idempotencyMiddleware', () => {
         1,
         'server-error',
         leaseExpiresAt,
+        '11111111-1111-4111-8111-111111111111',
         500,
         errorBody
       );
