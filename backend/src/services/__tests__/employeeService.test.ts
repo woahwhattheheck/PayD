@@ -69,6 +69,212 @@ describe('EmployeeService', () => {
       );
     });
 
+    it('preserves total and filters when a requested employee page is past the end', async () => {
+      (mockPool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ total_count: '17' }] });
+
+      const result = await employeeService.findAll(
+        42,
+        { page: 5, limit: 10, department: 'IT', search: 'Jane' } as any
+      );
+
+      expect(result.data).toEqual([]);
+      expect(result.pagination).toEqual({ total: 17, page: 5, limit: 10, totalPages: 2 });
+      expect(mockPool.query).toHaveBeenCalledTimes(2);
+
+      const [pageSql, pageArgs] = (mockPool.query as jest.Mock).mock.calls[0];
+      const [countSql, countArgs] = (mockPool.query as jest.Mock).mock.calls[1];
+      expect(pageSql).toContain('count(*) OVER() as total_count');
+      expect(countSql).toContain('SELECT COUNT(*) AS total_count');
+      expect(countSql).not.toContain('LIMIT');
+      expect(countSql).toContain('organization_id = 
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [],
+      });
+
+      await employeeService.findAll({ department: 'IT', page: 1, limit: 10 });
+
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('department = $'),
+        expect.arrayContaining(['IT'])
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('should update employee successfully', async () => {
+      const updateData = { first_name: 'Johnny' };
+      const mockUpdatedEmployee = { id: 1, first_name: 'Johnny' };
+
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [mockUpdatedEmployee],
+      });
+
+      const result = await employeeService.update(1, updateData);
+
+      expect(result).toEqual(mockUpdatedEmployee);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE employees'),
+        expect.arrayContaining(['Johnny', 1])
+      );
+    });
+
+    it('should return null if employee not found', async () => {
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [],
+      });
+
+      const result = await employeeService.update(999, { first_name: 'Test' });
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('delete', () => {
+    it('should soft delete employee', async () => {
+      const mockDeletedEmployee = { id: 1, deleted_at: new Date() };
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [mockDeletedEmployee],
+        rowCount: 1,
+      });
+
+      const result = await employeeService.delete(1);
+
+      expect(result).toEqual(mockDeletedEmployee);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringMatching(/UPDATE employees\s+SET deleted_at = NOW()/),
+        [1]
+      );
+    });
+  });
+});
+);
+      expect(countSql).toContain('department = 
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [],
+      });
+
+      await employeeService.findAll({ department: 'IT', page: 1, limit: 10 });
+
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('department = $'),
+        expect.arrayContaining(['IT'])
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('should update employee successfully', async () => {
+      const updateData = { first_name: 'Johnny' };
+      const mockUpdatedEmployee = { id: 1, first_name: 'Johnny' };
+
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [mockUpdatedEmployee],
+      });
+
+      const result = await employeeService.update(1, updateData);
+
+      expect(result).toEqual(mockUpdatedEmployee);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE employees'),
+        expect.arrayContaining(['Johnny', 1])
+      );
+    });
+
+    it('should return null if employee not found', async () => {
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [],
+      });
+
+      const result = await employeeService.update(999, { first_name: 'Test' });
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('delete', () => {
+    it('should soft delete employee', async () => {
+      const mockDeletedEmployee = { id: 1, deleted_at: new Date() };
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [mockDeletedEmployee],
+        rowCount: 1,
+      });
+
+      const result = await employeeService.delete(1);
+
+      expect(result).toEqual(mockDeletedEmployee);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringMatching(/UPDATE employees\s+SET deleted_at = NOW()/),
+        [1]
+      );
+    });
+  });
+});
+);
+      expect(countSql).toContain('first_name ILIKE 
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [],
+      });
+
+      await employeeService.findAll({ department: 'IT', page: 1, limit: 10 });
+
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('department = $'),
+        expect.arrayContaining(['IT'])
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('should update employee successfully', async () => {
+      const updateData = { first_name: 'Johnny' };
+      const mockUpdatedEmployee = { id: 1, first_name: 'Johnny' };
+
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [mockUpdatedEmployee],
+      });
+
+      const result = await employeeService.update(1, updateData);
+
+      expect(result).toEqual(mockUpdatedEmployee);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE employees'),
+        expect.arrayContaining(['Johnny', 1])
+      );
+    });
+
+    it('should return null if employee not found', async () => {
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [],
+      });
+
+      const result = await employeeService.update(999, { first_name: 'Test' });
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('delete', () => {
+    it('should soft delete employee', async () => {
+      const mockDeletedEmployee = { id: 1, deleted_at: new Date() };
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({
+        rows: [mockDeletedEmployee],
+        rowCount: 1,
+      });
+
+      const result = await employeeService.delete(1);
+
+      expect(result).toEqual(mockDeletedEmployee);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringMatching(/UPDATE employees\s+SET deleted_at = NOW()/),
+        [1]
+      );
+    });
+  });
+});
+);
+      expect(countArgs).toEqual([42, 'IT', '%Jane%']);
+      expect(pageArgs).toEqual([42, 'IT', '%Jane%', 10, 40]);
+    });
+
     it('should filter by department', async () => {
       (mockPool.query as jest.Mock).mockResolvedValueOnce({
         rows: [],
