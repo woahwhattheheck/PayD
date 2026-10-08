@@ -6,6 +6,20 @@ export interface SendMailInput {
   text: string;
 }
 
+/** Retain useful SMTP failure diagnostics without writing configured credentials. */
+function safeMailErrorMessage(error: unknown): string {
+  let message: string;
+  try {
+    message = error instanceof Error ? error.message : String(error);
+  } catch {
+    message = 'Unprintable mailer error';
+  }
+  for (const secret of [process.env.SMTP_PASS, process.env.SMTP_USER]) {
+    if (secret) message = message.split(secret).join('[REDACTED]');
+  }
+  return message;
+}
+
 export class MailerService {
   static isConfigured(): boolean {
     return !!process.env.SMTP_HOST && !!process.env.SMTP_USER && !!process.env.SMTP_PASS;
@@ -32,7 +46,7 @@ export class MailerService {
     } catch (error) {
       logger.error('Mailer failed to load nodemailer.', {
         ...context,
-        error: error instanceof Error ? error.message : String(error),
+        error: safeMailErrorMessage(error),
       });
       return;
     }
@@ -59,7 +73,7 @@ export class MailerService {
     } catch (error) {
       logger.error('Mailer failed to send email.', {
         ...context,
-        error: error instanceof Error ? error.message : String(error),
+        error: safeMailErrorMessage(error),
       });
       throw error;
     }
