@@ -993,6 +993,37 @@ describe('ScheduleService', () => {
 
   describe('updateAfterExecution', () => {
     const scheduleId = 1;
+    it('refuses to commit the result after claim ownership has moved', async () => {
+      const owner = 'pod-a:old-generation';
+      const row = {
+        id: scheduleId, frequency: 'once', timeOfDay: '14:30',
+        startDate: new Date('2024-01-15'), timezone: 'UTC',
+        lastRunTimestamp: null,
+      };
+      mockClientQuery
+        .mockResolvedValueOnce({ rows: [] }) // BEGIN
+        .mockResolvedValueOnce({ rows: [row] }) // SELECT existing owner
+        .mockResolvedValueOnce({ rowCount: 0, rows: [] }) // stolen claim
+        .mockResolvedValueOnce({ rows: [] }); // ROLLBACK
+
+      await expect(service.updateAfterExecution(
+        scheduleId, { success: true, transactionHash: 'hash' }, owner
+      )).rejects.toThrow('Schedule claim lost before finalizing execution');
+      const select = mockClientQuery.mock.calls.find(([sql]) =>
+        typeof sql === 'string' && sql.includes('SELECT') && sql.includes('FROM schedules')
+      );
+      const update = mockClientQuery.mock.calls.find(([sql]) =>
+        typeof sql === 'string' && sql.includes('UPDATE schedules')
+      );
+      expect(select?.[0]).toContain('AND locked_by = $2');
+      expect(select?.[1]).toEqual([scheduleId, owner]);
+      expect(update?.[0]).toContain('AND locked_by = $5');
+      expect(update?.[1][4]).toBe(owner);
+      expect(mockClientQuery).toHaveBeenCalledWith('ROLLBACK');
+      expect(mockClientQuery).not.toHaveBeenCalledWith('COMMIT');
+    });
+
+
 
     describe('successful execution', () => {
       it('should mark one-time schedule as completed after successful execution', async () => {
