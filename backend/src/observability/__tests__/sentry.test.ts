@@ -34,6 +34,11 @@ describe('Sentry backend observability', () => {
           Authorization: 'Bearer secret',
           Cookie: 'session=secret',
           'Set-Cookie': 'session=secret',
+          'X-API-Key': 'private-api-key',
+          pRoXyAuthorization: 'Basic private-proxy',
+          'Proxy-Authorization': 'Basic private-proxy',
+          'x-auth-token': 'private-auth-token',
+          'X-CSRF-Token': 'private-csrf-token',
           'x-request-id': 'req-123',
           accept: 'application/json',
         },
@@ -48,6 +53,11 @@ describe('Sentry backend observability', () => {
     expect(sanitized.request.headers.Authorization).toBeUndefined();
     expect(sanitized.request.headers.Cookie).toBeUndefined();
     expect(sanitized.request.headers['Set-Cookie']).toBeUndefined();
+    for (const name of ['X-API-Key', 'Proxy-Authorization', 'x-auth-token', 'X-CSRF-Token']) {
+      expect(sanitized.request.headers[name]).toBeUndefined();
+    }
+    expect(JSON.stringify(sanitized.request)).not.toContain('private-api-key');
+    expect(JSON.stringify(sanitized.request)).not.toContain('private-auth-token');
     expect(sanitized.request.headers['x-request-id']).toBe('req-123');
     expect(sanitized.request.headers.accept).toBe('application/json');
   });
