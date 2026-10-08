@@ -361,6 +361,7 @@ export class ScheduleService {
   async updateAfterExecution(
     scheduleId: number,
     executionResult: ExecutionResult,
+    claimOwner?: string,
   ): Promise<void> {
     const client = await pool.connect();
     try {
@@ -377,9 +378,12 @@ export class ScheduleService {
           last_run_timestamp as "lastRunTimestamp"
         FROM schedules
         WHERE id = $1
+        ${claimOwner ? 'AND locked_by = $2' : ''}
       `;
 
-      const selectResult = await client.query(selectQuery, [scheduleId]);
+      const selectResult = await client.query(
+        selectQuery, claimOwner ? [scheduleId, claimOwner] : [scheduleId]
+      );
 
       if (selectResult.rows.length === 0) {
         throw new Error(`Schedule with ID ${scheduleId} not found`);
@@ -422,14 +426,21 @@ export class ScheduleService {
           next_run_timestamp = COALESCE($3, next_run_timestamp),
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $4
+        ${claimOwner ? 'AND locked_by = $5' : ''}
       `;
 
-      await client.query(updateQuery, [
+      const updated = await client.query(updateQuery, [
         executionTime,
         newStatus,
         nextRunTimestamp,
         scheduleId,
+        ...(claimOwner ? [claimOwner] : []),
       ]);
+      // If a dead pod or a newer scheduler pass took over the row, do not
+      // advance its next-run status or commit stale result metadata.
+      if (claimOwner && updated.rowCount !== 1) {
+        throw new Error('Schedule claim lost before finalizing execution');
+      }
 
       await client.query('COMMIT');
     } catch (error) {
