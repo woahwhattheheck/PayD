@@ -28,7 +28,7 @@ jobs:
         working-directory: ./
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install App dependencies
         run: npm install
@@ -37,7 +37,7 @@ jobs:
         env:
           PUBLIC_STELLAR_NETWORK_PASSPHRASE: ${{ vars.PUBLIC_STELLAR_NETWORK_PASSPHRASE }}
           PUBLIC_STELLAR_RPC_URL: ${{ vars.PUBLIC_STELLAR_RPC_URL }}
-          PUBLIC_PUBLIC_STELLAR_HORIZON_URL: ${{ vars.PUBLIC_PUBLIC_STELLAR_HORIZON_URL }}
+          PUBLIC_STELLAR_HORIZON_URL: ${{ vars.PUBLIC_STELLAR_HORIZON_URL }}
         run: npm run build
 
       - name: Generate artifact attestation for dist
