@@ -92,6 +92,7 @@ describe('EmployeeService', () => {
       expect(countSql).toContain('department = $');
       expect(countSql).toContain('first_name ILIKE $');
       expect(countArgs).toEqual([42, 'IT', '%Jane%']);
+      expect(pageSql).toContain('LIMIT $4 OFFSET $5');
       expect(pageArgs).toEqual([42, 'IT', '%Jane%', 10, 40]);
     });
 

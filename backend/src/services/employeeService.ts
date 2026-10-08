@@ -111,7 +111,7 @@ export class EmployeeService {
       'SELECT COUNT(*) AS total_count'
     );
     const countValues = values.slice();
-    query += ` ORDER BY ${sortColumn} ${sortDirection} LIMIT ${paramIndex++} OFFSET ${paramIndex++}`;
+    query += ` ORDER BY ${sortColumn} ${sortDirection} LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     values.push(limit, offset);
 
     const result = await pool.query(query, values);

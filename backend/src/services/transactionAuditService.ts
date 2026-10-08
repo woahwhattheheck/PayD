@@ -134,11 +134,11 @@ export class TransactionAuditService {
         else if (filters.status === 'Failed') whereClauses.push(`tal.successful = false`);
       }
       if (filters.employeeId) {
-        payrollWhere.push(`pf.employee_id = ${paramIdx++}`);
+        payrollWhere.push(`pf.employee_id = $${paramIdx++}`);
         values.push(filters.employeeId);
       }
       if (filters.asset) {
-        payrollWhere.push(`pf.asset_code = ${paramIdx++}`);
+        payrollWhere.push(`pf.asset_code = $${paramIdx++}`);
         values.push(filters.asset);
       }
     }

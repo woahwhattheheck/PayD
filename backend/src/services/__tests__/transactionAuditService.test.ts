@@ -104,6 +104,7 @@ describe('TransactionAuditService', () => {
       expect(countSql).toContain('COUNT(*) FROM transaction_audit_logs tal');
       expect(dataSql).toContain('FROM payroll_audit_logs pf WHERE pf.employee_id = $1 AND pf.asset_code = $2');
       expect(countArgs).toEqual(['3', 'USDC']);
+      expect(dataSql).toContain('LIMIT $3 OFFSET $4');
       expect(dataArgs).toEqual(['3', 'USDC', 20, 0]);
     });
 
