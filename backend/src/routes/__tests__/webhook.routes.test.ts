@@ -124,11 +124,12 @@ describe('Webhook Routes - Auth and Tenant Isolation', () => {
 
       if (
         normalized.startsWith('SELECT id, url, secret, events, organization_id') &&
-        normalized.includes('WHERE events @>')
+        normalized.includes('WHERE organization_id = $2')
       ) {
         return {
           rows: storedSubscriptions.filter(
-            (row) => row.events.includes(params[0]) || row.events.includes('*')
+            (row) => row.organization_id === params[1] &&
+              (row.events.includes(params[0]) || row.events.includes('*'))
           ),
           rowCount: 0,
         };
@@ -306,6 +307,26 @@ describe('Webhook Routes - Auth and Tenant Isolation', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.message).toBe('Mock event dispatched');
+    });
+
+    it('never selects another organization wildcard subscription for a tenant event', async () => {
+      process.env.NODE_ENV = 'development';
+
+      const created = await request(app)
+        .post('/webhooks/subscribe')
+        .set('Authorization', `Bearer ${tenantBToken}`)
+        .send({ url: 'https://orgB.example.com/hook', secret: 'b'.repeat(16), events: ['*'] });
+      expect(created.status).toBe(201);
+
+      const triggered = await request(app)
+        .post('/webhooks/test-trigger')
+        .set('Authorization', `Bearer ${tenantAToken}`)
+        .send({ event: 'payment.completed', payload: { id: 'private-tenant-A' } });
+      expect(triggered.status).toBe(200);
+      expect(pool.query).toHaveBeenCalledWith(
+        expect.stringContaining('WHERE organization_id = $2'),
+        ['payment.completed', 10]
+      );
     });
 
     it('blocks test-trigger in production', async () => {
