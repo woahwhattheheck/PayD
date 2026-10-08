@@ -93,7 +93,8 @@ export class WebhookController {
     const { event, payload } = req.body;
     await WebhookService.dispatch(
       (event as string) || 'payment.completed',
-      payload || { id: 'test_tx_123', amount: 100 }
+      payload || { id: 'test_tx_123', amount: 100 },
+      req.tenantId!
     );
     res.json({ message: 'Mock event dispatched' });
   }
