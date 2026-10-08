@@ -208,7 +208,7 @@ describe('ScheduleExecutor', () => {
       expect(executor.recordExecution).toHaveBeenCalledWith(1, {
         success: true,
         transactionHash: 'abc123',
-      });
+      }, expect.any(String));
       expect(mockRelease).toHaveBeenCalled();
     });
 
@@ -468,6 +468,7 @@ describe('ScheduleExecutor', () => {
 
   describe('recordExecution', () => {
     const scheduleId = 1;
+    const claimOwner = 'pod-a:11111111-1111-4111-8111-111111111111';
 
     it('should record successful execution', async () => {
       const executionResult: ExecutionResult = {
@@ -484,7 +485,7 @@ describe('ScheduleExecutor', () => {
 
       mockScheduleService.updateAfterExecution.mockResolvedValue();
 
-      await executor.recordExecution(scheduleId, executionResult);
+      await executor.recordExecution(scheduleId, executionResult, claimOwner);
 
       expect(mockClientQuery).toHaveBeenCalledWith('BEGIN');
       expect(mockClientQuery).toHaveBeenCalledWith(
@@ -501,11 +502,12 @@ describe('ScheduleExecutor', () => {
       );
       expect(mockScheduleService.updateAfterExecution).toHaveBeenCalledWith(
         scheduleId,
-        executionResult
+        executionResult,
+        claimOwner
       );
       expect(mockClientQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE schedules SET locked_by = NULL'),
-        [scheduleId]
+        [scheduleId, claimOwner]
       );
       expect(mockClientQuery).toHaveBeenCalledWith('COMMIT');
       expect(mockRelease).toHaveBeenCalled();
@@ -529,7 +531,7 @@ describe('ScheduleExecutor', () => {
 
       mockScheduleService.updateAfterExecution.mockResolvedValue();
 
-      await executor.recordExecution(scheduleId, executionResult);
+      await executor.recordExecution(scheduleId, executionResult, claimOwner);
 
       expect(mockClientQuery).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO execution_history'),
@@ -545,7 +547,8 @@ describe('ScheduleExecutor', () => {
       );
       expect(mockScheduleService.updateAfterExecution).toHaveBeenCalledWith(
         scheduleId,
-        executionResult
+        executionResult,
+        claimOwner
       );
     });
 
@@ -560,7 +563,7 @@ describe('ScheduleExecutor', () => {
         .mockRejectedValueOnce(new Error('Database error')); // INSERT fails
 
       await expect(
-        executor.recordExecution(scheduleId, executionResult)
+        executor.recordExecution(scheduleId, executionResult, claimOwner)
       ).rejects.toThrow('Database error');
 
       expect(mockClientQuery).toHaveBeenCalledWith('ROLLBACK');
@@ -576,10 +579,55 @@ describe('ScheduleExecutor', () => {
       mockClientQuery.mockRejectedValueOnce(new Error('Connection error'));
 
       await expect(
-        executor.recordExecution(scheduleId, executionResult)
+        executor.recordExecution(scheduleId, executionResult, claimOwner)
       ).rejects.toThrow('Connection error');
 
       expect(mockRelease).toHaveBeenCalled();
+    });
+  });
+
+  describe('per-generation claim safety', () => {
+    it('releases only the matching claim owner, never a newer pass', async () => {
+      await (executor as any).releaseClaim(19, 'pod-a:old-claim');
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('WHERE id = $1 AND locked_by = $2'),
+        [19, 'pod-a:old-claim']
+      );
+    });
+
+    it('renews all actively claimed rows while a long payment is still running', async () => {
+      jest.useFakeTimers();
+      let finish!: (result: ExecutionResult) => void;
+      const processing = new Promise<ExecutionResult>((resolve) => { finish = resolve; });
+      const row = {
+        id: 19, organizationId: 1, userId: 2, frequency: 'once',
+        startDate: new Date(), endDate: null, paymentConfig: { recipients: [{}] },
+        nextRunTimestamp: new Date(), lastRunTimestamp: null,
+        status: 'active', createdAt: new Date(), updatedAt: new Date(),
+      };
+      mockClientQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [row] })
+        .mockResolvedValueOnce({ rows: [] });
+      jest.spyOn(executor, 'executeSchedule').mockReturnValue(processing);
+      jest.spyOn(executor, 'recordExecution').mockResolvedValue();
+      try {
+        const job = executor.processDueSchedules();
+        // Allow BEGIN, claimed rows, and COMMIT to settle before the tick.
+        for (let i = 0; i < 5; i++) await Promise.resolve();
+        await jest.advanceTimersByTimeAsync(60_000);
+        const renewal = (mockPool.query as jest.Mock).mock.calls.find(
+          ([sql]: [string]) => sql.includes('SET locked_at = NOW()')
+        );
+        expect(renewal).toBeDefined();
+        expect(renewal![0]).toContain('WHERE locked_by = $1');
+        expect(renewal![1][1]).toEqual([19]);
+        finish({ success: true, transactionHash: 'hash-19' });
+        await job;
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 
