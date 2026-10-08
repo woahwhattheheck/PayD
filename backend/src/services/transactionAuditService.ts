@@ -110,6 +110,10 @@ export class TransactionAuditService {
     let paramIdx = 1;
 
     const whereClauses: string[] = [];
+    // Use the same detail-row predicates for totals and paginated results.
+    // Per-transaction MAX(employee_id)/MAX(asset_code) must not decide which
+    // transactions match a filter (the matching detail may not be the MAX).
+    const payrollWhere: string[] = [];
     if (sourceAccount) {
       whereClauses.push(`tal.source_account = $${paramIdx++}`);
       values.push(sourceAccount);
@@ -130,21 +134,25 @@ export class TransactionAuditService {
         else if (filters.status === 'Failed') whereClauses.push(`tal.successful = false`);
       }
       if (filters.employeeId) {
-        whereClauses.push(`pal.employee_id = $${paramIdx++}`);
+        payrollWhere.push(`pf.employee_id = ${paramIdx++}`);
         values.push(filters.employeeId);
       }
       if (filters.asset) {
-        whereClauses.push(`pal.asset_code = $${paramIdx++}`);
+        payrollWhere.push(`pf.asset_code = ${paramIdx++}`);
         values.push(filters.asset);
       }
     }
 
+    if (payrollWhere.length > 0) {
+      whereClauses.push(
+        `EXISTS (SELECT 1 FROM payroll_audit_logs pf WHERE pf.tx_hash = tal.tx_hash AND ${payrollWhere.join(' AND ')})`
+      );
+    }
     const where = whereClauses.length > 0 ? `WHERE ` + whereClauses.join(' AND ') : '';
+    const aggregateWhere = payrollWhere.length > 0 ? `WHERE ${payrollWhere.join(' AND ')}` : '';
 
     const countResult = await pool.query(
-      `SELECT COUNT(DISTINCT tal.id) FROM transaction_audit_logs tal
-       LEFT JOIN payroll_audit_logs pal ON tal.tx_hash = pal.tx_hash
-       LEFT JOIN employees e ON pal.employee_id = e.id
+      `SELECT COUNT(*) FROM transaction_audit_logs tal
        ${where}`,
       values.slice()
     );
@@ -161,7 +169,7 @@ export class TransactionAuditService {
        FROM transaction_audit_logs tal
        LEFT JOIN (
            SELECT tx_hash, MAX(employee_id) as employee_id, MAX(asset_code) as asset_code, SUM(amount) as amount 
-           FROM payroll_audit_logs GROUP BY tx_hash
+           FROM payroll_audit_logs pf ${aggregateWhere} GROUP BY tx_hash
        ) pal ON tal.tx_hash = pal.tx_hash
        LEFT JOIN employees e ON pal.employee_id = e.id
        ${where}
