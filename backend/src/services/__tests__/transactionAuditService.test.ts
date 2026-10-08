@@ -79,7 +79,73 @@ describe('TransactionAuditService', () => {
       });
 
       const countQuery = (mockPool.query as jest.Mock).mock.calls[0];
-      expect(countQuery[0]).toContain('pal.employee_id = $');
+      expect(countQuery[0]).toContain('pf.employee_id = 
+      expect(countQuery[1]).toContain('emp-123');
+    });
+
+    it('uses matching payroll detail predicates for totals and page rows', async () => {
+      // The matching employee and asset may NOT have the maximum values
+      // in a multi-line payroll transaction.
+      (mockPool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ count: '1' }] })
+        .mockResolvedValueOnce({ rows: [{ id: 17, employee_name: 'Jane Doe', asset: 'USDC' }] });
+
+      const result = await TransactionAuditService.list(1, 20, undefined, {
+        employeeId: '3', asset: 'USDC',
+      });
+      expect(result.total).toBe(1);
+      expect(result.data).toHaveLength(1);
+
+      const [countSql, countArgs] = (mockPool.query as jest.Mock).mock.calls[0];
+      const [dataSql, dataArgs] = (mockPool.query as jest.Mock).mock.calls[1];
+      expect(countSql).toContain('EXISTS (SELECT 1 FROM payroll_audit_logs pf');
+      expect(dataSql).toContain('EXISTS (SELECT 1 FROM payroll_audit_logs pf');
+      expect(countSql).toContain('pf.employee_id = $1');
+      expect(dataSql).toContain('pf.asset_code = $2');
+      expect(countSql).toContain('COUNT(*) FROM transaction_audit_logs tal');
+      expect(dataSql).toContain('FROM payroll_audit_logs pf WHERE pf.employee_id = $1 AND pf.asset_code = $2');
+      expect(countArgs).toEqual(['3', 'USDC']);
+      expect(dataArgs).toEqual(['3', 'USDC', 20, 0]);
+    });
+
+    it('should apply asset filter correctly', async () => {
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ count: '0' }] });
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+
+      await TransactionAuditService.list(1, 20, undefined, {
+        asset: 'USDC'
+      });
+
+      const countQuery = (mockPool.query as jest.Mock).mock.calls[0];
+      expect(countQuery[0]).toContain('pf.asset_code = 
+      expect(countQuery[1]).toContain('USDC');
+    });
+  });
+});
+);
+      expect(countQuery[1]).toContain('emp-123');
+    });
+
+    it('should apply asset filter correctly', async () => {
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ count: '0' }] });
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+
+      await TransactionAuditService.list(1, 20, undefined, {
+        asset: 'USDC'
+      });
+
+      const countQuery = (mockPool.query as jest.Mock).mock.calls[0];
+      expect(countQuery[0]).toContain('pal.asset_code = $');
+      expect(countQuery[1]).toContain('USDC');
+    });
+  });
+});
+);
+      expect(countQuery[1]).toContain('USDC');
+    });
+  });
+});
+);
       expect(countQuery[1]).toContain('emp-123');
     });
 
