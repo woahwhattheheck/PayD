@@ -95,7 +95,7 @@ export async function fetchUsdRate(
     // Standard decimal strings (including scientific notation) are valid.
     const decimalRate =
       typeof rawRate === 'string' &&
-      /^(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?$/.test(rawRate.trim());
+      /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(rawRate.trim());
     const rate =
       typeof rawRate === 'number' || decimalRate ? Number(rawRate) : NaN;
     if (!Number.isFinite(rate) || rate <= 0) {
