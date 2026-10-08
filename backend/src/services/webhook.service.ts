@@ -1,5 +1,7 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
+import { randomUUID } from 'node:crypto';
+import { pool } from '../config/database.js';
 
 export interface WebhookSubscription {
   id: string;
@@ -9,8 +11,23 @@ export interface WebhookSubscription {
   organizationId: number;
 }
 
-// In-memory storage for demonstration (in a real app, this would be a database)
-const subscriptions: WebhookSubscription[] = [];
+interface WebhookSubscriptionRow {
+  id: string;
+  url: string;
+  secret: string;
+  events: string[];
+  organization_id: number;
+}
+
+function mapSubscription(row: WebhookSubscriptionRow): WebhookSubscription {
+  return {
+    id: row.id,
+    url: row.url,
+    secret: row.secret,
+    events: row.events,
+    organizationId: Number(row.organization_id),
+  };
+}
 
 export class WebhookService {
   static async subscribe(
@@ -19,34 +36,46 @@ export class WebhookService {
     secret: string,
     events: string[]
   ): Promise<WebhookSubscription> {
-    const subscription: WebhookSubscription = {
-      id: Math.random().toString(36).substring(2, 11),
-      url,
-      secret,
-      events,
-      organizationId,
-    };
-    subscriptions.push(subscription);
-    return subscription;
-  }
-
-  static listSubscriptions(organizationId: number): WebhookSubscription[] {
-    return subscriptions.filter((s) => s.organizationId === organizationId);
-  }
-
-  static deleteSubscription(id: string, organizationId: number): boolean {
-    const index = subscriptions.findIndex(
-      (s) => s.id === id && s.organizationId === organizationId
+    const id = randomUUID();
+    const result = await pool.query<WebhookSubscriptionRow>(
+      `INSERT INTO webhook_subscriptions (id, organization_id, url, secret, events)
+       VALUES ($1, $2, $3, $4, $5::text[])
+       RETURNING id, url, secret, events, organization_id`,
+      [id, organizationId, url, secret, events]
     );
-    if (index !== -1) {
-      subscriptions.splice(index, 1);
-      return true;
-    }
-    return false;
+
+    return mapSubscription(result.rows[0]);
   }
 
-  static async dispatch(eventType: string, payload: any): Promise<void> {
-    const relevantSubscriptions = subscriptions.filter(
+  static async listSubscriptions(organizationId: number): Promise<WebhookSubscription[]> {
+    const result = await pool.query<WebhookSubscriptionRow>(
+      `SELECT id, url, secret, events, organization_id
+       FROM webhook_subscriptions
+       WHERE organization_id = $1
+       ORDER BY created_at ASC, id ASC`,
+      [organizationId]
+    );
+
+    return result.rows.map(mapSubscription);
+  }
+
+  static async deleteSubscription(id: string, organizationId: number): Promise<boolean> {
+    const result = await pool.query(
+      `DELETE FROM webhook_subscriptions
+       WHERE id = $1 AND organization_id = $2
+       RETURNING id`,
+      [id, organizationId]
+    );
+
+    return result.rows.length > 0;
+  }
+
+  static async dispatch(
+    organizationId: number,
+    eventType: string,
+    payload: any
+  ): Promise<void> {
+    const relevantSubscriptions = (await this.listSubscriptions(organizationId)).filter(
       (s) => s.events.includes(eventType) || s.events.includes('*')
     );
 
