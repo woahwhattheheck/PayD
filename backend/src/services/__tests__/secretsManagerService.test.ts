@@ -1,4 +1,5 @@
 import {
+  AwsSecretsManagerClient,
   StellarSecretProvider,
   type SecretValueClient,
 } from '../secretsManagerService';
@@ -65,5 +66,41 @@ describe('StellarSecretProvider', () => {
     await expect(provider.getSecret()).rejects.toThrow(
       'temporary Secrets Manager failure'
     );
+  });
+});
+
+
+describe('AwsSecretsManagerClient streamed responses', () => {
+  it('keeps the request deadline active after headers until JSON body is read', async () => {
+    const previousFetch = globalThis.fetch;
+    jest.useFakeTimers();
+    let bodyStarted = false;
+    globalThis.fetch = jest.fn(async (_input, init?: RequestInit) => {
+      const signal = init?.signal;
+      return {
+        ok: true,
+        status: 200,
+        json: () => new Promise((_resolve, reject) => {
+          bodyStarted = true;
+          if (!signal) return reject(new Error('missing abort signal'));
+          signal.addEventListener('abort', () => reject(new Error('body aborted')), { once: true });
+        }),
+      } as unknown as Response;
+    }) as unknown as typeof fetch;
+
+    try {
+      const client = new AwsSecretsManagerClient('us-east-1', async () => ({
+        accessKeyId: 'TESTKEY',
+        secretAccessKey: 'test-only-signing-key',
+      }));
+      const pending = client.getCurrentSecret('test/scheduler-credential');
+      const assertion = expect(pending).rejects.toThrow('body aborted');
+      await jest.advanceTimersByTimeAsync(5_000);
+      await assertion;
+      expect(bodyStarted).toBe(true);
+    } finally {
+      globalThis.fetch = previousFetch;
+      jest.useRealTimers();
+    }
   });
 });
