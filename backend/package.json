@@ -13,6 +13,7 @@
         "lint": "eslint src/**/*.ts",
         "db:migrate": "ts-node src/db/migrate.ts",
         "db:migrate:dry-run": "ts-node src/db/migrate.ts --dry-run",
+        "db:check-migration-prefixes": "node scripts/check-migration-prefixes.mjs",
         "db:verify-schema": "ts-node src/db/verify-schema.ts",
         "db:verify-schedules": "ts-node src/db/verify-schedules-schema.ts"
     },
@@ -63,7 +64,7 @@
         "@types/node-cron": "^3.0.11",
         "@types/passport": "^1.0.17",
         "@types/passport-github2": "^1.2.9",
-        "@types/passport-google-oauth20": "^2.0.17",
+        "@types/passport-google-oauth20": "^2.0.0",
         "@types/pdfkit": "^0.17.5",
         "@types/pg": "^8.16.0",
         "@types/supertest": "^7.2.0",
