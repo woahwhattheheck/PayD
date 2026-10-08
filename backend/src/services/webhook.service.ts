@@ -58,7 +58,7 @@ export class WebhookService {
       `SELECT id, url, secret, events, organization_id
        FROM webhook_subscriptions
        WHERE organization_id = $1
-       ORDER BY created_at ASC`,
+       ORDER BY created_at ASC, id ASC`,
       [organizationId]
     );
 
