@@ -115,13 +115,19 @@ export class WebhookService {
     return (result.rowCount ?? 0) > 0;
   }
 
-  static async dispatch(eventType: string, payload: any): Promise<void> {
+  static async dispatch(eventType: string, payload: any, organizationId: number): Promise<void> {
+    // A subscription belonging to another employer must never receive this
+    // organization's financial or payment events, including wildcard events.
+    if (!Number.isSafeInteger(organizationId) || organizationId <= 0) {
+      throw new Error('Verified organization scope required for webhook delivery');
+    }
     const result = await pool.query<WebhookSubscriptionRow>(
       `SELECT id, url, secret, events, organization_id
        FROM webhook_subscriptions
-       WHERE events @> ARRAY[$1]::text[]
-          OR events @> ARRAY['*']::text[]`,
-      [eventType]
+       WHERE organization_id = $2
+         AND (events @> ARRAY[$1]::text[]
+           OR events @> ARRAY['*']::text[])`,
+      [eventType, organizationId]
     );
     const relevantSubscriptions = result.rows.map(toSubscription);
 
