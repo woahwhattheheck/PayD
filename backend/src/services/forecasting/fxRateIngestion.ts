@@ -12,7 +12,7 @@ export interface FxRateClient {
     text: string,
     values?: unknown[]
   ): Promise<FxQueryResult<Row>>;
-  release(): void;
+  release(destroy?: boolean): void;
 }
 
 export interface FxRateDatabase {
@@ -112,6 +112,7 @@ export async function runFxRateIngestion(
   }
 
   const client = await database.connect();
+  let destroyClient = false;
   try {
     await client.query('BEGIN');
 
@@ -134,11 +135,17 @@ export async function runFxRateIngestion(
     try {
       await client.query('ROLLBACK');
     } catch (rollbackError) {
+      // A failed rollback leaves the transaction state uncertain.
+      destroyClient = true;
       logger.error('FX rate ingestion rollback failed', rollbackError);
     }
     throw error;
   } finally {
-    client.release();
+    if (destroyClient) {
+      client.release(true);
+    } else {
+      client.release();
+    }
   }
 
   logger.info('FX rate ingestion completed', {
