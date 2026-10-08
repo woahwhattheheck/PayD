@@ -58,6 +58,45 @@ if (!DATABASE_URL) {
 
 const MIGRATIONS_DIR = path.resolve(__dirname, 'migrations');
 
+const LEGACY_MIGRATION_FILENAMES: Readonly<Record<string, string>> = Object.freeze({
+    '003_extend_employee_profiles.sql': '002_extend_employee_profiles.sql',
+    '004_create_users_2fa.sql': '003_create_users_2fa.sql',
+    '005_multi_tenant_rls.sql': '003_multi_tenant_rls.sql',
+    '006_create_clawback_audit_logs.sql': '004_create_clawback_audit_logs.sql',
+    '007_tenant_configurations.sql': '004_tenant_configurations.sql',
+    '008_auth_rbac_updates.sql': '005_auth_rbac_updates.sql',
+    '009_create_employee_trustlines.sql': '005_create_employee_trustlines.sql',
+    '010_create_transaction_audit_logs.sql': '006_create_transaction_audit_logs.sql',
+    '011_create_payroll_runs.sql': '007_create_payroll_runs.sql',
+    '012_create_payroll_audit_logs.sql': '008_create_payroll_audit_logs.sql',
+    '013_create_tax_tables.sql': '009_create_tax_tables.sql',
+    '014_add_salary_to_employees.sql': '010_add_salary_to_employees.sql',
+    '015_create_account_freeze_logs.sql': '010_create_account_freeze_logs.sql',
+    '016_create_multisig_configs.sql': '010_create_multisig_configs.sql',
+    '017_create_schema_migrations.sql': '011_create_schema_migrations.sql',
+    '018_create_wallets.sql': '012_create_wallets.sql',
+    '019_create_audit_logs.sql': '013_create_audit_logs.sql',
+    '020_create_contract_registry.sql': '014_create_contract_registry.sql',
+    '021_create_schedules.sql': '014_create_schedules.sql',
+    '022_create_contract_events.sql': '015_create_contract_events.sql',
+    '023_create_execution_history.sql': '015_create_execution_history.sql',
+    '024_create_contract_events.sql': '016_create_contract_events.sql',
+    '025_add_timezone_to_schedules.sql': '017_add_timezone_to_schedules.sql',
+    '026_add_schedules_user_fk.sql': '018_add_schedules_user_fk.sql',
+    '027_create_fx_rates.sql': '019_create_fx_rates.sql',
+    '028_create_liquidity_alerts.sql': '020_create_liquidity_alerts.sql',
+    '029_create_benefits_and_deductions.sql': '021_create_benefits_and_deductions.sql',
+    '030_auth_oauth_support.sql': '022_auth_oauth_support.sql',
+    '031_enhanced_auditing_and_monitoring.sql': '023_enhanced_auditing_and_monitoring.sql',
+    '032_audit_integrity_and_quotas.sql': '024_audit_integrity_and_quotas.sql',
+    '033_backend_robustness_part48.sql': '025_backend_robustness_part48.sql',
+    '034_backend_robustness_part45.sql': '026_backend_robustness_part45.sql',
+    '035_create_idempotency_keys.sql': '027_create_idempotency_keys.sql',
+    '036_schedule_row_locking.sql': '028_schedule_row_locking.sql',
+    '037_admin_two_factor_auth.sql': '029_admin_two_factor_auth.sql',
+    '038_create_invitations.sql': '031_create_invitations.sql',
+});
+
 /**
  * The tracking table is always the first thing the runner creates.
  * This DDL is intentionally inline (not read from a file) so the runner
@@ -101,6 +140,27 @@ function sha256(content: string): string {
 }
 
 /**
+ * Fail fast when migration filenames do not have a numeric prefix or reuse one.
+ */
+function assertUniqueMigrationPrefixes(filenames: string[]): void {
+    const seen = new Map<string, string>();
+
+    for (const filename of filenames) {
+        const match = /^(\\d+)_/.exec(filename);
+        if (!match) {
+            throw new Error(`Migration filename must start with a numeric prefix: ${filename}`);
+        }
+
+        const prefix = match[1];
+        const previous = seen.get(prefix);
+        if (previous) {
+            throw new Error(`Duplicate migration prefix ${prefix}: ${previous}, ${filename}`);
+        }
+        seen.set(prefix, filename);
+    }
+}
+
+/**
  * Return all *.sql files from `dir`, sorted lexicographically.
  * Consistent sort order means numeric prefixes (001_, 012_) define
  * execution sequence without any external configuration.
@@ -116,6 +176,8 @@ function readMigrationFiles(dir: string): MigrationFile[] {
         .readdirSync(dir)
         .filter((f) => f.endsWith('.sql'))
         .sort(); // lexicographic; '001_' < '012_' because '0' < '1'
+
+    assertUniqueMigrationPrefixes(files);
 
     return files.map((filename) => {
         const absolutePath = path.join(dir, filename);
@@ -140,6 +202,21 @@ async function fetchAppliedMigrations(
         map.set(row.filename, row);
     }
     return map;
+}
+
+/**
+ * Resolve an applied record by the current filename or its exact legacy name.
+ * Renumbered SQL files remain byte-identical, so the checksum drift guard proves
+ * the legacy record and current filename represent the same migration.
+ */
+function resolveAppliedMigration(
+    applied: Map<string, AppliedMigration>,
+    file: MigrationFile,
+): AppliedMigration | undefined {
+    const direct = applied.get(file.filename);
+    if (direct) return direct;
+    const legacyFilename = LEGACY_MIGRATION_FILENAMES[file.filename];
+    return legacyFilename ? applied.get(legacyFilename) : undefined;
 }
 
 /**
@@ -208,15 +285,15 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
 
         // ── Step 4: Evaluate each migration ───────────────────────────────────
         for (const file of files) {
-            const record = applied.get(file.filename);
+            const record = resolveAppliedMigration(applied, file);
 
             if (record !== undefined) {
                 // File already applied — check for content drift (tampering detection).
                 if (record.checksum !== file.checksum) {
                     const msg =
-                        `[migrate] DRIFT DETECTED: "${file.filename}" was previously ` +
-                        `applied with checksum ${record.checksum} but the file now has ` +
-                        `checksum ${file.checksum}. ` +
+                        `[migrate] DRIFT DETECTED: "${file.filename}" maps to applied ` +
+                        `migration "${record.filename}" with checksum ${record.checksum}, ` +
+                        `but the current file has checksum ${file.checksum}. ` +
                         `Aborting to protect database integrity.`;
                     console.error(msg);
                     result.driftDetected.push(file.filename);
@@ -224,7 +301,16 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
                     continue;
                 }
 
-                console.log(`[migrate] ↷ Skipped  ${file.filename}  (already applied)`);
+                if (record.filename !== file.filename && !isDryRun) {
+                    await recordMigration(client, file.filename, file.checksum, 0);
+                    applied.set(file.filename, { filename: file.filename, checksum: file.checksum });
+                    console.log(
+                        `[migrate] ↷ Skipped  ${file.filename}  ` +
+                        `(already applied as ${record.filename}; alias recorded)`,
+                    );
+                } else {
+                    console.log(`[migrate] ↷ Skipped  ${file.filename}  (already applied)`);
+                }
                 result.skipped.push(file.filename);
                 continue;
             }
