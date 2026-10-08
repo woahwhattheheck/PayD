@@ -90,7 +90,14 @@ export async function fetchUsdRate(
     }
 
     const rawRate = body.data?.rates?.USD;
-    const rate = typeof rawRate === 'number' ? rawRate : Number(rawRate);
+    // Treat provider JSON as untrusted: Number(true), Number(['1']) and
+    // Number('0x1') all produce 1 but are not decimal FX-rate quotes.
+    // Standard decimal strings (including scientific notation) are valid.
+    const decimalRate =
+      typeof rawRate === 'string' &&
+      /^(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?$/.test(rawRate.trim());
+    const rate =
+      typeof rawRate === 'number' || decimalRate ? Number(rawRate) : NaN;
     if (!Number.isFinite(rate) || rate <= 0) {
       throw new Error(`Coinbase FX response missing a positive USD rate for ${normalizedBase}`);
     }
