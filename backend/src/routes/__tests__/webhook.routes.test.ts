@@ -2,7 +2,7 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import webhookRoutes from '../webhook.routes.js';
-import { WebhookService } from '../../services/webhook.service.js';
+import { pool } from '../../config/database.js';
 
 const JWT_SECRET = 'test-secret';
 
@@ -46,13 +46,67 @@ const app = express();
 app.use(express.json());
 app.use('/webhooks', webhookRoutes);
 
+interface StoredWebhookSubscription {
+  id: string;
+  organization_id: number;
+  url: string;
+  secret: string;
+  events: string[];
+  created_at: Date;
+}
+
+let webhookRows: StoredWebhookSubscription[] = [];
+
 describe('Webhook Routes - Auth and Tenant Isolation', () => {
-  beforeEach(async () => {
-    // Clear in-memory subscriptions by listing and deleting for both tenants
-    const subsA = WebhookService.listSubscriptions(10);
-    for (const s of subsA) WebhookService.deleteSubscription(s.id, 10);
-    const subsB = WebhookService.listSubscriptions(20);
-    for (const s of subsB) WebhookService.deleteSubscription(s.id, 20);
+  beforeEach(() => {
+    webhookRows = [];
+
+    (pool.query as jest.Mock).mockImplementation(async (sql: unknown, params: unknown[] = []) => {
+      if (typeof sql !== 'string') return { rows: [] };
+      const normalized = sql.replace(/\s+/g, ' ').trim();
+
+      if (normalized.startsWith('INSERT INTO webhook_subscriptions')) {
+        const row: StoredWebhookSubscription = {
+          id: String(params[0]),
+          organization_id: Number(params[1]),
+          url: String(params[2]),
+          secret: String(params[3]),
+          events: params[4] as string[],
+          created_at: new Date(),
+        };
+        webhookRows.push(row);
+        return { rows: [row] };
+      }
+
+      if (
+        normalized.startsWith('SELECT id, url, secret, events, organization_id') &&
+        normalized.includes('FROM webhook_subscriptions')
+      ) {
+        const organizationId = Number(params[0]);
+        return {
+          rows: webhookRows
+            .filter((row) => row.organization_id === organizationId)
+            .sort(
+              (left, right) =>
+                left.created_at.getTime() - right.created_at.getTime() ||
+                left.id.localeCompare(right.id)
+            ),
+        };
+      }
+
+      if (normalized.startsWith('DELETE FROM webhook_subscriptions')) {
+        const [id, organizationId] = [String(params[0]), Number(params[1])];
+        const deleted = webhookRows.find(
+          (row) => row.id === id && row.organization_id === organizationId
+        );
+        webhookRows = webhookRows.filter(
+          (row) => !(row.id === id && row.organization_id === organizationId)
+        );
+        return { rows: deleted ? [{ id: deleted.id }] : [] };
+      }
+
+      return { rows: [] };
+    });
   });
 
   describe('Authentication required', () => {
@@ -100,6 +154,9 @@ describe('Webhook Routes - Auth and Tenant Isolation', () => {
 
       expect(resA.status).toBe(201);
       expect(resA.body.organizationId).toBe(10);
+      expect(resA.body.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      );
 
       const listA = await request(app)
         .get('/webhooks/subscriptions')
@@ -108,6 +165,25 @@ describe('Webhook Routes - Auth and Tenant Isolation', () => {
       expect(listA.status).toBe(200);
       expect(listA.body).toHaveLength(1);
       expect(listA.body[0].organizationId).toBe(10);
+    });
+
+    it('reads subscriptions written by another backend instance from shared storage', async () => {
+      webhookRows.push({
+        id: '00000000-0000-4000-8000-000000000001',
+        organization_id: 10,
+        url: 'https://other-pod.example.com/hook',
+        secret: 's'.repeat(16),
+        events: ['payment.completed'],
+        created_at: new Date('2026-10-08T00:00:00Z'),
+      });
+
+      const listA = await request(app)
+        .get('/webhooks/subscriptions')
+        .set('Authorization', `Bearer ${tenantAToken}`);
+
+      expect(listA.status).toBe(200);
+      expect(listA.body).toHaveLength(1);
+      expect(listA.body[0].url).toBe('https://other-pod.example.com/hook');
     });
 
     it('tenant B cannot see tenant A subscriptions', async () => {
