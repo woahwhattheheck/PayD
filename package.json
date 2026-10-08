@@ -59,6 +59,9 @@
       "bash -c 'cd frontend && npx eslint --fix \"$@\"' --",
       "prettier --write --ignore-unknown"
     ],
+    "backend/src/db/migrations/*.sql": [
+      "node backend/scripts/check-migration-prefixes.mjs"
+    ],
     "**/*.{json,md,yml,yaml,css,scss}": [
       "prettier --write --ignore-unknown"
     ],
