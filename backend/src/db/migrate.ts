@@ -78,6 +78,73 @@ const BOOTSTRAP_SQL = `
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/**
+ * Filename renames applied by the #456 prefix-dedup pass. Any database that
+ * already recorded the legacy names in `schema_migrations` would treat the
+ * renamed files as brand-new migrations and re-run them; reconciling the
+ * recorded filenames first keeps history, checksums, and the drift guard
+ * intact on existing deployments.
+ */
+const LEGACY_RENAMES: Record<string, string> = {
+    '002_extend_employee_profiles.sql': '003_extend_employee_profiles.sql',
+    '003_create_users_2fa.sql': '004_create_users_2fa.sql',
+    '003_multi_tenant_rls.sql': '005_multi_tenant_rls.sql',
+    '004_create_clawback_audit_logs.sql': '006_create_clawback_audit_logs.sql',
+    '004_tenant_configurations.sql': '007_tenant_configurations.sql',
+    '005_auth_rbac_updates.sql': '008_auth_rbac_updates.sql',
+    '005_create_employee_trustlines.sql': '009_create_employee_trustlines.sql',
+    '006_create_transaction_audit_logs.sql': '010_create_transaction_audit_logs.sql',
+    '007_create_payroll_runs.sql': '011_create_payroll_runs.sql',
+    '008_create_payroll_audit_logs.sql': '012_create_payroll_audit_logs.sql',
+    '009_create_tax_tables.sql': '013_create_tax_tables.sql',
+    '010_add_salary_to_employees.sql': '014_add_salary_to_employees.sql',
+    '010_create_account_freeze_logs.sql': '015_create_account_freeze_logs.sql',
+    '010_create_multisig_configs.sql': '016_create_multisig_configs.sql',
+    '011_create_schema_migrations.sql': '017_create_schema_migrations.sql',
+    '012_create_wallets.sql': '018_create_wallets.sql',
+    '013_create_audit_logs.sql': '019_create_audit_logs.sql',
+    '014_create_contract_registry.sql': '020_create_contract_registry.sql',
+    '014_create_schedules.sql': '021_create_schedules.sql',
+    '015_create_contract_events.sql': '022_create_contract_events.sql',
+    '015_create_execution_history.sql': '023_create_execution_history.sql',
+    '016_create_contract_events.sql': '024_create_contract_events.sql',
+    '017_add_timezone_to_schedules.sql': '025_add_timezone_to_schedules.sql',
+    '018_add_schedules_user_fk.sql': '026_add_schedules_user_fk.sql',
+    '019_create_fx_rates.sql': '027_create_fx_rates.sql',
+    '020_create_liquidity_alerts.sql': '028_create_liquidity_alerts.sql',
+    '021_create_benefits_and_deductions.sql': '029_create_benefits_and_deductions.sql',
+    '022_auth_oauth_support.sql': '030_auth_oauth_support.sql',
+    '023_enhanced_auditing_and_monitoring.sql': '031_enhanced_auditing_and_monitoring.sql',
+    '024_audit_integrity_and_quotas.sql': '032_audit_integrity_and_quotas.sql',
+    '025_backend_robustness_part48.sql': '033_backend_robustness_part48.sql',
+    '026_backend_robustness_part45.sql': '034_backend_robustness_part45.sql',
+    '027_create_idempotency_keys.sql': '035_create_idempotency_keys.sql',
+    '028_schedule_row_locking.sql': '036_schedule_row_locking.sql',
+    '029_admin_two_factor_auth.sql': '037_admin_two_factor_auth.sql',
+    '031_create_invitations.sql': '038_create_invitations.sql',
+};
+
+/**
+ * Retarget `schema_migrations` rows recorded under legacy filenames to the
+ * renamed files. Runs after the tracking-table bootstrap and before the
+ * applied-set lookup. No-op on fresh databases.
+ */
+async function reconcileLegacyFilenames(client: PoolClient): Promise<number> {
+    let updated = 0;
+    for (const [legacy, current] of Object.entries(LEGACY_RENAMES)) {
+        const res = await client.query(
+            `UPDATE schema_migrations SET filename = $1
+             WHERE filename = $2
+               AND NOT EXISTS (
+                   SELECT 1 FROM schema_migrations WHERE filename = $1
+               )`,
+            [current, legacy],
+        );
+        updated += res.rowCount ?? 0;
+    }
+    return updated;
+}
+
 interface AppliedMigration {
     filename: string;
     checksum: string;
@@ -188,6 +255,10 @@ async function runMigrations(isDryRun: boolean): Promise<RunResult> {
         if (!isDryRun) {
             await client.query(BOOTSTRAP_SQL);
             console.log('[migrate] ✓ schema_migrations table ready');
+            const reconciled = await reconcileLegacyFilenames(client);
+            if (reconciled > 0) {
+                console.log(`[migrate] ✓ Reconciled ${reconciled} legacy migration filename(s)`);
+            }
         } else {
             console.log('[migrate] [dry-run] Would bootstrap schema_migrations table');
         }

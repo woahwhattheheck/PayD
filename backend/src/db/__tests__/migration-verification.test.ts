@@ -22,11 +22,11 @@ const __dirname = path.dirname(__filename);
 const MIGRATIONS_DIR = path.resolve(__dirname, '../migrations');
 
 describe('Migration Files - Structure Verification', () => {
-  describe('014_create_schedules.sql', () => {
+  describe('021_create_schedules.sql', () => {
     let migrationContent: string;
 
     beforeAll(() => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       migrationContent = fs.readFileSync(migrationPath, 'utf8');
     });
 
@@ -113,11 +113,11 @@ describe('Migration Files - Structure Verification', () => {
     });
   });
 
-  describe('015_create_execution_history.sql', () => {
+  describe('023_create_execution_history.sql', () => {
     let migrationContent: string;
 
     beforeAll(() => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       migrationContent = fs.readFileSync(migrationPath, 'utf8');
     });
 
@@ -202,8 +202,8 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('migration files should have numeric prefixes', () => {
-      const schedulesFile = '014_create_schedules.sql';
-      const executionHistoryFile = '015_create_execution_history.sql';
+      const schedulesFile = '021_create_schedules.sql';
+      const executionHistoryFile = '023_create_execution_history.sql';
 
       expect(fs.existsSync(path.join(MIGRATIONS_DIR, schedulesFile))).toBe(true);
       expect(fs.existsSync(path.join(MIGRATIONS_DIR, executionHistoryFile))).toBe(true);
@@ -211,8 +211,8 @@ describe('Migration Files - Structure Verification', () => {
   });
 
   describe('SQL Syntax Validation', () => {
-    test('014_create_schedules.sql should have valid SQL syntax', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+    test('021_create_schedules.sql should have valid SQL syntax', () => {
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       // Check for common SQL syntax errors
@@ -225,8 +225,8 @@ describe('Migration Files - Structure Verification', () => {
       expect(openParens).toBe(closeParens);
     });
 
-    test('015_create_execution_history.sql should have valid SQL syntax', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+    test('023_create_execution_history.sql should have valid SQL syntax', () => {
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       // Check for common SQL syntax errors
@@ -242,7 +242,7 @@ describe('Migration Files - Structure Verification', () => {
 
   describe('Schema Design Validation', () => {
     test('schedules table should support all frequency types', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       const frequencies = ['once', 'weekly', 'biweekly', 'monthly'];
@@ -252,7 +252,7 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('schedules table should support all status types', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       const statuses = ['active', 'completed', 'cancelled', 'failed'];
@@ -262,7 +262,7 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('execution_history should support all execution status types', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       const statuses = ['success', 'failed', 'partial'];
@@ -272,14 +272,14 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('payment_config should use JSONB for flexibility', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       expect(content).toMatch(/payment_config\s+JSONB\s+NOT NULL/i);
     });
 
     test('error tracking should use JSONB for structured data', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       expect(content).toMatch(/error_details\s+JSONB/i);
@@ -289,7 +289,7 @@ describe('Migration Files - Structure Verification', () => {
 
   describe('Performance Optimization', () => {
     test('schedules should have index on next_run_timestamp for cron queries', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       // The cron job queries by next_run_timestamp and status
@@ -298,7 +298,7 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('schedules should have index on organization_id for tenant isolation', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       expect(content).toContain('idx_schedules_org_id');
@@ -306,7 +306,7 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('execution_history should have index on schedule_id for lookups', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       expect(content).toContain('idx_execution_schedule_id');
@@ -314,7 +314,7 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('execution_history should have index on executed_at for time-based queries', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       expect(content).toContain('idx_execution_executed_at');
@@ -324,7 +324,7 @@ describe('Migration Files - Structure Verification', () => {
 
   describe('Data Integrity', () => {
     test('schedules should have NOT NULL constraints on required fields', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       const requiredFields = [
@@ -344,7 +344,7 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('execution_history should have NOT NULL constraints on required fields', () => {
-      const migrationPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const migrationPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
       const content = fs.readFileSync(migrationPath, 'utf8');
 
       const requiredFields = ['schedule_id', 'status'];
@@ -356,8 +356,8 @@ describe('Migration Files - Structure Verification', () => {
     });
 
     test('foreign keys should have CASCADE delete for referential integrity', () => {
-      const schedulesPath = path.join(MIGRATIONS_DIR, '014_create_schedules.sql');
-      const executionHistoryPath = path.join(MIGRATIONS_DIR, '015_create_execution_history.sql');
+      const schedulesPath = path.join(MIGRATIONS_DIR, '021_create_schedules.sql');
+      const executionHistoryPath = path.join(MIGRATIONS_DIR, '023_create_execution_history.sql');
 
       const schedulesContent = fs.readFileSync(schedulesPath, 'utf8');
       const executionHistoryContent = fs.readFileSync(executionHistoryPath, 'utf8');
@@ -376,8 +376,8 @@ describe('Migration System Integration', () => {
     const files = fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql'));
     
     expect(files.length).toBeGreaterThan(0);
-    expect(files).toContain('014_create_schedules.sql');
-    expect(files).toContain('015_create_execution_history.sql');
+    expect(files).toContain('021_create_schedules.sql');
+    expect(files).toContain('023_create_execution_history.sql');
   });
 
   test('migration files should be sorted lexicographically', () => {
@@ -390,7 +390,7 @@ describe('Migration System Integration', () => {
   test('migration files should have consistent naming pattern', () => {
     const pattern = /^\d{3}_[a-z_]+\.sql$/;
     
-    expect('014_create_schedules.sql').toMatch(pattern);
-    expect('015_create_execution_history.sql').toMatch(pattern);
+    expect('021_create_schedules.sql').toMatch(pattern);
+    expect('023_create_execution_history.sql').toMatch(pattern);
   });
 });

@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check migration filename prefixes are unique
+        run: node backend/scripts/check-migration-prefixes.mjs
       - uses: actions/cache@v3
         with:
           path: |

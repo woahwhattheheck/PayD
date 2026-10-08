@@ -89,8 +89,8 @@ Expected output:
 [migrate] Target database: postgresql://payd_user:***@localhost:5432/payd_db
 [migrate] ✓ schema_migrations table ready
 [migrate] Found X migration file(s) in /path/to/migrations
-[migrate] ✓ Applied   014_create_schedules.sql  (XX ms)
-[migrate] ✓ Applied   015_create_execution_history.sql  (XX ms)
+[migrate] ✓ Applied   021_create_schedules.sql  (XX ms)
+[migrate] ✓ Applied   023_create_execution_history.sql  (XX ms)
 ─────────────────────────────────────────
 [migrate] Summary  (XXX ms total)
   Applied : 2

@@ -13,6 +13,7 @@
         "lint": "eslint src/**/*.ts",
         "db:migrate": "ts-node src/db/migrate.ts",
         "db:migrate:dry-run": "ts-node src/db/migrate.ts --dry-run",
+        "db:check-prefixes": "node scripts/check-migration-prefixes.mjs",
         "db:verify-schema": "ts-node src/db/verify-schema.ts",
         "db:verify-schedules": "ts-node src/db/verify-schedules-schema.ts"
     },

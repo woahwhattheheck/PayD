@@ -8,9 +8,9 @@ Task 1.3 requires running migrations and verifying the schema for the payroll sc
 
 ### 1. Migration Files Created (Tasks 1.1 & 1.2)
 
-- ✅ `014_create_schedules.sql` - Creates schedules table with all required columns, constraints, and indexes
-- ✅ `015_create_execution_history.sql` - Creates execution_history table with foreign key to schedules
-- ✅ `018_add_schedules_user_fk.sql` - Adds missing foreign key from schedules to users
+- ✅ `021_create_schedules.sql` - Creates schedules table with all required columns, constraints, and indexes
+- ✅ `023_create_execution_history.sql` - Creates execution_history table with foreign key to schedules
+- ✅ `026_add_schedules_user_fk.sql` - Adds missing foreign key from schedules to users
 
 ### 2. Verification Tooling Created
 
@@ -98,8 +98,8 @@ npm run db:verify-schema
 [migrate] ↷ Skipped  001_*.sql  (already applied)
 ...
 [migrate] ↷ Skipped  013_*.sql  (already applied)
-[migrate] ✓ Applied   014_create_schedules.sql  (XX ms)
-[migrate] ✓ Applied   015_create_execution_history.sql  (XX ms)
+[migrate] ✓ Applied   021_create_schedules.sql  (XX ms)
+[migrate] ✓ Applied   023_create_execution_history.sql  (XX ms)
 ─────────────────────────────────────────
 [migrate] Summary  (XXX ms total)
   Applied : 2
