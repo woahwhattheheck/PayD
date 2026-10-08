@@ -5,7 +5,7 @@ import { getWithdrawalEstimate } from '../src/utils/withdrawalEstimate.ts';
 
 test('uses the supplied rate only for an anchor-supported currency', () => {
   assert.deepEqual(getWithdrawalEstimate('25', ['NGN', 'KES'], 'NGN', 1500), {
-    estimatedReceive: 37500, isCurrencySupported: true, error: null,
+    estimatedReceive: 37500, isCurrencySupported: true, isEstimateAvailable: true, error: null,
   });
   const unsupported = getWithdrawalEstimate('25', ['EUR', 'GBP'], 'NGN', 1500);
   assert.equal(unsupported.estimatedReceive, 0);
@@ -15,7 +15,7 @@ test('uses the supplied rate only for an anchor-supported currency', () => {
 
 test('does not quote before selecting an anchor, but reports an empty support list', () => {
   assert.deepEqual(getWithdrawalEstimate('25', undefined, 'NGN', 1500), {
-    estimatedReceive: 0, isCurrencySupported: false, error: null,
+    estimatedReceive: 0, isCurrencySupported: false, isEstimateAvailable: false, error: null,
   });
   assert.match(getWithdrawalEstimate('25', [], 'NGN', 1500).error, /does not support NGN/);
 });
@@ -31,7 +31,7 @@ test('refreshes for currency and rate changes without editing the amount', () =>
 test('switching to a supported anchor removes the currency error', () => {
   assert.ok(getWithdrawalEstimate('10', ['NGN'], 'EUR', 0.92).error);
   assert.deepEqual(getWithdrawalEstimate('25', ['EUR'], 'EUR', 0.92), {
-    estimatedReceive: 23, isCurrencySupported: true, error: null,
+    estimatedReceive: 23, isCurrencySupported: true, isEstimateAvailable: true, error: null,
   });
 });
 
@@ -41,9 +41,22 @@ test('empty, invalid, negative and non-finite amounts never produce an estimate'
   }
 });
 
-test('invalid rates and arithmetic overflow never produce an estimate', () => {
+test('unavailable rates and arithmetic results block quotes until recovery', () => {
   for (const rate of [NaN, Infinity, -Infinity, 0, -1]) {
-    assert.equal(getWithdrawalEstimate('25', ['EUR'], 'EUR', rate).estimatedReceive, 0);
+    const estimate = getWithdrawalEstimate('25', ['EUR'], 'EUR', rate);
+    assert.equal(estimate.estimatedReceive, 0);
+    assert.equal(estimate.isCurrencySupported, true);
+    assert.equal(estimate.isEstimateAvailable, false);
+    assert.match(estimate.error, /Exchange rate is unavailable/);
   }
-  assert.equal(getWithdrawalEstimate('1e308', ['EUR'], 'EUR', 10).estimatedReceive, 0);
+  for (const [amount, rate] of [['1e308', 10], ['5e-324', 0.1]]) {
+    const estimate = getWithdrawalEstimate(amount, ['EUR'], 'EUR', rate);
+    assert.equal(estimate.estimatedReceive, 0);
+    assert.equal(estimate.isEstimateAvailable, false);
+    assert.match(estimate.error, /Unable to estimate this amount/);
+  }
+  const recovered = getWithdrawalEstimate('25', ['EUR'], 'EUR', 0.92);
+  assert.equal(recovered.isEstimateAvailable, true);
+  assert.equal(recovered.error, null);
+  assert.equal(recovered.estimatedReceive, 23);
 });

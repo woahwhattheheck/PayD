@@ -29,6 +29,7 @@ export interface WithdrawalState {
 interface UseWithdrawalReturn {
   state: WithdrawalState;
   isCurrencySupported: boolean;
+  isEstimateAvailable: boolean;
   setStep: (step: WithdrawalStep) => void;
   selectAnchor: (anchor: AnchorInfo) => void;
   setAmount: (amount: string) => void;
@@ -139,6 +140,11 @@ export function useWithdrawal(
         return false;
       }
 
+      if (!estimate.isEstimateAvailable) {
+        setState((prev) => ({ ...prev, step: 'enter_amount' }));
+        return false;
+      }
+
       setState((prev) => ({ ...prev, isLoading: true, error: null, step: 'confirm' }));
 
       try {
@@ -179,7 +185,7 @@ export function useWithdrawal(
         return false;
       }
     },
-    [state.selectedAnchor, state.amount, balance, estimate.isCurrencySupported]
+    [state.selectedAnchor, state.amount, balance, estimate.isCurrencySupported, estimate.isEstimateAvailable]
   );
 
   const pollTransactionStatus = useCallback(async () => {
@@ -316,6 +322,7 @@ export function useWithdrawal(
       error: estimate.error ?? state.error,
     },
     isCurrencySupported: estimate.isCurrencySupported,
+    isEstimateAvailable: estimate.isEstimateAvailable,
     setStep,
     selectAnchor,
     setAmount,

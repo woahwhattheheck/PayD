@@ -1,6 +1,7 @@
 export interface WithdrawalEstimate {
   estimatedReceive: number;
   isCurrencySupported: boolean;
+  isEstimateAvailable: boolean;
   error: string | null;
 }
 
@@ -12,17 +13,25 @@ export function getWithdrawalEstimate(
   exchangeRate: number
 ): WithdrawalEstimate {
   const isCurrencySupported = supportedCurrencies?.includes(selectedCurrency) ?? false;
-  const error = supportedCurrencies && !isCurrencySupported
-    ? `Selected anchor does not support ${selectedCurrency}. Please choose another anchor or currency.`
-    : null;
   const numericAmount = Number(amount);
+  const isAmountValid = Number.isFinite(numericAmount) && numericAmount > 0;
+  const isRateValid = Number.isFinite(exchangeRate) && exchangeRate > 0;
   const convertedAmount = numericAmount * exchangeRate;
-  const estimatedReceive = isCurrencySupported
-    && Number.isFinite(numericAmount) && numericAmount > 0
-    && Number.isFinite(exchangeRate) && exchangeRate > 0
-    && Number.isFinite(convertedAmount)
-    ? convertedAmount
-    : 0;
+  const isEstimateAvailable = isCurrencySupported && isAmountValid && isRateValid
+    && Number.isFinite(convertedAmount) && convertedAmount > 0;
+  let error: string | null = null;
+  if (supportedCurrencies && !isCurrencySupported) {
+    error = `Selected anchor does not support ${selectedCurrency}. Please choose another anchor or currency.`;
+  } else if (isCurrencySupported && !isRateValid) {
+    error = 'Exchange rate is unavailable. Please refresh the rate before withdrawing.';
+  } else if (isCurrencySupported && isAmountValid && !isEstimateAvailable) {
+    error = 'Unable to estimate this amount. Please choose a different amount.';
+  }
 
-  return { estimatedReceive, isCurrencySupported, error };
+  return {
+    estimatedReceive: isEstimateAvailable ? convertedAmount : 0,
+    isCurrencySupported,
+    isEstimateAvailable,
+    error,
+  };
 }
