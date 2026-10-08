@@ -50,7 +50,9 @@ export interface SorobanEvent {
   id: string;
   pagingToken: string;
   topic: string[];
-  value: {
+  // Stellar getEvents returns base64-encoded ScVal strings; legacy clients
+  // may still supply an { xdr } wrapper.
+  value: string | {
     xdr: string;
   };
   inSuccessfulContractCall: boolean;
@@ -60,4 +62,5 @@ export interface SorobanEvent {
 export interface GetEventsResponse {
   events: SorobanEvent[];
   latestLedger: number;
+  cursor?: string;
 }
