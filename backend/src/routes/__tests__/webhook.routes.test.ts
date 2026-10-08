@@ -185,6 +185,9 @@ describe('Webhook Routes - Auth and Tenant Isolation', () => {
 
       expect(resA.status).toBe(201);
       expect(resA.body.organizationId).toBe(10);
+      expect(resA.body.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      );
 
       const listA = await request(app)
         .get('/webhooks/subscriptions')
@@ -193,6 +196,26 @@ describe('Webhook Routes - Auth and Tenant Isolation', () => {
       expect(listA.status).toBe(200);
       expect(listA.body).toHaveLength(1);
       expect(listA.body[0].organizationId).toBe(10);
+    });
+
+    it('reads subscriptions written by another backend instance from shared storage', async () => {
+      storedSubscriptions.push({
+        id: '00000000-0000-4000-8000-000000000001',
+        organization_id: 10,
+        url: 'https://other-pod.example.com/hook',
+        secret: 's'.repeat(16),
+        events: ['payment.completed'],
+        created_at: new Date('2026-10-08T00:00:00Z'),
+      });
+
+      const listA = await request(app)
+        .get('/webhooks/subscriptions')
+        .set('Authorization', `Bearer ${tenantAToken}`);
+
+      expect(listA.status).toBe(200);
+      expect(listA.body).toHaveLength(1);
+      expect(listA.body[0].id).toBe('00000000-0000-4000-8000-000000000001');
+      expect(listA.body[0].url).toBe('https://other-pod.example.com/hook');
     });
 
     it('tenant B cannot see tenant A subscriptions', async () => {
