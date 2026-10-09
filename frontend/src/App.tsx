@@ -1,3 +1,4 @@
+import Forecasting from './pages/Forecasting';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Home from './pages/Home';
@@ -94,6 +95,14 @@ function App() {
               }
             >
               <EmployeePortal />
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/forecast"
+          element={
+            <ErrorBoundary fallback={<ErrorFallback />}>
+              <Forecasting />
             </ErrorBoundary>
           }
         />

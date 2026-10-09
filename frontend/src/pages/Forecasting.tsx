@@ -1,3 +1,4 @@
+import PayrollAnalyticsCharts from '../components/PayrollAnalyticsCharts';
 import { useEffect, useMemo, useState } from 'react';
 import {
   CartesianGrid,
@@ -226,6 +227,8 @@ export default function Forecasting() {
           </ResponsiveContainer>
         </div>
       </Card>
+
+      <PayrollAnalyticsCharts />
 
       <Card>
         <Heading as="h2" size="xs">
