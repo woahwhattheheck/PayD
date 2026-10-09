@@ -1,3 +1,4 @@
+import { readEnv } from './env.js';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github2';
@@ -9,8 +10,8 @@ dotenv.config();
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID || 'dummy',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy',
+      clientID: readEnv('GOOGLE_CLIENT_ID') || 'dummy',
+      clientSecret: readEnv('GOOGLE_CLIENT_SECRET') || 'dummy',
       callbackURL: '/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -58,8 +59,8 @@ passport.use(
 passport.use(
   new GitHubStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID || 'dummy',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || 'dummy',
+      clientID: readEnv('GITHUB_CLIENT_ID') || 'dummy',
+      clientSecret: readEnv('GITHUB_CLIENT_SECRET') || 'dummy',
       callbackURL: '/auth/github/callback',
     },
     async (accessToken: string, refreshToken: string, profile: any, done: any) => {

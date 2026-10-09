@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { WebhookController } from '../controllers/webhook.controller.js';
 import { authenticateJWT } from '../middlewares/auth.js';
@@ -16,7 +17,7 @@ router.get('/subscriptions', WebhookController.listSubscriptions);
 router.delete('/subscriptions/:id', WebhookController.deleteSubscription);
 
 const requireNonProduction = (req: Request, res: Response, next: NextFunction) => {
-  if (process.env.NODE_ENV === 'production') {
+  if (readEnv('NODE_ENV') === 'production') {
     res.status(404).json({ error: 'Not Found' });
     return;
   }

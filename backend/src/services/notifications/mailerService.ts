@@ -1,3 +1,4 @@
+import { readEnv } from '../../config/env.js';
 export interface SendMailInput {
   to: string[];
   subject: string;
@@ -6,7 +7,7 @@ export interface SendMailInput {
 
 export class MailerService {
   static isConfigured(): boolean {
-    return !!process.env.SMTP_HOST && !!process.env.SMTP_USER && !!process.env.SMTP_PASS;
+    return !!readEnv('SMTP_HOST') && !!readEnv('SMTP_USER') && !!readEnv('SMTP_PASS');
   }
 
   static async sendMail(input: SendMailInput): Promise<void> {
@@ -20,16 +21,16 @@ export class MailerService {
     }
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
+      host: readEnv('SMTP_HOST'),
+      port: Number(readEnv('SMTP_PORT') || '587'),
+      secure: readEnv('SMTP_SECURE') === 'true',
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: readEnv('SMTP_USER'),
+        pass: readEnv('SMTP_PASS'),
       },
     });
 
-    const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+    const from = readEnv('SMTP_FROM') || readEnv('SMTP_USER');
 
     await transporter.sendMail({
       from,

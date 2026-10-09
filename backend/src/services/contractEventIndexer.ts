@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import { default as pool } from '../config/database.js';
 import type { SorobanEvent, GetEventsResponse } from '../types/contractEvent.js';
 import { PoolClient } from 'pg';
@@ -9,12 +10,12 @@ export class ContractEventIndexer {
   private readonly POLL_INTERVAL_MS = 10000; // Poll every 10 seconds
   private readonly BATCH_SIZE = 100;
   private readonly CONTRACTS_TO_INDEX = [
-    process.env.BULK_PAYMENT_CONTRACT_ID,
-    process.env.VESTING_ESCROW_CONTRACT_ID,
-    process.env.REVENUE_SPLIT_CONTRACT_ID,
+    readEnv('BULK_PAYMENT_CONTRACT_ID'),
+    readEnv('VESTING_ESCROW_CONTRACT_ID'),
+    readEnv('REVENUE_SPLIT_CONTRACT_ID'),
   ].filter(Boolean) as string[];
 
-  private readonly RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
+  private readonly RPC_URL = readEnv('SOROBAN_RPC_URL') || 'https://soroban-testnet.stellar.org';
 
   /**
    * Initialize the indexer and start polling

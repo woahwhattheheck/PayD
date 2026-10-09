@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import { Networks } from "@stellar/stellar-sdk";
 
 export enum StellarNetwork {
@@ -33,7 +34,7 @@ const NETWORK_DEFAULTS: Record<StellarNetwork, Omit<NetworkConfig, "network">> =
  *   STELLAR_HORIZON_URL        - Override the default Horizon URL
  */
 export function getNetworkConfig(): NetworkConfig {
-  const env = (process.env.STELLAR_NETWORK || "testnet").toLowerCase();
+  const env = (readEnv('STELLAR_NETWORK') || "testnet").toLowerCase();
   const network =
     env === "mainnet" || env === "public"
       ? StellarNetwork.MAINNET
@@ -44,7 +45,7 @@ export function getNetworkConfig(): NetworkConfig {
   return {
     network,
     networkPassphrase:
-      process.env.STELLAR_NETWORK_PASSPHRASE || defaults.networkPassphrase,
-    horizonUrl: process.env.STELLAR_HORIZON_URL || defaults.horizonUrl,
+      readEnv('STELLAR_NETWORK_PASSPHRASE') || defaults.networkPassphrase,
+    horizonUrl: readEnv('STELLAR_HORIZON_URL') || defaults.horizonUrl,
   };
 }

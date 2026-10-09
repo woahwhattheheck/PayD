@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 /**
  * Contract Upgrade Service
  *
@@ -22,11 +23,11 @@ import { pool } from '../config/database.js';
 // ---------------------------------------------------------------------------
 
 function getSorobanRpcUrl(): string {
-  return (process.env.STELLAR_RPC_URL ?? 'https://soroban-testnet.stellar.org').replace(/\/+$/, '');
+  return (readEnv('STELLAR_RPC_URL') ?? 'https://soroban-testnet.stellar.org').replace(/\/+$/, '');
 }
 
 function getNetworkPassphrase(): string {
-  return process.env.STELLAR_NETWORK === 'MAINNET'
+  return readEnv('STELLAR_NETWORK') === 'MAINNET'
     ? Networks.PUBLIC
     : Networks.TESTNET;
 }

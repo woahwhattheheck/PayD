@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import {
   Account,
   Horizon,
@@ -41,7 +42,7 @@ export class StellarService {
 
   static getServer(): Horizon.Server {
     if (!this.server) {
-      const url = process.env.STELLAR_HORIZON_URL || 'https://horizon-testnet.stellar.org';
+      const url = readEnv('STELLAR_HORIZON_URL') || 'https://horizon-testnet.stellar.org';
       this.server = new Horizon.Server(url);
     }
     return this.server;
@@ -49,7 +50,7 @@ export class StellarService {
 
   static getNetworkPassphrase(): string {
     if (!this.network) {
-      this.network = process.env.STELLAR_NETWORK === 'public' ? Networks.PUBLIC : Networks.TESTNET;
+      this.network = readEnv('STELLAR_NETWORK') === 'public' ? Networks.PUBLIC : Networks.TESTNET;
     }
     return this.network;
   }

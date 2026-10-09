@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import PDFDocument from 'pdfkit';
 import { pool } from '../config/database.js';
 import { TransactionAuditService } from './transactionAuditService.js';
@@ -172,7 +173,7 @@ export class PDFCertificateService {
     const transaction = txResult.rows[0];
 
     // Construct verification URL (using Horizon explorer or custom verification endpoint)
-    const network = process.env.STELLAR_NETWORK || 'testnet';
+    const network = readEnv('STELLAR_NETWORK') || 'testnet';
     const horizonUrl = network === 'mainnet' 
       ? 'https://horizon.stellar.org'
       : 'https://horizon-testnet.stellar.org';

@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import { Request, Response } from 'express';
 import pg from 'pg';
 import { Redis } from 'ioredis';
@@ -62,7 +63,7 @@ export class HealthController {
   static getLiveness(req: Request, res: Response): void {
     const timestamp = new Date().toISOString();
     const uptime = process.uptime();
-    const version = process.env.npm_package_version || '1.0.0';
+    const version = readEnv('npm_package_version') || '1.0.0';
 
     const report: LivenessReport = {
       status: 'ok',
@@ -78,7 +79,7 @@ export class HealthController {
   static async getHealthStatus(req: Request, res: Response): Promise<void> {
     const timestamp = new Date().toISOString();
     const uptime = process.uptime();
-    const version = process.env.npm_package_version || '1.0.0';
+    const version = readEnv('npm_package_version') || '1.0.0';
 
     const statusReport: HealthReport = {
       status: 'ok',

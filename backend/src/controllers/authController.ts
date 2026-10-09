@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import express from 'express';
 import { createHash, randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
@@ -300,7 +301,7 @@ export class AuthController {
    * their second factor simply by signing in with Google or GitHub.
    */
   static oauthCallback(req: express.Request, res: express.Response) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = readEnv('FRONTEND_URL') || 'http://localhost:5173';
     const user = req.user as (express.User & { is_2fa_enabled?: boolean }) | undefined;
 
     if (!user) {

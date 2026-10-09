@@ -1,3 +1,4 @@
+import { readEnv } from '../config/env.js';
 import cron from 'node-cron';
 import type { ScheduledTask } from 'node-cron';
 import { default as pool } from '../config/database.js';
@@ -219,7 +220,7 @@ export class ScheduleExecutor {
 
       // Get source keypair from environment
       // In production, this should be securely managed (e.g., KMS, vault)
-      const sourceSecret = process.env.STELLAR_SOURCE_SECRET;
+      const sourceSecret = readEnv('STELLAR_SOURCE_SECRET');
       if (!sourceSecret) {
         throw new Error('STELLAR_SOURCE_SECRET environment variable not set');
       }
@@ -235,7 +236,7 @@ export class ScheduleExecutor {
         } else {
           // For custom assets, we need an issuer public key
           // This should be configured per asset in production
-          const issuerPublicKey = process.env.STELLAR_ASSET_ISSUER;
+          const issuerPublicKey = readEnv('STELLAR_ASSET_ISSUER');
           if (!issuerPublicKey) {
             throw new Error(`Asset issuer not configured for ${recipient.assetCode}`);
           }

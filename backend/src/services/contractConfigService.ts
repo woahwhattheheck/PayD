@@ -1,3 +1,4 @@
+import { listContractDeploymentEnv, readDynamicEnv } from '../config/env.js';
 /**
  * Contract Configuration Service
  * Parses contract deployment information from environments.toml or environment variables
@@ -112,7 +113,7 @@ export class ContractConfigService {
     const processedContracts = new Set<string>();
 
     // Iterate through all environment variables
-    for (const [key, value] of Object.entries(process.env)) {
+    for (const [key, value] of listContractDeploymentEnv()) {
       // Match pattern: {CONTRACT_TYPE}_{NETWORK}_CONTRACT_ID
       const contractIdMatch = key.match(/^(.+)_(TESTNET|MAINNET)_CONTRACT_ID$/);
 
@@ -133,8 +134,8 @@ export class ContractConfigService {
         const versionKey = `${contractIdMatch[1]}_${contractIdMatch[2]}_VERSION`;
         const deployedAtKey = `${contractIdMatch[1]}_${contractIdMatch[2]}_DEPLOYED_AT`;
 
-        const version = process.env[versionKey] || '1.0.0';
-        const deployedAt = parseInt(process.env[deployedAtKey] || '0', 10);
+        const version = readDynamicEnv(versionKey) || '1.0.0';
+        const deployedAt = parseInt(readDynamicEnv(deployedAtKey) || '0', 10);
 
         entries.push({
           contractId: value,

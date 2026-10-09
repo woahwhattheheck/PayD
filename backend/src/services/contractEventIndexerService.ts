@@ -1,9 +1,10 @@
+import { readEnv } from '../config/env.js';
 import { query } from '../config/database.js';
 
 const INDEX_STATE_KEY = 'soroban_contract_events';
-const DEFAULT_START_LEDGER = Number(process.env.SOROBAN_EVENT_START_LEDGER || '0');
-const POLL_INTERVAL_MS = Number(process.env.SOROBAN_EVENT_POLL_INTERVAL_MS || '12000');
-const DEFAULT_RPC_URL = process.env.STELLAR_RPC_URL || 'https://soroban-testnet.stellar.org';
+const DEFAULT_START_LEDGER = Number(readEnv('SOROBAN_EVENT_START_LEDGER') || '0');
+const POLL_INTERVAL_MS = Number(readEnv('SOROBAN_EVENT_POLL_INTERVAL_MS') || '12000');
+const DEFAULT_RPC_URL = readEnv('STELLAR_RPC_URL') || 'https://soroban-testnet.stellar.org';
 
 interface RpcContractEvent {
   id?: string;
@@ -153,9 +154,9 @@ export class ContractEventIndexerService {
 
   private static getIndexedContractIds(): string[] {
     const envIds = [
-      process.env.BULK_PAYMENT_CONTRACT_ID,
-      process.env.VESTING_ESCROW_CONTRACT_ID,
-      process.env.REVENUE_SPLIT_CONTRACT_ID,
+      readEnv('BULK_PAYMENT_CONTRACT_ID'),
+      readEnv('VESTING_ESCROW_CONTRACT_ID'),
+      readEnv('REVENUE_SPLIT_CONTRACT_ID'),
     ]
       .map((value) => (value || '').trim())
       .filter(Boolean);
