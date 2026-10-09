@@ -1,3 +1,4 @@
+import { getPayrollAnalytics } from '../services/payrollAnalyticsService.js';
 import { Request, Response, Router } from 'express';
 import { payrollQueryService } from '../services/payroll-query.service.js';
 import logger from '../utils/logger.js';
@@ -425,6 +426,27 @@ router.get('/cache/stats', (req: Request, res: Response) => {
       error: 'Failed to retrieve cache stats',
       message: (error as Error).message,
     });
+  }
+});
+
+/**
+ * GET /api/payroll/analytics
+ * Employer-only, 12 calendar months of settled real payroll transactions.
+ * Tenant identity comes from the verified JWT; clients cannot select an
+ * arbitrary organization's payroll data with a query parameter.
+ */
+router.get('/analytics', authorizeRoles('EMPLOYER'), async (req: Request, res: Response) => {
+  const organizationId = req.user?.organizationId;
+  if (!Number.isSafeInteger(organizationId) || !organizationId || organizationId < 1) {
+    return res.status(403).json({ error: 'An authenticated organization is required' });
+  }
+
+  try {
+    const analytics = await getPayrollAnalytics(organizationId);
+    return res.json({ success: true, data: analytics });
+  } catch (error) {
+    logger.error('GET /api/payroll/analytics failed', error);
+    return res.status(500).json({ success: false, error: 'Unable to load payroll analytics' });
   }
 });
 
