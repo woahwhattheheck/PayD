@@ -1,48 +1,33 @@
-import dotenv from 'dotenv';
+import { readEnv } from './env.js';
 
-dotenv.config();
-
+// Retain the application's existing nested config shape, from one Zod schema.
 export const config = {
-  port: parseInt(process.env.PORT || '3001', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
-
-  // Stellar Configuration
+  port: Number.parseInt(readEnv('PORT'), 10),
+  nodeEnv: readEnv('NODE_ENV'),
   stellar: {
-    networkPassphrase:
-      process.env.STELLAR_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
-    horizonUrl: process.env.STELLAR_HORIZON_URL || 'https://horizon-testnet.stellar.org',
+    networkPassphrase: readEnv('STELLAR_NETWORK_PASSPHRASE'),
+    horizonUrl: readEnv('STELLAR_HORIZON_URL'),
   },
-
-  // SDS Configuration
   sds: {
-    enabled: process.env.SDS_ENABLE === 'true',
-    apiKey: process.env.SDS_API_KEY,
-    endpoint: process.env.SDS_ENDPOINT || 'https://sds-api.stellar.org',
-    timeout: parseInt(process.env.SDS_TIMEOUT || '30000', 10),
-    retryAttempts: parseInt(process.env.SDS_RETRY_ATTEMPTS || '3', 10),
-    retryDelay: parseInt(process.env.SDS_RETRY_DELAY || '1000', 10),
+    enabled: ['true', '1'].includes(readEnv('SDS_ENABLE')),
+    apiKey: readEnv('SDS_API_KEY'),
+    endpoint: readEnv('SDS_ENDPOINT'),
+    timeout: Number.parseInt(readEnv('SDS_TIMEOUT'), 10),
+    retryAttempts: Number.parseInt(readEnv('SDS_RETRY_ATTEMPTS'), 10),
+    retryDelay: Number.parseInt(readEnv('SDS_RETRY_DELAY'), 10),
   },
-
-  // Database Configuration
   database: {
-    url: process.env.DATABASE_URL,
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME,
+    url: readEnv('DATABASE_URL'),
+    host: readEnv('DB_HOST'),
+    port: Number.parseInt(readEnv('DB_PORT'), 10),
+    user: readEnv('DB_USER'),
+    password: readEnv('DB_PASSWORD'),
+    name: readEnv('DB_NAME'),
   },
-
-  // Caching Configuration
   cache: {
-    enabled: process.env.ENABLE_CACHING === 'true',
-    ttl: parseInt(process.env.CACHE_TTL || '3600', 10),
+    enabled: ['true', '1'].includes(readEnv('ENABLE_CACHING')),
+    ttl: Number.parseInt(readEnv('CACHE_TTL'), 10),
   },
-
-  // Logging
-  logging: {
-    level: process.env.LOG_LEVEL || 'info',
-  },
+  logging: { level: readEnv('LOG_LEVEL') },
 };
-
 export default config;
